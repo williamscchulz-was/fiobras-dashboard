@@ -103,17 +103,22 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .premio-block{background:var(--s1);border:1.5px solid var(--b1);border-radius:12px;padding:22px 26px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
 .premio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:14px;}
 @media(max-width:700px){.premio-grid{grid-template-columns:1fr;}}
-.pc{background:var(--bg);border:1.5px solid var(--b1);border-radius:11px;padding:16px 18px;}
-.pc-lvl{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
-.pc-meses{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;min-height:20px;}
-.pc-mes-tag{font-family:'DM Mono',monospace;font-size:.68rem;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid var(--b2);}
-.pc-sec{border-top:1px solid var(--b2);padding-top:9px;margin-top:9px;}
-.pc-sec-lbl{font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.pc{background:var(--s1);border:1.5px solid var(--b1);border-radius:11px;padding:18px 20px;
+  position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pc-c,var(--green));border-radius:11px 11px 0 0;}
+.pc-lvl{font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;padding-bottom:12px;border-bottom:1.5px solid var(--b1);}
+.pc-meses{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;min-height:28px;align-items:center;}
+.pc-mes-tag{font-family:'DM Mono',monospace;font-size:.72rem;font-weight:600;
+  padding:4px 10px;border-radius:20px;
+  background:color-mix(in srgb, currentColor 15%, transparent);
+  border:1.5px solid currentColor;}
+.pc-sec{border-top:1px solid var(--b1);padding-top:12px;margin-top:12px;}
+.pc-sec-lbl{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;}
 .pc-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;}
-.pc-lbl{font-size:.76rem;color:var(--muted);}.pc-val{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;color:var(--text);}
-.pc-total{margin-top:10px;padding-top:10px;border-top:1.5px solid var(--b2);display:flex;justify-content:space-between;align-items:baseline;}
-.pc-tlbl{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
-.pc-tval{font-family:'DM Mono',monospace;font-size:1.15rem;font-weight:500;}
+.pc-lbl{font-size:.74rem;color:var(--muted);}.pc-val{font-family:'DM Mono',monospace;font-size:.86rem;font-weight:700;color:var(--text);}
+.pc-total{margin-top:14px;padding-top:14px;border-top:2px solid var(--b1);display:flex;justify-content:space-between;align-items:baseline;}
+.pc-tlbl{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text);}
+.pc-tval{font-family:'DM Mono',monospace;font-size:1.2rem;font-weight:700;}
 /* ── Histórico ── */
 .metric-tabs{display:flex;gap:7px;margin-bottom:20px;flex-wrap:wrap;}
 .mt-btn{padding:7px 15px;background:var(--s1);border:1.5px solid var(--b1);border-radius:6px;color:var(--muted);font-family:'Poppins',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04);}
@@ -142,11 +147,21 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 [data-theme="dark"] .mc,
 [data-theme="dark"] .mt-btn{box-shadow:none;}
 [data-theme="dark"] .kpi:hover{box-shadow:0 4px 20px rgba(0,0,0,.35);}
+[data-theme="dark"] .pc{background:var(--s1);box-shadow:none;}
 [data-theme="dark"] .mc.filled{background:rgba(0,136,53,.06);}
 [data-theme="dark"] .yc.hi{background:linear-gradient(135deg,rgba(0,136,53,.07),var(--s1));}
 
 .theme-toggle{display:flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.28);border-radius:20px;cursor:pointer;font-family:'DM Mono',monospace;font-size:.55rem;font-weight:500;color:rgba(255,255,255,.85);transition:all .2s;user-select:none;}
 .theme-toggle:hover{background:rgba(255,255,255,.25);color:#fff;}
+
+/* ── Prêmio: lista de meses com valor por mês ── */
+.pc-meses-list{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;min-height:24px;}
+.pc-mes-row{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:7px;border:1px solid var(--b1);background:var(--bg);}
+.pc-mes-val{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:700;}
+.pc-empty{font-size:.76rem;color:var(--muted2);padding:4px 0;display:block;}
+.pc-subtotal{opacity:.7;margin-top:2px;}
+.pc-lvl-val{font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;color:rgba(255,255,255,.55);margin-left:8px;letter-spacing:0;}
+[data-theme="dark"] .pc-mes-row{background:var(--bg);}
 </style>
 </head>
 <body>
@@ -156,7 +171,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     <span class="hdr-system">Dashboard</span>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill">v0.6</div>
+    <div class="hdr-pill">v0.8</div>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
       <span id="toggle-icon">🌙</span>
       <span id="toggle-label">Escuro</span>
@@ -381,10 +396,10 @@ function rPremio(){
   const LV=[{k:'meta',lb:'META',c:'#3ecf6e'},{k:'plus',lb:'META PLUS',c:'#4db3ff'},{k:'super',lb:'SUPER META',c:'#FFCB00'}];
   document.getElementById('premioGrid').innerHTML=LV.map(lv=>{
     const mF=PN.fat[lv.k],mL=PN.ll[lv.k];
-    const mFt=mF.length?mF.map(m=>'<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join(''):'<span style="font-size:.53rem;color:var(--muted2)">—</span>';
-    const mLt=mL.length?mL.map(m=>'<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join(''):'<span style="font-size:.53rem;color:var(--muted2)">—</span>';
+    const mFt=mF.length?mF.map(m=>'<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join(''):'<span style="font-size:.76rem;color:var(--muted2)">—</span>';
+    const mLt=mL.length?mL.map(m=>'<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join(''):'<span style="font-size:.76rem;color:var(--muted2)">—</span>';
     const menF=mF.length*PR.fat[lv.k].m,menL=mL.length*PR.ll[lv.k].m;
-    return'<div class="pc"><div class="pc-lvl" style="color:'+lv.c+'">'+lv.lb+'</div>'+
+    return'<div class="pc" style="--pc-c:'+lv.c+'"><div class="pc-lvl" style="color:'+lv.c+'">'+lv.lb+'</div>'+
       '<div class="pc-sec"><div class="pc-sec-lbl">Receita Bruta</div><div class="pc-meses">'+mFt+'</div>'+
       '<div class="pc-row"><span class="pc-lbl">Prêmio acumulado</span><span class="pc-val">R$ '+BR(menF,0)+'</span></div></div>'+
       '<div class="pc-sec"><div class="pc-sec-lbl">Lucro Ajustado</div><div class="pc-meses">'+mLt+'</div>'+
