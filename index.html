@@ -411,6 +411,8 @@ function applyTheme(dark){
 }
 function toggleTheme(){
   applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?false:true);
+  // Re-render charts if historic tab is active
+  if(document.getElementById('panel-historico')?.classList.contains('active')) rHist();
 }
 
 // ── PWA Manifest ─────────────────────────────────────────────────────────
@@ -434,6 +436,13 @@ function toggleTheme(){
   const el=document.getElementById('pwa-manifest');
   if(el) el.href=URL.createObjectURL(blob);
 })();
+
+// ── Service Worker (PWA instalável) ──────────────────────────────────────
+if('serviceWorker' in navigator){
+  const swCode='self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",e=>e.respondWith(fetch(e.request).catch(()=>new Response("Offline",{status:503}))));';
+  const swBlob=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+}
 
 // ── Init ─────────────────────────────────────────────────────────────────
 (function(){
@@ -532,7 +541,7 @@ const aC=()=>Object.values(RES).filter(hasData).reduce((a,r)=>a+(+r.clin||0),0);
 function render(){rKPI();rAnual();rMths();rPremio();if(SEL!==null)rDet(SEL);}
 function rKPI(){
   const fat=aF(),ll=aL(),ip=aI(),cl=aC();
-  document.getElementById('acumBadge').innerHTML='';
+  document.getElementById('acumBadge').innerHTML=lB(gB());
   // Calcula quais meses foram preenchidos em 2026
   const mesesPreenchidos=Object.keys(RES).filter(k=>hasData(RES[k])).map(k=>parseInt(k.split('-')[1])-1);
   // Soma os mesmos meses de 2025
@@ -548,12 +557,15 @@ function rKPI(){
     return'<div class="kpi-yoy"><span class="kpi-yoy-base">'+fmt(v25)+'</span><span class="kpi-yoy-d" style="color:'+clr+'">'+d.txt+'</span></div>';
   }
   const KS=[
-    {lb:'Receita Bruta',v:fM(fat),comp:mkComp(fat,fat25,fM),c:'#008835'},
-    {lb:'LL Ajustado',v:fM(ll),comp:mkComp(ll,ll25,fM),c:'#0076BE'},
-    {lb:'IPAC',v:fK(ip),comp:ip25>0?mkComp(ip,ip25,fK):'',c:'#FFCB00'},
-    {lb:'Clientes Novos',v:fN(cl),comp:cl25>0?mkComp(cl,cl25,fN):'',c:'#4db3ff'}
+    {lb:'Receita Bruta',v:fM(fat),comp:mkComp(fat,fat25,fM),c:'#008835',acomp:false},
+    {lb:'LL Ajustado',v:fM(ll),comp:mkComp(ll,ll25,fM),c:'#0076BE',acomp:false},
+    {lb:'IPAC',v:fK(ip),comp:ip25>0?mkComp(ip,ip25,fK):'',c:'#FFCB00',acomp:true},
+    {lb:'Clientes Novos',v:fN(cl),comp:cl25>0?mkComp(cl,cl25,fN):'',c:'#4db3ff',acomp:true}
   ];
-  document.getElementById('kpiStrip').innerHTML=KS.map(k=>'<div class="kpi" style="--kc:'+k.c+'"><div class="kpi-lbl"><div class="kpi-dot"></div>'+k.lb+'</div><div class="kpi-val">'+k.v+'</div>'+k.comp+(k.comp?'<div class="kpi-vs-label">vs 2025</div>':'')+'</div>').join('');
+  document.getElementById('kpiStrip').innerHTML=KS.map(k=>{
+    const acTag=k.acomp?'<span style="font-size:.5rem;font-weight:400;letter-spacing:1px;color:var(--muted2);margin-left:6px">ACOMP.</span>':'';
+    return'<div class="kpi" style="--kc:'+k.c+'"><div class="kpi-lbl"><div class="kpi-dot"></div>'+k.lb+acTag+'</div><div class="kpi-val">'+k.v+'</div>'+k.comp+(k.comp?'<div class="kpi-vs-label">vs 2025</div>':'')+'</div>';
+  }).join('');
 }
 function rAnual(){
   const fat=aF(),ll=aL();
@@ -599,21 +611,57 @@ function rDet(idx){
   }).join('');
 }
 function rPremio(){
-  const ms=Object.keys(RES).sort(),n=ms.length;
+  const ms=Object.keys(RES).sort();
   const PN={fat:{meta:[],plus:[],super:[]},ll:{meta:[],plus:[],super:[]}};
-  ms.forEach(k=>{const i=parseInt(k.split('-')[1])-1,r=RES[k],lF=gLF(+r.fat||0,i),lL=gLL(+r.ll||0,i),nm=MONTHS[i];if(lF!=='none')PN.fat[lF].push(nm);if(lL!=='none')PN.ll[lL].push(nm);});
+  ms.forEach(k=>{
+    const i=parseInt(k.split('-')[1])-1,r=RES[k];
+    const lF=gLF(+r.fat||0,i),lL=gLL(+r.ll||0,i),nm=MONTHS[i];
+    if(lF!=='none')PN.fat[lF].push(nm);
+    if(lL!=='none')PN.ll[lL].push(nm);
+  });
+
+  // Bônus anual: verifica se acumulado anual atingiu a meta anual
+  const fatAcum=aF(),llAcum=aL();
+  function bonusAnual(tipo,level){
+    const acum=tipo==='fat'?fatAcum:llAcum;
+    const metaAnual=tipo==='fat'?MF.anual[level]:ML.anual[level];
+    return acum>=metaAnual;
+  }
+
   const LV=[{k:'meta',lb:'META',c:'#3ecf6e'},{k:'plus',lb:'META PLUS',c:'#4db3ff'},{k:'super',lb:'SUPER META',c:'#FFCB00'}];
   document.getElementById('premioGrid').innerHTML=LV.map(lv=>{
     const mF=PN.fat[lv.k],mL=PN.ll[lv.k];
     const mFt=mF.length?mF.map(m=>'<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join(''):'<span style="font-size:.76rem;color:var(--muted2)">—</span>';
     const mLt=mL.length?mL.map(m=>'<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join(''):'<span style="font-size:.76rem;color:var(--muted2)">—</span>';
-    const menF=mF.length*PR.fat[lv.k].m,menL=mL.length*PR.ll[lv.k].m;
+    const menF=mF.length*PR.fat[lv.k].m, menL=mL.length*PR.ll[lv.k].m;
+
+    // Bônus anual
+    const bF=bonusAnual('fat',lv.k), bL=bonusAnual('ll',lv.k);
+    const bFval=bF?PR.fat[lv.k].a:0, bLval=bL?PR.ll[lv.k].a:0;
+    const totalMensal=menF+menL;
+    const totalAnual=bFval+bLval;
+    const totalGeral=totalMensal+totalAnual;
+
+    // Progresso anual
+    const fatProg=Math.min(fatAcum/(MF.anual[lv.k]||1)*100,100);
+    const llProg=Math.min(llAcum/(ML.anual[lv.k]||1)*100,100);
+
+    const bonusSec='<div class="pc-sec"><div class="pc-sec-lbl">Bônus Anual</div>'+
+      '<div class="pc-row"><span class="pc-lbl">Receita Bruta</span><span class="pc-val" style="color:'+(bF?'#3ecf6e':'var(--muted2)')+'">R$ '+BR(PR.fat[lv.k].a,0)+(bF?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3ecf6e" stroke-width="3" style="vertical-align:middle;margin-left:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>':'')+'</span></div>'+
+      '<div style="margin:4px 0"><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+fatProg+'%;background:'+lv.c+';border-radius:2px;transition:width 1s"></div></div><div style="font-family:\'DM Mono\',monospace;font-size:.6rem;color:var(--muted2);text-align:right;margin-top:2px">'+BR(fatProg,1)+'%</div></div>'+
+      '<div class="pc-row"><span class="pc-lbl">Lucro Ajustado</span><span class="pc-val" style="color:'+(bL?'#3ecf6e':'var(--muted2)')+'">R$ '+BR(PR.ll[lv.k].a,0)+(bL?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3ecf6e" stroke-width="3" style="vertical-align:middle;margin-left:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>':'')+'</span></div>'+
+      '<div style="margin:4px 0"><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+llProg+'%;background:'+lv.c+';border-radius:2px;transition:width 1s"></div></div><div style="font-family:\'DM Mono\',monospace;font-size:.6rem;color:var(--muted2);text-align:right;margin-top:2px">'+BR(llProg,1)+'%</div></div>'+
+      '</div>';
+
     return'<div class="pc" style="--pc-c:'+lv.c+'"><div class="pc-lvl" style="color:'+lv.c+'">'+lv.lb+'</div>'+
-      '<div class="pc-sec"><div class="pc-sec-lbl">Receita Bruta</div><div class="pc-meses">'+mFt+'</div>'+
-      '<div class="pc-row"><span class="pc-lbl">Prêmio acumulado</span><span class="pc-val">R$ '+BR(menF,0)+'</span></div></div>'+
-      '<div class="pc-sec"><div class="pc-sec-lbl">Lucro Ajustado</div><div class="pc-meses">'+mLt+'</div>'+
-      '<div class="pc-row"><span class="pc-lbl">Prêmio acumulado</span><span class="pc-val">R$ '+BR(menL,0)+'</span></div></div>'+
-      '<div class="pc-total"><span class="pc-tlbl">Total realizado</span><span class="pc-tval" style="color:'+lv.c+'">R$ '+BR(menF+menL,0)+'</span></div></div>';
+      '<div class="pc-sec"><div class="pc-sec-lbl">Receita Bruta — mensal</div><div class="pc-meses">'+mFt+'</div>'+
+      '<div class="pc-row"><span class="pc-lbl">Acumulado</span><span class="pc-val">R$ '+BR(menF,0)+'</span></div></div>'+
+      '<div class="pc-sec"><div class="pc-sec-lbl">Lucro Ajustado — mensal</div><div class="pc-meses">'+mLt+'</div>'+
+      '<div class="pc-row"><span class="pc-lbl">Acumulado</span><span class="pc-val">R$ '+BR(menL,0)+'</span></div></div>'+
+      bonusSec+
+      '<div class="pc-total"><span class="pc-tlbl">Total</span><span class="pc-tval" style="color:'+lv.c+'">R$ '+BR(totalGeral,0)+'</span></div>'+
+      (totalAnual>0?'<div style="font-family:\'DM Mono\',monospace;font-size:.58rem;color:var(--muted2);text-align:right;margin-top:4px">mensal R$ '+BR(totalMensal,0)+' + bônus R$ '+BR(totalAnual,0)+'</div>':'')+
+      '</div>';
   }).join('');
 }
 const HX=[
@@ -636,21 +684,55 @@ function rYS(){
       (d?'<div class="yc-growth '+d.cls+'"><span>'+(d.p>=0?'↑':'↓')+'</span><span>'+Math.abs(d.p).toFixed(1)+'%</span></div>':'<div style="height:18px"></div>')+'</div>';
   }).join('');
 }
+// ── Chart theme helper ──
+function chartColors(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  return{
+    grid:    dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.07)',
+    tick:    dark?'#8E8E93':'#567A5E',
+    ttBg:    dark?'#1C1C1E':'#fff',
+    ttBorder:dark?'#3A3A3C':'#CDDBD2',
+    ttTitle: dark?'#8E8E93':'#567A5E',
+    ttBody:  dark?'#F5F5F5':'#1A2E1E',
+    legend:  dark?'#8E8E93':'#567A5E',
+    line25:  dark?'rgba(255,255,255,.2)':'rgba(0,0,0,.2)',
+    ptBorder:dark?'#1C1C1E':'#fff'
+  };
+}
 function rCharts(){
   const m=HX.find(x=>x.id===HM),a26=g26(m.id),AT=[2020,2021],AN=[2020,2021,2022,2023,2024,2025,'2026*'],dA=AN.map(a=>a==='2026*'?a26:m.gA(+a));
+  const tc=chartColors();
   document.getElementById('chartLbl').textContent='Evolução histórica · '+m.lb;
   if(CH)CH.destroy();
   const c1=document.getElementById('histChart').getContext('2d');
-  CH=new Chart(c1,{type:'bar',data:{labels:AN.map(String),datasets:[{data:dA,backgroundColor:AN.map(a=>a==='2026*'?m.c+'dd':AT.includes(+a)?m.c+'30':m.c+'66'),borderColor:AN.map(a=>a==='2026*'?m.c:AT.includes(+a)?m.c+'55':m.c+'aa'),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0b1710',borderColor:'#1f3d28',borderWidth:1,titleColor:'#4a7354',bodyColor:'#e6efe7',padding:12,callbacks:{label:ctx=>m.fmt(ctx.raw)}}},scales:{x:{grid:{color:'#162b1c'},ticks:{color:'#4a7354',font:{family:"'DM Mono',monospace",size:11}}},y:{grid:{color:'#162b1c'},ticks:{color:'#4a7354',font:{family:"'DM Mono',monospace",size:10},callback:v=>m.fmt(v)}}}}});
+  CH=new Chart(c1,{type:'bar',data:{labels:AN.map(String),datasets:[{data:dA,
+    backgroundColor:AN.map(a=>a==='2026*'?m.c+'dd':AT.includes(+a)?m.c+'30':m.c+'66'),
+    borderColor:AN.map(a=>a==='2026*'?m.c:AT.includes(+a)?m.c+'55':m.c+'aa'),
+    borderWidth:1.5,borderRadius:6}]},
+  options:{responsive:true,plugins:{legend:{display:false},tooltip:{
+    backgroundColor:tc.ttBg,borderColor:tc.ttBorder,borderWidth:1,
+    titleColor:tc.ttTitle,bodyColor:tc.ttBody,padding:12,
+    callbacks:{label:ctx=>m.fmt(ctx.raw)}}},
+  scales:{x:{grid:{color:tc.grid},ticks:{color:tc.tick,font:{family:"'DM Mono',monospace",size:11}}},
+          y:{grid:{color:tc.grid},ticks:{color:tc.tick,font:{family:"'DM Mono',monospace",size:10},callback:v=>m.fmt(v)}}}}});
+
   const d25=m.gM(2025)||Array(12).fill(0),d26=MONTHS.map((_,i)=>{const r=RES[K(i)];if(!r)return null;return m.id==='fat'?+r.fat||0:m.id==='ll'?+r.ll||0:m.id==='ipac'?+r.ipac||0:+r.clin||0;});
   const mL=m.id==='fat'?MF.meta:m.id==='ll'?ML.meta:null,pL=m.id==='fat'?MF.plus:m.id==='ll'?ML.plus:null,sL=m.id==='fat'?MF.super:m.id==='ll'?ML.super:null;
   if(CC)CC.destroy();
   const c2=document.getElementById('compChart').getContext('2d'),gr=c2.createLinearGradient(0,0,0,200);gr.addColorStop(0,m.c+'44');gr.addColorStop(1,m.c+'00');
-  const DS=[{label:'2025',data:d25,borderColor:'#2b4530',borderWidth:1.5,backgroundColor:'transparent',pointRadius:3,pointBackgroundColor:'#2b4530',tension:.4,borderDash:[4,3]},{label:'2026',data:d26,borderColor:m.c,borderWidth:2.5,backgroundColor:gr,fill:true,pointRadius:4,pointBackgroundColor:m.c,pointBorderColor:'#fff',pointBorderWidth:2,tension:.4}];
+  const DS=[
+    {label:'2025',data:d25,borderColor:tc.line25,borderWidth:1.5,backgroundColor:'transparent',pointRadius:3,pointBackgroundColor:tc.line25,tension:.4,borderDash:[4,3]},
+    {label:'2026',data:d26,borderColor:m.c,borderWidth:2.5,backgroundColor:gr,fill:true,pointRadius:4,pointBackgroundColor:m.c,pointBorderColor:tc.ptBorder,pointBorderWidth:2,tension:.4}
+  ];
   if(mL)DS.push({label:'Meta',data:mL,borderColor:'#3ecf6e',borderWidth:1,backgroundColor:'transparent',pointRadius:0,tension:.3,borderDash:[6,4]});
   if(pL)DS.push({label:'Meta Plus',data:pL,borderColor:'#4db3ff',borderWidth:1,backgroundColor:'transparent',pointRadius:0,tension:.3,borderDash:[4,3]});
   if(sL)DS.push({label:'Super Meta',data:sL,borderColor:'#FFCB00',borderWidth:1,backgroundColor:'transparent',pointRadius:0,tension:.3,borderDash:[3,3]});
-  CC=new Chart(c2,{type:'line',data:{labels:MONTHS,datasets:DS},options:{responsive:true,plugins:{legend:{labels:{color:'#4a7354',font:{family:"'DM Mono',monospace",size:10},boxWidth:10,padding:14}},tooltip:{backgroundColor:'#0b1710',borderColor:'#1f3d28',borderWidth:1,titleColor:'#4a7354',bodyColor:'#e6efe7',padding:12,callbacks:{label:ctx=>ctx.dataset.label+': '+m.fmt(ctx.raw||0)}}},scales:{x:{grid:{color:'#162b1c'},ticks:{color:'#4a7354',font:{family:"'DM Mono',monospace",size:10}}},y:{grid:{color:'#162b1c'},ticks:{color:'#4a7354',font:{family:"'DM Mono',monospace",size:10},callback:v=>m.fmt(v)}}}}});
+  CC=new Chart(c2,{type:'line',data:{labels:MONTHS,datasets:DS},
+  options:{responsive:true,plugins:{legend:{labels:{color:tc.legend,font:{family:"'DM Mono',monospace",size:10},boxWidth:10,padding:14}},
+  tooltip:{backgroundColor:tc.ttBg,borderColor:tc.ttBorder,borderWidth:1,titleColor:tc.ttTitle,bodyColor:tc.ttBody,padding:12,
+    callbacks:{label:ctx=>ctx.dataset.label+': '+m.fmt(ctx.raw||0)}}},
+  scales:{x:{grid:{color:tc.grid},ticks:{color:tc.tick,font:{family:"'DM Mono',monospace",size:10}}},
+          y:{grid:{color:tc.grid},ticks:{color:tc.tick,font:{family:"'DM Mono',monospace",size:10},callback:v=>m.fmt(v)}}}}});
 }
 window.sM=idx=>{SEL=idx;render();setTimeout(()=>document.getElementById('mdet').scrollIntoView({behavior:'smooth',block:'start'}),60);};
 window.fmtInput=(el,idx)=>{
