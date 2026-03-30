@@ -223,7 +223,11 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .prod-group::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--pg-c,var(--green));border-radius:12px 12px 0 0;}
 .prod-group-title{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
 .prod-group-title span{font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;letter-spacing:0;text-transform:none;}
-.prod-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}
+.prod-split{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+@media(max-width:768px){.prod-split{grid-template-columns:1fr;}}
+.prod-chart-wrap{min-height:160px;position:relative;}
+.prod-chart-wrap canvas{max-height:180px;}
+.prod-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;}
 .prod-result{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .prod-result-lbl{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
 .prod-result-val{font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;}
@@ -235,6 +239,32 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .prod-premio-row .pp-status{font-family:'DM Mono',monospace;font-size:.72rem;font-weight:600;}
 .prod-premio-row .pp-val{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;}
 [data-theme="dark"] .prod-group{box-shadow:none;}
+
+/* ── Desenvolvimento de Cor ── */
+.cor-filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.cor-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:10px;position:relative;overflow:hidden;transition:border-color .2s;cursor:pointer;}
+.cor-card:hover{border-color:var(--green);}
+.cor-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cor-status,var(--muted));border-radius:12px 0 0 12px;}
+.cor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.cor-codigo{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;color:var(--text);}
+.cor-status-badge{font-family:'Poppins',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:5px;}
+.cor-info{display:flex;gap:20px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);}
+.cor-info span{display:flex;align-items:center;gap:4px;}
+.cor-dias{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;}
+.cor-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.cor-actions{display:flex;gap:6px;}
+.cor-act-btn{padding:6px 12px;border-radius:6px;border:1.5px solid var(--border2);background:transparent;font-family:'Poppins',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;color:var(--muted);transition:all .15s;}
+.cor-act-btn:hover{border-color:var(--green);color:var(--green);}
+.cor-act-btn.danger{border-color:var(--red);color:var(--red);}
+.cor-act-btn.danger:hover{background:rgba(192,57,43,.1);}
+.cor-act-btn.primary{background:var(--green);color:#fff;border-color:var(--green);}
+.cor-act-btn.primary:hover{background:var(--green2);}
+.cor-hist{margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);line-height:2;}
+.cor-empty{text-align:center;padding:40px 20px;color:var(--muted2);font-size:.82rem;}
+.modal{background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;padding:28px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.25);}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+[data-theme="dark"] .cor-card{box-shadow:none;}
 
 /* ── Login screen ── */
 .login-screen{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;
@@ -330,6 +360,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <button class="tab-btn active" data-role="admin" onclick="switchTab('metas',this)">2026</button>
   <button class="tab-btn" data-role="admin" onclick="switchTab('historico',this)">Histórico</button>
   <button class="tab-btn" data-role="all" onclick="switchTab('producao',this)">Produção</button>
+  <button class="tab-btn" data-role="all" onclick="switchTab('cores',this)">Desenv. Cor</button>
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
@@ -384,6 +415,53 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <div class="premio-block">
     <div style="font-size:.74rem;color:var(--muted)">Prêmio mensal por métrica de produção.</div>
     <div id="prodPremioGrid" style="margin-top:14px"></div>
+  </div>
+</div>
+</div>
+<!-- ── Aba Desenvolvimento de Cor ── -->
+<div class="panel" id="panel-cores">
+<div class="wrap">
+  <div class="sh"><h2>Desenvolvimento de Cor 2026</h2><div class="sh-line"></div></div>
+  <div class="kpi-strip" id="coresKpiStrip"></div>
+  <div class="sh"><h2>Filtros</h2><div class="sh-line"></div></div>
+  <div class="cor-filtros" id="corFiltros">
+    <select class="login-select" id="filtroStatus" onchange="renderCoresLista()" style="width:auto;min-width:140px;padding:9px 36px 9px 12px;font-size:.72rem">
+      <option value="">Todos status</option>
+      <option value="entrada">Entrada</option>
+      <option value="desenvolvida">Desenvolvida</option>
+      <option value="enviada">Enviada ao cliente</option>
+      <option value="em_ajuste">Em ajuste</option>
+      <option value="reenviada">Reenviada</option>
+      <option value="aprovada">Aprovada</option>
+    </select>
+    <select class="login-select" id="filtroMes" onchange="renderCoresLista()" style="width:auto;min-width:120px;padding:9px 36px 9px 12px;font-size:.72rem">
+      <option value="">Todos meses</option>
+      <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
+      <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
+      <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
+      <option value="9">Out</option><option value="10">Nov</option><option value="11">Dez</option>
+    </select>
+    <input class="login-input" id="filtroCliente" oninput="renderCoresLista()" placeholder="Buscar cliente..." style="width:auto;min-width:160px;padding:9px 12px;font-size:.72rem">
+    <button class="save-btn" onclick="novaCor()">Nova Cor</button>
+  </div>
+  <div class="sh" style="margin-top:16px"><h2>Cores</h2><div class="sh-line"></div><span id="coresCount" style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted)"></span></div>
+  <div id="coresLista"></div>
+  <!-- Modal Nova/Editar Cor -->
+  <div class="modal-bg" id="corModal">
+    <div class="modal" style="width:520px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:20px" id="corModalTitle">Nova Cor</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="mf"><label class="login-label">Código/Referência</label><input class="login-input" id="corCodigo" placeholder="REF-001" style="padding:10px 12px;font-size:.78rem"></div>
+        <div class="mf"><label class="login-label">Cliente</label><input class="login-input" id="corCliente" placeholder="Nome do cliente" style="padding:10px 12px;font-size:.78rem"></div>
+        <div class="mf"><label class="login-label">Nº OP</label><input class="login-input" id="corOP" placeholder="OP-1234" style="padding:10px 12px;font-size:.78rem"></div>
+        <div class="mf"><label class="login-label">Data Entrada</label><input class="login-input" type="date" id="corDataEntrada" style="padding:10px 12px;font-size:.78rem"></div>
+      </div>
+      <div class="mf" style="margin-top:12px"><label class="login-label">Observações</label><textarea class="login-input" id="corObs" rows="2" placeholder="Observações..." style="padding:10px 12px;font-size:.78rem;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+        <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharCorModal()">Cancelar</button>
+        <button class="save-btn" onclick="salvarCor()">Salvar</button>
+      </div>
+    </div>
   </div>
 </div>
 </div>
@@ -564,6 +642,19 @@ onValue(prodRef, (snapshot) => {
 });
 
 window._salvarProdFirebase = (d) => set(prodRef, d).catch(e => console.error('Erro ao salvar produção:', e));
+
+// ── Cores — Firebase ─────────────────────────────────────────────────────
+const coresRef = ref(db, 'cores-2026');
+
+onValue(coresRef, (snapshot) => {
+  const data = snapshot.val();
+  if (data) {
+    coresData = data;
+    if (document.getElementById('panel-cores')?.classList.contains('active')) renderCores();
+  }
+});
+
+window._salvarCoresFirebase = (d) => set(coresRef, d).catch(e => console.error('Erro ao salvar cores:', e));
 </script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
@@ -859,11 +950,11 @@ function renderDetalhe(idx) {
     const indBadge = (f.id==='fat'||f.id==='ll')
       ? '<span style="margin-left:8px">' + badgeNivel(f.id==='fat' ? getNivelFat(f.v,idx) : getNivelLL(f.v,idx)) + '</span>' : '';
 
-    const inputVal  = (f.id==='fat'||f.id==='ll') ? (f.v ? Number(f.v).toLocaleString('pt-BR') : '') : (f.v || '');
-    const inputType = (f.id==='fat'||f.id==='ll') ? 'text' : 'number';
-    const inputEvt  = (f.id==='fat'||f.id==='ll') ? 'oninput="fmtInput(this,'+idx+')"' : 'oninput="onInputChange('+idx+')"';
+    const isMoney = (f.id==='fat'||f.id==='ll');
+    const inputVal  = isMoney ? (f.v ? Number(f.v).toLocaleString('pt-BR') : '') : (f.v ? fmtBR(f.v, 2) : '');
+    const inputEvt  = isMoney ? 'oninput="fmtInput(this,'+idx+')"' : 'oninput="onInputChange('+idx+')"';
 
-    return '<div class="mf"><label style="display:flex;align-items:center;gap:0">'+f.lb+indBadge+'</label><div class="mf-wrap"><div class="mf-pfx">'+f.pfx+'</div><input type="'+inputType+'" id="mdf-'+f.id+'" value="'+inputVal+'" placeholder="0" '+inputEvt+'></div>'+vsHTML+lvHTML+'</div>';
+    return '<div class="mf"><label style="display:flex;align-items:center;gap:0">'+f.lb+indBadge+'</label><div class="mf-wrap"><div class="mf-pfx">'+f.pfx+'</div><input type="text" id="mdf-'+f.id+'" value="'+inputVal+'" placeholder="0" '+inputEvt+'></div>'+vsHTML+lvHTML+'</div>';
   }).join('');
 }
 
@@ -1070,8 +1161,28 @@ window.selecionarMes = idx => {
   setTimeout(() => document.getElementById('mdet').scrollIntoView({ behavior:'smooth', block:'start' }), 60);
 };
 
-/** Formata input de moeda com milhar */
+/** 
+ * Handler universal: converte ponto em vírgula em inputs numéricos.
+ * Intercepta no keydown para que o usuário sempre veja vírgula.
+ */
+document.addEventListener('keydown', e => {
+  if (e.key === '.' && e.target.tagName === 'INPUT' && e.target.type !== 'date') {
+    e.preventDefault();
+    const el = e.target;
+    const start = el.selectionStart;
+    const val = el.value;
+    // Só permite uma vírgula
+    if (!val.includes(',')) {
+      el.value = val.slice(0, start) + ',' + val.slice(start);
+      el.setSelectionRange(start + 1, start + 1);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+});
+
+/** Formata input de moeda inteiro com milhar (fat, ll) */
 window.fmtInput = (el, idx) => {
+  // Remove tudo que não é dígito
   const raw = el.value.replace(/\D/g, '');
   const num = parseInt(raw) || 0;
   el.value = num > 0 ? Number(num).toLocaleString('pt-BR') : '';
@@ -1084,10 +1195,11 @@ window.onInputChange = idx => {
   document.getElementById('mdet-lvl-badge').innerHTML = '';
 };
 
-/** Extrai valor numérico de um input formatado */
+/** Extrai valor numérico de um input formatado (BR: 1.234,56 → 1234.56) */
 function getRawVal(id) {
   const el = document.getElementById(id);
   if (!el) return 0;
+  // Remove pontos de milhar, troca vírgula por ponto decimal
   const v = el.value.replace(/\./g, '').replace(',', '.');
   return parseFloat(v) || 0;
 }
@@ -1131,6 +1243,7 @@ window.switchTab = (tab, btn) => {
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'historico') renderHistorico();
   if (tab === 'producao') renderProducao();
+  if (tab === 'cores') renderCores();
 };
 
 /** Toast notification */
@@ -1147,11 +1260,11 @@ function toast(msg, type='ok', ms=2500) {
 
 // Metas IPAC (kg) — 3 níveis
 const METAS_IPAC = {
-  inicial:  300487.46,  // R$ 100
-  media:    314145.02,  // R$ 200
-  superior: 341463.02   // R$ 400
+  meta:     300487.46,  // R$ 100
+  plus:     314145.02,  // R$ 200
+  super:    341463.02   // R$ 400
 };
-const PREMIOS_IPAC = { inicial:100, media:200, superior:400 };
+const PREMIOS_IPAC = { meta:100, plus:200, super:400 };
 
 // Metas fixas das outras métricas
 const META_EFIC_TINT  = 0.90;   // ≥ 90%  → R$ 100 (também pré-requisito do IPAC)
@@ -1161,7 +1274,7 @@ const META_REPROC     = 0.005;  // ≤ 0.5% → R$ 100
 const PREMIO_FIXO     = 100;    // R$ 100 para cada métrica atingida
 
 // Estado
-let prodDados = {};    // { '2026-01': {ipac, efTint1-3, efRep1-3, diasMedia, op30, reproc, reprocQtde}, ... }
+let prodDados = {};    // { '2026-01': {cv,co,pes,pac, efTint1-3,efTintMedia, efRep1-3,efRepMedia, diasMedia, op30, reproc, reprocQtde}, ... }
 let prodMesSel = null; // Mês selecionado na aba produção
 
 // ── Helpers de produção ──────────────────────────────────────────────────
@@ -1179,29 +1292,35 @@ function prodSave(d) {
 function prodInit() {
   prodDados = prodLoad() || {};
   // Dados iniciais Jan-Mar (da planilha)
-  if (!prodDados['2026-01']) prodDados['2026-01'] = { ipac:197384.81, efTint1:0.7927,efTint2:0.9186,efTint3:0.9861, efRep1:0.4235,efRep2:0.4442,efRep3:0.5089, diasMedia:10, op30:false, reproc:0.008768,reprocQtde:904.52 };
-  if (!prodDados['2026-02']) prodDados['2026-02'] = { ipac:283450.22, efTint1:0.8305,efTint2:0.973,efTint3:0.9794, efRep1:0.6231,efRep2:0.5958,efRep3:0.6139, diasMedia:9.5, op30:false, reproc:0.005203,reprocQtde:750.01 };
-  if (!prodDados['2026-03']) prodDados['2026-03'] = { ipac:353472.73, efTint1:0.8315,efTint2:0.9925,efTint3:1.0344, efRep1:0.6653,efRep2:0.5775,efRep3:0.6432, diasMedia:13.23, op30:false, reproc:0.002074,reprocQtde:360.16 };
+  if (!prodDados['2026-01']) prodDados['2026-01'] = { cv:358.58,co:80870.4,pes:19951.84,pac:1978.37, efTint1:0.7927,efTint2:0.9186,efTint3:0.9861,efTintMedia:0.8969, efRep1:0.4235,efRep2:0.4442,efRep3:0.5089,efRepMedia:0.4572, diasMedia:10, op30:false, reproc:0.008768,reprocQtde:904.52 };
+  if (!prodDados['2026-02']) prodDados['2026-02'] = { cv:334.58,co:119749.11,pes:22268.31,pac:1801.14, efTint1:0.8305,efTint2:0.973,efTint3:0.9794,efTintMedia:0.9251, efRep1:0.6231,efRep2:0.5958,efRep3:0.6139,efRepMedia:0.6108, diasMedia:9.5, op30:false, reproc:0.005203,reprocQtde:750.01 };
+  if (!prodDados['2026-03']) prodDados['2026-03'] = { cv:1661.9,co:153386.83,pes:13163.62,pac:5403.85, efTint1:0.8315,efTint2:0.9925,efTint3:1.0344,efTintMedia:0.9466, efRep1:0.6653,efRep2:0.5775,efRep3:0.6432,efRepMedia:0.6281, diasMedia:13.23, op30:false, reproc:0.002074,reprocQtde:360.16 };
+}
+
+/** Calcula IPAC em kg a partir dos componentes: (CV + CO) × 2,16 + PES + PAC */
+function calcIpac(r) {
+  return ((+r.cv||0) + (+r.co||0)) * 2.16 + (+r.pes||0) + (+r.pac||0);
 }
 
 /** Calcula métricas derivadas de um registro */
 function prodCalc(r) {
-  if (!r) return { efTint:0, efRep:0, diasMedia:0 };
-  const efTint = ((+r.efTint1||0)+(+r.efTint2||0)+(+r.efTint3||0)) / 3;
-  const efRep  = ((+r.efRep1||0)+(+r.efRep2||0)+(+r.efRep3||0)) / 3;
+  if (!r) return { efTint:0, efRep:0, diasMedia:0, ipac:0 };
+  const efTint = +r.efTintMedia || 0;
+  const efRep  = +r.efRepMedia || 0;
   const diasMedia = +r.diasMedia || 0;
-  return { efTint, efRep, diasMedia };
+  const ipac = calcIpac(r);
+  return { efTint, efRep, diasMedia, ipac };
 }
 
 /** Verifica se mês de produção tem dados */
-const prodHasData = r => r && (+r.ipac||0) > 0;
+const prodHasData = r => r && calcIpac(r) > 0;
 
 /** Nível de IPAC atingido */
 function getNivelIpac(ipac, efTint) {
   if (efTint < META_EFIC_TINT) return 'none'; // Pré-requisito
-  if (ipac >= METAS_IPAC.superior) return 'superior';
-  if (ipac >= METAS_IPAC.media)    return 'media';
-  if (ipac >= METAS_IPAC.inicial)  return 'inicial';
+  if (ipac >= METAS_IPAC.super) return 'super';
+  if (ipac >= METAS_IPAC.plus)    return 'plus';
+  if (ipac >= METAS_IPAC.meta)  return 'meta';
   return 'none';
 }
 
@@ -1221,7 +1340,7 @@ function renderProdKPI() {
   let sumIpac=0, sumEfTint=0, sumEfRep=0, sumDias=0, cntDias=0, sumReproc=0;
   meses.forEach(k => {
     const r = prodDados[k], c = prodCalc(r);
-    sumIpac += (+r.ipac||0);
+    sumIpac += calcIpac(r);
     sumEfTint += c.efTint;
     sumEfRep  += c.efRep;
     if (c.diasMedia > 0) { sumDias += c.diasMedia; cntDias++; }
@@ -1254,13 +1373,13 @@ function renderProdMeses() {
     const preenchido = prodHasData(r);
     const futuro = i > cur;
     const c = preenchido ? prodCalc(r) : null;
-    const nv = preenchido ? getNivelIpac(+r.ipac||0, c.efTint) : 'none';
-    const nvColor = { none:'', inicial:'#3ecf6e', media:'#4db3ff', superior:'var(--yellow)' };
+    const nv = preenchido ? getNivelIpac(calcIpac(r), c.efTint) : 'none';
+    const nvColor = { none:'', meta:'#3ecf6e', plus:'#4db3ff', super:'var(--yellow)' };
     const dotStyle = nv!=='none' ? 'background:'+nvColor[nv]+';' : '';
     return '<div class="mc '+(preenchido?'filled':'')+' '+(prodMesSel===i?'sel':'')+' '+(futuro&&!preenchido?'future':'')+'" onclick="'+(futuro&&!preenchido?'':'selecionarMesProd('+i+')')+'">'+
       (nv!=='none'?'<div class="mc-lvl" style="'+dotStyle+'"></div>':'')+
       '<div class="mc-name">'+m+'</div><div class="mc-dot"></div>'+
-      '<div class="mc-mini">'+(preenchido?fmtKg(+r.ipac||0):futuro?'—':'lançar')+'</div></div>';
+      '<div class="mc-mini">'+(preenchido?fmtKg(calcIpac(r)):futuro?'—':'lançar')+'</div></div>';
   }).join('');
 }
 
@@ -1271,47 +1390,148 @@ function renderProdDetalhe(idx) {
   const c = prodCalc(r);
 
   function inp(id, val, pfx, placeholder) {
-    const v = val ? (typeof val==='number'&&val<1 ? fmtBR(val*100,2) : val) : '';
+    let v = '';
+    if (val && typeof val === 'number' && val !== 0) {
+      if (val > 0 && val < 1) {
+        v = fmtBR(val * 100, 2);
+      } else {
+        v = fmtBR(val, 2);
+      }
+    }
     return '<div class="mf"><label class="login-label">'+pfx+'</label><div class="mf-wrap"><input type="text" id="pf-'+id+'" value="'+v+'" placeholder="'+(placeholder||'0')+'" oninput="onProdInput('+idx+')"></div></div>';
   }
 
-  const nivelIpac = getNivelIpac(+r.ipac||0, c.efTint);
-  const nivelLabel = { none:'—', inicial:'Inicial', media:'Média', superior:'Superior' };
-  const nivelColor = { none:'var(--muted)', inicial:'#3ecf6e', media:'#4db3ff', superior:'var(--yellow)' };
+  const ipacCalc = calcIpac(r);
+  const nivelIpac = getNivelIpac(ipacCalc, c.efTint);
+  const nivelColor = { none:'var(--muted)', meta:'#3ecf6e', plus:'#4db3ff', super:'var(--yellow)' };
 
   const html =
     // IPAC
-    '<div class="prod-group" style="--pg-c:#008835"><div class="prod-group-title" style="color:#008835">IPAC<span>Meta: '+fmtKg(METAS_IPAC.inicial)+' / '+fmtKg(METAS_IPAC.media)+' / '+fmtKg(METAS_IPAC.superior)+'</span></div>' +
-    '<div class="prod-fields">'+inp('ipac', +r.ipac||0, 'Produção (kg)', '0')+'</div>' +
-    '<div class="prod-result"><span class="prod-result-lbl">Nível</span><span class="prod-result-val" style="color:'+nivelColor[nivelIpac]+'">'+nivelLabel[nivelIpac]+'</span></div></div>' +
+    '<div class="prod-group" style="--pg-c:#008835"><div class="prod-group-title" style="color:#008835">IPAC<span>Meta: '+fmtBR(METAS_IPAC.meta,0)+' / Plus: '+fmtBR(METAS_IPAC.plus,0)+' / Super: '+fmtBR(METAS_IPAC.super,0)+' kg</span></div>' +
+    '<div class="prod-split"><div>' +
+      '<div class="prod-fields">'+inp('cv',+r.cv||0,'CV (kg)')+inp('co',+r.co||0,'CO (kg)')+inp('pes',+r.pes||0,'PES (kg)')+inp('pac',+r.pac||0,'PAC (kg)')+'</div>' +
+      '<div class="prod-result"><span class="prod-result-lbl">IPAC calculado</span><span class="prod-result-val" style="color:'+nivelColor[nivelIpac]+'">'+fmtBR(ipacCalc,2)+' kg</span></div>' +
+      '<div class="prod-result" style="border:none;padding-top:4px"><span class="prod-result-lbl">Nível</span>'+badgeNivel(nivelIpac)+'</div>' +
+    '</div><div class="prod-chart-wrap"><canvas id="pchart-ipac"></canvas></div></div></div>' +
 
     // Eficiência Tinturaria
     '<div class="prod-group" style="--pg-c:#0076BE"><div class="prod-group-title" style="color:#0076BE">Eficiência Tinturaria<span>Meta: 90%</span></div>' +
-    '<div class="prod-fields">'+inp('efTint1',+r.efTint1||0,'1º Turno (%)')+inp('efTint2',+r.efTint2||0,'2º Turno (%)')+inp('efTint3',+r.efTint3||0,'3º Turno (%)')+'</div>' +
-    '<div class="prod-result"><span class="prod-result-lbl">Média</span><span class="prod-result-val" style="color:'+(c.efTint>=META_EFIC_TINT?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.efTint*100,2)+'%</span></div></div>' +
+    '<div class="prod-split"><div>' +
+      '<div class="prod-fields">'+inp('efTint1',+r.efTint1||0,'1º Turno (%)')+inp('efTint2',+r.efTint2||0,'2º Turno (%)')+inp('efTint3',+r.efTint3||0,'3º Turno (%)')+inp('efTintMedia',+r.efTintMedia||0,'Média (%)')+'</div>' +
+      '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(c.efTint>=META_EFIC_TINT?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.efTint*100,2)+'%</span></div>' +
+    '</div><div class="prod-chart-wrap"><canvas id="pchart-tint"></canvas></div></div></div>' +
 
     // Eficiência Repasse
     '<div class="prod-group" style="--pg-c:#FFCB00"><div class="prod-group-title" style="color:#FFCB00">Eficiência Repasse<span>Meta: 75%</span></div>' +
-    '<div class="prod-fields">'+inp('efRep1',+r.efRep1||0,'1º Turno (%)')+inp('efRep2',+r.efRep2||0,'2º Turno (%)')+inp('efRep3',+r.efRep3||0,'3º Turno (%)')+'</div>' +
-    '<div class="prod-result"><span class="prod-result-lbl">Média</span><span class="prod-result-val" style="color:'+(c.efRep>=META_EFIC_REP?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.efRep*100,2)+'%</span></div></div>' +
+    '<div class="prod-split"><div>' +
+      '<div class="prod-fields">'+inp('efRep1',+r.efRep1||0,'1º Turno (%)')+inp('efRep2',+r.efRep2||0,'2º Turno (%)')+inp('efRep3',+r.efRep3||0,'3º Turno (%)')+inp('efRepMedia',+r.efRepMedia||0,'Média (%)')+'</div>' +
+      '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(c.efRep>=META_EFIC_REP?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.efRep*100,2)+'%</span></div>' +
+    '</div><div class="prod-chart-wrap"><canvas id="pchart-rep"></canvas></div></div></div>' +
 
     // Dias Desenvolvimento
     '<div class="prod-group" style="--pg-c:#4db3ff"><div class="prod-group-title" style="color:#4db3ff">Dias Desenvolvimento<span>Meta: ≤ 10 dias</span></div>' +
-    '<div class="prod-fields">'+inp('diasMedia',+r.diasMedia||0,'Média de dias', '0')+'</div>' +
-    '<div style="margin-top:12px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleOp30('+idx+')">' +
-      '<div id="pf-op30" style="width:20px;height:20px;border-radius:5px;border:1.5px solid '+(r.op30?'var(--red)':'var(--border2)')+';background:'+(r.op30?'rgba(192,57,43,.15)':'transparent')+';display:flex;align-items:center;justify-content:center;transition:all .2s">' +
-        (r.op30?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>':'') +
+    '<div class="prod-split"><div>' +
+      '<div class="prod-fields">'+inp('diasMedia',+r.diasMedia||0,'Média de dias','0')+'</div>' +
+      '<div style="margin-top:12px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleOp30('+idx+')">' +
+        '<div id="pf-op30" style="width:20px;height:20px;border-radius:5px;border:1.5px solid '+(r.op30?'var(--red)':'var(--border2)')+';background:'+(r.op30?'rgba(192,57,43,.15)':'transparent')+';display:flex;align-items:center;justify-content:center;transition:all .2s">' +
+          (r.op30?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>':'') +
+        '</div>' +
+        '<span style="font-size:.72rem;font-weight:500;color:'+(r.op30?'var(--red)':'var(--muted)')+'">OP com mais de 30 dias em aberto</span>' +
       '</div>' +
-      '<span style="font-size:.72rem;font-weight:500;color:'+(r.op30?'var(--red)':'var(--muted)')+'">OP com mais de 30 dias em aberto</span>' +
-    '</div>' +
-    '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(c.diasMedia>0&&c.diasMedia<=META_DIAS_DEV&&!r.op30?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.diasMedia,1)+' d'+(r.op30?' (OP>30)':'')+'</span></div></div>' +
+      '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(c.diasMedia>0&&c.diasMedia<=META_DIAS_DEV&&!r.op30?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.diasMedia,1)+' d'+(r.op30?' (OP>30)':'')+'</span></div>' +
+    '</div><div class="prod-chart-wrap"><canvas id="pchart-dias"></canvas></div></div></div>' +
 
     // Reprocesso
     '<div class="prod-group" style="--pg-c:var(--red)"><div class="prod-group-title" style="color:var(--red)">Reprocesso Gerado<span>Meta: ≤ 0,50%</span></div>' +
-    '<div class="prod-fields">'+inp('reproc',+r.reproc||0,'Percentual (%)')+inp('reprocQtde',+r.reprocQtde||0,'Qtde (kg)')+'</div>' +
-    '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(+r.reproc<=META_REPROC?'#3ecf6e':'var(--red)')+'">'+fmtBR((+r.reproc||0)*100,3)+'%</span></div></div>';
+    '<div class="prod-split"><div>' +
+      '<div class="prod-fields">'+inp('reproc',+r.reproc||0,'Percentual (%)')+inp('reprocQtde',+r.reprocQtde||0,'Qtde (kg)')+'</div>' +
+      '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(+r.reproc<=META_REPROC?'#3ecf6e':'var(--red)')+'">'+fmtBR((+r.reproc||0)*100,3)+'%</span></div>' +
+    '</div><div class="prod-chart-wrap"><canvas id="pchart-reproc"></canvas></div></div></div>';
 
   document.getElementById('prodDet-fields').innerHTML = html;
+  setTimeout(() => renderProdCharts(idx), 50);
+}
+
+// ── Mini-charts por métrica (meses lançados) ─────────────────────────────
+const _prodCharts = {};
+
+function renderProdCharts(selIdx) {
+  // Mostra apenas meses com dados ATÉ o mês selecionado (acumulativo)
+  const allMeses = Object.keys(prodDados).filter(k => prodHasData(prodDados[k])).sort();
+  const limiteKey = mesKey(selIdx);
+  const meses = allMeses.filter(k => k <= limiteKey);
+  const labels = meses.map(k => MONTHS[parseInt(k.split('-')[1]) - 1]);
+  const tc = chartColors();
+  const selMonthPos = meses.indexOf(mesKey(selIdx));
+
+  function barColors(baseColor, count) {
+    return Array.from({ length: count }, (_, i) => i === selMonthPos ? baseColor : baseColor + '55');
+  }
+  function condColors(data, threshold, goodColor, badColor, higher) {
+    return data.map((v, i) => {
+      const ok = higher ? v >= threshold : v <= threshold;
+      const c = ok ? goodColor : badColor;
+      return i === selMonthPos ? c : c + '55';
+    });
+  }
+
+  function mkChart(canvasId, datasets, yFmt) {
+    const el = document.getElementById(canvasId);
+    if (!el) return;
+    if (_prodCharts[canvasId]) _prodCharts[canvasId].destroy();
+    _prodCharts[canvasId] = new Chart(el.getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false },
+          tooltip: { backgroundColor: tc.ttBg, borderColor: tc.ttBorder, borderWidth: 1,
+            titleColor: tc.ttTitle, bodyColor: tc.ttBody, padding: 8,
+            callbacks: { label: ctx => yFmt(ctx.raw) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: tc.tick, font: { family: "'DM Mono',monospace", size: 9 } } },
+          y: { grid: { color: tc.grid }, ticks: { color: tc.tick, font: { family: "'DM Mono',monospace", size: 9 }, callback: v => yFmt(v) } }
+        }
+      }
+    });
+  }
+
+  // IPAC
+  const ipacData = meses.map(k => calcIpac(prodDados[k]));
+  mkChart('pchart-ipac', [
+    { label: 'IPAC', data: ipacData, backgroundColor: barColors('#008835', labels.length), borderRadius: 4 },
+    { label: 'Meta', data: labels.map(() => METAS_IPAC.meta), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 },
+    { label: 'Plus', data: labels.map(() => METAS_IPAC.plus), type: 'line', borderColor: '#4db3ff', borderWidth: 1, borderDash: [3,3], backgroundColor: 'transparent', pointRadius: 0 },
+    { label: 'Super', data: labels.map(() => METAS_IPAC.super), type: 'line', borderColor: '#FFCB00', borderWidth: 1, borderDash: [3,3], backgroundColor: 'transparent', pointRadius: 0 }
+  ], v => fmtBR(v, 0) + ' kg');
+
+  // Eficiência Tinturaria
+  const tintData = meses.map(k => (+(prodDados[k].efTintMedia || 0)) * 100);
+  mkChart('pchart-tint', [
+    { label: 'Efic. Tint.', data: tintData, backgroundColor: condColors(tintData, 90, '#0076BE', '#e05252', true), borderRadius: 4 },
+    { label: 'Meta 90%', data: labels.map(() => 90), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 }
+  ], v => fmtBR(v, 1) + '%');
+
+  // Eficiência Repasse
+  const repData = meses.map(k => (+(prodDados[k].efRepMedia || 0)) * 100);
+  mkChart('pchart-rep', [
+    { label: 'Efic. Rep.', data: repData, backgroundColor: condColors(repData, 75, '#FFCB00', '#e05252', true), borderRadius: 4 },
+    { label: 'Meta 75%', data: labels.map(() => 75), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 }
+  ], v => fmtBR(v, 1) + '%');
+
+  // Dias Desenvolvimento
+  const diasData = meses.map(k => +(prodDados[k].diasMedia || 0));
+  mkChart('pchart-dias', [
+    { label: 'Dias', data: diasData, backgroundColor: condColors(diasData, 10, '#4db3ff', '#e05252', false), borderRadius: 4 },
+    { label: 'Meta 10d', data: labels.map(() => 10), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 }
+  ], v => fmtBR(v, 1) + ' d');
+
+  // Reprocesso
+  const reprocData = meses.map(k => (+(prodDados[k].reproc || 0)) * 100);
+  mkChart('pchart-reproc', [
+    { label: 'Reproc.', data: reprocData, backgroundColor: condColors(reprocData, 0.5, '#008835', '#e05252', false), borderRadius: 4 },
+    { label: 'Meta 0,5%', data: labels.map(() => 0.5), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 }
+  ], v => fmtBR(v, 3) + '%');
 }
 
 function renderProdPremio() {
@@ -1325,7 +1545,7 @@ function renderProdPremio() {
     let premioMes = 0;
 
     // IPAC (com pré-requisito eficiência tinturaria)
-    const nvIpac = getNivelIpac(+r.ipac||0, c.efTint);
+    const nvIpac = getNivelIpac(calcIpac(r), c.efTint);
     const pIpac = nvIpac !== 'none' ? PREMIOS_IPAC[nvIpac] : 0;
     premioMes += pIpac;
 
@@ -1343,7 +1563,7 @@ function renderProdPremio() {
 
     totalGeral += premioMes;
 
-    const nvColor = { none:'var(--muted)', inicial:'#3ecf6e', media:'#4db3ff', superior:'var(--yellow)' };
+    const nvColor = { none:'var(--muted)', meta:'#3ecf6e', plus:'#4db3ff', super:'var(--yellow)' };
 
     return '<div class="prod-premio-row"><span class="pp-lbl">'+nm+'</span>' +
       '<span class="pp-status" style="color:'+nvColor[nvIpac]+'">IPAC R$ '+fmtBR(pIpac,0)+'</span>' +
@@ -1393,21 +1613,26 @@ window.salvarMesProd = () => {
   const prev = prodDados[k] || {};
 
   prodDados[k] = {
-    ipac:       getProdVal('ipac'),
-    efTint1:    pctToDecimal(getProdVal('efTint1')),
-    efTint2:    pctToDecimal(getProdVal('efTint2')),
-    efTint3:    pctToDecimal(getProdVal('efTint3')),
-    efRep1:     pctToDecimal(getProdVal('efRep1')),
-    efRep2:     pctToDecimal(getProdVal('efRep2')),
-    efRep3:     pctToDecimal(getProdVal('efRep3')),
-    diasMedia:  getProdVal('diasMedia'),
-    op30:       !!prev.op30,
-    reproc:     pctToDecimal(getProdVal('reproc')),
-    reprocQtde: getProdVal('reprocQtde')
+    cv:          getProdVal('cv'),
+    co:          getProdVal('co'),
+    pes:         getProdVal('pes'),
+    pac:         getProdVal('pac'),
+    efTint1:     pctToDecimal(getProdVal('efTint1')),
+    efTint2:     pctToDecimal(getProdVal('efTint2')),
+    efTint3:     pctToDecimal(getProdVal('efTint3')),
+    efTintMedia: pctToDecimal(getProdVal('efTintMedia')),
+    efRep1:      pctToDecimal(getProdVal('efRep1')),
+    efRep2:      pctToDecimal(getProdVal('efRep2')),
+    efRep3:      pctToDecimal(getProdVal('efRep3')),
+    efRepMedia:  pctToDecimal(getProdVal('efRepMedia')),
+    diasMedia:   getProdVal('diasMedia'),
+    op30:        !!prev.op30,
+    reproc:      pctToDecimal(getProdVal('reproc')),
+    reprocQtde:  getProdVal('reprocQtde')
   };
 
   // Sincroniza IPAC com a aba financeira
-  syncIpacToFinanceiro(prodMesSel, prodDados[k].ipac);
+  syncIpacToFinanceiro(prodMesSel, calcIpac(prodDados[k]));
 
   const ok = prodSave(prodDados);
   toast(ok ? MONTHS[prodMesSel]+' produção salvo' : 'Salvo só nesta sessão', ok ? 'ok' : 'warn');
@@ -1437,7 +1662,383 @@ function syncIpacToFinanceiro(mesIdx, ipacKg) {
   render(); // Re-render aba financeira
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// DESENVOLVIMENTO DE COR — Constantes, Estado, Render
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Feriados 2026 — Nacionais + SC + Indaial ─────────────────────────────
+const FERIADOS_2026 = [
+  // Nacionais
+  '2026-01-01', // Confraternização Universal
+  '2026-02-16', // Carnaval (segunda)
+  '2026-02-17', // Carnaval (terça)
+  '2026-02-18', // Quarta de Cinzas
+  '2026-04-03', // Sexta-feira Santa
+  '2026-04-21', // Tiradentes
+  '2026-05-01', // Dia do Trabalho
+  '2026-06-04', // Corpus Christi
+  '2026-09-07', // Independência
+  '2026-10-12', // Aparecida
+  '2026-11-02', // Finados
+  '2026-11-15', // Proclamação da República
+  '2026-12-25', // Natal
+  // SC Estadual
+  '2026-08-11', // Data Magna SC
+  // Indaial Municipal
+  '2026-06-29', // Aniversário de Indaial
+].map(d => d); // Strings ISO
+
+const FERIADOS_SET = new Set(FERIADOS_2026);
+
+/** Calcula dias úteis entre duas datas (exclui fds + feriados) */
+function diasUteis(dataIni, dataFim) {
+  if (!dataIni || !dataFim) return 0;
+  const d1 = new Date(dataIni + 'T00:00:00');
+  const d2 = new Date(dataFim + 'T00:00:00');
+  if (d2 <= d1) return 0;
+  let count = 0;
+  const cur = new Date(d1);
+  cur.setDate(cur.getDate() + 1); // Não conta o dia de entrada
+  while (cur <= d2) {
+    const dow = cur.getDay();
+    const iso = cur.toISOString().slice(0, 10);
+    if (dow !== 0 && dow !== 6 && !FERIADOS_SET.has(iso)) count++;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count;
+}
+
+/** Data de hoje ISO */
+const hoje = () => new Date().toISOString().slice(0, 10);
+
+// ── Estado Cores ─────────────────────────────────────────────────────────
+let coresData = {}; // { id: { codigo, cliente, op, obs, status, historico:[{acao,data}], ... } }
+let corEditId = null;
+
+function coresLoad() {
+  try { const r = localStorage.getItem('fiobras_cores_2026'); return r ? JSON.parse(r) : null; }
+  catch(e) { return null; }
+}
+function coresSave(d) {
+  if (window._salvarCoresFirebase) { window._salvarCoresFirebase(d); }
+  else { try { localStorage.setItem('fiobras_cores_2026', JSON.stringify(d)); } catch(e) {} }
+  return true;
+}
+function coresInit() {
+  coresData = coresLoad() || {};
+}
+
+// ── Status helpers ───────────────────────────────────────────────────────
+const STATUS_CONFIG = {
+  entrada:      { lb:'Entrada',          cor:'#FFCB00', bg:'rgba(255,203,0,.15)' },
+  desenvolvida: { lb:'Desenvolvida',     cor:'#0076BE', bg:'rgba(0,118,190,.15)' },
+  enviada:      { lb:'Enviada',          cor:'#8E8E93', bg:'rgba(142,142,147,.15)' },
+  em_ajuste:    { lb:'Em Ajuste',        cor:'#e07820', bg:'rgba(224,120,32,.15)' },
+  reenviada:    { lb:'Reenviada',        cor:'#8E8E93', bg:'rgba(142,142,147,.15)' },
+  aprovada:     { lb:'Aprovada',         cor:'#008835', bg:'rgba(0,136,53,.15)' }
+};
+
+/** Calcula dias úteis ativos de desenvolvimento de uma cor */
+function calcDiasAtivos(cor) {
+  const hist = cor.historico || [];
+  if (hist.length === 0) return 0;
+
+  let total = 0;
+  let inicioAtivo = null;
+
+  for (const ev of hist) {
+    switch(ev.acao) {
+      case 'entrada':
+        inicioAtivo = ev.data;
+        break;
+      case 'desenvolvida':
+      case 'enviada':
+        // Pausa — soma período ativo
+        if (inicioAtivo) { total += diasUteis(inicioAtivo, ev.data); inicioAtivo = null; }
+        break;
+      case 'em_ajuste':
+        // Retoma contagem
+        inicioAtivo = ev.data;
+        break;
+      case 'reenviada':
+        // Pausa novamente
+        if (inicioAtivo) { total += diasUteis(inicioAtivo, ev.data); inicioAtivo = null; }
+        break;
+      case 'aprovada':
+        // Se ainda estava ativo, soma
+        if (inicioAtivo) { total += diasUteis(inicioAtivo, ev.data); inicioAtivo = null; }
+        break;
+    }
+  }
+
+  // Se ainda em desenvolvimento (não pausou), conta até hoje
+  if (inicioAtivo) {
+    total += diasUteis(inicioAtivo, hoje());
+  }
+
+  return total;
+}
+
+/** Verifica se cor tem OP > 30 dias em aberto */
+function corTemOp30(cor) {
+  const hist = cor.historico || [];
+  if (hist.length === 0) return false;
+  const entrada = hist.find(h => h.acao === 'entrada');
+  if (!entrada) return false;
+  const d1 = new Date(entrada.data + 'T00:00:00');
+  const d2 = cor.status === 'aprovada'
+    ? new Date((hist.find(h => h.acao === 'aprovada') || {}).data + 'T00:00:00')
+    : new Date();
+  const diff = Math.floor((d2 - d1) / 86400000);
+  return diff > 30;
+}
+
+/** Próximas ações possíveis por status */
+function acoesPossiveis(status) {
+  switch(status) {
+    case 'entrada':      return [{ acao:'desenvolvida', lb:'Desenvolvida', cls:'primary' }];
+    case 'desenvolvida': return [
+      { acao:'aprovada', lb:'Aprovar (equipe)', cls:'primary' },
+      { acao:'enviada', lb:'Enviar ao cliente', cls:'' }
+    ];
+    case 'enviada':      return [
+      { acao:'aprovada', lb:'Cliente aprovou', cls:'primary' },
+      { acao:'em_ajuste', lb:'Cliente rejeitou', cls:'danger' }
+    ];
+    case 'em_ajuste':    return [{ acao:'desenvolvida', lb:'Desenvolvida', cls:'primary' }];
+    case 'reenviada':    return [
+      { acao:'aprovada', lb:'Cliente aprovou', cls:'primary' },
+      { acao:'em_ajuste', lb:'Cliente rejeitou', cls:'danger' }
+    ];
+    case 'aprovada':     return [];
+    default:             return [];
+  }
+}
+
+// ── Render Cores ─────────────────────────────────────────────────────────
+
+function renderCores() {
+  renderCoresKPI();
+  renderCoresLista();
+}
+
+function renderCoresKPI() {
+  const todas = Object.values(coresData);
+  const total = todas.length;
+  const abertas = todas.filter(c => c.status !== 'aprovada').length;
+  const aprovadas = todas.filter(c => c.status === 'aprovada').length;
+  const diasArr = todas.filter(c => c.status === 'aprovada').map(c => calcDiasAtivos(c));
+  const mediaAprov = diasArr.length > 0 ? diasArr.reduce((a,b) => a+b, 0) / diasArr.length : 0;
+  const op30count = todas.filter(c => corTemOp30(c) && c.status !== 'aprovada').length;
+
+  const KS = [
+    { lb:'Total Cores', v:total, c:'#0076BE' },
+    { lb:'Em Aberto', v:abertas, c:'#FFCB00' },
+    { lb:'Aprovadas', v:aprovadas, c:'#008835' },
+    { lb:'Média Aprovadas', v:mediaAprov > 0 ? fmtBR(mediaAprov,1)+' d' : '—', c:mediaAprov > 0 && mediaAprov <= 10 ? '#008835' : '#e05252' },
+  ];
+
+  document.getElementById('coresKpiStrip').innerHTML = KS.map(k =>
+    '<div class="kpi" style="--kc:'+k.c+'"><div class="kpi-lbl"><div class="kpi-dot"></div>'+k.lb+'</div><div class="kpi-val">'+k.v+'</div></div>'
+  ).join('') + (op30count > 0 ? '<div class="kpi" style="--kc:var(--red)"><div class="kpi-lbl"><div class="kpi-dot"></div>OP > 30 dias</div><div class="kpi-val" style="color:var(--red)">'+op30count+'</div></div>' : '');
+}
+
+function renderCoresLista() {
+  const fStatus = document.getElementById('filtroStatus')?.value || '';
+  const fMes = document.getElementById('filtroMes')?.value;
+  const fCliente = (document.getElementById('filtroCliente')?.value || '').toLowerCase();
+
+  let lista = Object.entries(coresData).map(([id, c]) => ({ id, ...c }));
+
+  // Filtros
+  if (fStatus) lista = lista.filter(c => c.status === fStatus);
+  if (fMes !== '' && fMes !== undefined && fMes !== null) {
+    const mes = parseInt(fMes);
+    lista = lista.filter(c => {
+      const entrada = (c.historico || []).find(h => h.acao === 'entrada');
+      return entrada && new Date(entrada.data + 'T00:00:00').getMonth() === mes;
+    });
+  }
+  if (fCliente) lista = lista.filter(c => (c.cliente||'').toLowerCase().includes(fCliente));
+
+  // Ordenar: abertas primeiro, depois por data entrada desc
+  lista.sort((a, b) => {
+    if (a.status === 'aprovada' && b.status !== 'aprovada') return 1;
+    if (a.status !== 'aprovada' && b.status === 'aprovada') return -1;
+    const dA = (a.historico||[]).find(h => h.acao === 'entrada')?.data || '';
+    const dB = (b.historico||[]).find(h => h.acao === 'entrada')?.data || '';
+    return dB.localeCompare(dA);
+  });
+
+  document.getElementById('coresCount').textContent = lista.length + ' de ' + Object.keys(coresData).length;
+
+  if (lista.length === 0) {
+    document.getElementById('coresLista').innerHTML = '<div class="cor-empty">Nenhuma cor encontrada</div>';
+    return;
+  }
+
+  document.getElementById('coresLista').innerHTML = lista.map(c => {
+    const sc = STATUS_CONFIG[c.status] || STATUS_CONFIG.entrada;
+    const dias = calcDiasAtivos(c);
+    const op30 = corTemOp30(c);
+    const acoes = acoesPossiveis(c.status);
+    const entrada = (c.historico||[]).find(h => h.acao === 'entrada');
+    const entradaFmt = entrada ? entrada.data.split('-').reverse().join('/') : '—';
+
+    const diasColor = c.status === 'aprovada'
+      ? (dias <= 10 ? '#3ecf6e' : 'var(--red)')
+      : (dias <= 10 ? 'var(--text)' : 'var(--red)');
+
+    const acoesHTML = acoes.map(a =>
+      '<button class="cor-act-btn '+a.cls+'" onclick="event.stopPropagation();corAcao(\''+c.id+'\',\''+a.acao+'\')">'+a.lb+'</button>'
+    ).join('');
+
+    // Histórico resumido
+    const histHTML = (c.historico||[]).map(h => {
+      const dt = h.data.split('-').reverse().join('/');
+      const sc2 = STATUS_CONFIG[h.acao] || {};
+      return '<span style="color:'+(sc2.cor||'var(--muted)')+'">'+dt+' '+((sc2.lb||h.acao))+'</span>';
+    }).join(' → ');
+
+    return '<div class="cor-card" style="--cor-status:'+sc.cor+'" onclick="toggleCorHist(\''+c.id+'\')">' +
+      '<div class="cor-top">' +
+        '<div><span class="cor-codigo">'+c.codigo+'</span></div>' +
+        '<span class="cor-status-badge" style="color:'+sc.cor+';background:'+sc.bg+'">'+sc.lb+'</span>' +
+      '</div>' +
+      '<div class="cor-info">' +
+        '<span>'+c.cliente+'</span>' +
+        '<span>OP '+c.op+'</span>' +
+        '<span>Entrada: '+entradaFmt+'</span>' +
+        '<span class="cor-dias" style="color:'+diasColor+'">'+dias+' dia'+(dias!==1?'s':'')+'</span>' +
+        (op30 ? '<span style="color:var(--red);font-weight:700">OP>30d</span>' : '') +
+      '</div>' +
+      '<div class="cor-bottom">' +
+        '<div class="cor-actions">'+acoesHTML+
+          (c.status !== 'aprovada' ? '<button class="cor-act-btn" onclick="event.stopPropagation();editarCor(\''+c.id+'\')">Editar</button>' : '') +
+          '<button class="cor-act-btn danger" onclick="event.stopPropagation();excluirCor(\''+c.id+'\')">Excluir</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cor-hist" id="hist-'+c.id+'" style="display:none">'+histHTML+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Ações Cores ──────────────────────────────────────────────────────────
+
+window.toggleCorHist = id => {
+  const el = document.getElementById('hist-' + id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+};
+
+window.novaCor = () => {
+  corEditId = null;
+  document.getElementById('corModalTitle').textContent = 'Nova Cor';
+  document.getElementById('corCodigo').value = '';
+  document.getElementById('corCliente').value = '';
+  document.getElementById('corOP').value = '';
+  document.getElementById('corObs').value = '';
+  document.getElementById('corDataEntrada').value = hoje();
+  document.getElementById('corModal').classList.add('open');
+};
+
+window.editarCor = id => {
+  const c = coresData[id];
+  if (!c) return;
+  corEditId = id;
+  document.getElementById('corModalTitle').textContent = 'Editar Cor';
+  document.getElementById('corCodigo').value = c.codigo || '';
+  document.getElementById('corCliente').value = c.cliente || '';
+  document.getElementById('corOP').value = c.op || '';
+  document.getElementById('corObs').value = c.obs || '';
+  const entrada = (c.historico||[]).find(h => h.acao === 'entrada');
+  document.getElementById('corDataEntrada').value = entrada ? entrada.data : '';
+  document.getElementById('corModal').classList.add('open');
+};
+
+window.fecharCorModal = () => {
+  document.getElementById('corModal').classList.remove('open');
+  corEditId = null;
+};
+
+window.salvarCor = () => {
+  const codigo = document.getElementById('corCodigo').value.trim();
+  const cliente = document.getElementById('corCliente').value.trim();
+  const op = document.getElementById('corOP').value.trim();
+  const obs = document.getElementById('corObs').value.trim();
+  const dataEntrada = document.getElementById('corDataEntrada').value;
+
+  if (!codigo) { toast('Informe o código da cor', 'err'); return; }
+  if (!dataEntrada) { toast('Informe a data de entrada', 'err'); return; }
+
+  if (corEditId) {
+    // Editando
+    coresData[corEditId].codigo = codigo;
+    coresData[corEditId].cliente = cliente;
+    coresData[corEditId].op = op;
+    coresData[corEditId].obs = obs;
+    // Atualiza data de entrada no histórico
+    const hist = coresData[corEditId].historico || [];
+    const entIdx = hist.findIndex(h => h.acao === 'entrada');
+    if (entIdx >= 0) hist[entIdx].data = dataEntrada;
+  } else {
+    // Nova cor
+    const id = 'cor_' + Date.now();
+    coresData[id] = {
+      codigo, cliente, op, obs,
+      status: 'entrada',
+      historico: [{ acao:'entrada', data:dataEntrada }]
+    };
+  }
+
+  coresSave(coresData);
+  fecharCorModal();
+  toast(corEditId ? 'Cor atualizada' : 'Cor cadastrada', 'ok');
+  renderCores();
+};
+
+window.corAcao = (id, acao) => {
+  const c = coresData[id];
+  if (!c) return;
+
+  // Para ações que precisam de data, usa hoje
+  const dataAcao = hoje();
+
+  // Se está em desenvolvida e vai para enviada, registra ambas
+  if (acao === 'desenvolvida' && c.status === 'em_ajuste') {
+    // Retornou do ajuste, desenvolvida novamente
+    c.historico.push({ acao:'desenvolvida', data:dataAcao });
+    c.status = 'desenvolvida';
+  } else if (acao === 'enviada') {
+    c.historico.push({ acao:'enviada', data:dataAcao });
+    c.status = 'enviada';
+  } else if (acao === 'em_ajuste') {
+    c.historico.push({ acao:'em_ajuste', data:dataAcao });
+    c.status = 'em_ajuste';
+  } else if (acao === 'aprovada') {
+    c.historico.push({ acao:'aprovada', data:dataAcao });
+    c.status = 'aprovada';
+  } else {
+    c.historico.push({ acao, data:dataAcao });
+    c.status = acao;
+  }
+
+  coresSave(coresData);
+  toast(STATUS_CONFIG[acao]?.lb || acao, 'ok');
+  renderCores();
+};
+
+window.excluirCor = id => {
+  const c = coresData[id];
+  if (!c) return;
+  if (!confirm('Excluir a cor ' + c.codigo + '?')) return;
+  delete coresData[id];
+  coresSave(coresData);
+  toast('Cor excluída', 'ok');
+  renderCores();
+};
+
 // ── Boot ─────────────────────────────────────────────────────────────────
+coresInit();
 prodInit();
 init();
 render();
