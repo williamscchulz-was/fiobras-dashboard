@@ -1,4 +1,36 @@
 <!DOCTYPE html>
+<!--
+  ╔═══════════════════════════════════════════════════════════════╗
+  ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
+  ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.0.0  30/03/2026  Aba Produção + Desenv. Cor + gráficos   ║
+  ║    • Aba Produção: IPAC (CV+CO+PES+PAC), Efic. Tinturaria,   ║
+  ║      Efic. Repasse (3 turnos + média), Dias Desenv.,          ║
+  ║      Reprocesso. Prêmios por nível (Meta/Plus/Super).         ║
+  ║    • Aba Desenvolvimento de Cor: lista individual por cor,    ║
+  ║      fluxo Entrada→Desenvolvida→Enviada→Aprovada,             ║
+  ║      pausa/retomada, dias úteis (feriados Indaial/SC),        ║
+  ║      filtros por status/mês/cliente, Firebase tempo real.     ║
+  ║    • Gráficos split 50/50 nos cards de produção (Chart.js),   ║
+  ║      acumulativos até o mês selecionado, linhas de meta.      ║
+  ║    • Usuário Geovani adicionado (sem senha, role produção).   ║
+  ║    • Bug ponto/vírgula corrigido em todos os inputs.          ║
+  ║    • IPAC calculado: (CV+CO)×2,16 + PES + PAC                ║
+  ║    • Nomenclatura: Meta / Meta Plus / Super Meta (produção).  ║
+  ║                                                               ║
+  ║  v1.0.0  30/03/2026  Refatoração completa + Login + PWA       ║
+  ║    • Fase 1: Alinhamento FIOBRAS_BASE v2 (tokens, header,    ║
+  ║      dark mode, Outfit, linha tricolor, SVGs, toast).         ║
+  ║    • Fase 2: Login (admin+senha, Anderson/Aldo sem senha),    ║
+  ║      splash screen, PWA completo (manifest, ícones, SW).     ║
+  ║    • Fase 3: Gráficos adaptativos ao tema, acumBadge,         ║
+  ║      bônus anual, IPAC/Clientes como acompanhamento.          ║
+  ║    • Fase 4: Refatoração JS (nomes legíveis, comentários),    ║
+  ║      CSS organizado em 17 seções.                             ║
+  ║                                                               ║
+  ║  v0.8.0  —           Versão original (pré-refatoração)        ║
+  ╚═══════════════════════════════════════════════════════════════╝
+-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -335,7 +367,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <div class="splash-sub">Dashboard</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version">v1.0</div>
+  <div class="splash-version">v2.0</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -346,7 +378,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     <span class="hdr-system">Dashboard</span>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill">v1.0</div>
+    <div class="hdr-pill">v2.0</div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -431,8 +463,8 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
       <option value="desenvolvida">Desenvolvida</option>
       <option value="enviada">Enviada ao cliente</option>
       <option value="em_ajuste">Em ajuste</option>
-      <option value="reenviada">Reenviada</option>
       <option value="aprovada">Aprovada</option>
+      <option value="cancelada">Cancelada</option>
     </select>
     <select class="login-select" id="filtroMes" onchange="renderCoresLista()" style="width:auto;min-width:120px;padding:9px 36px 9px 12px;font-size:.72rem">
       <option value="">Todos meses</option>
@@ -441,7 +473,15 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
       <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
       <option value="9">Out</option><option value="10">Nov</option><option value="11">Dez</option>
     </select>
-    <input class="login-input" id="filtroCliente" oninput="renderCoresLista()" placeholder="Buscar cliente..." style="width:auto;min-width:160px;padding:9px 12px;font-size:.72rem">
+    <select class="login-select" id="filtroFibra" onchange="renderCoresLista()" style="width:auto;min-width:100px;padding:9px 36px 9px 12px;font-size:.72rem">
+      <option value="">Todas fibras</option>
+      <option value="CO">CO</option>
+      <option value="CV">CV</option>
+      <option value="PES">PES</option>
+      <option value="PAC">PAC</option>
+      <option value="Outra">Outra</option>
+    </select>
+    <input class="login-input" id="filtroCliente" oninput="renderCoresLista()" placeholder="Buscar cor, cliente..." style="width:auto;min-width:160px;padding:9px 12px;font-size:.72rem">
     <button class="save-btn" onclick="novaCor()">Nova Cor</button>
   </div>
   <div class="sh" style="margin-top:16px"><h2>Cores</h2><div class="sh-line"></div><span id="coresCount" style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted)"></span></div>
@@ -451,9 +491,19 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     <div class="modal" style="width:520px">
       <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:20px" id="corModalTitle">Nova Cor</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="mf"><label class="login-label">Código/Referência</label><input class="login-input" id="corCodigo" placeholder="REF-001" style="padding:10px 12px;font-size:.78rem"></div>
+        <div class="mf"><label class="login-label">Referência Cliente</label><input class="login-input" id="corCodigo" placeholder="REF-001" style="padding:10px 12px;font-size:.78rem"></div>
+        <div class="mf"><label class="login-label">Nome da Cor</label><input class="login-input" id="corNome" placeholder="Azul Royal" style="padding:10px 12px;font-size:.78rem"></div>
+        <div class="mf"><label class="login-label">Fibra</label>
+          <select class="login-select" id="corFibra" style="padding:10px 36px 10px 12px;font-size:.78rem">
+            <option value="">Selecione...</option>
+            <option value="CO">CO</option>
+            <option value="CV">CV</option>
+            <option value="PES">PES</option>
+            <option value="PAC">PAC</option>
+            <option value="Outra">Outra</option>
+          </select>
+        </div>
         <div class="mf"><label class="login-label">Cliente</label><input class="login-input" id="corCliente" placeholder="Nome do cliente" style="padding:10px 12px;font-size:.78rem"></div>
-        <div class="mf"><label class="login-label">Nº OP</label><input class="login-input" id="corOP" placeholder="OP-1234" style="padding:10px 12px;font-size:.78rem"></div>
         <div class="mf"><label class="login-label">Data Entrada</label><input class="login-input" type="date" id="corDataEntrada" style="padding:10px 12px;font-size:.78rem"></div>
       </div>
       <div class="mf" style="margin-top:12px"><label class="login-label">Observações</label><textarea class="login-input" id="corObs" rows="2" placeholder="Observações..." style="padding:10px 12px;font-size:.78rem;resize:vertical"></textarea></div>
@@ -1336,6 +1386,7 @@ function renderProducao() {
 function renderProdKPI() {
   const meses = Object.keys(prodDados).filter(k => prodHasData(prodDados[k]));
   const n = meses.length || 1;
+  const mesesIdx = meses.map(k => parseInt(k.split('-')[1]) - 1);
 
   let sumIpac=0, sumEfTint=0, sumEfRep=0, sumDias=0, cntDias=0, sumReproc=0;
   meses.forEach(k => {
@@ -1347,6 +1398,21 @@ function renderProdKPI() {
     sumReproc += (+r.reproc||0);
   });
 
+  // IPAC — comparação com mesmos meses de 2025 e 2024
+  const ipac25 = mesesIdx.reduce((s,i) => s + (HIST_IPAC[2025]?.[i]||0), 0);
+  const ipac24 = mesesIdx.reduce((s,i) => s + (HIST_IPAC[2024]?.[i]||0), 0);
+  let ipacComp = '';
+  if (mesesIdx.length > 0) {
+    function mkYoy(v26, vPrev, ano) {
+      if (!vPrev) return '';
+      const d = calcDelta(v26, vPrev);
+      if (!d) return '';
+      const clr = d.p >= 0 ? '#3ecf6e' : '#e05252';
+      return '<div style="display:flex;align-items:center;gap:6px;margin-top:4px"><span style="font-family:\'DM Mono\',monospace;font-size:.68rem;color:var(--muted)">vs '+ano+': '+fmtKg(vPrev)+'</span><span style="font-family:\'DM Mono\',monospace;font-size:.72rem;font-weight:700;color:'+clr+'">'+d.txt+'</span></div>';
+    }
+    ipacComp = mkYoy(sumIpac, ipac25, '2025') + mkYoy(sumIpac, ipac24, '2024');
+  }
+
   const avgEfTint = sumEfTint / n;
   const avgEfRep  = sumEfRep / n;
   const avgDias   = cntDias > 0 ? sumDias / cntDias : 0;
@@ -1355,7 +1421,7 @@ function renderProdKPI() {
   function st(ok) { return ok ? '<span class="prod-status ok">OK</span>' : '<span class="prod-status fail">ABAIXO</span>'; }
 
   const KS = [
-    { lb:'IPAC Acum.', v:fmtKg(sumIpac), c:'#008835', extra:'' },
+    { lb:'IPAC Acum.', v:fmtKg(sumIpac), c:'#008835', extra:ipacComp },
     { lb:'Efic. Tinturaria', v:fmtBR(avgEfTint*100,1)+'%', c:'#0076BE', extra:st(avgEfTint>=META_EFIC_TINT) },
     { lb:'Efic. Repasse', v:fmtBR(avgEfRep*100,1)+'%', c:'#FFCB00', extra:st(avgEfRep>=META_EFIC_REP) },
     { lb:'Dias Desenv.', v:avgDias>0?fmtBR(avgDias,1)+' d':'—', c:'#4db3ff', extra:avgDias>0?st(avgDias<=META_DIAS_DEV):'' },
@@ -1412,7 +1478,7 @@ function renderProdDetalhe(idx) {
       '<div class="prod-fields">'+inp('cv',+r.cv||0,'CV (kg)')+inp('co',+r.co||0,'CO (kg)')+inp('pes',+r.pes||0,'PES (kg)')+inp('pac',+r.pac||0,'PAC (kg)')+'</div>' +
       '<div class="prod-result"><span class="prod-result-lbl">IPAC calculado</span><span class="prod-result-val" style="color:'+nivelColor[nivelIpac]+'">'+fmtBR(ipacCalc,2)+' kg</span></div>' +
       '<div class="prod-result" style="border:none;padding-top:4px"><span class="prod-result-lbl">Nível</span>'+badgeNivel(nivelIpac)+'</div>' +
-    '</div><div class="prod-chart-wrap"><canvas id="pchart-ipac"></canvas></div></div></div>' +
+    '</div><div class="prod-chart-wrap"><canvas id="pchart-ipac"></canvas><div id="pchart-ipac-pcts" style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap"></div></div></div></div>' +
 
     // Eficiência Tinturaria
     '<div class="prod-group" style="--pg-c:#0076BE"><div class="prod-group-title" style="color:#0076BE">Eficiência Tinturaria<span>Meta: 90%</span></div>' +
@@ -1479,12 +1545,13 @@ function renderProdCharts(selIdx) {
     const el = document.getElementById(canvasId);
     if (!el) return;
     if (_prodCharts[canvasId]) _prodCharts[canvasId].destroy();
+    const showLegend = datasets.length > 1;
     _prodCharts[canvasId] = new Chart(el.getContext('2d'), {
       type: 'bar',
       data: { labels, datasets },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false },
+        plugins: { legend: { display: showLegend, labels: { color: tc.legend, font: { family: "'DM Mono',monospace", size: 8 }, boxWidth: 8, padding: 6 } },
           tooltip: { backgroundColor: tc.ttBg, borderColor: tc.ttBorder, borderWidth: 1,
             titleColor: tc.ttTitle, bodyColor: tc.ttBody, padding: 8,
             callbacks: { label: ctx => yFmt(ctx.raw) } } },
@@ -1498,6 +1565,13 @@ function renderProdCharts(selIdx) {
 
   // IPAC
   const ipacData = meses.map(k => calcIpac(prodDados[k]));
+  const ipacSel = selMonthPos >= 0 ? ipacData[selMonthPos] : 0;
+
+  // Percentuais do mês selecionado vs cada meta
+  const pctMeta  = METAS_IPAC.meta  > 0 ? (ipacSel / METAS_IPAC.meta * 100) : 0;
+  const pctPlus  = METAS_IPAC.plus  > 0 ? (ipacSel / METAS_IPAC.plus * 100) : 0;
+  const pctSuper = METAS_IPAC.super > 0 ? (ipacSel / METAS_IPAC.super * 100) : 0;
+
   mkChart('pchart-ipac', [
     { label: 'IPAC', data: ipacData, backgroundColor: barColors('#008835', labels.length), borderRadius: 4 },
     { label: 'Meta', data: labels.map(() => METAS_IPAC.meta), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 },
@@ -1505,18 +1579,35 @@ function renderProdCharts(selIdx) {
     { label: 'Super', data: labels.map(() => METAS_IPAC.super), type: 'line', borderColor: '#FFCB00', borderWidth: 1, borderDash: [3,3], backgroundColor: 'transparent', pointRadius: 0 }
   ], v => fmtBR(v, 0) + ' kg');
 
+  // Badges de % abaixo do gráfico
+  const pctsEl = document.getElementById('pchart-ipac-pcts');
+  if (pctsEl && ipacSel > 0) {
+    function pctBadge(label, pct, color) {
+      const ok = pct >= 100;
+      const opacity = ok ? '1' : '.5';
+      return '<span style="font-family:\'DM Mono\',monospace;font-size:.62rem;font-weight:'+(ok?'700':'500')+';padding:3px 8px;border-radius:4px;border:1.5px solid '+(ok?color:color+'44')+';background:'+(ok?color+'22':color+'08')+';color:'+color+';opacity:'+opacity+'">'+label+' '+fmtBR(pct,1)+'%</span>';
+    }
+    pctsEl.innerHTML = pctBadge('Meta', pctMeta, '#3ecf6e') + pctBadge('Plus', pctPlus, '#4db3ff') + pctBadge('Super', pctSuper, '#FFCB00');
+  } else if (pctsEl) {
+    pctsEl.innerHTML = '';
+  }
+
   // Eficiência Tinturaria
   const tintData = meses.map(k => (+(prodDados[k].efTintMedia || 0)) * 100);
+  const tintAvg = tintData.length > 0 ? tintData.reduce((a,b)=>a+b,0)/tintData.length : 0;
   mkChart('pchart-tint', [
     { label: 'Efic. Tint.', data: tintData, backgroundColor: condColors(tintData, 90, '#0076BE', '#e05252', true), borderRadius: 4 },
-    { label: 'Meta 90%', data: labels.map(() => 90), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 }
+    { label: 'Meta 90%', data: labels.map(() => 90), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 },
+    { label: 'Média '+fmtBR(tintAvg,1)+'%', data: labels.map(() => tintAvg), type: 'line', borderColor: '#0076BE', borderWidth: 1.5, borderDash: [8,4], backgroundColor: 'transparent', pointRadius: 0 }
   ], v => fmtBR(v, 1) + '%');
 
   // Eficiência Repasse
   const repData = meses.map(k => (+(prodDados[k].efRepMedia || 0)) * 100);
+  const repAvg = repData.length > 0 ? repData.reduce((a,b)=>a+b,0)/repData.length : 0;
   mkChart('pchart-rep', [
     { label: 'Efic. Rep.', data: repData, backgroundColor: condColors(repData, 75, '#FFCB00', '#e05252', true), borderRadius: 4 },
-    { label: 'Meta 75%', data: labels.map(() => 75), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 }
+    { label: 'Meta 75%', data: labels.map(() => 75), type: 'line', borderColor: '#3ecf6e', borderWidth: 1.5, borderDash: [4,3], backgroundColor: 'transparent', pointRadius: 0 },
+    { label: 'Média '+fmtBR(repAvg,1)+'%', data: labels.map(() => repAvg), type: 'line', borderColor: '#FFCB00', borderWidth: 1.5, borderDash: [8,4], backgroundColor: 'transparent', pointRadius: 0 }
   ], v => fmtBR(v, 1) + '%');
 
   // Dias Desenvolvimento
@@ -1627,7 +1718,7 @@ window.salvarMesProd = () => {
     efRepMedia:  pctToDecimal(getProdVal('efRepMedia')),
     diasMedia:   getProdVal('diasMedia'),
     op30:        !!prev.op30,
-    reproc:      pctToDecimal(getProdVal('reproc')),
+    reproc:      getProdVal('reproc') / 100, // Usuário digita 0,88 → armazena 0.0088
     reprocQtde:  getProdVal('reprocQtde')
   };
 
@@ -1734,8 +1825,8 @@ const STATUS_CONFIG = {
   desenvolvida: { lb:'Desenvolvida',     cor:'#0076BE', bg:'rgba(0,118,190,.15)' },
   enviada:      { lb:'Enviada',          cor:'#8E8E93', bg:'rgba(142,142,147,.15)' },
   em_ajuste:    { lb:'Em Ajuste',        cor:'#e07820', bg:'rgba(224,120,32,.15)' },
-  reenviada:    { lb:'Reenviada',        cor:'#8E8E93', bg:'rgba(142,142,147,.15)' },
-  aprovada:     { lb:'Aprovada',         cor:'#008835', bg:'rgba(0,136,53,.15)' }
+  aprovada:     { lb:'Aprovada',         cor:'#008835', bg:'rgba(0,136,53,.15)' },
+  cancelada:    { lb:'Cancelada',        cor:'#636366', bg:'rgba(99,99,102,.15)' }
 };
 
 /** Calcula dias úteis ativos de desenvolvimento de uma cor */
@@ -1760,11 +1851,8 @@ function calcDiasAtivos(cor) {
         // Retoma contagem
         inicioAtivo = ev.data;
         break;
-      case 'reenviada':
-        // Pausa novamente
-        if (inicioAtivo) { total += diasUteis(inicioAtivo, ev.data); inicioAtivo = null; }
-        break;
       case 'aprovada':
+      case 'cancelada':
         // Se ainda estava ativo, soma
         if (inicioAtivo) { total += diasUteis(inicioAtivo, ev.data); inicioAtivo = null; }
         break;
@@ -1795,22 +1883,22 @@ function corTemOp30(cor) {
 
 /** Próximas ações possíveis por status */
 function acoesPossiveis(status) {
+  const cancelar = { acao:'cancelada', lb:'Cancelar', cls:'danger' };
   switch(status) {
-    case 'entrada':      return [{ acao:'desenvolvida', lb:'Desenvolvida', cls:'primary' }];
+    case 'entrada':      return [{ acao:'desenvolvida', lb:'Desenvolvida', cls:'primary' }, cancelar];
     case 'desenvolvida': return [
       { acao:'aprovada', lb:'Aprovar (equipe)', cls:'primary' },
-      { acao:'enviada', lb:'Enviar ao cliente', cls:'' }
+      { acao:'enviada', lb:'Enviar ao cliente', cls:'' },
+      cancelar
     ];
     case 'enviada':      return [
       { acao:'aprovada', lb:'Cliente aprovou', cls:'primary' },
-      { acao:'em_ajuste', lb:'Cliente rejeitou', cls:'danger' }
+      { acao:'em_ajuste', lb:'Cliente rejeitou', cls:'danger' },
+      cancelar
     ];
-    case 'em_ajuste':    return [{ acao:'desenvolvida', lb:'Desenvolvida', cls:'primary' }];
-    case 'reenviada':    return [
-      { acao:'aprovada', lb:'Cliente aprovou', cls:'primary' },
-      { acao:'em_ajuste', lb:'Cliente rejeitou', cls:'danger' }
-    ];
+    case 'em_ajuste':    return [{ acao:'desenvolvida', lb:'Desenvolvida', cls:'primary' }, cancelar];
     case 'aprovada':     return [];
+    case 'cancelada':    return [];
     default:             return [];
   }
 }
@@ -1824,15 +1912,17 @@ function renderCores() {
 
 function renderCoresKPI() {
   const todas = Object.values(coresData);
-  const total = todas.length;
-  const abertas = todas.filter(c => c.status !== 'aprovada').length;
-  const aprovadas = todas.filter(c => c.status === 'aprovada').length;
-  const diasArr = todas.filter(c => c.status === 'aprovada').map(c => calcDiasAtivos(c));
+  const ativas = todas.filter(c => c.status !== 'cancelada');
+  const total = ativas.length;
+  const abertas = ativas.filter(c => c.status !== 'aprovada').length;
+  const aprovadas = ativas.filter(c => c.status === 'aprovada').length;
+  const canceladas = todas.filter(c => c.status === 'cancelada').length;
+  const diasArr = ativas.filter(c => c.status === 'aprovada').map(c => calcDiasAtivos(c));
   const mediaAprov = diasArr.length > 0 ? diasArr.reduce((a,b) => a+b, 0) / diasArr.length : 0;
-  const op30count = todas.filter(c => corTemOp30(c) && c.status !== 'aprovada').length;
+  const op30count = ativas.filter(c => corTemOp30(c) && c.status !== 'aprovada').length;
 
   const KS = [
-    { lb:'Total Cores', v:total, c:'#0076BE' },
+    { lb:'Total Ativas', v:total, c:'#0076BE' },
     { lb:'Em Aberto', v:abertas, c:'#FFCB00' },
     { lb:'Aprovadas', v:aprovadas, c:'#008835' },
     { lb:'Média Aprovadas', v:mediaAprov > 0 ? fmtBR(mediaAprov,1)+' d' : '—', c:mediaAprov > 0 && mediaAprov <= 10 ? '#008835' : '#e05252' },
@@ -1840,18 +1930,22 @@ function renderCoresKPI() {
 
   document.getElementById('coresKpiStrip').innerHTML = KS.map(k =>
     '<div class="kpi" style="--kc:'+k.c+'"><div class="kpi-lbl"><div class="kpi-dot"></div>'+k.lb+'</div><div class="kpi-val">'+k.v+'</div></div>'
-  ).join('') + (op30count > 0 ? '<div class="kpi" style="--kc:var(--red)"><div class="kpi-lbl"><div class="kpi-dot"></div>OP > 30 dias</div><div class="kpi-val" style="color:var(--red)">'+op30count+'</div></div>' : '');
+  ).join('')
+  + (canceladas > 0 ? '<div class="kpi" style="--kc:#636366"><div class="kpi-lbl"><div class="kpi-dot"></div>Canceladas</div><div class="kpi-val" style="color:#636366">'+canceladas+'</div></div>' : '')
+  + (op30count > 0 ? '<div class="kpi" style="--kc:var(--red)"><div class="kpi-lbl"><div class="kpi-dot"></div>OP > 30 dias</div><div class="kpi-val" style="color:var(--red)">'+op30count+'</div></div>' : '');
 }
 
 function renderCoresLista() {
   const fStatus = document.getElementById('filtroStatus')?.value || '';
   const fMes = document.getElementById('filtroMes')?.value;
+  const fFibra = document.getElementById('filtroFibra')?.value || '';
   const fCliente = (document.getElementById('filtroCliente')?.value || '').toLowerCase();
 
   let lista = Object.entries(coresData).map(([id, c]) => ({ id, ...c }));
 
   // Filtros
   if (fStatus) lista = lista.filter(c => c.status === fStatus);
+  if (fFibra) lista = lista.filter(c => c.fibra === fFibra);
   if (fMes !== '' && fMes !== undefined && fMes !== null) {
     const mes = parseInt(fMes);
     lista = lista.filter(c => {
@@ -1859,7 +1953,7 @@ function renderCoresLista() {
       return entrada && new Date(entrada.data + 'T00:00:00').getMonth() === mes;
     });
   }
-  if (fCliente) lista = lista.filter(c => (c.cliente||'').toLowerCase().includes(fCliente));
+  if (fCliente) lista = lista.filter(c => ((c.cliente||'')+(c.nome||'')+(c.codigo||'')).toLowerCase().includes(fCliente));
 
   // Ordenar: abertas primeiro, depois por data entrada desc
   lista.sort((a, b) => {
@@ -1885,9 +1979,11 @@ function renderCoresLista() {
     const entrada = (c.historico||[]).find(h => h.acao === 'entrada');
     const entradaFmt = entrada ? entrada.data.split('-').reverse().join('/') : '—';
 
-    const diasColor = c.status === 'aprovada'
-      ? (dias <= 10 ? '#3ecf6e' : 'var(--red)')
-      : (dias <= 10 ? 'var(--text)' : 'var(--red)');
+    const diasColor = c.status === 'cancelada'
+      ? '#636366'
+      : c.status === 'aprovada'
+        ? (dias <= 10 ? '#3ecf6e' : 'var(--red)')
+        : (dias <= 10 ? 'var(--text)' : 'var(--red)');
 
     const acoesHTML = acoes.map(a =>
       '<button class="cor-act-btn '+a.cls+'" onclick="event.stopPropagation();corAcao(\''+c.id+'\',\''+a.acao+'\')">'+a.lb+'</button>'
@@ -1902,19 +1998,18 @@ function renderCoresLista() {
 
     return '<div class="cor-card" style="--cor-status:'+sc.cor+'" onclick="toggleCorHist(\''+c.id+'\')">' +
       '<div class="cor-top">' +
-        '<div><span class="cor-codigo">'+c.codigo+'</span></div>' +
+        '<div><span class="cor-codigo">'+c.codigo+'</span>'+(c.nome?' <span style="font-size:.76rem;color:var(--muted);font-weight:400;margin-left:6px">'+c.nome+'</span>':'')+(c.fibra?' <span style="font-family:\'DM Mono\',monospace;font-size:.58rem;font-weight:600;padding:2px 6px;border-radius:3px;background:rgba(0,118,190,.12);color:#4db3ff;margin-left:6px">'+c.fibra+'</span>':'')+'</div>' +
         '<span class="cor-status-badge" style="color:'+sc.cor+';background:'+sc.bg+'">'+sc.lb+'</span>' +
       '</div>' +
       '<div class="cor-info">' +
         '<span>'+c.cliente+'</span>' +
-        '<span>OP '+c.op+'</span>' +
         '<span>Entrada: '+entradaFmt+'</span>' +
         '<span class="cor-dias" style="color:'+diasColor+'">'+dias+' dia'+(dias!==1?'s':'')+'</span>' +
         (op30 ? '<span style="color:var(--red);font-weight:700">OP>30d</span>' : '') +
       '</div>' +
       '<div class="cor-bottom">' +
         '<div class="cor-actions">'+acoesHTML+
-          (c.status !== 'aprovada' ? '<button class="cor-act-btn" onclick="event.stopPropagation();editarCor(\''+c.id+'\')">Editar</button>' : '') +
+          (c.status !== 'aprovada' && c.status !== 'cancelada' ? '<button class="cor-act-btn" onclick="event.stopPropagation();editarCor(\''+c.id+'\')">Editar</button>' : '') +
           '<button class="cor-act-btn danger" onclick="event.stopPropagation();excluirCor(\''+c.id+'\')">Excluir</button>' +
         '</div>' +
       '</div>' +
@@ -1934,8 +2029,9 @@ window.novaCor = () => {
   corEditId = null;
   document.getElementById('corModalTitle').textContent = 'Nova Cor';
   document.getElementById('corCodigo').value = '';
+  document.getElementById('corNome').value = '';
+  document.getElementById('corFibra').value = '';
   document.getElementById('corCliente').value = '';
-  document.getElementById('corOP').value = '';
   document.getElementById('corObs').value = '';
   document.getElementById('corDataEntrada').value = hoje();
   document.getElementById('corModal').classList.add('open');
@@ -1947,8 +2043,9 @@ window.editarCor = id => {
   corEditId = id;
   document.getElementById('corModalTitle').textContent = 'Editar Cor';
   document.getElementById('corCodigo').value = c.codigo || '';
+  document.getElementById('corNome').value = c.nome || '';
+  document.getElementById('corFibra').value = c.fibra || '';
   document.getElementById('corCliente').value = c.cliente || '';
-  document.getElementById('corOP').value = c.op || '';
   document.getElementById('corObs').value = c.obs || '';
   const entrada = (c.historico||[]).find(h => h.acao === 'entrada');
   document.getElementById('corDataEntrada').value = entrada ? entrada.data : '';
@@ -1962,29 +2059,28 @@ window.fecharCorModal = () => {
 
 window.salvarCor = () => {
   const codigo = document.getElementById('corCodigo').value.trim();
+  const nome = document.getElementById('corNome').value.trim();
+  const fibra = document.getElementById('corFibra').value;
   const cliente = document.getElementById('corCliente').value.trim();
-  const op = document.getElementById('corOP').value.trim();
   const obs = document.getElementById('corObs').value.trim();
   const dataEntrada = document.getElementById('corDataEntrada').value;
 
-  if (!codigo) { toast('Informe o código da cor', 'err'); return; }
+  if (!codigo) { toast('Informe a referência da cor', 'err'); return; }
   if (!dataEntrada) { toast('Informe a data de entrada', 'err'); return; }
 
   if (corEditId) {
-    // Editando
     coresData[corEditId].codigo = codigo;
+    coresData[corEditId].nome = nome;
+    coresData[corEditId].fibra = fibra;
     coresData[corEditId].cliente = cliente;
-    coresData[corEditId].op = op;
     coresData[corEditId].obs = obs;
-    // Atualiza data de entrada no histórico
     const hist = coresData[corEditId].historico || [];
     const entIdx = hist.findIndex(h => h.acao === 'entrada');
     if (entIdx >= 0) hist[entIdx].data = dataEntrada;
   } else {
-    // Nova cor
     const id = 'cor_' + Date.now();
     coresData[id] = {
-      codigo, cliente, op, obs,
+      codigo, nome, fibra, cliente, obs,
       status: 'entrada',
       historico: [{ acao:'entrada', data:dataEntrada }]
     };
@@ -2003,8 +2099,12 @@ window.corAcao = (id, acao) => {
   // Para ações que precisam de data, usa hoje
   const dataAcao = hoje();
 
-  // Se está em desenvolvida e vai para enviada, registra ambas
-  if (acao === 'desenvolvida' && c.status === 'em_ajuste') {
+  // Cancelar requer confirmação
+  if (acao === 'cancelada') {
+    if (!confirm('Cancelar a cor ' + c.codigo + '?\nEla será desconsiderada dos cálculos.')) return;
+    c.historico.push({ acao:'cancelada', data:dataAcao });
+    c.status = 'cancelada';
+  } else if (acao === 'desenvolvida' && c.status === 'em_ajuste') {
     // Retornou do ajuste, desenvolvida novamente
     c.historico.push({ acao:'desenvolvida', data:dataAcao });
     c.status = 'desenvolvida';
