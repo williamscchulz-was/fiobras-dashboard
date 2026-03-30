@@ -293,6 +293,12 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .cor-act-btn.primary:hover{background:var(--green2);}
 .cor-hist{margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);line-height:2;}
 .cor-empty{text-align:center;padding:40px 20px;color:var(--muted2);font-size:.82rem;}
+.prazo-mes{display:flex;flex-direction:column;align-items:center;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);min-width:64px;}
+.prazo-mes-lbl{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.prazo-mes-val{font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;line-height:1;}
+.prazo-mes-n{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted2);margin-top:3px;}
+.prazo-mes.ok{border-color:rgba(0,136,53,.35);}.prazo-mes.fail{border-color:rgba(192,57,43,.3);}
+[data-theme="dark"] .prazo-mes{box-shadow:none;}
 .modal{background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;padding:28px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.25);}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center;}
 .modal-bg.open{display:flex;}
@@ -455,6 +461,8 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 <div class="wrap">
   <div class="sh"><h2>Desenvolvimento de Cor 2026</h2><div class="sh-line"></div></div>
   <div class="kpi-strip" id="coresKpiStrip"></div>
+  <div class="sh"><h2>Prazo mensal</h2><div class="sh-line"></div></div>
+  <div id="coresMesesPrazo" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px"></div>
   <div class="sh"><h2>Filtros</h2><div class="sh-line"></div></div>
   <div class="cor-filtros" id="corFiltros">
     <select class="login-select" id="filtroStatus" onchange="renderCoresLista()" style="width:auto;min-width:140px;padding:9px 36px 9px 12px;font-size:.72rem">
@@ -1907,7 +1915,52 @@ function acoesPossiveis(status) {
 
 function renderCores() {
   renderCoresKPI();
+  renderCoresMesesPrazo();
   renderCoresLista();
+}
+
+/** Calcula e renderiza prazo médio por mês (cores aprovadas pela data de aprovação) */
+function renderCoresMesesPrazo() {
+  const el = document.getElementById('coresMesesPrazo');
+  if (!el) return;
+
+  // Agrupa cores aprovadas por mês de aprovação
+  const porMes = {}; // { 0: [dias1, dias2], 1: [...], ... }
+  Object.values(coresData).forEach(c => {
+    if (c.status !== 'aprovada') return;
+    const aprovEvt = (c.historico || []).filter(h => h.acao === 'aprovada').pop();
+    if (!aprovEvt) return;
+    const mesAprov = new Date(aprovEvt.data + 'T00:00:00').getMonth();
+    const dias = calcDiasAtivos(c);
+    if (!porMes[mesAprov]) porMes[mesAprov] = [];
+    porMes[mesAprov].push(dias);
+  });
+
+  // Renderiza os 12 meses (só os que têm dados)
+  const mesesComDados = Object.keys(porMes).map(Number).sort((a,b) => a - b);
+  if (mesesComDados.length === 0) {
+    el.innerHTML = '<span style="font-size:.72rem;color:var(--muted2)">Nenhuma cor aprovada ainda</span>';
+    return;
+  }
+
+  el.innerHTML = mesesComDados.map(m => {
+    const arr = porMes[m];
+    const media = arr.reduce((a,b) => a + b, 0) / arr.length;
+    const ok = media <= META_DIAS_DEV;
+    const temOp30 = Object.values(coresData).some(c => {
+      if (c.status !== 'aprovada') return false;
+      const aprov = (c.historico || []).filter(h => h.acao === 'aprovada').pop();
+      if (!aprov) return false;
+      return new Date(aprov.data + 'T00:00:00').getMonth() === m && corTemOp30(c);
+    });
+
+    return '<div class="prazo-mes '+(ok && !temOp30 ? 'ok' : 'fail')+'">' +
+      '<span class="prazo-mes-lbl">' + MONTHS[m] + '</span>' +
+      '<span class="prazo-mes-val" style="color:'+(ok && !temOp30 ? '#3ecf6e' : 'var(--red)')+'">'+fmtBR(media, 1)+' d</span>' +
+      '<span class="prazo-mes-n">' + arr.length + ' cor'+(arr.length>1?'es':'')+'</span>' +
+      (temOp30 ? '<span style="font-size:.48rem;color:var(--red);margin-top:2px">OP>30d</span>' : '') +
+    '</div>';
+  }).join('');
 }
 
 function renderCoresKPI() {
