@@ -317,6 +317,24 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .modal-bg.open{display:flex;}
 [data-theme="dark"] .cor-card{box-shadow:none;}
 
+/* ── Print / PDF ── */
+@media print {
+  body { background:#fff !important; color:#1A2E1E !important; }
+  .hdr,.tabs,.splash,.login-screen,.toast,.footer,
+  .cor-filtros,.sh,#coresKpiStrip,#coresMesesPrazo,
+  #coresLista,#corModal,.panel { display:none !important; }
+  #relModal { position:static !important; background:none !important; backdrop-filter:none !important; display:block !important; }
+  #relModal .modal { box-shadow:none !important; border:none !important; width:100% !important; max-width:100% !important; max-height:none !important; padding:0 !important; }
+  #relModal .modal > div:last-child { display:none !important; }
+  #app { display:block !important; }
+  .rel-row { border-color:#ddd !important; }
+  .rel-resumo { border-color:#ddd !important; background:#f9f9f9 !important; }
+  .rel-section-title { border-color:#ddd !important; }
+  .print-header { display:block !important; }
+  @page { margin:15mm; size:A4; }
+}
+.print-header { display:none; }
+
 /* ── Login screen ── */
 .login-screen{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 30% 20%,#00a040 0%,#008835 40%,#006020 100%);transition:opacity .5s,visibility .5s;}
@@ -547,9 +565,14 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
           <option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
         </select>
       </div>
+      <div class="print-header" style="margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #008835">
+        <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:800;color:#008835;letter-spacing:1px">Fiobras</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;color:#1A2E1E;margin-top:4px" id="relPrintTitle">Relatório Desenvolvimento de Cor</div>
+      </div>
       <div id="relConteudo" style="overflow-y:auto;flex:1"></div>
       <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
         <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharRelModal()">Fechar</button>
+        <button class="save-btn" style="background:var(--green)" onclick="exportarRelatorioPDF()">Exportar PDF</button>
       </div>
     </div>
   </div>
@@ -2241,6 +2264,12 @@ window.abrirRelatorio = () => {
 
 window.fecharRelModal = () => {
   document.getElementById('relModal').classList.remove('open');
+};
+
+window.exportarRelatorioPDF = () => {
+  const mes = parseInt(document.getElementById('relMes').value);
+  document.getElementById('relPrintTitle').textContent = 'Relatório Desenvolvimento de Cor — ' + MONTHS[mes] + '/2026';
+  window.print();
 };
 
 window.renderRelatorio = () => {
