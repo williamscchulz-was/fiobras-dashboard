@@ -299,6 +299,19 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .prazo-mes-n{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted2);margin-top:3px;}
 .prazo-mes.ok{border-color:rgba(0,136,53,.35);}.prazo-mes.fail{border-color:rgba(192,57,43,.3);}
 [data-theme="dark"] .prazo-mes{box-shadow:none;}
+.rel-section{margin-bottom:20px;}
+.rel-section-title{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding-bottom:10px;margin-bottom:12px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.rel-section-title .rel-count{font-family:'DM Mono',monospace;font-size:.62rem;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);}
+.rel-row{display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;font-size:.74rem;align-items:center;}
+.rel-row-ref{font-family:'DM Mono',monospace;font-weight:600;color:var(--text);}
+.rel-row-nome{color:var(--muted);font-size:.68rem;}
+.rel-row-dias{font-family:'DM Mono',monospace;font-weight:700;text-align:right;}
+.rel-row-fibra{font-family:'DM Mono',monospace;font-size:.56rem;font-weight:600;padding:2px 5px;border-radius:3px;background:rgba(0,118,190,.12);color:#4db3ff;display:inline-block;margin-left:6px;}
+.rel-resumo{background:var(--surface2,var(--surface));border:1.5px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;gap:24px;flex-wrap:wrap;}
+.rel-resumo-item{display:flex;flex-direction:column;align-items:center;}
+.rel-resumo-lbl{font-size:.58rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.rel-resumo-val{font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;}
+.rel-empty{font-size:.74rem;color:var(--muted2);padding:8px 0;}
 .modal{background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;padding:28px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.25);}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center;}
 .modal-bg.open{display:flex;}
@@ -491,6 +504,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </select>
     <input class="login-input" id="filtroCliente" oninput="renderCoresLista()" placeholder="Buscar cor, cliente..." style="width:auto;min-width:160px;padding:9px 12px;font-size:.72rem">
     <button class="save-btn" onclick="novaCor()">Nova Cor</button>
+    <button class="save-btn" style="background:var(--blue);box-shadow:0 2px 12px rgba(0,118,190,.25)" onclick="abrirRelatorio()">Relatório</button>
   </div>
   <div class="sh" style="margin-top:16px"><h2>Cores</h2><div class="sh-line"></div><span id="coresCount" style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted)"></span></div>
   <div id="coresLista"></div>
@@ -518,6 +532,24 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
         <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharCorModal()">Cancelar</button>
         <button class="save-btn" onclick="salvarCor()">Salvar</button>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Relatório -->
+  <div class="modal-bg" id="relModal">
+    <div class="modal" style="width:680px;max-height:85vh;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:.9rem;font-weight:700;color:var(--text)">Relatório Desenvolvimento de Cor</div>
+        <select class="login-select" id="relMes" onchange="renderRelatorio()" style="width:auto;min-width:120px;padding:8px 36px 8px 12px;font-size:.72rem">
+          <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option>
+          <option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option>
+          <option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option>
+          <option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
+        </select>
+      </div>
+      <div id="relConteudo" style="overflow-y:auto;flex:1"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+        <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharRelModal()">Fechar</button>
       </div>
     </div>
   </div>
@@ -2183,11 +2215,115 @@ window.corAcao = (id, acao) => {
 window.excluirCor = id => {
   const c = coresData[id];
   if (!c) return;
+
+  // Produção precisa de senha admin para excluir
+  if (window._userRole !== 'admin') {
+    const senha = prompt('Senha do administrador para excluir:');
+    if (senha !== 'admin') { toast('Senha incorreta', 'err'); return; }
+  }
+
   if (!confirm('Excluir a cor ' + c.codigo + '?')) return;
   delete coresData[id];
   coresSave(coresData);
   toast('Cor excluída', 'ok');
   renderCores();
+};
+
+// ── Relatório ────────────────────────────────────────────────────────────
+
+window.abrirRelatorio = () => {
+  // Default to current month
+  const mesAtual = new Date().getMonth();
+  document.getElementById('relMes').value = mesAtual;
+  document.getElementById('relModal').classList.add('open');
+  renderRelatorio();
+};
+
+window.fecharRelModal = () => {
+  document.getElementById('relModal').classList.remove('open');
+};
+
+window.renderRelatorio = () => {
+  const mes = parseInt(document.getElementById('relMes').value);
+  const mesNome = MONTHS[mes];
+  const todas = Object.values(coresData);
+
+  /** Retorna mês de aprovação de uma cor */
+  function getMesAprovacao(c) {
+    const aprov = (c.historico || []).filter(h => h.acao === 'aprovada').pop();
+    return aprov ? new Date(aprov.data + 'T00:00:00').getMonth() : -1;
+  }
+  /** Retorna mês de cancelamento */
+  function getMesCancelamento(c) {
+    const canc = (c.historico || []).filter(h => h.acao === 'cancelada').pop();
+    return canc ? new Date(canc.data + 'T00:00:00').getMonth() : -1;
+  }
+  /** Retorna mês de entrada */
+  function getMesEntrada(c) {
+    const ent = (c.historico || []).find(h => h.acao === 'entrada');
+    return ent ? new Date(ent.data + 'T00:00:00').getMonth() : -1;
+  }
+
+  // 1. Finalizadas no mês (aprovadas com data de aprovação neste mês)
+  const finalizadas = todas.filter(c => c.status === 'aprovada' && getMesAprovacao(c) === mes);
+
+  // 2. Canceladas no mês
+  const canceladas = todas.filter(c => c.status === 'cancelada' && getMesCancelamento(c) === mes);
+
+  // 3. Em andamento neste mês (ativas, que entraram até este mês e não finalizaram antes dele)
+  const emAndamento = todas.filter(c => {
+    if (c.status === 'aprovada' && getMesAprovacao(c) < mes) return false;
+    if (c.status === 'cancelada' && getMesCancelamento(c) < mes) return false;
+    if (getMesEntrada(c) > mes) return false;
+    if (c.status === 'aprovada' || c.status === 'cancelada') return false;
+    return true;
+  });
+
+  // Média de dias das finalizadas
+  const diasFin = finalizadas.map(c => calcDiasAtivos(c));
+  const mediaFin = diasFin.length > 0 ? diasFin.reduce((a,b) => a+b, 0) / diasFin.length : 0;
+  const temOp30Fin = finalizadas.some(c => corTemOp30(c));
+
+  function mkRow(c, showDias) {
+    const dias = calcDiasAtivos(c);
+    const diasOk = dias <= META_DIAS_DEV;
+    return '<div class="rel-row">' +
+      '<div><span class="rel-row-ref">'+c.codigo+'</span>'+(c.nome?' <span class="rel-row-nome">'+c.nome+'</span>':'')+(c.fibra?'<span class="rel-row-fibra">'+c.fibra+'</span>':'')+'</div>' +
+      '<div style="font-size:.7rem;color:var(--muted)">'+c.cliente+'</div>' +
+      (showDias ? '<div class="rel-row-dias" style="color:'+(diasOk?'#3ecf6e':'var(--red)')+'">'+dias+' d</div>' : '<div></div>') +
+    '</div>';
+  }
+
+  let html = '';
+
+  // Resumo
+  html += '<div class="rel-resumo">' +
+    '<div class="rel-resumo-item"><span class="rel-resumo-lbl">Finalizadas</span><span class="rel-resumo-val" style="color:#008835">'+finalizadas.length+'</span></div>' +
+    '<div class="rel-resumo-item"><span class="rel-resumo-lbl">Prazo médio</span><span class="rel-resumo-val" style="color:'+(mediaFin>0&&mediaFin<=10&&!temOp30Fin?'#3ecf6e':'var(--red)')+'">'+
+      (mediaFin > 0 ? fmtBR(mediaFin,1)+' d' : '—')+'</span></div>' +
+    '<div class="rel-resumo-item"><span class="rel-resumo-lbl">Canceladas</span><span class="rel-resumo-val" style="color:#636366">'+canceladas.length+'</span></div>' +
+    '<div class="rel-resumo-item"><span class="rel-resumo-lbl">Em andamento</span><span class="rel-resumo-val" style="color:#FFCB00">'+emAndamento.length+'</span></div>' +
+    (temOp30Fin ? '<div class="rel-resumo-item"><span class="rel-resumo-lbl">OP>30d</span><span class="rel-resumo-val" style="color:var(--red)">Sim</span></div>' : '') +
+    '<div class="rel-resumo-item"><span class="rel-resumo-lbl">Prêmio</span><span class="rel-resumo-val" style="color:'+(mediaFin>0&&mediaFin<=10&&!temOp30Fin?'#3ecf6e':'var(--red)')+'">'+
+      (mediaFin>0&&mediaFin<=10&&!temOp30Fin?'R$ 100':'—')+'</span></div>' +
+  '</div>';
+
+  // Seção 1: Finalizadas
+  html += '<div class="rel-section"><div class="rel-section-title" style="color:#008835">Cores Finalizadas — '+mesNome+'<span class="rel-count">'+finalizadas.length+' cor'+(finalizadas.length!==1?'es':'')+'</span></div>' +
+    (finalizadas.length > 0 ? finalizadas.map(c => mkRow(c, true)).join('') : '<div class="rel-empty">Nenhuma cor finalizada em '+mesNome+'</div>') +
+  '</div>';
+
+  // Seção 2: Canceladas
+  html += '<div class="rel-section"><div class="rel-section-title" style="color:#636366">Cores Canceladas — '+mesNome+'<span class="rel-count">'+canceladas.length+'</span></div>' +
+    (canceladas.length > 0 ? canceladas.map(c => mkRow(c, true)).join('') : '<div class="rel-empty">Nenhuma cor cancelada em '+mesNome+'</div>') +
+  '</div>';
+
+  // Seção 3: Em andamento
+  html += '<div class="rel-section"><div class="rel-section-title" style="color:#FFCB00">Cores em Andamento<span class="rel-count">'+emAndamento.length+'</span></div>' +
+    (emAndamento.length > 0 ? emAndamento.map(c => mkRow(c, true)).join('') : '<div class="rel-empty">Nenhuma cor em andamento</div>') +
+  '</div>';
+
+  document.getElementById('relConteudo').innerHTML = html;
 };
 
 // ── Boot ─────────────────────────────────────────────────────────────────
