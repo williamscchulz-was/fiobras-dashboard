@@ -62,8 +62,11 @@
   --shadow-sm:none; --shadow-md:none;
   color-scheme:dark;
 }
+/* ── Base & Reset ── */
 *{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+
+/* ── Header ── */
 .hdr{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#008835 0%,#007030 100%);padding:0 28px 0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.2);}
 .hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#006020,#FFCB00,#0076BE);opacity:.5;}
 .hdr-left{display:flex;align-items:baseline;gap:10px;}
@@ -73,6 +76,8 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .hdr-pill{font-family:'DM Mono',monospace;font-size:.56rem;font-weight:500;color:rgba(255,255,255,.85);background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.30);padding:3px 9px;border-radius:5px;}
 .hdr-icon-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.18);border-radius:50%;cursor:pointer;color:rgba(255,255,255,.7);transition:all .2s;}
 .hdr-icon-btn:hover{background:rgba(255,255,255,.22);color:#fff;}
+
+/* ── Tabs & Layout ── */
 .tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;position:sticky;top:52px;z-index:99;}
 .tab-btn{padding:14px 24px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-bottom:-1px;}
 .tab-btn:hover{color:var(--text);}.tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
@@ -180,6 +185,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .yc-growth{margin-top:7px;display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:.75rem;font-weight:600;}
 .chart-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:22px 22px 14px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
 .chart-lbl{font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+/* ── Toast ── */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:10000;padding:12px 24px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:600;color:#fff;opacity:0;pointer-events:none;transition:transform .35s cubic-bezier(.34,1.2,.64,1),opacity .25s;box-shadow:0 6px 20px rgba(0,0,0,.3);white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.ok{background:#008835;}.toast.err{background:#C0392B;}.toast.warn{background:#e07820;}
@@ -412,7 +418,7 @@ function applyTheme(dark){
 function toggleTheme(){
   applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?false:true);
   // Re-render charts if historic tab is active
-  if(document.getElementById('panel-historico')?.classList.contains('active')) rHist();
+  if(document.getElementById('panel-historico')?.classList.contains('active')) renderHistorico();
 }
 
 // ── PWA Manifest ─────────────────────────────────────────────────────────
@@ -473,8 +479,7 @@ const metasRef = ref(db, 'metas-2026');
 onValue(metasRef, (snapshot) => {
   const data = snapshot.val();
   if (data) {
-    window._RES = data;
-    RES = data;
+    resultados = data;
     render();
   }
 });
@@ -484,286 +489,584 @@ window._salvarFirebase = (d) => set(metasRef, d).catch(e => console.error('Erro 
 window._firebaseReady = true;
 </script>
 <script>
-const SK='fiobras_metas_2026_v3';
-function load(){try{const r=localStorage.getItem(SK);return r?JSON.parse(r):null;}catch(e){return null;}}
-function save(d){
-  // Salva no Firebase se disponível, senão localStorage como fallback
-  if(window._salvarFirebase){window._salvarFirebase(d);}
-  else{try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
+// ═══════════════════════════════════════════════════════════════════════════
+// FIOBRAS DASHBOARD — LÓGICA PRINCIPAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Persistência ─────────────────────────────────────────────────────────
+const STORAGE_KEY = 'fiobras_metas_2026_v3';
+
+function load() {
+  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; }
+  catch(e) { return null; }
+}
+
+function save(data) {
+  if (window._salvarFirebase) { window._salvarFirebase(data); }
+  else { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {} }
   return true;
 }
-const MONTHS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const MF={
-  super:[2550000,3548360,3548360,3548360,3548360,3548360,3548360,3548360,3548360,3548360,3548360,2000000],
-  plus: [2300000,3347950,3347950,3347950,3347950,3347950,3347950,3347950,3347950,3347950,3347950,1900000],
-  meta: [2000000,3250037,3250037,3250037,3250037,3250037,3250037,3250037,3250037,3250037,3250037,1700000],
-  anual:{super:40033596,plus:37679496,meta:36200371}
+
+// ── Constantes ───────────────────────────────────────────────────────────
+const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+// Metas mensais — Receita Bruta (por nível)
+const METAS_FAT = {
+  super: [2550000,3548360,3548360,3548360,3548360,3548360,3548360,3548360,3548360,3548360,3548360,2000000],
+  plus:  [2300000,3347950,3347950,3347950,3347950,3347950,3347950,3347950,3347950,3347950,3347950,1900000],
+  meta:  [2000000,3250037,3250037,3250037,3250037,3250037,3250037,3250037,3250037,3250037,3250037,1700000],
+  anual: { super:40033596, plus:37679496, meta:36200371 }
 };
-const ML={
-  super:[250000,457686,457686,457686,457686,457686,457686,457686,457686,457686,457686,200000],
-  plus: [225000,445198,445198,445198,445198,445198,445198,445198,445198,445198,445198,160000],
-  meta: [220000,427711,427711,427711,427711,427711,427711,427711,427711,427711,427711,150000],
-  anual:{super:5026863,plus:4836985,meta:4647107}
+
+// Metas mensais — Lucro Líquido Ajustado (por nível)
+const METAS_LL = {
+  super: [250000,457686,457686,457686,457686,457686,457686,457686,457686,457686,457686,200000],
+  plus:  [225000,445198,445198,445198,445198,445198,445198,445198,445198,445198,445198,160000],
+  meta:  [220000,427711,427711,427711,427711,427711,427711,427711,427711,427711,427711,150000],
+  anual: { super:5026863, plus:4836985, meta:4647107 }
 };
-const PR={fat:{meta:{m:500,a:2500},plus:{m:1000,a:8000},super:{m:1621,a:15000}},ll:{meta:{m:500,a:2500},plus:{m:1000,a:8000},super:{m:1621,a:20000}}};
-const FAT={2020:[2578587,3357525,2373235,378264,599402,1611463,2652634,2517374,3419674,3428537,3360048,2753904],2021:[3183251,3594025,2824158,2564293,3341145,3098244,4101129,4183084,4577795,4250171,4249018,2757951],2022:[3547190,3958865,4285920,4249236,4023148,4481756,4284731,4202161,3830252,3926030,3483023,1432770],2023:[2643661,3057540,3004829,3029073,3031461,3004804,2799975,3014926,2748249,2835662,2403901,1245281],2024:[2344598,2721966,2766306,2765887,2511011,2402600,2505824,2795743,2596794,2711785,2509602,1343383],2025:[2157410,3068251,3074060,3131016,3104235,3015024,3113103,3042175,3039708,3324191,3025834,1600000]};
-const LA={2020:[-28161,-135174,-655140,-370428,-108607,-221656,363947,-84832,111388,445907,1019689,528410],2021:[-57346,299535,149768,468213,639697,589941,202764,327124,409615,520844,652915,326812],2022:[584806,679504,815375,447914,454080,440843,472873,422718,240300,289809,297183,66823],2023:[291322,341232,322474,282665,290664,230383,326028,338680,286389,352103,259391,156257],2024:[233179,347783,266336,276440,280229,285635,259748,456806,285669,270674,226180,89157],2025:[173960,406558,398915,397400,347499,360586,433150,396174,459329,496680,428357,158621]};
-const IPAC={2020:[170980,234280,177460,31460,16110,58870,292270,250820,300820,291870,266550,148470],2021:[266630,224820,296200,200200,228180,215720,261790,309990,315760,327680,318490,212610],2022:[286130,312910,333960,273750,256140,276640,237900,252980,206490,215650,208930,118250],2023:[195110,192750,225460,172240,160190,176630,160520,203250,185730,193030,212860,101850],2024:[171120,229940,194870,200290,214480,224460,256490,274950,240160,270260,258580,112810],2025:[223700,233170,267220,259120,281920,258490,331560,313210,304580,318400,286690,168930]};
-const CLIN={2024:[2,3,4,8,7,2,3,3,3,0,1,0],2025:[2,4,5,1,5,5,3,1,3,3,2,2]};
-const sm=a=>a.reduce((s,v)=>s+v,0);
-const FA={},LAA={},IA={};
-Object.keys(FAT).forEach(a=>FA[+a]=sm(FAT[+a]));
-Object.keys(LA).forEach(a=>LAA[+a]=sm(LA[+a]));
-LAA[2024]=3389298;LAA[2025]=4457229;
-Object.keys(IPAC).forEach(a=>IA[+a]=sm(IPAC[+a]));
-let RES={},SEL=null,HM='fat',CH=null,CC=null;
-function init(){RES=load()||{};if(!RES['2026-01'])RES['2026-01']={fat:2309089,ll:226711,ipac:0,clin:0};if(!RES['2026-02'])RES['2026-02']={fat:3260146,ll:402420,ipac:0,clin:0};}
-const BR=(v,d=0)=>Number(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
-const fM=v=>v>=1e6?'R$ '+BR(v/1e6,2)+' M':v>=1e3?'R$ '+BR(v/1e3,0)+' K':'R$ '+BR(v,0);
-const fF=v=>'R$ '+BR(v,2);
-const fK=v=>v>=1e3?BR(v/1e3,1)+' t':BR(v,0)+' kg';
-const fN=v=>BR(Math.round(v),0);
-function dlt(a,b){if(!b||b===0)return null;const p=(a-b)/Math.abs(b)*100;return{p,cls:p>=0?'pos':'neg',txt:(p>=0?'+':'')+BR(p,1)+'%'};}
-const K=i=>'2026-'+String(i+1).padStart(2,'0');
-const PC=(a,m)=>m>0?Math.min(a/m*100,999):0;
-const CP=p=>p>=100?'#3ecf6e':p>=66?'#008835':p>=33?'#FFCB00':'#e05252';
-const LC={none:'var(--muted)',meta:'#3ecf6e',plus:'#4db3ff',super:'var(--yellow)'};
-function gL(f,l,i){if(f>=MF.super[i]&&l>=ML.super[i])return'super';if(f>=MF.plus[i]&&l>=ML.plus[i])return'plus';if(f>=MF.meta[i]&&l>=ML.meta[i])return'meta';return'none';}
-function gLF(f,i){if(f>=MF.super[i])return'super';if(f>=MF.plus[i])return'plus';if(f>=MF.meta[i])return'meta';return'none';}
-function gLL(l,i){if(l>=ML.super[i])return'super';if(l>=ML.plus[i])return'plus';if(l>=ML.meta[i])return'meta';return'none';}
-function gB(){return Object.keys(RES).reduce((b,k)=>{const i=parseInt(k.split('-')[1])-1,r=RES[k],lv=gL(+r.fat||0,+r.ll||0,i);return{none:0,meta:1,plus:2,super:3}[lv]>{none:0,meta:1,plus:2,super:3}[b]?lv:b;},'none');}
-function lB(lv){const M={none:['level-none','—'],meta:['level-meta','● META'],plus:['level-plus','▲ META PLUS'],super:['level-super','★ SUPER META']};return'<span class="level-badge '+M[lv][0]+'">'+M[lv][1]+'</span>';}
-const hasData=r=>(+r.fat||0)>0||(+r.ll||0)>0;
-const aF=()=>Object.values(RES).filter(hasData).reduce((a,r)=>a+(+r.fat||0),0);
-const aL=()=>Object.values(RES).filter(hasData).reduce((a,r)=>a+(+r.ll||0),0);
-const aI=()=>Object.values(RES).filter(hasData).reduce((a,r)=>a+(+r.ipac||0),0);
-const aC=()=>Object.values(RES).filter(hasData).reduce((a,r)=>a+(+r.clin||0),0);
-function render(){rKPI();rAnual();rMths();rPremio();if(SEL!==null)rDet(SEL);}
-function rKPI(){
-  const fat=aF(),ll=aL(),ip=aI(),cl=aC();
-  document.getElementById('acumBadge').innerHTML=lB(gB());
-  // Calcula quais meses foram preenchidos em 2026
-  const mesesPreenchidos=Object.keys(RES).filter(k=>hasData(RES[k])).map(k=>parseInt(k.split('-')[1])-1);
-  // Soma os mesmos meses de 2025
-  const fat25=mesesPreenchidos.reduce((s,i)=>s+(FAT[2025]?.[i]||0),0);
-  const ll25=mesesPreenchidos.reduce((s,i)=>s+(LA[2025]?.[i]||0),0);
-  const ip25=mesesPreenchidos.reduce((s,i)=>s+(IPAC[2025]?.[i]||0),0);
-  const cl25=mesesPreenchidos.reduce((s,i)=>s+(CLIN[2025]?.[i]||0),0);
-  function mkComp(v26,v25,fmt){
-    if(!v25||mesesPreenchidos.length===0)return'';
-    const d=dlt(v26,v25);
-    if(!d)return'';
-    const clr=d.p>=0?'#3ecf6e':'#e05252';
-    return'<div class="kpi-yoy"><span class="kpi-yoy-base">'+fmt(v25)+'</span><span class="kpi-yoy-d" style="color:'+clr+'">'+d.txt+'</span></div>';
-  }
-  const KS=[
-    {lb:'Receita Bruta',v:fM(fat),comp:mkComp(fat,fat25,fM),c:'#008835',acomp:false},
-    {lb:'LL Ajustado',v:fM(ll),comp:mkComp(ll,ll25,fM),c:'#0076BE',acomp:false},
-    {lb:'IPAC',v:fK(ip),comp:ip25>0?mkComp(ip,ip25,fK):'',c:'#FFCB00',acomp:true},
-    {lb:'Clientes Novos',v:fN(cl),comp:cl25>0?mkComp(cl,cl25,fN):'',c:'#4db3ff',acomp:true}
-  ];
-  document.getElementById('kpiStrip').innerHTML=KS.map(k=>{
-    const acTag=k.acomp?'<span style="font-size:.5rem;font-weight:400;letter-spacing:1px;color:var(--muted2);margin-left:6px">ACOMP.</span>':'';
-    return'<div class="kpi" style="--kc:'+k.c+'"><div class="kpi-lbl"><div class="kpi-dot"></div>'+k.lb+acTag+'</div><div class="kpi-val">'+k.v+'</div>'+k.comp+(k.comp?'<div class="kpi-vs-label">vs 2025</div>':'')+'</div>';
-  }).join('');
+
+// Prêmios — m = mensal por mês atingido, a = bônus anual se bater meta do ano
+const PREMIOS = {
+  fat: { meta:{m:500,a:2500}, plus:{m:1000,a:8000}, super:{m:1621,a:15000} },
+  ll:  { meta:{m:500,a:2500}, plus:{m:1000,a:8000}, super:{m:1621,a:20000} }
+};
+
+// ── Histórico — dados anuais por mês ─────────────────────────────────────
+const HIST_FAT = {
+  2020:[2578587,3357525,2373235,378264,599402,1611463,2652634,2517374,3419674,3428537,3360048,2753904],
+  2021:[3183251,3594025,2824158,2564293,3341145,3098244,4101129,4183084,4577795,4250171,4249018,2757951],
+  2022:[3547190,3958865,4285920,4249236,4023148,4481756,4284731,4202161,3830252,3926030,3483023,1432770],
+  2023:[2643661,3057540,3004829,3029073,3031461,3004804,2799975,3014926,2748249,2835662,2403901,1245281],
+  2024:[2344598,2721966,2766306,2765887,2511011,2402600,2505824,2795743,2596794,2711785,2509602,1343383],
+  2025:[2157410,3068251,3074060,3131016,3104235,3015024,3113103,3042175,3039708,3324191,3025834,1600000]
+};
+
+const HIST_LL = {
+  2020:[-28161,-135174,-655140,-370428,-108607,-221656,363947,-84832,111388,445907,1019689,528410],
+  2021:[-57346,299535,149768,468213,639697,589941,202764,327124,409615,520844,652915,326812],
+  2022:[584806,679504,815375,447914,454080,440843,472873,422718,240300,289809,297183,66823],
+  2023:[291322,341232,322474,282665,290664,230383,326028,338680,286389,352103,259391,156257],
+  2024:[233179,347783,266336,276440,280229,285635,259748,456806,285669,270674,226180,89157],
+  2025:[173960,406558,398915,397400,347499,360586,433150,396174,459329,496680,428357,158621]
+};
+
+const HIST_IPAC = {
+  2020:[170980,234280,177460,31460,16110,58870,292270,250820,300820,291870,266550,148470],
+  2021:[266630,224820,296200,200200,228180,215720,261790,309990,315760,327680,318490,212610],
+  2022:[286130,312910,333960,273750,256140,276640,237900,252980,206490,215650,208930,118250],
+  2023:[195110,192750,225460,172240,160190,176630,160520,203250,185730,193030,212860,101850],
+  2024:[171120,229940,194870,200290,214480,224460,256490,274950,240160,270260,258580,112810],
+  2025:[223700,233170,267220,259120,281920,258490,331560,313210,304580,318400,286690,168930]
+};
+
+const HIST_CLIN = {
+  2024:[2,3,4,8,7,2,3,3,3,0,1,0],
+  2025:[2,4,5,1,5,5,3,1,3,3,2,2]
+};
+
+// ── Totais anuais pré-calculados ─────────────────────────────────────────
+const somaArray = a => a.reduce((s,v) => s + v, 0);
+const TOTAIS_FAT = {}, TOTAIS_LL = {}, TOTAIS_IPAC = {};
+
+Object.keys(HIST_FAT).forEach(a => TOTAIS_FAT[+a] = somaArray(HIST_FAT[+a]));
+Object.keys(HIST_LL).forEach(a => TOTAIS_LL[+a] = somaArray(HIST_LL[+a]));
+TOTAIS_LL[2024] = 3389298;  // Valor ajustado (diferente da soma simples)
+TOTAIS_LL[2025] = 4457229;  // Valor ajustado
+Object.keys(HIST_IPAC).forEach(a => TOTAIS_IPAC[+a] = somaArray(HIST_IPAC[+a]));
+
+// ── Estado da aplicação ──────────────────────────────────────────────────
+let resultados = {};       // Dados lançados 2026 { '2026-01': {fat,ll,ipac,clin}, ... }
+let mesSel     = null;     // Índice do mês selecionado (0-11) ou null
+let metricaAtiva = 'fat';  // Métrica ativa no histórico
+let chartHist  = null;     // Instância Chart.js — gráfico de barras
+let chartComp  = null;     // Instância Chart.js — gráfico comparativo
+
+// ── Init ─────────────────────────────────────────────────────────────────
+function init() {
+  resultados = load() || {};
+  // Dados iniciais (Jan e Fev já lançados)
+  if (!resultados['2026-01']) resultados['2026-01'] = { fat:2309089, ll:226711, ipac:0, clin:0 };
+  if (!resultados['2026-02']) resultados['2026-02'] = { fat:3260146, ll:402420, ipac:0, clin:0 };
 }
-function rAnual(){
-  const fat=aF(),ll=aL();
-  function mk(lbl,acum,metas,fmt){
-    return'<div><div class="anual-lbl">'+lbl+'</div>'+[{k:'super',lb:'Super Meta',c:'#FFCB00'},{k:'plus',lb:'Meta Plus',c:'#4db3ff'},{k:'meta',lb:'Meta',c:'#3ecf6e'}].map(r=>{const p=PC(acum,metas.anual[r.k]);return'<div class="anual-row"><div class="anual-rlbl" style="color:'+r.c+'">'+r.lb+'</div><div class="anual-prog"><div class="anual-prog-fill" style="width:'+Math.min(p,100)+'%;background:'+r.c+'"></div></div><div class="anual-pct" style="color:'+r.c+'">'+BR(p,1)+'%</div><div class="anual-vals"><div class="anual-atual">'+fmt(acum)+'</div><div class="anual-tgt">/ '+fmt(metas.anual[r.k])+'</div></div></div>';}).join('')+'</div>';
-  }
-  document.getElementById('anualGrid').innerHTML=mk('Receita Bruta',fat,MF,fM)+mk('LL Ajustado',ll,ML,fM);
+
+// ── Formatadores ─────────────────────────────────────────────────────────
+const fmtBR   = (v, d=0) => Number(v).toLocaleString('pt-BR', { minimumFractionDigits:d, maximumFractionDigits:d });
+const fmtMoeda = v => v >= 1e6 ? 'R$ '+fmtBR(v/1e6,2)+' M' : v >= 1e3 ? 'R$ '+fmtBR(v/1e3,0)+' K' : 'R$ '+fmtBR(v,0);
+const fmtFull  = v => 'R$ ' + fmtBR(v, 2);
+const fmtKg    = v => v >= 1e3 ? fmtBR(v/1e3,1)+' t' : fmtBR(v,0)+' kg';
+const fmtNum   = v => fmtBR(Math.round(v), 0);
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+/** Calcula variação percentual entre dois valores */
+function calcDelta(atual, anterior) {
+  if (!anterior || anterior === 0) return null;
+  const p = (atual - anterior) / Math.abs(anterior) * 100;
+  return { p, cls: p >= 0 ? 'pos' : 'neg', txt: (p >= 0 ? '+' : '') + fmtBR(p, 1) + '%' };
 }
-function rMths(){
-  const cur=new Date().getMonth();
-  document.getElementById('monthsGrid').innerHTML=MONTHS.map((m,i)=>{
-    const k=K(i),r=RES[k],fl=r&&(+r.fat||0)>0,fu=i>cur,lv=fl?gL(+r.fat||0,+r.ll||0,i):'none';
-    const ds=lv!=='none'?'background:'+LC[lv]+';'+(lv==='super'?'box-shadow:0 0 6px var(--yellow)':''):'';
-    return'<div class="mc '+(fl?'filled':'')+' '+(SEL===i?'sel':'')+' '+(fu&&!fl?'future':'')+'" onclick="'+(fu&&!fl?'':'sM('+i+')')+'">'+
-      (lv!=='none'?'<div class="mc-lvl" style="'+ds+'"></div>':'')+
-      '<div class="mc-name">'+m+'</div><div class="mc-dot"></div>'+
-      '<div class="mc-mini">'+(fl?fM(+r.fat||0):fu?'—':'lançar')+'</div></div>';
-  }).join('');
+
+/** Gera a chave do mês no formato '2026-MM' */
+const mesKey = i => '2026-' + String(i + 1).padStart(2, '0');
+
+/** Calcula percentual atingido (capped em 999%) */
+const calcPct = (atual, meta) => meta > 0 ? Math.min(atual / meta * 100, 999) : 0;
+
+/** Cores por nível de meta */
+const CORES_NIVEL = { none:'var(--muted)', meta:'#3ecf6e', plus:'#4db3ff', super:'var(--yellow)' };
+
+/** Determina nível atingido (considerando FAT + LL juntos) */
+function getNivel(fat, ll, mesIdx) {
+  if (fat >= METAS_FAT.super[mesIdx] && ll >= METAS_LL.super[mesIdx]) return 'super';
+  if (fat >= METAS_FAT.plus[mesIdx]  && ll >= METAS_LL.plus[mesIdx])  return 'plus';
+  if (fat >= METAS_FAT.meta[mesIdx]  && ll >= METAS_LL.meta[mesIdx])  return 'meta';
+  return 'none';
 }
-function rDet(idx){
-  const k=K(idx),r=RES[k]||{};
-  document.getElementById('mdet-nome').textContent=MONTHS[idx];
-  document.getElementById('mdet').classList.add('vis');
-  document.getElementById('mdet-lvl-badge').innerHTML='';
-  const RF={
-    fat:{2025:FAT[2025]?.[idx]||0,2024:FAT[2024]?.[idx]||0,2023:FAT[2023]?.[idx]||0,2022:FAT[2022]?.[idx]||0,2021:FAT[2021]?.[idx]||0},
-    ll: {2025:LA[2025]?.[idx]||0, 2024:LA[2024]?.[idx]||0, 2023:LA[2023]?.[idx]||0, 2022:LA[2022]?.[idx]||0, 2021:LA[2021]?.[idx]||0},
-    ipac:{2025:IPAC[2025]?.[idx]??null,2024:IPAC[2024]?.[idx]??null,2023:IPAC[2023]?.[idx]??null,2022:IPAC[2022]?.[idx]??null,2021:IPAC[2021]?.[idx]??null},
-    clin:{2025:CLIN[2025]?.[idx]??null,2024:CLIN[2024]?.[idx]??null,2023:null,2022:null,2021:null}
+
+/** Nível só pela Receita Bruta */
+function getNivelFat(fat, mesIdx) {
+  if (fat >= METAS_FAT.super[mesIdx]) return 'super';
+  if (fat >= METAS_FAT.plus[mesIdx])  return 'plus';
+  if (fat >= METAS_FAT.meta[mesIdx])  return 'meta';
+  return 'none';
+}
+
+/** Nível só pelo Lucro Líquido */
+function getNivelLL(ll, mesIdx) {
+  if (ll >= METAS_LL.super[mesIdx]) return 'super';
+  if (ll >= METAS_LL.plus[mesIdx])  return 'plus';
+  if (ll >= METAS_LL.meta[mesIdx])  return 'meta';
+  return 'none';
+}
+
+/** Maior nível atingido em qualquer mês */
+function getNivelGeral() {
+  return Object.keys(resultados).reduce((best, k) => {
+    const i = parseInt(k.split('-')[1]) - 1;
+    const r = resultados[k];
+    const lv = getNivel(+r.fat||0, +r.ll||0, i);
+    const rank = { none:0, meta:1, plus:2, super:3 };
+    return rank[lv] > rank[best] ? lv : best;
+  }, 'none');
+}
+
+/** Gera HTML do badge de nível */
+function badgeNivel(lv) {
+  const MAP = {
+    none:  ['level-none', '—'],
+    meta:  ['level-meta', '● META'],
+    plus:  ['level-plus', '▲ META PLUS'],
+    super: ['level-super','★ SUPER META']
   };
-  const FL=[{id:'fat',lb:'Receita Bruta',pfx:'R$',v:+r.fat||0,fmt:fF,ms:{super:MF.super[idx],plus:MF.plus[idx],meta:MF.meta[idx]}},{id:'ll',lb:'LL Ajustado',pfx:'R$',v:+r.ll||0,fmt:fF,ms:{super:ML.super[idx],plus:ML.plus[idx],meta:ML.meta[idx]}},{id:'ipac',lb:'IPAC (ton)',pfx:'t',v:+r.ipac||0,fmt:v=>BR(v,2),ms:null},{id:'clin',lb:'Clientes Novos',pfx:'nº',v:+r.clin||0,fmt:fN,ms:null}];
-  document.getElementById('mdet-fields').innerHTML=FL.map(f=>{
-    const anos=[2025,2024,2023,2022,2021];
-    const vs='<div class="mf-vs">'+anos.map(a=>{const rv=RF[f.id]?.[a];if(rv==null)return'<div class="mf-vs-row" style="visibility:hidden"><span class="mf-vs-yr">'+a+'</span><span class="mf-vs-val">—</span></div>';const d=f.v>0&&rv?dlt(f.v,rv):null;return'<div class="mf-vs-row"><span class="mf-vs-yr">'+a+'</span><span class="mf-vs-val">'+f.fmt(rv)+'</span>'+(d?'<span class="mf-vs-d '+d.cls+'">'+d.txt+'</span>':'')+'</div>';}).join('')+'</div>';
-    const lv=f.ms?'<div class="mf-lvls"><span class="mf-lvl level-meta">M '+BR(PC(f.v,f.ms.meta),0)+'%</span><span class="mf-lvl level-plus">P '+BR(PC(f.v,f.ms.plus),0)+'%</span><span class="mf-lvl level-super">S '+BR(PC(f.v,f.ms.super),0)+'%</span></div>':'<div style="margin-top:4px;font-size:.52rem;color:var(--muted2)">acompanhamento</div>';
-    // Badge individual para fat e ll
-    const indBadge=(f.id==='fat'||f.id==='ll')?'<span style="margin-left:8px">'+lB(f.id==='fat'?gLF(f.v,idx):gLL(f.v,idx))+'</span>':'';
-    // Formata valor com milhar para fat e ll
-    const inputVal=(f.id==='fat'||f.id==='ll')?(f.v?Number(f.v).toLocaleString('pt-BR'):''):(f.v||'');
-    const inputType=(f.id==='fat'||f.id==='ll')?'text':'number';
-    const inputExtra=(f.id==='fat'||f.id==='ll')?'oninput="fmtInput(this,'+idx+')"':'oninput="oI('+idx+')"';
-    return'<div class="mf"><label style="display:flex;align-items:center;gap:0">'+f.lb+indBadge+'</label><div class="mf-wrap"><div class="mf-pfx">'+f.pfx+'</div><input type="'+inputType+'" id="mdf-'+f.id+'" value="'+inputVal+'" placeholder="0" '+inputExtra+'></div>'+vs+lv+'</div>';
+  return '<span class="level-badge ' + MAP[lv][0] + '">' + MAP[lv][1] + '</span>';
+}
+
+/** Verifica se um registro tem dados lançados */
+const hasData = r => (+r.fat||0) > 0 || (+r.ll||0) > 0;
+
+// ── Acumuladores 2026 ────────────────────────────────────────────────────
+const acumFat  = () => Object.values(resultados).filter(hasData).reduce((a,r) => a + (+r.fat||0), 0);
+const acumLL   = () => Object.values(resultados).filter(hasData).reduce((a,r) => a + (+r.ll||0), 0);
+const acumIpac = () => Object.values(resultados).filter(hasData).reduce((a,r) => a + (+r.ipac||0), 0);
+const acumClin = () => Object.values(resultados).filter(hasData).reduce((a,r) => a + (+r.clin||0), 0);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER — Aba 2026 (Metas)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function render() {
+  renderKPI();
+  renderAnual();
+  renderMeses();
+  renderPremio();
+  if (mesSel !== null) renderDetalhe(mesSel);
+}
+
+// ── KPI Strip (4 cards no topo) ──────────────────────────────────────────
+function renderKPI() {
+  const fat = acumFat(), ll = acumLL(), ip = acumIpac(), cl = acumClin();
+  document.getElementById('acumBadge').innerHTML = badgeNivel(getNivelGeral());
+
+  // Compara com os mesmos meses de 2025
+  const mesesPreenchidos = Object.keys(resultados).filter(k => hasData(resultados[k])).map(k => parseInt(k.split('-')[1]) - 1);
+  const fat25 = mesesPreenchidos.reduce((s,i) => s + (HIST_FAT[2025]?.[i]||0), 0);
+  const ll25  = mesesPreenchidos.reduce((s,i) => s + (HIST_LL[2025]?.[i]||0), 0);
+  const ip25  = mesesPreenchidos.reduce((s,i) => s + (HIST_IPAC[2025]?.[i]||0), 0);
+  const cl25  = mesesPreenchidos.reduce((s,i) => s + (HIST_CLIN[2025]?.[i]||0), 0);
+
+  function mkComp(v26, v25, fmt) {
+    if (!v25 || mesesPreenchidos.length === 0) return '';
+    const d = calcDelta(v26, v25);
+    if (!d) return '';
+    const clr = d.p >= 0 ? '#3ecf6e' : '#e05252';
+    return '<div class="kpi-yoy"><span class="kpi-yoy-base">' + fmt(v25) + '</span><span class="kpi-yoy-d" style="color:' + clr + '">' + d.txt + '</span></div>';
+  }
+
+  const KS = [
+    { lb:'Receita Bruta',  v:fmtMoeda(fat), comp:mkComp(fat,fat25,fmtMoeda), c:'#008835', acomp:false },
+    { lb:'LL Ajustado',    v:fmtMoeda(ll),  comp:mkComp(ll,ll25,fmtMoeda),   c:'#0076BE', acomp:false },
+    { lb:'IPAC',           v:fmtKg(ip),     comp:ip25>0?mkComp(ip,ip25,fmtKg):'',    c:'#FFCB00', acomp:true },
+    { lb:'Clientes Novos', v:fmtNum(cl),    comp:cl25>0?mkComp(cl,cl25,fmtNum):'',   c:'#4db3ff', acomp:true }
+  ];
+  document.getElementById('kpiStrip').innerHTML = KS.map(k => {
+    const acTag = k.acomp ? '<span style="font-size:.5rem;font-weight:400;letter-spacing:1px;color:var(--muted2);margin-left:6px">ACOMP.</span>' : '';
+    return '<div class="kpi" style="--kc:'+k.c+'"><div class="kpi-lbl"><div class="kpi-dot"></div>'+k.lb+acTag+'</div><div class="kpi-val">'+k.v+'</div>'+k.comp+(k.comp?'<div class="kpi-vs-label">vs 2025</div>':'')+'</div>';
   }).join('');
 }
-function rPremio(){
-  const ms=Object.keys(RES).sort();
-  const PN={fat:{meta:[],plus:[],super:[]},ll:{meta:[],plus:[],super:[]}};
-  ms.forEach(k=>{
-    const i=parseInt(k.split('-')[1])-1,r=RES[k];
-    const lF=gLF(+r.fat||0,i),lL=gLL(+r.ll||0,i),nm=MONTHS[i];
-    if(lF!=='none')PN.fat[lF].push(nm);
-    if(lL!=='none')PN.ll[lL].push(nm);
+
+// ── Progresso anual (barras por nível) ───────────────────────────────────
+function renderAnual() {
+  const fat = acumFat(), ll = acumLL();
+  function mk(lbl, acum, metas, fmt) {
+    return '<div><div class="anual-lbl">'+lbl+'</div>' +
+      [{k:'super',lb:'Super Meta',c:'#FFCB00'},{k:'plus',lb:'Meta Plus',c:'#4db3ff'},{k:'meta',lb:'Meta',c:'#3ecf6e'}]
+      .map(r => {
+        const p = calcPct(acum, metas.anual[r.k]);
+        return '<div class="anual-row"><div class="anual-rlbl" style="color:'+r.c+'">'+r.lb+'</div><div class="anual-prog"><div class="anual-prog-fill" style="width:'+Math.min(p,100)+'%;background:'+r.c+'"></div></div><div class="anual-pct" style="color:'+r.c+'">'+fmtBR(p,1)+'%</div><div class="anual-vals"><div class="anual-atual">'+fmt(acum)+'</div><div class="anual-tgt">/ '+fmt(metas.anual[r.k])+'</div></div></div>';
+      }).join('') + '</div>';
+  }
+  document.getElementById('anualGrid').innerHTML = mk('Receita Bruta', fat, METAS_FAT, fmtMoeda) + mk('LL Ajustado', ll, METAS_LL, fmtMoeda);
+}
+
+// ── Grid de meses ────────────────────────────────────────────────────────
+function renderMeses() {
+  const cur = new Date().getMonth();
+  document.getElementById('monthsGrid').innerHTML = MONTHS.map((m, i) => {
+    const k = mesKey(i), r = resultados[k];
+    const preenchido = r && (+r.fat||0) > 0;
+    const futuro = i > cur;
+    const lv = preenchido ? getNivel(+r.fat||0, +r.ll||0, i) : 'none';
+    const dotStyle = lv !== 'none' ? 'background:'+CORES_NIVEL[lv]+';'+(lv==='super'?'box-shadow:0 0 6px var(--yellow)':'') : '';
+    return '<div class="mc '+(preenchido?'filled':'')+' '+(mesSel===i?'sel':'')+' '+(futuro&&!preenchido?'future':'')+'" onclick="'+(futuro&&!preenchido?'':'selecionarMes('+i+')')+'">'+
+      (lv!=='none'?'<div class="mc-lvl" style="'+dotStyle+'"></div>':'')+
+      '<div class="mc-name">'+m+'</div><div class="mc-dot"></div>'+
+      '<div class="mc-mini">'+(preenchido?fmtMoeda(+r.fat||0):futuro?'—':'lançar')+'</div></div>';
+  }).join('');
+}
+
+// ── Detalhe do mês selecionado ───────────────────────────────────────────
+function renderDetalhe(idx) {
+  const k = mesKey(idx), r = resultados[k] || {};
+  document.getElementById('mdet-nome').textContent = MONTHS[idx];
+  document.getElementById('mdet').classList.add('vis');
+  document.getElementById('mdet-lvl-badge').innerHTML = '';
+
+  // Referências históricas para comparação
+  const ref = {
+    fat:  { 2025:HIST_FAT[2025]?.[idx]||0, 2024:HIST_FAT[2024]?.[idx]||0, 2023:HIST_FAT[2023]?.[idx]||0, 2022:HIST_FAT[2022]?.[idx]||0, 2021:HIST_FAT[2021]?.[idx]||0 },
+    ll:   { 2025:HIST_LL[2025]?.[idx]||0,   2024:HIST_LL[2024]?.[idx]||0,   2023:HIST_LL[2023]?.[idx]||0,   2022:HIST_LL[2022]?.[idx]||0,   2021:HIST_LL[2021]?.[idx]||0 },
+    ipac: { 2025:HIST_IPAC[2025]?.[idx]??null, 2024:HIST_IPAC[2024]?.[idx]??null, 2023:HIST_IPAC[2023]?.[idx]??null, 2022:HIST_IPAC[2022]?.[idx]??null, 2021:HIST_IPAC[2021]?.[idx]??null },
+    clin: { 2025:HIST_CLIN[2025]?.[idx]??null, 2024:HIST_CLIN[2024]?.[idx]??null, 2023:null, 2022:null, 2021:null }
+  };
+
+  const campos = [
+    { id:'fat',  lb:'Receita Bruta',  pfx:'R$', v:+r.fat||0,  fmt:fmtFull, ms:{ super:METAS_FAT.super[idx], plus:METAS_FAT.plus[idx], meta:METAS_FAT.meta[idx] } },
+    { id:'ll',   lb:'LL Ajustado',    pfx:'R$', v:+r.ll||0,   fmt:fmtFull, ms:{ super:METAS_LL.super[idx],  plus:METAS_LL.plus[idx],  meta:METAS_LL.meta[idx] } },
+    { id:'ipac', lb:'IPAC (ton)',     pfx:'t',  v:+r.ipac||0, fmt:v=>fmtBR(v,2), ms:null },
+    { id:'clin', lb:'Clientes Novos', pfx:'nº', v:+r.clin||0, fmt:fmtNum,  ms:null }
+  ];
+
+  document.getElementById('mdet-fields').innerHTML = campos.map(f => {
+    const anos = [2025,2024,2023,2022,2021];
+    const vsHTML = '<div class="mf-vs">' + anos.map(a => {
+      const rv = ref[f.id]?.[a];
+      if (rv == null) return '<div class="mf-vs-row" style="visibility:hidden"><span class="mf-vs-yr">'+a+'</span><span class="mf-vs-val">—</span></div>';
+      const d = f.v > 0 && rv ? calcDelta(f.v, rv) : null;
+      return '<div class="mf-vs-row"><span class="mf-vs-yr">'+a+'</span><span class="mf-vs-val">'+f.fmt(rv)+'</span>'+(d?'<span class="mf-vs-d '+d.cls+'">'+d.txt+'</span>':'')+'</div>';
+    }).join('') + '</div>';
+
+    const lvHTML = f.ms
+      ? '<div class="mf-lvls"><span class="mf-lvl level-meta">M '+fmtBR(calcPct(f.v,f.ms.meta),0)+'%</span><span class="mf-lvl level-plus">P '+fmtBR(calcPct(f.v,f.ms.plus),0)+'%</span><span class="mf-lvl level-super">S '+fmtBR(calcPct(f.v,f.ms.super),0)+'%</span></div>'
+      : '<div style="margin-top:4px;font-size:.52rem;color:var(--muted2)">acompanhamento</div>';
+
+    const indBadge = (f.id==='fat'||f.id==='ll')
+      ? '<span style="margin-left:8px">' + badgeNivel(f.id==='fat' ? getNivelFat(f.v,idx) : getNivelLL(f.v,idx)) + '</span>' : '';
+
+    const inputVal  = (f.id==='fat'||f.id==='ll') ? (f.v ? Number(f.v).toLocaleString('pt-BR') : '') : (f.v || '');
+    const inputType = (f.id==='fat'||f.id==='ll') ? 'text' : 'number';
+    const inputEvt  = (f.id==='fat'||f.id==='ll') ? 'oninput="fmtInput(this,'+idx+')"' : 'oninput="onInputChange('+idx+')"';
+
+    return '<div class="mf"><label style="display:flex;align-items:center;gap:0">'+f.lb+indBadge+'</label><div class="mf-wrap"><div class="mf-pfx">'+f.pfx+'</div><input type="'+inputType+'" id="mdf-'+f.id+'" value="'+inputVal+'" placeholder="0" '+inputEvt+'></div>'+vsHTML+lvHTML+'</div>';
+  }).join('');
+}
+
+// ── Prêmios ──────────────────────────────────────────────────────────────
+function renderPremio() {
+  const meses = Object.keys(resultados).sort();
+  const premiosPorNivel = { fat:{ meta:[], plus:[], super:[] }, ll:{ meta:[], plus:[], super:[] } };
+
+  meses.forEach(k => {
+    const i = parseInt(k.split('-')[1]) - 1, r = resultados[k];
+    const lvF = getNivelFat(+r.fat||0, i), lvL = getNivelLL(+r.ll||0, i), nm = MONTHS[i];
+    if (lvF !== 'none') premiosPorNivel.fat[lvF].push(nm);
+    if (lvL !== 'none') premiosPorNivel.ll[lvL].push(nm);
   });
 
-  // Bônus anual: verifica se acumulado anual atingiu a meta anual
-  const fatAcum=aF(),llAcum=aL();
-  function bonusAnual(tipo,level){
-    const acum=tipo==='fat'?fatAcum:llAcum;
-    const metaAnual=tipo==='fat'?MF.anual[level]:ML.anual[level];
-    return acum>=metaAnual;
+  // Bônus anual: verifica se acumulado atingiu a meta anual
+  const fatTotal = acumFat(), llTotal = acumLL();
+  function temBonusAnual(tipo, level) {
+    const acum = tipo === 'fat' ? fatTotal : llTotal;
+    const metaAnual = tipo === 'fat' ? METAS_FAT.anual[level] : METAS_LL.anual[level];
+    return acum >= metaAnual;
   }
 
-  const LV=[{k:'meta',lb:'META',c:'#3ecf6e'},{k:'plus',lb:'META PLUS',c:'#4db3ff'},{k:'super',lb:'SUPER META',c:'#FFCB00'}];
-  document.getElementById('premioGrid').innerHTML=LV.map(lv=>{
-    const mF=PN.fat[lv.k],mL=PN.ll[lv.k];
-    const mFt=mF.length?mF.map(m=>'<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join(''):'<span style="font-size:.76rem;color:var(--muted2)">—</span>';
-    const mLt=mL.length?mL.map(m=>'<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join(''):'<span style="font-size:.76rem;color:var(--muted2)">—</span>';
-    const menF=mF.length*PR.fat[lv.k].m, menL=mL.length*PR.ll[lv.k].m;
+  const checkSVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3ecf6e" stroke-width="3" style="vertical-align:middle;margin-left:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+  const NIVEIS = [
+    { k:'meta',  lb:'META',       c:'#3ecf6e' },
+    { k:'plus',  lb:'META PLUS',  c:'#4db3ff' },
+    { k:'super', lb:'SUPER META', c:'#FFCB00' }
+  ];
+
+  document.getElementById('premioGrid').innerHTML = NIVEIS.map(lv => {
+    const mF = premiosPorNivel.fat[lv.k], mL = premiosPorNivel.ll[lv.k];
+    const mFt = mF.length ? mF.map(m => '<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join('') : '<span style="font-size:.76rem;color:var(--muted2)">—</span>';
+    const mLt = mL.length ? mL.map(m => '<span class="pc-mes-tag" style="color:'+lv.c+';border-color:'+lv.c+'44">'+m+'</span>').join('') : '<span style="font-size:.76rem;color:var(--muted2)">—</span>';
+    const menF = mF.length * PREMIOS.fat[lv.k].m, menL = mL.length * PREMIOS.ll[lv.k].m;
 
     // Bônus anual
-    const bF=bonusAnual('fat',lv.k), bL=bonusAnual('ll',lv.k);
-    const bFval=bF?PR.fat[lv.k].a:0, bLval=bL?PR.ll[lv.k].a:0;
-    const totalMensal=menF+menL;
-    const totalAnual=bFval+bLval;
-    const totalGeral=totalMensal+totalAnual;
+    const bF = temBonusAnual('fat', lv.k), bL = temBonusAnual('ll', lv.k);
+    const bFval = bF ? PREMIOS.fat[lv.k].a : 0, bLval = bL ? PREMIOS.ll[lv.k].a : 0;
+    const totalMensal = menF + menL;
+    const totalAnual  = bFval + bLval;
+    const totalGeral  = totalMensal + totalAnual;
 
-    // Progresso anual
-    const fatProg=Math.min(fatAcum/(MF.anual[lv.k]||1)*100,100);
-    const llProg=Math.min(llAcum/(ML.anual[lv.k]||1)*100,100);
+    // Progresso em direção ao bônus anual
+    const fatProg = Math.min(fatTotal / (METAS_FAT.anual[lv.k]||1) * 100, 100);
+    const llProg  = Math.min(llTotal  / (METAS_LL.anual[lv.k]||1)  * 100, 100);
 
-    const bonusSec='<div class="pc-sec"><div class="pc-sec-lbl">Bônus Anual</div>'+
-      '<div class="pc-row"><span class="pc-lbl">Receita Bruta</span><span class="pc-val" style="color:'+(bF?'#3ecf6e':'var(--muted2)')+'">R$ '+BR(PR.fat[lv.k].a,0)+(bF?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3ecf6e" stroke-width="3" style="vertical-align:middle;margin-left:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>':'')+'</span></div>'+
-      '<div style="margin:4px 0"><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+fatProg+'%;background:'+lv.c+';border-radius:2px;transition:width 1s"></div></div><div style="font-family:\'DM Mono\',monospace;font-size:.6rem;color:var(--muted2);text-align:right;margin-top:2px">'+BR(fatProg,1)+'%</div></div>'+
-      '<div class="pc-row"><span class="pc-lbl">Lucro Ajustado</span><span class="pc-val" style="color:'+(bL?'#3ecf6e':'var(--muted2)')+'">R$ '+BR(PR.ll[lv.k].a,0)+(bL?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3ecf6e" stroke-width="3" style="vertical-align:middle;margin-left:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>':'')+'</span></div>'+
-      '<div style="margin:4px 0"><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+llProg+'%;background:'+lv.c+';border-radius:2px;transition:width 1s"></div></div><div style="font-family:\'DM Mono\',monospace;font-size:.6rem;color:var(--muted2);text-align:right;margin-top:2px">'+BR(llProg,1)+'%</div></div>'+
+    const bonusSec = '<div class="pc-sec"><div class="pc-sec-lbl">Bônus Anual</div>' +
+      '<div class="pc-row"><span class="pc-lbl">Receita Bruta</span><span class="pc-val" style="color:'+(bF?'#3ecf6e':'var(--muted2)')+'">R$ '+fmtBR(PREMIOS.fat[lv.k].a,0)+(bF?checkSVG:'')+'</span></div>' +
+      '<div style="margin:4px 0"><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+fatProg+'%;background:'+lv.c+';border-radius:2px;transition:width 1s"></div></div><div style="font-family:\'DM Mono\',monospace;font-size:.6rem;color:var(--muted2);text-align:right;margin-top:2px">'+fmtBR(fatProg,1)+'%</div></div>' +
+      '<div class="pc-row"><span class="pc-lbl">Lucro Ajustado</span><span class="pc-val" style="color:'+(bL?'#3ecf6e':'var(--muted2)')+'">R$ '+fmtBR(PREMIOS.ll[lv.k].a,0)+(bL?checkSVG:'')+'</span></div>' +
+      '<div style="margin:4px 0"><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+llProg+'%;background:'+lv.c+';border-radius:2px;transition:width 1s"></div></div><div style="font-family:\'DM Mono\',monospace;font-size:.6rem;color:var(--muted2);text-align:right;margin-top:2px">'+fmtBR(llProg,1)+'%</div></div>' +
       '</div>';
 
-    return'<div class="pc" style="--pc-c:'+lv.c+'"><div class="pc-lvl" style="color:'+lv.c+'">'+lv.lb+'</div>'+
-      '<div class="pc-sec"><div class="pc-sec-lbl">Receita Bruta — mensal</div><div class="pc-meses">'+mFt+'</div>'+
-      '<div class="pc-row"><span class="pc-lbl">Acumulado</span><span class="pc-val">R$ '+BR(menF,0)+'</span></div></div>'+
-      '<div class="pc-sec"><div class="pc-sec-lbl">Lucro Ajustado — mensal</div><div class="pc-meses">'+mLt+'</div>'+
-      '<div class="pc-row"><span class="pc-lbl">Acumulado</span><span class="pc-val">R$ '+BR(menL,0)+'</span></div></div>'+
-      bonusSec+
-      '<div class="pc-total"><span class="pc-tlbl">Total</span><span class="pc-tval" style="color:'+lv.c+'">R$ '+BR(totalGeral,0)+'</span></div>'+
-      (totalAnual>0?'<div style="font-family:\'DM Mono\',monospace;font-size:.58rem;color:var(--muted2);text-align:right;margin-top:4px">mensal R$ '+BR(totalMensal,0)+' + bônus R$ '+BR(totalAnual,0)+'</div>':'')+
+    return '<div class="pc" style="--pc-c:'+lv.c+'"><div class="pc-lvl" style="color:'+lv.c+'">'+lv.lb+'</div>' +
+      '<div class="pc-sec"><div class="pc-sec-lbl">Receita Bruta — mensal</div><div class="pc-meses">'+mFt+'</div>' +
+      '<div class="pc-row"><span class="pc-lbl">Acumulado</span><span class="pc-val">R$ '+fmtBR(menF,0)+'</span></div></div>' +
+      '<div class="pc-sec"><div class="pc-sec-lbl">Lucro Ajustado — mensal</div><div class="pc-meses">'+mLt+'</div>' +
+      '<div class="pc-row"><span class="pc-lbl">Acumulado</span><span class="pc-val">R$ '+fmtBR(menL,0)+'</span></div></div>' +
+      bonusSec +
+      '<div class="pc-total"><span class="pc-tlbl">Total</span><span class="pc-tval" style="color:'+lv.c+'">R$ '+fmtBR(totalGeral,0)+'</span></div>' +
+      (totalAnual > 0 ? '<div style="font-family:\'DM Mono\',monospace;font-size:.58rem;color:var(--muted2);text-align:right;margin-top:4px">mensal R$ '+fmtBR(totalMensal,0)+' + bônus R$ '+fmtBR(totalAnual,0)+'</div>' : '') +
       '</div>';
   }).join('');
 }
-const HX=[
-  {id:'fat',lb:'Receita Bruta',c:'#008835',fmt:fM,gA:a=>FA[a]||0,gM:a=>FAT[a]||null},
-  {id:'ll', lb:'LL Ajustado',  c:'#0076BE',fmt:fM,gA:a=>LAA[a]||0,gM:a=>LA[a]||null},
-  {id:'ipac',lb:'IPAC (kg)',   c:'#FFCB00',fmt:fK,gA:a=>IA[a]||0, gM:a=>IPAC[a]||null},
-  {id:'clin',lb:'Clientes Novos',c:'#4db3ff',fmt:fN,gA:a=>CLIN[a]?sm(CLIN[a]):0,gM:a=>CLIN[a]||null},
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER — Aba Histórico
+// ═══════════════════════════════════════════════════════════════════════════
+
+const METRICAS = [
+  { id:'fat',  lb:'Receita Bruta',  c:'#008835', fmt:fmtMoeda, getAnual:a=>TOTAIS_FAT[a]||0,  getMensal:a=>HIST_FAT[a]||null },
+  { id:'ll',   lb:'LL Ajustado',    c:'#0076BE', fmt:fmtMoeda, getAnual:a=>TOTAIS_LL[a]||0,   getMensal:a=>HIST_LL[a]||null },
+  { id:'ipac', lb:'IPAC (kg)',      c:'#FFCB00', fmt:fmtKg,    getAnual:a=>TOTAIS_IPAC[a]||0, getMensal:a=>HIST_IPAC[a]||null },
+  { id:'clin', lb:'Clientes Novos', c:'#4db3ff', fmt:fmtNum,   getAnual:a=>HIST_CLIN[a]?somaArray(HIST_CLIN[a]):0, getMensal:a=>HIST_CLIN[a]||null },
 ];
-function rHist(){rMTabs();rYS();rCharts();}
-function rMTabs(){document.getElementById('metricTabs').innerHTML=HX.map(m=>'<button class="mt-btn '+(HM===m.id?'active':'')+'" onclick="sHM(\''+m.id+'\')">'+m.lb+'</button>').join('');}
-function g26(id){if(id==='fat')return aF();if(id==='ll')return aL();if(id==='ipac')return aI();return aC();}
-function rYS(){
-  const m=HX.find(x=>x.id===HM),a26=g26(m.id),AT=[2020,2021],AN=[2020,2021,2022,2023,2024,2025,'2026*'],vs=AN.map(a=>a==='2026*'?a26:m.gA(+a));
-  document.getElementById('yearsStrip').innerHTML=AN.map((ano,i)=>{
-    const val=vs[i],prev=i>0?vs[i-1]:0,d=prev>0?dlt(val,prev):null,isAt=AT.includes(+ano);
-    return'<div class="yc '+(ano==='2026*'?'hi':'')+(isAt?' atip':'')+'">'+
-      (ano==='2026*'?'<div class="yc-badge">YTD</div>':'')+
-      '<div class="yc-year">'+ano+(isAt?'*':'')+'</div>'+
-      '<div class="yc-val">'+(val>0?m.fmt(val):'—')+'</div>'+
-      (d?'<div class="yc-growth '+d.cls+'"><span>'+(d.p>=0?'↑':'↓')+'</span><span>'+Math.abs(d.p).toFixed(1)+'%</span></div>':'<div style="height:18px"></div>')+'</div>';
+
+function renderHistorico() { renderMetricTabs(); renderYearsStrip(); renderCharts(); }
+
+function renderMetricTabs() {
+  document.getElementById('metricTabs').innerHTML = METRICAS.map(m =>
+    '<button class="mt-btn '+(metricaAtiva===m.id?'active':'')+'" onclick="setMetrica(\''+m.id+'\')">'+m.lb+'</button>'
+  ).join('');
+}
+
+/** Retorna o acumulado de 2026 para a métrica */
+function get2026(id) {
+  if (id === 'fat')  return acumFat();
+  if (id === 'll')   return acumLL();
+  if (id === 'ipac') return acumIpac();
+  return acumClin();
+}
+
+// ── Years strip (cards por ano) ──────────────────────────────────────────
+function renderYearsStrip() {
+  const m = METRICAS.find(x => x.id === metricaAtiva);
+  const val2026 = get2026(m.id);
+  const ATIPICOS = [2020, 2021];
+  const ANOS = [2020, 2021, 2022, 2023, 2024, 2025, '2026*'];
+  const valores = ANOS.map(a => a === '2026*' ? val2026 : m.getAnual(+a));
+
+  document.getElementById('yearsStrip').innerHTML = ANOS.map((ano, i) => {
+    const val = valores[i], prev = i > 0 ? valores[i-1] : 0;
+    const d = prev > 0 ? calcDelta(val, prev) : null;
+    const isAtipico = ATIPICOS.includes(+ano);
+    return '<div class="yc '+(ano==='2026*'?'hi':'')+(isAtipico?' atip':'')+'">' +
+      (ano==='2026*'?'<div class="yc-badge">YTD</div>':'') +
+      '<div class="yc-year">'+ano+(isAtipico?'*':'')+'</div>' +
+      '<div class="yc-val">'+(val>0?m.fmt(val):'—')+'</div>' +
+      (d ? '<div class="yc-growth '+d.cls+'"><span>'+(d.p>=0?'↑':'↓')+'</span><span>'+Math.abs(d.p).toFixed(1)+'%</span></div>' : '<div style="height:18px"></div>') +
+      '</div>';
   }).join('');
 }
-// ── Chart theme helper ──
-function chartColors(){
-  const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  return{
-    grid:    dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.07)',
-    tick:    dark?'#8E8E93':'#567A5E',
-    ttBg:    dark?'#1C1C1E':'#fff',
-    ttBorder:dark?'#3A3A3C':'#CDDBD2',
-    ttTitle: dark?'#8E8E93':'#567A5E',
-    ttBody:  dark?'#F5F5F5':'#1A2E1E',
-    legend:  dark?'#8E8E93':'#567A5E',
-    line25:  dark?'rgba(255,255,255,.2)':'rgba(0,0,0,.2)',
-    ptBorder:dark?'#1C1C1E':'#fff'
+
+// ── Gráficos (adaptativos ao tema) ───────────────────────────────────────
+function chartColors() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    grid:     dark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.07)',
+    tick:     dark ? '#8E8E93' : '#567A5E',
+    ttBg:     dark ? '#1C1C1E' : '#fff',
+    ttBorder: dark ? '#3A3A3C' : '#CDDBD2',
+    ttTitle:  dark ? '#8E8E93' : '#567A5E',
+    ttBody:   dark ? '#F5F5F5' : '#1A2E1E',
+    legend:   dark ? '#8E8E93' : '#567A5E',
+    line25:   dark ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.2)',
+    ptBorder: dark ? '#1C1C1E' : '#fff'
   };
 }
-function rCharts(){
-  const m=HX.find(x=>x.id===HM),a26=g26(m.id),AT=[2020,2021],AN=[2020,2021,2022,2023,2024,2025,'2026*'],dA=AN.map(a=>a==='2026*'?a26:m.gA(+a));
-  const tc=chartColors();
-  document.getElementById('chartLbl').textContent='Evolução histórica · '+m.lb;
-  if(CH)CH.destroy();
-  const c1=document.getElementById('histChart').getContext('2d');
-  CH=new Chart(c1,{type:'bar',data:{labels:AN.map(String),datasets:[{data:dA,
-    backgroundColor:AN.map(a=>a==='2026*'?m.c+'dd':AT.includes(+a)?m.c+'30':m.c+'66'),
-    borderColor:AN.map(a=>a==='2026*'?m.c:AT.includes(+a)?m.c+'55':m.c+'aa'),
-    borderWidth:1.5,borderRadius:6}]},
-  options:{responsive:true,plugins:{legend:{display:false},tooltip:{
-    backgroundColor:tc.ttBg,borderColor:tc.ttBorder,borderWidth:1,
-    titleColor:tc.ttTitle,bodyColor:tc.ttBody,padding:12,
-    callbacks:{label:ctx=>m.fmt(ctx.raw)}}},
-  scales:{x:{grid:{color:tc.grid},ticks:{color:tc.tick,font:{family:"'DM Mono',monospace",size:11}}},
-          y:{grid:{color:tc.grid},ticks:{color:tc.tick,font:{family:"'DM Mono',monospace",size:10},callback:v=>m.fmt(v)}}}}});
 
-  const d25=m.gM(2025)||Array(12).fill(0),d26=MONTHS.map((_,i)=>{const r=RES[K(i)];if(!r)return null;return m.id==='fat'?+r.fat||0:m.id==='ll'?+r.ll||0:m.id==='ipac'?+r.ipac||0:+r.clin||0;});
-  const mL=m.id==='fat'?MF.meta:m.id==='ll'?ML.meta:null,pL=m.id==='fat'?MF.plus:m.id==='ll'?ML.plus:null,sL=m.id==='fat'?MF.super:m.id==='ll'?ML.super:null;
-  if(CC)CC.destroy();
-  const c2=document.getElementById('compChart').getContext('2d'),gr=c2.createLinearGradient(0,0,0,200);gr.addColorStop(0,m.c+'44');gr.addColorStop(1,m.c+'00');
-  const DS=[
-    {label:'2025',data:d25,borderColor:tc.line25,borderWidth:1.5,backgroundColor:'transparent',pointRadius:3,pointBackgroundColor:tc.line25,tension:.4,borderDash:[4,3]},
-    {label:'2026',data:d26,borderColor:m.c,borderWidth:2.5,backgroundColor:gr,fill:true,pointRadius:4,pointBackgroundColor:m.c,pointBorderColor:tc.ptBorder,pointBorderWidth:2,tension:.4}
+function renderCharts() {
+  const m = METRICAS.find(x => x.id === metricaAtiva);
+  const val2026 = get2026(m.id);
+  const ATIPICOS = [2020, 2021];
+  const ANOS = [2020, 2021, 2022, 2023, 2024, 2025, '2026*'];
+  const dataAnual = ANOS.map(a => a === '2026*' ? val2026 : m.getAnual(+a));
+  const tc = chartColors();
+
+  // ── Gráfico de barras (evolução anual) ──
+  document.getElementById('chartLbl').textContent = 'Evolução histórica · ' + m.lb;
+  if (chartHist) chartHist.destroy();
+  const ctx1 = document.getElementById('histChart').getContext('2d');
+
+  chartHist = new Chart(ctx1, { type:'bar', data:{ labels:ANOS.map(String), datasets:[{ data:dataAnual,
+    backgroundColor: ANOS.map(a => a==='2026*' ? m.c+'dd' : ATIPICOS.includes(+a) ? m.c+'30' : m.c+'66'),
+    borderColor:     ANOS.map(a => a==='2026*' ? m.c     : ATIPICOS.includes(+a) ? m.c+'55' : m.c+'aa'),
+    borderWidth:1.5, borderRadius:6 }] },
+  options:{ responsive:true, plugins:{ legend:{display:false}, tooltip:{
+    backgroundColor:tc.ttBg, borderColor:tc.ttBorder, borderWidth:1,
+    titleColor:tc.ttTitle, bodyColor:tc.ttBody, padding:12,
+    callbacks:{ label:ctx=>m.fmt(ctx.raw) } }},
+  scales:{
+    x:{ grid:{color:tc.grid}, ticks:{color:tc.tick, font:{family:"'DM Mono',monospace",size:11}} },
+    y:{ grid:{color:tc.grid}, ticks:{color:tc.tick, font:{family:"'DM Mono',monospace",size:10}, callback:v=>m.fmt(v)} }
+  }}});
+
+  // ── Gráfico de linhas (2026 vs 2025 mês a mês) ──
+  const data25 = m.getMensal(2025) || Array(12).fill(0);
+  const data26 = MONTHS.map((_, i) => {
+    const r = resultados[mesKey(i)];
+    if (!r) return null;
+    return m.id==='fat' ? +r.fat||0 : m.id==='ll' ? +r.ll||0 : m.id==='ipac' ? +r.ipac||0 : +r.clin||0;
+  });
+
+  // Linhas de meta (só para fat e ll)
+  const metaLine  = m.id==='fat' ? METAS_FAT.meta  : m.id==='ll' ? METAS_LL.meta  : null;
+  const plusLine   = m.id==='fat' ? METAS_FAT.plus  : m.id==='ll' ? METAS_LL.plus  : null;
+  const superLine  = m.id==='fat' ? METAS_FAT.super : m.id==='ll' ? METAS_LL.super : null;
+
+  if (chartComp) chartComp.destroy();
+  const ctx2 = document.getElementById('compChart').getContext('2d');
+  const grad = ctx2.createLinearGradient(0,0,0,200);
+  grad.addColorStop(0, m.c+'44');
+  grad.addColorStop(1, m.c+'00');
+
+  const datasets = [
+    { label:'2025', data:data25, borderColor:tc.line25, borderWidth:1.5, backgroundColor:'transparent', pointRadius:3, pointBackgroundColor:tc.line25, tension:.4, borderDash:[4,3] },
+    { label:'2026', data:data26, borderColor:m.c, borderWidth:2.5, backgroundColor:grad, fill:true, pointRadius:4, pointBackgroundColor:m.c, pointBorderColor:tc.ptBorder, pointBorderWidth:2, tension:.4 }
   ];
-  if(mL)DS.push({label:'Meta',data:mL,borderColor:'#3ecf6e',borderWidth:1,backgroundColor:'transparent',pointRadius:0,tension:.3,borderDash:[6,4]});
-  if(pL)DS.push({label:'Meta Plus',data:pL,borderColor:'#4db3ff',borderWidth:1,backgroundColor:'transparent',pointRadius:0,tension:.3,borderDash:[4,3]});
-  if(sL)DS.push({label:'Super Meta',data:sL,borderColor:'#FFCB00',borderWidth:1,backgroundColor:'transparent',pointRadius:0,tension:.3,borderDash:[3,3]});
-  CC=new Chart(c2,{type:'line',data:{labels:MONTHS,datasets:DS},
-  options:{responsive:true,plugins:{legend:{labels:{color:tc.legend,font:{family:"'DM Mono',monospace",size:10},boxWidth:10,padding:14}},
-  tooltip:{backgroundColor:tc.ttBg,borderColor:tc.ttBorder,borderWidth:1,titleColor:tc.ttTitle,bodyColor:tc.ttBody,padding:12,
-    callbacks:{label:ctx=>ctx.dataset.label+': '+m.fmt(ctx.raw||0)}}},
-  scales:{x:{grid:{color:tc.grid},ticks:{color:tc.tick,font:{family:"'DM Mono',monospace",size:10}}},
-          y:{grid:{color:tc.grid},ticks:{color:tc.tick,font:{family:"'DM Mono',monospace",size:10},callback:v=>m.fmt(v)}}}}});
+  if (metaLine)  datasets.push({ label:'Meta',       data:metaLine,  borderColor:'#3ecf6e', borderWidth:1, backgroundColor:'transparent', pointRadius:0, tension:.3, borderDash:[6,4] });
+  if (plusLine)   datasets.push({ label:'Meta Plus',  data:plusLine,  borderColor:'#4db3ff', borderWidth:1, backgroundColor:'transparent', pointRadius:0, tension:.3, borderDash:[4,3] });
+  if (superLine)  datasets.push({ label:'Super Meta', data:superLine, borderColor:'#FFCB00', borderWidth:1, backgroundColor:'transparent', pointRadius:0, tension:.3, borderDash:[3,3] });
+
+  chartComp = new Chart(ctx2, { type:'line', data:{ labels:MONTHS, datasets },
+  options:{ responsive:true,
+    plugins:{ legend:{ labels:{ color:tc.legend, font:{family:"'DM Mono',monospace",size:10}, boxWidth:10, padding:14 }},
+    tooltip:{ backgroundColor:tc.ttBg, borderColor:tc.ttBorder, borderWidth:1, titleColor:tc.ttTitle, bodyColor:tc.ttBody, padding:12,
+      callbacks:{ label:ctx => ctx.dataset.label+': '+m.fmt(ctx.raw||0) } }},
+    scales:{
+      x:{ grid:{color:tc.grid}, ticks:{color:tc.tick, font:{family:"'DM Mono',monospace",size:10}} },
+      y:{ grid:{color:tc.grid}, ticks:{color:tc.tick, font:{family:"'DM Mono',monospace",size:10}, callback:v=>m.fmt(v)} }
+    }}});
 }
-window.sM=idx=>{SEL=idx;render();setTimeout(()=>document.getElementById('mdet').scrollIntoView({behavior:'smooth',block:'start'}),60);};
-window.fmtInput=(el,idx)=>{
-  const raw=el.value.replace(/\D/g,'');
-  const num=parseInt(raw)||0;
-  el.value=num>0?Number(num).toLocaleString('pt-BR'):'';
-  oI(idx);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INTERAÇÕES DO USUÁRIO
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Seleciona um mês no grid */
+window.selecionarMes = idx => {
+  mesSel = idx;
+  render();
+  setTimeout(() => document.getElementById('mdet').scrollIntoView({ behavior:'smooth', block:'start' }), 60);
 };
-window.oI=idx=>{const lv=gL(getRawVal('mdf-fat'),getRawVal('mdf-ll'),idx);document.getElementById('mdet-lvl-badge').innerHTML='';};
-function getRawVal(id){const el=document.getElementById(id);if(!el)return 0;const v=el.value.replace(/\./g,'').replace(',','.');return parseFloat(v)||0;}
-window.zerarMes=()=>{
-  if(SEL===null)return;
-  if(!confirm('Tem certeza que deseja zerar o resultado de '+MONTHS[SEL]+'?\nEssa ação não pode ser desfeita.'))return;
-  const k=K(SEL);
-  delete RES[k];
-  const ok=save(RES);
-  toast(ok?MONTHS[SEL]+' zerado':'Zerado só nesta sessão',ok?'ok':'warn');
-  SEL=null;
+
+/** Formata input de moeda com milhar */
+window.fmtInput = (el, idx) => {
+  const raw = el.value.replace(/\D/g, '');
+  const num = parseInt(raw) || 0;
+  el.value = num > 0 ? Number(num).toLocaleString('pt-BR') : '';
+  onInputChange(idx);
+};
+
+/** Atualiza badge ao editar campos */
+window.onInputChange = idx => {
+  const lv = getNivel(getRawVal('mdf-fat'), getRawVal('mdf-ll'), idx);
+  document.getElementById('mdet-lvl-badge').innerHTML = '';
+};
+
+/** Extrai valor numérico de um input formatado */
+function getRawVal(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const v = el.value.replace(/\./g, '').replace(',', '.');
+  return parseFloat(v) || 0;
+}
+
+/** Zera os dados de um mês */
+window.zerarMes = () => {
+  if (mesSel === null) return;
+  if (!confirm('Tem certeza que deseja zerar o resultado de ' + MONTHS[mesSel] + '?\nEssa ação não pode ser desfeita.')) return;
+  const k = mesKey(mesSel);
+  delete resultados[k];
+  const ok = save(resultados);
+  toast(ok ? MONTHS[mesSel]+' zerado' : 'Zerado só nesta sessão', ok ? 'ok' : 'warn');
+  mesSel = null;
   document.getElementById('mdet').classList.remove('vis');
   render();
 };
-window.salvarMes=()=>{
-  if(SEL===null)return;
-  const k=K(SEL);
-  RES[k]={fat:getRawVal('mdf-fat'),ll:getRawVal('mdf-ll'),ipac:parseFloat(document.getElementById('mdf-ipac')?.value)||0,clin:parseFloat(document.getElementById('mdf-clin')?.value)||0};
-  const ok=save(RES);toast(ok?MONTHS[SEL]+' salvo':'Salvo só nesta sessão',ok?'ok':'warn');render();
+
+/** Salva os dados de um mês */
+window.salvarMes = () => {
+  if (mesSel === null) return;
+  const k = mesKey(mesSel);
+  resultados[k] = {
+    fat:  getRawVal('mdf-fat'),
+    ll:   getRawVal('mdf-ll'),
+    ipac: parseFloat(document.getElementById('mdf-ipac')?.value) || 0,
+    clin: parseFloat(document.getElementById('mdf-clin')?.value) || 0
+  };
+  const ok = save(resultados);
+  toast(ok ? MONTHS[mesSel]+' salvo' : 'Salvo só nesta sessão', ok ? 'ok' : 'warn');
+  render();
 };
-window.sHM=id=>{HM=id;rHist();};
-window.switchTab=(tab,btn)=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');if(tab==='historico')rHist();};
-function toast(msg,type='ok',ms=2500){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>{t.className='toast '+type;},ms);}
-init();render();
+
+/** Troca a métrica ativa no histórico */
+window.setMetrica = id => { metricaAtiva = id; renderHistorico(); };
+
+/** Troca de aba */
+window.switchTab = (tab, btn) => {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'historico') renderHistorico();
+};
+
+/** Toast notification */
+function toast(msg, type='ok', ms=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => { t.className = 'toast ' + type; }, ms);
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────
+init();
+render();
+
 </script>
 
 <footer class="footer" style="background:var(--surface);border-top:1px solid var(--border);padding:0 32px;height:44px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
