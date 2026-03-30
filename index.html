@@ -218,6 +218,24 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .pc-lvl-val{font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;color:rgba(255,255,255,.55);margin-left:8px;letter-spacing:0;}
 [data-theme="dark"] .pc-mes-row{background:var(--bg);}
 
+/* ── Produção — campos agrupados ── */
+.prod-group{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;position:relative;overflow:hidden;}
+.prod-group::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--pg-c,var(--green));border-radius:12px 12px 0 0;}
+.prod-group-title{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.prod-group-title span{font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;letter-spacing:0;text-transform:none;}
+.prod-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}
+.prod-result{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.prod-result-lbl{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.prod-result-val{font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;}
+.prod-status{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;padding:3px 9px;border-radius:4px;}
+.prod-status.ok{background:rgba(0,136,53,.15);color:#3ecf6e;border:1px solid rgba(0,136,53,.3);}
+.prod-status.fail{background:rgba(192,57,43,.12);color:var(--red);border:1px solid rgba(192,57,43,.25);}
+.prod-premio-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;}
+.prod-premio-row .pp-lbl{font-size:.74rem;font-weight:600;color:var(--text);}
+.prod-premio-row .pp-status{font-family:'DM Mono',monospace;font-size:.72rem;font-weight:600;}
+.prod-premio-row .pp-val{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;}
+[data-theme="dark"] .prod-group{box-shadow:none;}
+
 /* ── Login screen ── */
 .login-screen{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 30% 20%,#00a040 0%,#008835 40%,#006020 100%);transition:opacity .5s,visibility .5s;}
@@ -269,6 +287,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
         <option value="admin">Admin</option>
         <option value="anderson">Anderson</option>
         <option value="aldo">Aldo</option>
+        <option value="geovani">Geovani</option>
       </select>
     </div>
     <div class="login-pass-wrap" id="loginPassWrap">
@@ -307,9 +326,10 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </button>
   </div>
 </div>
-<div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('metas',this)">2026</button>
-  <button class="tab-btn" onclick="switchTab('historico',this)">Histórico</button>
+<div class="tabs" id="tabsBar">
+  <button class="tab-btn active" data-role="admin" onclick="switchTab('metas',this)">2026</button>
+  <button class="tab-btn" data-role="admin" onclick="switchTab('historico',this)">Histórico</button>
+  <button class="tab-btn" data-role="all" onclick="switchTab('producao',this)">Produção</button>
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
@@ -343,15 +363,40 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <div class="chart-card"><div class="chart-lbl">2026 vs 2025 — mês a mês</div><canvas id="compChart" height="200"></canvas></div>
 </div>
 </div>
+<!-- ── Aba Produção ── -->
+<div class="panel" id="panel-producao">
+<div class="wrap">
+  <div class="sh"><h2>Produção 2026</h2><div class="sh-line"></div></div>
+  <div class="kpi-strip" id="prodKpiStrip"></div>
+  <div class="sh"><h2>Meses · clique para lançar resultado</h2><div class="sh-line"></div></div>
+  <div class="months-grid" id="prodMonthsGrid"></div>
+  <div class="mdet" id="prodDet">
+    <div class="mdet-hdr">
+      <div class="mdet-title">Produção de <span id="prodDet-nome">—</span></div>
+      <div class="mdet-actions">
+        <button class="save-btn" style="background:var(--red);box-shadow:0 2px 12px rgba(224,82,82,.25)" onclick="zerarMesProd()">Zerar</button>
+        <button class="save-btn" onclick="salvarMesProd()">Salvar</button>
+      </div>
+    </div>
+    <div id="prodDet-fields"></div>
+  </div>
+  <div class="sh" style="margin-top:4px"><h2>Prêmios Produção</h2><div class="sh-line"></div></div>
+  <div class="premio-block">
+    <div style="font-size:.74rem;color:var(--muted)">Prêmio mensal por métrica de produção.</div>
+    <div id="prodPremioGrid" style="margin-top:14px"></div>
+  </div>
+</div>
+</div>
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 
 // ── Usuários ─────────────────────────────────────────────────────────────
 const USERS={
-  admin:  {nome:'Admin',     senha:'admin'},
-  anderson:{nome:'Anderson', senha:null},
-  aldo:   {nome:'Aldo',      senha:null}
+  admin:   {nome:'Admin',    senha:'admin', role:'admin'},
+  anderson:{nome:'Anderson', senha:null,    role:'producao'},
+  aldo:    {nome:'Aldo',     senha:null,    role:'producao'},
+  geovani: {nome:'Geovani',  senha:null,    role:'producao'}
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -375,7 +420,7 @@ function doLogin(){
   const u=USERS[sel];
   if(u.senha!==null&&pass!==u.senha){err.textContent='Senha incorreta';return;}
   setSession(sel);
-  showSplash(u.nome);
+  showSplash(u.nome, u.role);
 }
 
 function doLogout(){
@@ -383,7 +428,7 @@ function doLogout(){
   location.reload();
 }
 
-function showSplash(nome){
+function showSplash(nome, role){
   document.getElementById('loginScreen').classList.add('hide');
   const sp=document.getElementById('splash');
   const bar=sp.querySelector('.splash-bar');
@@ -394,17 +439,36 @@ function showSplash(nome){
   setTimeout(()=>{
     sp.classList.add('hide');
     document.getElementById('app').classList.add('visible');
+    setupTabs(role);
   },2400);
+}
+
+/** Configura abas visíveis por role */
+function setupTabs(role){
+  window._userRole = role;
+  const btns = document.querySelectorAll('.tab-btn');
+  btns.forEach(b => {
+    const r = b.getAttribute('data-role');
+    b.style.display = (r==='all' || role==='admin') ? '' : 'none';
+  });
+  // Ativa aba padrão por role
+  if(role==='producao'){
+    // Esconde painéis financeiros, mostra produção
+    btns.forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const prodBtn = document.querySelector('[onclick*="producao"]');
+    if(prodBtn) prodBtn.classList.add('active');
+    document.getElementById('panel-producao').classList.add('active');
+    renderProducao();
+  }
 }
 
 function checkAuth(){
   const s=getSession();
   if(s&&USERS[s.user]){
-    // Já autenticado — splash rápido
     document.getElementById('loginScreen').classList.add('hide');
-    showSplash(USERS[s.user].nome);
+    showSplash(USERS[s.user].nome, USERS[s.user].role);
   }
-  // Senão: login screen já está visível
 }
 
 // ── Tema ─────────────────────────────────────────────────────────────────
@@ -487,6 +551,19 @@ onValue(metasRef, (snapshot) => {
 // Salva no Firebase
 window._salvarFirebase = (d) => set(metasRef, d).catch(e => console.error('Erro ao salvar:', e));
 window._firebaseReady = true;
+
+// ── Produção — Firebase ──────────────────────────────────────────────────
+const prodRef = ref(db, 'producao-2026');
+
+onValue(prodRef, (snapshot) => {
+  const data = snapshot.val();
+  if (data) {
+    prodDados = data;
+    if (document.getElementById('panel-producao')?.classList.contains('active')) renderProducao();
+  }
+});
+
+window._salvarProdFirebase = (d) => set(prodRef, d).catch(e => console.error('Erro ao salvar produção:', e));
 </script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1053,6 +1130,7 @@ window.switchTab = (tab, btn) => {
   btn.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'historico') renderHistorico();
+  if (tab === 'producao') renderProducao();
 };
 
 /** Toast notification */
@@ -1063,7 +1141,304 @@ function toast(msg, type='ok', ms=2500) {
   setTimeout(() => { t.className = 'toast ' + type; }, ms);
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PRODUÇÃO — Constantes, Estado, Render
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Metas IPAC (kg) — 3 níveis
+const METAS_IPAC = {
+  inicial:  300487.46,  // R$ 100
+  media:    314145.02,  // R$ 200
+  superior: 341463.02   // R$ 400
+};
+const PREMIOS_IPAC = { inicial:100, media:200, superior:400 };
+
+// Metas fixas das outras métricas
+const META_EFIC_TINT  = 0.90;   // ≥ 90%  → R$ 100 (também pré-requisito do IPAC)
+const META_EFIC_REP   = 0.75;   // ≥ 75%  → R$ 100
+const META_DIAS_DEV   = 10;     // ≤ 10d  → R$ 100
+const META_REPROC     = 0.005;  // ≤ 0.5% → R$ 100
+const PREMIO_FIXO     = 100;    // R$ 100 para cada métrica atingida
+
+// Estado
+let prodDados = {};    // { '2026-01': {ipac, efTint1-3, efRep1-3, diasMedia, op30, reproc, reprocQtde}, ... }
+let prodMesSel = null; // Mês selecionado na aba produção
+
+// ── Helpers de produção ──────────────────────────────────────────────────
+
+function prodLoad() {
+  try { const r = localStorage.getItem('fiobras_prod_2026'); return r ? JSON.parse(r) : null; }
+  catch(e) { return null; }
+}
+function prodSave(d) {
+  if (window._salvarProdFirebase) { window._salvarProdFirebase(d); }
+  else { try { localStorage.setItem('fiobras_prod_2026', JSON.stringify(d)); } catch(e) {} }
+  return true;
+}
+
+function prodInit() {
+  prodDados = prodLoad() || {};
+  // Dados iniciais Jan-Mar (da planilha)
+  if (!prodDados['2026-01']) prodDados['2026-01'] = { ipac:197384.81, efTint1:0.7927,efTint2:0.9186,efTint3:0.9861, efRep1:0.4235,efRep2:0.4442,efRep3:0.5089, diasMedia:10, op30:false, reproc:0.008768,reprocQtde:904.52 };
+  if (!prodDados['2026-02']) prodDados['2026-02'] = { ipac:283450.22, efTint1:0.8305,efTint2:0.973,efTint3:0.9794, efRep1:0.6231,efRep2:0.5958,efRep3:0.6139, diasMedia:9.5, op30:false, reproc:0.005203,reprocQtde:750.01 };
+  if (!prodDados['2026-03']) prodDados['2026-03'] = { ipac:353472.73, efTint1:0.8315,efTint2:0.9925,efTint3:1.0344, efRep1:0.6653,efRep2:0.5775,efRep3:0.6432, diasMedia:13.23, op30:false, reproc:0.002074,reprocQtde:360.16 };
+}
+
+/** Calcula métricas derivadas de um registro */
+function prodCalc(r) {
+  if (!r) return { efTint:0, efRep:0, diasMedia:0 };
+  const efTint = ((+r.efTint1||0)+(+r.efTint2||0)+(+r.efTint3||0)) / 3;
+  const efRep  = ((+r.efRep1||0)+(+r.efRep2||0)+(+r.efRep3||0)) / 3;
+  const diasMedia = +r.diasMedia || 0;
+  return { efTint, efRep, diasMedia };
+}
+
+/** Verifica se mês de produção tem dados */
+const prodHasData = r => r && (+r.ipac||0) > 0;
+
+/** Nível de IPAC atingido */
+function getNivelIpac(ipac, efTint) {
+  if (efTint < META_EFIC_TINT) return 'none'; // Pré-requisito
+  if (ipac >= METAS_IPAC.superior) return 'superior';
+  if (ipac >= METAS_IPAC.media)    return 'media';
+  if (ipac >= METAS_IPAC.inicial)  return 'inicial';
+  return 'none';
+}
+
+// ── Render produção ──────────────────────────────────────────────────────
+
+function renderProducao() {
+  renderProdKPI();
+  renderProdMeses();
+  renderProdPremio();
+  if (prodMesSel !== null) renderProdDetalhe(prodMesSel);
+}
+
+function renderProdKPI() {
+  const meses = Object.keys(prodDados).filter(k => prodHasData(prodDados[k]));
+  const n = meses.length || 1;
+
+  let sumIpac=0, sumEfTint=0, sumEfRep=0, sumDias=0, cntDias=0, sumReproc=0;
+  meses.forEach(k => {
+    const r = prodDados[k], c = prodCalc(r);
+    sumIpac += (+r.ipac||0);
+    sumEfTint += c.efTint;
+    sumEfRep  += c.efRep;
+    if (c.diasMedia > 0) { sumDias += c.diasMedia; cntDias++; }
+    sumReproc += (+r.reproc||0);
+  });
+
+  const avgEfTint = sumEfTint / n;
+  const avgEfRep  = sumEfRep / n;
+  const avgDias   = cntDias > 0 ? sumDias / cntDias : 0;
+  const avgReproc = sumReproc / n;
+
+  function st(ok) { return ok ? '<span class="prod-status ok">OK</span>' : '<span class="prod-status fail">ABAIXO</span>'; }
+
+  const KS = [
+    { lb:'IPAC Acum.', v:fmtKg(sumIpac), c:'#008835', extra:'' },
+    { lb:'Efic. Tinturaria', v:fmtBR(avgEfTint*100,1)+'%', c:'#0076BE', extra:st(avgEfTint>=META_EFIC_TINT) },
+    { lb:'Efic. Repasse', v:fmtBR(avgEfRep*100,1)+'%', c:'#FFCB00', extra:st(avgEfRep>=META_EFIC_REP) },
+    { lb:'Dias Desenv.', v:avgDias>0?fmtBR(avgDias,1)+' d':'—', c:'#4db3ff', extra:avgDias>0?st(avgDias<=META_DIAS_DEV):'' },
+  ];
+
+  document.getElementById('prodKpiStrip').innerHTML = KS.map(k =>
+    '<div class="kpi" style="--kc:'+k.c+'"><div class="kpi-lbl"><div class="kpi-dot"></div>'+k.lb+'</div><div class="kpi-val">'+k.v+'</div>'+(k.extra?'<div style="margin-top:8px">'+k.extra+'</div>':'')+'</div>'
+  ).join('');
+}
+
+function renderProdMeses() {
+  const cur = new Date().getMonth();
+  document.getElementById('prodMonthsGrid').innerHTML = MONTHS.map((m, i) => {
+    const k = mesKey(i), r = prodDados[k];
+    const preenchido = prodHasData(r);
+    const futuro = i > cur;
+    const c = preenchido ? prodCalc(r) : null;
+    const nv = preenchido ? getNivelIpac(+r.ipac||0, c.efTint) : 'none';
+    const nvColor = { none:'', inicial:'#3ecf6e', media:'#4db3ff', superior:'var(--yellow)' };
+    const dotStyle = nv!=='none' ? 'background:'+nvColor[nv]+';' : '';
+    return '<div class="mc '+(preenchido?'filled':'')+' '+(prodMesSel===i?'sel':'')+' '+(futuro&&!preenchido?'future':'')+'" onclick="'+(futuro&&!preenchido?'':'selecionarMesProd('+i+')')+'">'+
+      (nv!=='none'?'<div class="mc-lvl" style="'+dotStyle+'"></div>':'')+
+      '<div class="mc-name">'+m+'</div><div class="mc-dot"></div>'+
+      '<div class="mc-mini">'+(preenchido?fmtKg(+r.ipac||0):futuro?'—':'lançar')+'</div></div>';
+  }).join('');
+}
+
+function renderProdDetalhe(idx) {
+  const k = mesKey(idx), r = prodDados[k] || {};
+  document.getElementById('prodDet-nome').textContent = MONTHS[idx];
+  document.getElementById('prodDet').classList.add('vis');
+  const c = prodCalc(r);
+
+  function inp(id, val, pfx, placeholder) {
+    const v = val ? (typeof val==='number'&&val<1 ? fmtBR(val*100,2) : val) : '';
+    return '<div class="mf"><label class="login-label">'+pfx+'</label><div class="mf-wrap"><input type="text" id="pf-'+id+'" value="'+v+'" placeholder="'+(placeholder||'0')+'" oninput="onProdInput('+idx+')"></div></div>';
+  }
+
+  const nivelIpac = getNivelIpac(+r.ipac||0, c.efTint);
+  const nivelLabel = { none:'—', inicial:'Inicial', media:'Média', superior:'Superior' };
+  const nivelColor = { none:'var(--muted)', inicial:'#3ecf6e', media:'#4db3ff', superior:'var(--yellow)' };
+
+  const html =
+    // IPAC
+    '<div class="prod-group" style="--pg-c:#008835"><div class="prod-group-title" style="color:#008835">IPAC<span>Meta: '+fmtKg(METAS_IPAC.inicial)+' / '+fmtKg(METAS_IPAC.media)+' / '+fmtKg(METAS_IPAC.superior)+'</span></div>' +
+    '<div class="prod-fields">'+inp('ipac', +r.ipac||0, 'Produção (kg)', '0')+'</div>' +
+    '<div class="prod-result"><span class="prod-result-lbl">Nível</span><span class="prod-result-val" style="color:'+nivelColor[nivelIpac]+'">'+nivelLabel[nivelIpac]+'</span></div></div>' +
+
+    // Eficiência Tinturaria
+    '<div class="prod-group" style="--pg-c:#0076BE"><div class="prod-group-title" style="color:#0076BE">Eficiência Tinturaria<span>Meta: 90%</span></div>' +
+    '<div class="prod-fields">'+inp('efTint1',+r.efTint1||0,'1º Turno (%)')+inp('efTint2',+r.efTint2||0,'2º Turno (%)')+inp('efTint3',+r.efTint3||0,'3º Turno (%)')+'</div>' +
+    '<div class="prod-result"><span class="prod-result-lbl">Média</span><span class="prod-result-val" style="color:'+(c.efTint>=META_EFIC_TINT?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.efTint*100,2)+'%</span></div></div>' +
+
+    // Eficiência Repasse
+    '<div class="prod-group" style="--pg-c:#FFCB00"><div class="prod-group-title" style="color:#FFCB00">Eficiência Repasse<span>Meta: 75%</span></div>' +
+    '<div class="prod-fields">'+inp('efRep1',+r.efRep1||0,'1º Turno (%)')+inp('efRep2',+r.efRep2||0,'2º Turno (%)')+inp('efRep3',+r.efRep3||0,'3º Turno (%)')+'</div>' +
+    '<div class="prod-result"><span class="prod-result-lbl">Média</span><span class="prod-result-val" style="color:'+(c.efRep>=META_EFIC_REP?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.efRep*100,2)+'%</span></div></div>' +
+
+    // Dias Desenvolvimento
+    '<div class="prod-group" style="--pg-c:#4db3ff"><div class="prod-group-title" style="color:#4db3ff">Dias Desenvolvimento<span>Meta: ≤ 10 dias</span></div>' +
+    '<div class="prod-fields">'+inp('diasMedia',+r.diasMedia||0,'Média de dias', '0')+'</div>' +
+    '<div style="margin-top:12px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleOp30('+idx+')">' +
+      '<div id="pf-op30" style="width:20px;height:20px;border-radius:5px;border:1.5px solid '+(r.op30?'var(--red)':'var(--border2)')+';background:'+(r.op30?'rgba(192,57,43,.15)':'transparent')+';display:flex;align-items:center;justify-content:center;transition:all .2s">' +
+        (r.op30?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>':'') +
+      '</div>' +
+      '<span style="font-size:.72rem;font-weight:500;color:'+(r.op30?'var(--red)':'var(--muted)')+'">OP com mais de 30 dias em aberto</span>' +
+    '</div>' +
+    '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(c.diasMedia>0&&c.diasMedia<=META_DIAS_DEV&&!r.op30?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.diasMedia,1)+' d'+(r.op30?' (OP>30)':'')+'</span></div></div>' +
+
+    // Reprocesso
+    '<div class="prod-group" style="--pg-c:var(--red)"><div class="prod-group-title" style="color:var(--red)">Reprocesso Gerado<span>Meta: ≤ 0,50%</span></div>' +
+    '<div class="prod-fields">'+inp('reproc',+r.reproc||0,'Percentual (%)')+inp('reprocQtde',+r.reprocQtde||0,'Qtde (kg)')+'</div>' +
+    '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(+r.reproc<=META_REPROC?'#3ecf6e':'var(--red)')+'">'+fmtBR((+r.reproc||0)*100,3)+'%</span></div></div>';
+
+  document.getElementById('prodDet-fields').innerHTML = html;
+}
+
+function renderProdPremio() {
+  const meses = Object.keys(prodDados).filter(k => prodHasData(prodDados[k])).sort();
+
+  let totalGeral = 0;
+  const rows = meses.map(k => {
+    const i = parseInt(k.split('-')[1]) - 1;
+    const r = prodDados[k], c = prodCalc(r);
+    const nm = MONTHS[i];
+    let premioMes = 0;
+
+    // IPAC (com pré-requisito eficiência tinturaria)
+    const nvIpac = getNivelIpac(+r.ipac||0, c.efTint);
+    const pIpac = nvIpac !== 'none' ? PREMIOS_IPAC[nvIpac] : 0;
+    premioMes += pIpac;
+
+    // Reprocesso
+    const okReproc = (+r.reproc||0) <= META_REPROC && (+r.reproc||0) > 0;
+    if (okReproc) premioMes += PREMIO_FIXO;
+
+    // Eficiência Repasse
+    const okRep = c.efRep >= META_EFIC_REP;
+    if (okRep) premioMes += PREMIO_FIXO;
+
+    // Dias Desenvolvimento (média ≤ 10 E sem OP > 30 dias)
+    const okDias = c.diasMedia > 0 && c.diasMedia <= META_DIAS_DEV && !r.op30;
+    if (okDias) premioMes += PREMIO_FIXO;
+
+    totalGeral += premioMes;
+
+    const nvColor = { none:'var(--muted)', inicial:'#3ecf6e', media:'#4db3ff', superior:'var(--yellow)' };
+
+    return '<div class="prod-premio-row"><span class="pp-lbl">'+nm+'</span>' +
+      '<span class="pp-status" style="color:'+nvColor[nvIpac]+'">IPAC R$ '+fmtBR(pIpac,0)+'</span>' +
+      '<span class="pp-status" style="color:'+(okReproc?'#3ecf6e':'var(--muted)')+'">Reproc '+(okReproc?'R$ 100':'—')+'</span>' +
+      '<span class="pp-status" style="color:'+(okRep?'#3ecf6e':'var(--muted)')+'">Repasse '+(okRep?'R$ 100':'—')+'</span>' +
+      '<span class="pp-status" style="color:'+(okDias?'#3ecf6e':'var(--muted)')+'">Desenv '+(okDias?'R$ 100':'—')+'</span>' +
+      '<span class="pp-val" style="color:'+(premioMes>0?'#3ecf6e':'var(--muted)')+'">R$ '+fmtBR(premioMes,0)+'</span></div>';
+  });
+
+  const totalRow = '<div class="prod-premio-row" style="border-color:var(--green);margin-top:8px"><span class="pp-lbl" style="font-weight:700">TOTAL ACUMULADO</span><span class="pp-val" style="color:#3ecf6e;font-size:1rem">R$ '+fmtBR(totalGeral,0)+'</span></div>';
+
+  document.getElementById('prodPremioGrid').innerHTML = (rows.length ? rows.join('') : '<div style="font-size:.76rem;color:var(--muted2);padding:8px 0">Nenhum mês lançado</div>') + totalRow;
+}
+
+// ── Interações produção ──────────────────────────────────────────────────
+
+window.selecionarMesProd = idx => {
+  prodMesSel = idx;
+  renderProducao();
+  setTimeout(() => document.getElementById('prodDet').scrollIntoView({ behavior:'smooth', block:'start' }), 60);
+};
+
+window.onProdInput = idx => {
+  // Live preview sem salvar
+};
+
+/** Toggle checkbox OP > 30 dias */
+window.toggleOp30 = idx => {
+  const k = mesKey(idx);
+  if (!prodDados[k]) prodDados[k] = {};
+  prodDados[k].op30 = !prodDados[k].op30;
+  renderProdDetalhe(idx);
+};
+
+/** Lê valor de input de produção (converte % para decimal se < 100) */
+function getProdVal(id) {
+  const el = document.getElementById('pf-' + id);
+  if (!el) return 0;
+  const v = el.value.replace(/\./g, '').replace(',', '.');
+  return parseFloat(v) || 0;
+}
+
+window.salvarMesProd = () => {
+  if (prodMesSel === null) return;
+  const k = mesKey(prodMesSel);
+  const pctToDecimal = v => v > 1 ? v / 100 : v; // Converte 85.5 → 0.855
+  const prev = prodDados[k] || {};
+
+  prodDados[k] = {
+    ipac:       getProdVal('ipac'),
+    efTint1:    pctToDecimal(getProdVal('efTint1')),
+    efTint2:    pctToDecimal(getProdVal('efTint2')),
+    efTint3:    pctToDecimal(getProdVal('efTint3')),
+    efRep1:     pctToDecimal(getProdVal('efRep1')),
+    efRep2:     pctToDecimal(getProdVal('efRep2')),
+    efRep3:     pctToDecimal(getProdVal('efRep3')),
+    diasMedia:  getProdVal('diasMedia'),
+    op30:       !!prev.op30,
+    reproc:     pctToDecimal(getProdVal('reproc')),
+    reprocQtde: getProdVal('reprocQtde')
+  };
+
+  // Sincroniza IPAC com a aba financeira
+  syncIpacToFinanceiro(prodMesSel, prodDados[k].ipac);
+
+  const ok = prodSave(prodDados);
+  toast(ok ? MONTHS[prodMesSel]+' produção salvo' : 'Salvo só nesta sessão', ok ? 'ok' : 'warn');
+  renderProducao();
+};
+
+window.zerarMesProd = () => {
+  if (prodMesSel === null) return;
+  if (!confirm('Zerar produção de ' + MONTHS[prodMesSel] + '?')) return;
+  const k = mesKey(prodMesSel);
+  delete prodDados[k];
+  syncIpacToFinanceiro(prodMesSel, 0);
+  const ok = prodSave(prodDados);
+  toast(ok ? MONTHS[prodMesSel]+' zerado' : 'Zerado só nesta sessão', ok ? 'ok' : 'warn');
+  prodMesSel = null;
+  document.getElementById('prodDet').classList.remove('vis');
+  renderProducao();
+};
+
+/** Sincroniza IPAC da produção com a aba financeira */
+function syncIpacToFinanceiro(mesIdx, ipacKg) {
+  const k = mesKey(mesIdx);
+  if (resultados[k]) {
+    resultados[k].ipac = ipacKg / 1000; // kg → ton para o financeiro
+  }
+  save(resultados);
+  render(); // Re-render aba financeira
+}
+
 // ── Boot ─────────────────────────────────────────────────────────────────
+prodInit();
 init();
 render();
 
