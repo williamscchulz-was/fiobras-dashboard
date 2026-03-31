@@ -3,6 +3,13 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.0.1  31/03/2026  Fix mobile · ícones header · tema       ║
+  ║    • Ícones header: fix oval no iOS (touch target 44×44).     ║
+  ║    • Notch spacer separado do header (não estica ícones).     ║
+  ║    • Tema claro: data-theme="light" explícito no HTML.        ║
+  ║    • color-scheme:light no :root + meta theme-color dinâmico. ║
+  ║    • Mobile: header/tabs/filtros/modais responsivos.          ║
+  ║                                                               ║
   ║  v2.0.0  30/03/2026  Aba Produção + Desenv. Cor + gráficos   ║
   ║    • Aba Produção: IPAC (CV+CO+PES+PAC), Efic. Tinturaria,   ║
   ║      Efic. Repasse (3 turnos + média), Dias Desenv.,          ║
@@ -100,15 +107,19 @@
 *{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
 
+/* ── Notch spacer (iOS safe area) ── */
+.notch-spacer{height:env(safe-area-inset-top,0px);background:linear-gradient(135deg,#008835 0%,#007030 100%);position:sticky;top:0;z-index:101;}
+[data-theme="dark"] .notch-spacer{background:linear-gradient(135deg,#1C1C1E,#222224);}
+
 /* ── Header ── */
-.hdr{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#008835 0%,#007030 100%);padding:0 28px 0 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.2);min-height:52px;padding-top:env(safe-area-inset-top,0px);}
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;height:52px;padding:0 28px 0 24px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#008835 0%,#007030 100%);box-shadow:0 2px 12px rgba(0,0,0,.2);}
 .hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#006020,#FFCB00,#0076BE);opacity:.5;}
-.hdr-left{display:flex;align-items:center;gap:10px;min-height:52px;}
+.hdr-left{display:flex;align-items:center;gap:10px;}
 .hdr-brand{font-family:'Outfit',sans-serif;font-size:1.15rem;font-weight:800;color:#fff;letter-spacing:1.5px;}
 .hdr-system{font-family:'DM Mono',monospace;font-size:.52rem;font-weight:400;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.55);}
-.hdr-right{display:flex;align-items:center;gap:12px;flex-shrink:0;min-height:52px;}
+.hdr-right{display:flex;align-items:center;gap:12px;}
 .hdr-pill{font-family:'DM Mono',monospace;font-size:.56rem;font-weight:500;color:rgba(255,255,255,.85);background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.30);padding:3px 9px;border-radius:5px;}
-.hdr-icon-btn{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.18);border-radius:50%;cursor:pointer;color:rgba(255,255,255,.7);transition:all .2s;flex-shrink:0;}
+.hdr-icon-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.18);border-radius:50%;cursor:pointer;color:rgba(255,255,255,.7);transition:all .2s;}
 .hdr-icon-btn:hover{background:rgba(255,255,255,.22);color:#fff;}
 
 /* ── Tabs & Layout ── */
@@ -325,13 +336,12 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 
 /* ── Header mobile ── */
 @media(max-width:480px){
-  .hdr{padding:0 14px;padding-top:env(safe-area-inset-top,0px);}
-  .hdr-left{gap:6px;min-height:48px;}
-  .hdr-right{gap:8px;min-height:48px;}
+  .hdr{padding:0 14px;height:48px;}
+  .hdr-left{gap:6px;}
+  .hdr-right{gap:8px;}
   .hdr-brand{font-size:.92rem;letter-spacing:.5px;}
   .hdr-system{font-size:.42rem;letter-spacing:2px;}
   .hdr-pill{display:none;}
-  .hdr-icon-btn{width:36px;height:36px;}
 }
 
 /* ── Tabs: scroll horizontal no mobile ── */
@@ -486,9 +496,9 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 
 /* ── Touch: ensure all interactive elements ≥ 44px ── */
 @media(pointer:coarse){
-  .tab-btn,.mt-btn,.save-btn,.cor-act-btn,.hdr-icon-btn,
+  .tab-btn,.mt-btn,.save-btn,.cor-act-btn,
   .mc,.login-btn,.login-select,.login-input{min-height:44px;}
-  .cor-act-btn{padding:8px 14px;}
+  .hdr-icon-btn{width:44px;height:44px;}
 }
 
 /* ── Print / PDF ── */
@@ -578,18 +588,19 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <div class="splash-sub">Dashboard</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version">v2.0</div>
+  <div class="splash-version">v2.0.1</div>
 </div>
 
 <!-- ── App principal ── -->
 <div id="app">
+<div class="notch-spacer"></div>
 <div class="hdr">
   <div class="hdr-left">
     <span class="hdr-brand">Fiobras</span>
     <span class="hdr-system">Dashboard</span>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill">v2.0</div>
+    <div class="hdr-pill">v2.0.1</div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
