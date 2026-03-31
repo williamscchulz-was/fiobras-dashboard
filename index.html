@@ -3,6 +3,15 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.0.2  31/03/2026  Edição nome/obs produção + fix PDF      ║
+  ║    • Botão Editar (nome da cor + obs) visível para todos os   ║
+  ║      usuários (produção e admin) em todas as cores.            ║
+  ║    • Modal leve para editar apenas Nome da Cor e Observações.  ║
+  ║    • Admin mantém "Editar Tudo" (modal completo) em ativas.    ║
+  ║    • Obs exibida no card quando preenchida.                    ║
+  ║    • Fix PDF: @media print agora mostra #panel-cores para      ║
+  ║      que o relatório renderize corretamente ao imprimir.       ║
+  ║                                                               ║
   ║  v2.0.1  31/03/2026  Fix mobile · ícones header · tema       ║
   ║    • Ícones header: fix oval no iOS (touch target 44×44).     ║
   ║    • Notch spacer separado do header (não estica ícones).     ║
@@ -507,10 +516,12 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   .hdr,.tabs,.splash,.login-screen,.toast,.footer,
   .cor-filtros,.sh,#coresKpiStrip,#coresMesesPrazo,
   #coresLista,#corModal,.panel { display:none !important; }
+  #panel-cores { display:block !important; }
   #relModal { position:static !important; background:none !important; backdrop-filter:none !important; display:block !important; }
   #relModal .modal { box-shadow:none !important; border:none !important; width:100% !important; max-width:100% !important; max-height:none !important; padding:0 !important; }
   #relModal .modal > div:last-child { display:none !important; }
-  #app { display:block !important; }
+  #app { display:block !important; visibility:visible !important; }
+  #corNomeObsModal { display:none !important; }
   .rel-row { border-color:#ddd !important; }
   .rel-resumo { border-color:#ddd !important; background:#f9f9f9 !important; }
   .rel-section-title { border-color:#ddd !important; }
@@ -600,7 +611,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     <span class="hdr-system">Dashboard</span>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill">v2.0.1</div>
+    <div class="hdr-pill">v2.0.2</div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -761,7 +772,19 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
       </div>
     </div>
   </div>
-</div>
+  <!-- Modal Editar Nome/Obs (produção + admin) -->
+  <div class="modal-bg" id="corNomeObsModal">
+    <div class="modal" style="width:420px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:6px">Editar Cor</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);margin-bottom:20px" id="corNomeObsRef"></div>
+      <div class="mf" style="margin-bottom:14px"><label class="login-label">Nome da Cor</label><input class="login-input" id="corNomeObsNome" placeholder="Ex: Azul Royal" style="padding:10px 12px;font-size:.78rem"></div>
+      <div class="mf"><label class="login-label">Observações</label><textarea class="login-input" id="corNomeObsObs" rows="3" placeholder="Observações..." style="padding:10px 12px;font-size:.78rem;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+        <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharNomeObsModal()">Cancelar</button>
+        <button class="save-btn" onclick="salvarNomeObs()">Salvar</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -2292,6 +2315,16 @@ function renderCoresLista() {
       return '<span style="color:'+(sc2.cor||'var(--muted)')+'">'+dt+' '+((sc2.lb||h.acao))+'</span>';
     }).join(' → ');
 
+    // Obs display
+    const obsHTML = c.obs ? '<div style="margin-top:8px;font-size:.68rem;color:var(--muted);font-style:italic;line-height:1.5"><span style="font-weight:600;font-style:normal;color:var(--muted2)">Obs:</span> '+c.obs+'</div>' : '';
+
+    // Botão editar: admin vê edição completa em cores ativas + edição nome/obs em todas
+    // Produção vê apenas edição nome/obs em todas as cores
+    const isAdmin = window._userRole === 'admin';
+    const isAtiva = c.status !== 'aprovada' && c.status !== 'cancelada';
+    const editFullBtn = (isAdmin && isAtiva) ? '<button class="cor-act-btn" onclick="event.stopPropagation();editarCor(\''+c.id+'\')">Editar Tudo</button>' : '';
+    const editNomeBtn = '<button class="cor-act-btn" onclick="event.stopPropagation();editarNomeObs(\''+c.id+'\')">Editar</button>';
+
     return '<div class="cor-card" style="--cor-status:'+sc.cor+'" onclick="toggleCorHist(\''+c.id+'\')">' +
       '<div class="cor-top">' +
         '<div><span class="cor-codigo">'+c.codigo+'</span>'+(c.nome?' <span style="font-size:.76rem;color:var(--muted);font-weight:400;margin-left:6px">'+c.nome+'</span>':'')+(c.fibra?' <span style="font-family:\'DM Mono\',monospace;font-size:.58rem;font-weight:600;padding:2px 6px;border-radius:3px;background:rgba(0,118,190,.12);color:#4db3ff;margin-left:6px">'+c.fibra+'</span>':'')+'</div>' +
@@ -2303,9 +2336,9 @@ function renderCoresLista() {
         '<span class="cor-dias" style="color:'+diasColor+'">'+dias+' dia'+(dias!==1?'s':'')+'</span>' +
         (op30 ? '<span style="color:var(--red);font-weight:700">OP>30d</span>' : '') +
       '</div>' +
+      obsHTML +
       '<div class="cor-bottom">' +
-        '<div class="cor-actions">'+acoesHTML+
-          (c.status !== 'aprovada' && c.status !== 'cancelada' ? '<button class="cor-act-btn" onclick="event.stopPropagation();editarCor(\''+c.id+'\')">Editar</button>' : '') +
+        '<div class="cor-actions">'+acoesHTML+editNomeBtn+editFullBtn+
           '<button class="cor-act-btn danger" onclick="event.stopPropagation();excluirCor(\''+c.id+'\')">Excluir</button>' +
         '</div>' +
       '</div>' +
@@ -2437,6 +2470,34 @@ window.excluirCor = id => {
   delete coresData[id];
   coresSave(coresData);
   toast('Cor excluída', 'ok');
+  renderCores();
+};
+
+// ── Editar Nome/Obs (produção + admin) ──────────────────────────────────
+let corNomeObsId = null;
+
+window.editarNomeObs = id => {
+  const c = coresData[id];
+  if (!c) return;
+  corNomeObsId = id;
+  document.getElementById('corNomeObsRef').textContent = c.codigo + (c.cliente ? ' · ' + c.cliente : '');
+  document.getElementById('corNomeObsNome').value = c.nome || '';
+  document.getElementById('corNomeObsObs').value = c.obs || '';
+  document.getElementById('corNomeObsModal').classList.add('open');
+};
+
+window.fecharNomeObsModal = () => {
+  document.getElementById('corNomeObsModal').classList.remove('open');
+  corNomeObsId = null;
+};
+
+window.salvarNomeObs = () => {
+  if (!corNomeObsId || !coresData[corNomeObsId]) return;
+  coresData[corNomeObsId].nome = document.getElementById('corNomeObsNome').value.trim();
+  coresData[corNomeObsId].obs = document.getElementById('corNomeObsObs').value.trim();
+  coresSave(coresData);
+  fecharNomeObsModal();
+  toast('Nome/Obs atualizado', 'ok');
   renderCores();
 };
 
