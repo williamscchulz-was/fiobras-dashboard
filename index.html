@@ -564,44 +564,76 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 
 /* ── Print / PDF ── */
 @media print {
+  /* ── Base: force light theme ── */
+  :root { --bg:#fff !important; --surface:#fff !important; --surface2:#f8f8f8 !important;
+    --border:#ddd !important; --border2:#ccc !important;
+    --text:#1A2E1E !important; --muted:#567A5E !important; --muted2:#8AAF92 !important;
+    --red:#C0392B !important; --green:#008835 !important; --yellow:#FFCB00 !important; --blue:#0076BE !important;
+    color-scheme:light !important; }
   body { background:#fff !important; color:#1A2E1E !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  .hdr,.tabs,.splash,.login-screen,.toast,.footer { display:none !important; }
+  .hdr,.tabs,.splash,.login-screen,.toast,.footer,.notch-spacer { display:none !important; }
   #app { display:block !important; visibility:visible !important; }
+  .print-header { display:block !important; color:#1A2E1E !important; }
 
   /* ── Print Relatório Produção ── */
   body.print-prod-rel .panel,
-  body.print-prod-rel .notch-spacer,
   body.print-prod-rel #corModal,
   body.print-prod-rel #corNomeObsModal,
   body.print-prod-rel #relModal { display:none !important; }
   body.print-prod-rel #panel-producao { display:block !important; }
   body.print-prod-rel #panel-producao > .wrap > *:not(#prodRelModal) { display:none !important; }
-  body.print-prod-rel #prodRelModal { position:static !important; background:none !important; backdrop-filter:none !important; display:block !important; }
-  body.print-prod-rel #prodRelModal .modal { box-shadow:none !important; border:none !important; width:100% !important; max-width:100% !important; max-height:none !important; padding:0 !important; }
+  body.print-prod-rel #prodRelModal {
+    position:static !important; background:none !important;
+    backdrop-filter:none !important; display:block !important; }
+  body.print-prod-rel #prodRelModal .modal {
+    box-shadow:none !important; border:none !important;
+    width:100% !important; max-width:100% !important;
+    max-height:none !important; padding:0 !important;
+    background:#fff !important; color:#1A2E1E !important; }
   body.print-prod-rel #prodRelModal .modal > div:last-child { display:none !important; }
-  body.print-prod-rel .prel-row { border-color:#ddd !important; background:#fff !important; }
-  body.print-prod-rel .prel-total { border-color:#008835 !important; background:#fff !important; }
+  body.print-prod-rel #prodRelModal .modal > div:first-child { display:none !important; }
+  /* Force readable colors on report rows */
+  body.print-prod-rel .prel-row {
+    background:#fff !important; border-color:#ddd !important; color:#1A2E1E !important; }
+  body.print-prod-rel .prel-name { color:#1A2E1E !important; }
+  body.print-prod-rel .prel-note { color:#567A5E !important; }
+  body.print-prod-rel .prel-meta { color:#567A5E !important; }
+  body.print-prod-rel .prel-bonus { color:#1A2E1E !important; }
   body.print-prod-rel .prel-status.ok { background:rgba(0,136,53,.15) !important; }
   body.print-prod-rel .prel-status.fail { background:rgba(192,57,43,.12) !important; }
+  body.print-prod-rel .prel-total {
+    background:#fff !important; border-color:#008835 !important; }
+  body.print-prod-rel .prel-total-lbl { color:#1A2E1E !important; }
   body.print-prod-rel .print-header { display:block !important; }
+  body.print-prod-rel .print-header div { color:#1A2E1E !important; }
+  body.print-prod-rel .print-header div:first-child { color:#008835 !important; }
 
   /* ── Print Relatório Cores ── */
   body.print-cor-rel .panel,
-  body.print-cor-rel .notch-spacer,
   body.print-cor-rel #corModal,
   body.print-cor-rel #corNomeObsModal,
   body.print-cor-rel #prodRelModal { display:none !important; }
   body.print-cor-rel #panel-cores { display:block !important; }
   body.print-cor-rel #panel-cores > .wrap > *:not(#relModal) { display:none !important; }
-  body.print-cor-rel #relModal { position:static !important; background:none !important; backdrop-filter:none !important; display:block !important; }
-  body.print-cor-rel #relModal .modal { box-shadow:none !important; border:none !important; width:100% !important; max-width:100% !important; max-height:none !important; padding:0 !important; }
+  body.print-cor-rel #relModal {
+    position:static !important; background:none !important;
+    backdrop-filter:none !important; display:block !important; }
+  body.print-cor-rel #relModal .modal {
+    box-shadow:none !important; border:none !important;
+    width:100% !important; max-width:100% !important;
+    max-height:none !important; padding:0 !important;
+    background:#fff !important; color:#1A2E1E !important; }
   body.print-cor-rel #relModal .modal > div:last-child { display:none !important; }
-  body.print-cor-rel .rel-row { border-color:#ddd !important; }
-  body.print-cor-rel .rel-resumo { border-color:#ddd !important; background:#f9f9f9 !important; }
-  body.print-cor-rel .rel-section-title { border-color:#ddd !important; }
+  body.print-cor-rel #relModal .modal > div:first-child { display:none !important; }
+  body.print-cor-rel .rel-row { border-color:#ddd !important; background:#fff !important; color:#1A2E1E !important; }
+  body.print-cor-rel .rel-resumo { border-color:#ddd !important; background:#f8f8f8 !important; }
+  body.print-cor-rel .rel-resumo-lbl { color:#567A5E !important; }
+  body.print-cor-rel .rel-resumo-val { color:#1A2E1E !important; }
+  body.print-cor-rel .rel-section-title { border-color:#ddd !important; color:#1A2E1E !important; }
+  body.print-cor-rel .rel-row-ref { color:#1A2E1E !important; }
+  body.print-cor-rel .rel-empty { color:#8AAF92 !important; }
   body.print-cor-rel .print-header { display:block !important; }
 
-  .print-header { display:block !important; }
   @page { margin:15mm; size:A4; }
 }
 .print-header { display:none; }
@@ -675,7 +707,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <div class="splash-sub">Dashboard</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version">v2.0.1</div>
+  <div class="splash-version">v2.0.6</div>
 </div>
 
 <!-- ── App principal ── -->
