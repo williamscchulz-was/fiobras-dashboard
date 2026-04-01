@@ -3,7 +3,15 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
   ╠═══════════════════════════════════════════════════════════════╣
-  ║  v2.0.2  31/03/2026  Edição nome/obs produção + fix PDF      ║
+  ║  v2.0.3  01/04/2026  Fix efic >100% + sync IPAC Prod→2026       ║
+  ║    • Campos percentual (Efic. Tinturaria, Repasse, Reprocesso)   ║
+  ║      agora exibem corretamente valores ≥100% (ex: 101,00%).      ║
+  ║    • IPAC sincronizado automaticamente Produção → aba 2026.      ║
+  ║    • Campo IPAC na aba 2026 agora é readonly (fonte: Produção).  ║
+  ║    • Unidade IPAC corrigida: armazena em kg (não ton).           ║
+  ║    • Zerar mês financeiro preserva IPAC da Produção.             ║
+  ║                                                                   ║
+  ║  v2.0.2  31/03/2026  Edição nome/obs produção + fix PDF          ║
   ║    • Botão Editar (nome da cor + obs) visível para todos os   ║
   ║      usuários (produção e admin) em todas as cores.            ║
   ║    • Modal leve para editar apenas Nome da Cor e Observações.  ║
@@ -611,7 +619,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     <span class="hdr-system">Dashboard</span>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill">v2.0.2</div>
+    <div class="hdr-pill">v2.0.3</div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -1159,7 +1167,7 @@ const hasData = r => (+r.fat||0) > 0 || (+r.ll||0) > 0;
 // ── Acumuladores 2026 ────────────────────────────────────────────────────
 const acumFat  = () => Object.values(resultados).filter(hasData).reduce((a,r) => a + (+r.fat||0), 0);
 const acumLL   = () => Object.values(resultados).filter(hasData).reduce((a,r) => a + (+r.ll||0), 0);
-const acumIpac = () => Object.values(resultados).filter(hasData).reduce((a,r) => a + (+r.ipac||0), 0);
+const acumIpac = () => Object.values(resultados).reduce((a,r) => a + (+r.ipac||0), 0);
 const acumClin = () => Object.values(resultados).filter(hasData).reduce((a,r) => a + (+r.clin||0), 0);
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1254,7 +1262,7 @@ function renderDetalhe(idx) {
   const campos = [
     { id:'fat',  lb:'Receita Bruta',  pfx:'R$', v:+r.fat||0,  fmt:fmtFull, ms:{ super:METAS_FAT.super[idx], plus:METAS_FAT.plus[idx], meta:METAS_FAT.meta[idx] } },
     { id:'ll',   lb:'LL Ajustado',    pfx:'R$', v:+r.ll||0,   fmt:fmtFull, ms:{ super:METAS_LL.super[idx],  plus:METAS_LL.plus[idx],  meta:METAS_LL.meta[idx] } },
-    { id:'ipac', lb:'IPAC (ton)',     pfx:'t',  v:+r.ipac||0, fmt:v=>fmtBR(v,2), ms:null },
+    { id:'ipac', lb:'IPAC (kg)',      pfx:'kg', v:+r.ipac||0, fmt:fmtKg, ms:null, readonly:true },
     { id:'clin', lb:'Clientes Novos', pfx:'nº', v:+r.clin||0, fmt:fmtNum,  ms:null }
   ];
 
@@ -1277,8 +1285,10 @@ function renderDetalhe(idx) {
     const isMoney = (f.id==='fat'||f.id==='ll');
     const inputVal  = isMoney ? (f.v ? Number(f.v).toLocaleString('pt-BR') : '') : (f.v ? fmtBR(f.v, 2) : '');
     const inputEvt  = isMoney ? 'oninput="fmtInput(this,'+idx+')"' : 'oninput="onInputChange('+idx+')"';
+    const roAttr    = f.readonly ? 'readonly tabindex="-1" style="opacity:.7;cursor:default"' : '';
+    const roNote    = f.readonly ? '<div style="margin-top:4px;font-size:.52rem;color:var(--muted2);font-style:italic">Calculado pela aba Produção</div>' : '';
 
-    return '<div class="mf"><label style="display:flex;align-items:center;gap:0">'+f.lb+indBadge+'</label><div class="mf-wrap"><div class="mf-pfx">'+f.pfx+'</div><input type="text" id="mdf-'+f.id+'" value="'+inputVal+'" placeholder="0" '+inputEvt+'></div>'+vsHTML+lvHTML+'</div>';
+    return '<div class="mf"><label style="display:flex;align-items:center;gap:0">'+f.lb+indBadge+'</label><div class="mf-wrap"><div class="mf-pfx">'+f.pfx+'</div><input type="text" id="mdf-'+f.id+'" value="'+inputVal+'" placeholder="0" '+inputEvt+' '+roAttr+'></div>'+roNote+vsHTML+lvHTML+'</div>';
   }).join('');
 }
 
@@ -1531,9 +1541,14 @@ function getRawVal(id) {
 /** Zera os dados de um mês */
 window.zerarMes = () => {
   if (mesSel === null) return;
-  if (!confirm('Tem certeza que deseja zerar o resultado de ' + MONTHS[mesSel] + '?\nEssa ação não pode ser desfeita.')) return;
+  if (!confirm('Tem certeza que deseja zerar o resultado financeiro de ' + MONTHS[mesSel] + '?\nO IPAC (produção) será mantido.')) return;
   const k = mesKey(mesSel);
-  delete resultados[k];
+  const prevIpac = resultados[k]?.ipac || 0;
+  if (prevIpac > 0) {
+    resultados[k] = { fat:0, ll:0, ipac:prevIpac, clin:0 }; // Mantém IPAC da Produção
+  } else {
+    delete resultados[k];
+  }
   const ok = save(resultados);
   toast(ok ? MONTHS[mesSel]+' zerado' : 'Zerado só nesta sessão', ok ? 'ok' : 'warn');
   mesSel = null;
@@ -1545,10 +1560,11 @@ window.zerarMes = () => {
 window.salvarMes = () => {
   if (mesSel === null) return;
   const k = mesKey(mesSel);
+  const prev = resultados[k] || {};
   resultados[k] = {
     fat:  getRawVal('mdf-fat'),
     ll:   getRawVal('mdf-ll'),
-    ipac: parseFloat(document.getElementById('mdf-ipac')?.value) || 0,
+    ipac: prev.ipac || 0,  // Preserva IPAC calculado pela aba Produção
     clin: parseFloat(document.getElementById('mdf-clin')?.value) || 0
   };
   const ok = save(resultados);
@@ -1729,11 +1745,11 @@ function renderProdDetalhe(idx) {
   document.getElementById('prodDet').classList.add('vis');
   const c = prodCalc(r);
 
-  function inp(id, val, pfx, placeholder) {
+  function inp(id, val, pfx, placeholder, isPct) {
     let v = '';
     if (val && typeof val === 'number' && val !== 0) {
-      if (val > 0 && val < 1) {
-        v = fmtBR(val * 100, 2);
+      if (isPct) {
+        v = fmtBR(val * 100, 2); // Sempre converte decimal → percentual (0.8545→85,45 / 1.01→101,00)
       } else {
         v = fmtBR(val, 2);
       }
@@ -1757,14 +1773,14 @@ function renderProdDetalhe(idx) {
     // Eficiência Tinturaria
     '<div class="prod-group" style="--pg-c:#0076BE"><div class="prod-group-title" style="color:#0076BE">Eficiência Tinturaria<span>Meta: 90%</span></div>' +
     '<div class="prod-split"><div>' +
-      '<div class="prod-fields">'+inp('efTint1',+r.efTint1||0,'1º Turno (%)')+inp('efTint2',+r.efTint2||0,'2º Turno (%)')+inp('efTint3',+r.efTint3||0,'3º Turno (%)')+inp('efTintMedia',+r.efTintMedia||0,'Média (%)')+'</div>' +
+      '<div class="prod-fields">'+inp('efTint1',+r.efTint1||0,'1º Turno (%)','0',true)+inp('efTint2',+r.efTint2||0,'2º Turno (%)','0',true)+inp('efTint3',+r.efTint3||0,'3º Turno (%)','0',true)+inp('efTintMedia',+r.efTintMedia||0,'Média (%)','0',true)+'</div>' +
       '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(c.efTint>=META_EFIC_TINT?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.efTint*100,2)+'%</span></div>' +
     '</div><div class="prod-chart-wrap"><canvas id="pchart-tint"></canvas></div></div></div>' +
 
     // Eficiência Repasse
     '<div class="prod-group" style="--pg-c:#FFCB00"><div class="prod-group-title" style="color:#FFCB00">Eficiência Repasse<span>Meta: 75%</span></div>' +
     '<div class="prod-split"><div>' +
-      '<div class="prod-fields">'+inp('efRep1',+r.efRep1||0,'1º Turno (%)')+inp('efRep2',+r.efRep2||0,'2º Turno (%)')+inp('efRep3',+r.efRep3||0,'3º Turno (%)')+inp('efRepMedia',+r.efRepMedia||0,'Média (%)')+'</div>' +
+      '<div class="prod-fields">'+inp('efRep1',+r.efRep1||0,'1º Turno (%)','0',true)+inp('efRep2',+r.efRep2||0,'2º Turno (%)','0',true)+inp('efRep3',+r.efRep3||0,'3º Turno (%)','0',true)+inp('efRepMedia',+r.efRepMedia||0,'Média (%)','0',true)+'</div>' +
       '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(c.efRep>=META_EFIC_REP?'#3ecf6e':'var(--red)')+'">'+fmtBR(c.efRep*100,2)+'%</span></div>' +
     '</div><div class="prod-chart-wrap"><canvas id="pchart-rep"></canvas></div></div></div>' +
 
@@ -1784,7 +1800,7 @@ function renderProdDetalhe(idx) {
     // Reprocesso
     '<div class="prod-group" style="--pg-c:var(--red)"><div class="prod-group-title" style="color:var(--red)">Reprocesso Gerado<span>Meta: ≤ 0,50%</span></div>' +
     '<div class="prod-split"><div>' +
-      '<div class="prod-fields">'+inp('reproc',+r.reproc||0,'Percentual (%)')+inp('reprocQtde',+r.reprocQtde||0,'Qtde (kg)')+'</div>' +
+      '<div class="prod-fields">'+inp('reproc',+r.reproc||0,'Percentual (%)','0',true)+inp('reprocQtde',+r.reprocQtde||0,'Qtde (kg)')+'</div>' +
       '<div class="prod-result"><span class="prod-result-lbl">Status</span><span class="prod-result-val" style="color:'+(+r.reproc<=META_REPROC?'#3ecf6e':'var(--red)')+'">'+fmtBR((+r.reproc||0)*100,3)+'%</span></div>' +
     '</div><div class="prod-chart-wrap"><canvas id="pchart-reproc"></canvas></div></div></div>';
 
@@ -2020,9 +2036,8 @@ window.zerarMesProd = () => {
 /** Sincroniza IPAC da produção com a aba financeira */
 function syncIpacToFinanceiro(mesIdx, ipacKg) {
   const k = mesKey(mesIdx);
-  if (resultados[k]) {
-    resultados[k].ipac = ipacKg / 1000; // kg → ton para o financeiro
-  }
+  if (!resultados[k]) resultados[k] = { fat:0, ll:0, ipac:0, clin:0 };
+  resultados[k].ipac = ipacKg; // Armazena em kg (consistente com HIST_IPAC)
   save(resultados);
   render(); // Re-render aba financeira
 }
