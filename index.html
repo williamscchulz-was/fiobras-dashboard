@@ -3,6 +3,18 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.1.0  02/04/2026  Navegação modular + Timeline                      ║
+  ║    • Seletor de módulo entre header e abas (Resultados / Produção).  ║
+  ║    • Módulo Resultados: abas 2026 + Histórico (admin only).          ║
+  ║    • Módulo Produção: abas Produção + Desenv. Cor + Timeline.        ║
+  ║    • Role produção: abre direto no módulo Produção.                  ║
+  ║    • Timeline: feed vertical (estilo Nubank) de registros de         ║
+  ║      testes de produção. Campos: descrição (obrig.), cliente,        ║
+  ║      OP, cor (opcionais), foto (upload + compressão 480px JPEG).     ║
+  ║    • Foto fullscreen ao toque, exclusão por admin, agrupamento       ║
+  ║      por data (Hoje/Ontem/dd-mm-aaaa), Firebase tempo real.          ║
+  ║    • Fix LL Ajustado 2025: 4.457.229 → 4.404.551.                   ║
+  ║                                                                      ║
   ║  v2.0.6  01/04/2026  Fix PDF — mostra só o relatório resumido     ║
   ║    • Exportar PDF agora exibe apenas o relatório (produção ou   ║
   ║      desenv. cor), sem KPIs, meses ou conteúdo extra.           ║
@@ -156,8 +168,16 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .hdr-icon-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.18);border-radius:50%;cursor:pointer;color:rgba(255,255,255,.7);transition:all .2s;}
 .hdr-icon-btn:hover{background:rgba(255,255,255,.22);color:#fff;}
 
+/* ── Module bar ── */
+.mod-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:6px 12px;display:flex;gap:6px;position:sticky;top:calc(52px + env(safe-area-inset-top,0px));z-index:99;}
+.mod-btn{flex:1;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;min-height:44px;color:var(--muted2);}
+.mod-btn.active{border-color:var(--green);background:rgba(0,136,53,.07);color:var(--green);}
+.mod-btn svg{transition:color .15s;}
+.mod-btn .mod-lbl{font-family:'Poppins',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:inherit;transition:color .15s;}
+.mod-btn.active .mod-lbl{color:var(--green);}
 /* ── Tabs & Layout ── */
-.tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;position:sticky;top:calc(52px + env(safe-area-inset-top,0px));z-index:99;}
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;position:sticky;top:calc(52px + 57px + env(safe-area-inset-top,0px));z-index:98;}
+.tab-group{display:none;}.tab-group.active{display:flex;}
 .tab-btn{padding:14px 24px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-bottom:-1px;}
 .tab-btn:hover{color:var(--text);}.tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
 .panel{display:none;}.panel.active{display:block;}
@@ -272,6 +292,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 /* ── Dark theme overrides ── */
 [data-theme="dark"] .hdr{background:linear-gradient(135deg,#1C1C1E,#222224);box-shadow:0 1px 0 #2C2C2E;}
 [data-theme="dark"] .hdr::after{opacity:.3;}
+[data-theme="dark"] .mod-bar{background:#1C1C1E;border-color:#2C2C2E;}
 [data-theme="dark"] .tabs{background:#1C1C1E;border-color:#2C2C2E;}
 [data-theme="dark"] .kpi,
 [data-theme="dark"] .anual-block,
@@ -390,6 +411,57 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center;}
 .modal-bg.open{display:flex;}
 [data-theme="dark"] .cor-card{box-shadow:none;}
+
+/* ── Timeline ── */
+.tl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.tl-fab{width:44px;height:44px;border-radius:50%;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,136,53,.3);transition:transform .15s,box-shadow .15s;}
+.tl-fab:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(0,136,53,.4);}
+.tl-fab:active{transform:scale(.96);}
+.tl-fab svg{stroke:#fff;width:20px;height:20px;}
+.tl-feed{position:relative;padding-left:28px;}
+.tl-feed::before{content:'';position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:var(--border);border-radius:2px;}
+.tl-date-sep{position:relative;margin-bottom:12px;margin-top:20px;}
+.tl-date-sep:first-child{margin-top:0;}
+.tl-date-lbl{font-family:'DM Mono',monospace;font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);background:var(--bg);padding-right:12px;position:relative;z-index:1;}
+.tl-dot{position:absolute;left:-28px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;border:2px solid var(--green);background:var(--bg);z-index:2;}
+.tl-evt{position:relative;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
+.tl-evt:hover{border-color:var(--green);}
+.tl-evt-dot{position:absolute;left:-24px;top:20px;width:8px;height:8px;border-radius:50%;background:var(--border2);}
+.tl-evt-top{display:flex;gap:12px;align-items:flex-start;}
+.tl-evt-foto{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--surface2);border:1px solid var(--border);flex-shrink:0;cursor:pointer;}
+.tl-evt-body{flex:1;min-width:0;}
+.tl-evt-desc{font-size:.82rem;font-weight:500;color:var(--text);line-height:1.5;margin-bottom:6px;word-break:break-word;}
+.tl-evt-chips{display:flex;gap:5px;flex-wrap:wrap;}
+.tl-chip{font-family:'DM Mono',monospace;font-size:.6rem;font-weight:500;padding:3px 8px;border-radius:4px;background:rgba(0,136,53,.08);color:var(--green);border:1px solid rgba(0,136,53,.2);white-space:nowrap;}
+.tl-chip.cli{background:rgba(0,118,190,.08);color:var(--blue);border-color:rgba(0,118,190,.2);}
+.tl-chip.op{background:rgba(255,203,0,.1);color:#b8920a;border-color:rgba(255,203,0,.25);}
+.tl-evt-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.tl-evt-time{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted2);}
+.tl-evt-user{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted2);}
+.tl-evt-del{opacity:0;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--muted2);flex-shrink:0;}
+.tl-evt:hover .tl-evt-del{opacity:1;}
+.tl-evt-del:hover{border-color:var(--red);color:var(--red);background:rgba(192,57,43,.06);}
+.tl-empty{text-align:center;padding:48px 20px;color:var(--muted2);}
+.tl-empty svg{margin-bottom:12px;}
+.tl-form-field{margin-bottom:14px;}
+.tl-form-field label{display:block;font-family:'Poppins',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.tl-form-field input,.tl-form-field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg);outline:none;transition:border-color .2s;}
+.tl-form-field input:focus,.tl-form-field textarea:focus{border-color:var(--green);}
+.tl-form-field textarea{resize:vertical;min-height:72px;}
+.tl-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.tl-form-row{grid-template-columns:1fr;}}
+.tl-foto-upload{width:100%;height:80px;border:2px dashed var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:var(--muted);font-size:.72rem;font-weight:500;transition:border-color .2s,background .2s;}
+.tl-foto-upload:hover{border-color:var(--green);background:rgba(0,136,53,.03);}
+.tl-foto-upload.has-foto{border-style:solid;border-color:var(--green);}
+.tl-foto-preview{width:60px;height:60px;border-radius:6px;object-fit:cover;}
+.tl-foto-upload input[type="file"]{display:none;}
+.tl-fullimg{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;cursor:pointer;}
+.tl-fullimg.open{display:flex;}
+.tl-fullimg img{max-width:92vw;max-height:88vh;border-radius:8px;object-fit:contain;}
+[data-theme="dark"] .tl-evt{box-shadow:none;}
+[data-theme="dark"] .tl-dot{background:var(--bg);}
+[data-theme="dark"] .tl-date-lbl{background:var(--bg);}
+[data-theme="dark"] .tl-chip.op{color:#d4a600;}
 
 /* ══════════════════════════════════════════════════════════════════════════
    MOBILE RESPONSIVE — 375px–768px
@@ -557,7 +629,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 
 /* ── Touch: ensure all interactive elements ≥ 44px ── */
 @media(pointer:coarse){
-  .tab-btn,.mt-btn,.save-btn,.cor-act-btn,
+  .tab-btn,.mt-btn,.save-btn,.cor-act-btn,.mod-btn,
   .mc,.login-btn,.login-select,.login-input{min-height:44px;}
   .hdr-icon-btn{width:44px;height:44px;}
 }
@@ -571,7 +643,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     --red:#C0392B !important; --green:#008835 !important; --yellow:#FFCB00 !important; --blue:#0076BE !important;
     color-scheme:light !important; }
   body { background:#fff !important; color:#1A2E1E !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  .hdr,.tabs,.splash,.login-screen,.toast,.footer,.notch-spacer { display:none !important; }
+  .hdr,.tabs,.mod-bar,.splash,.login-screen,.toast,.footer,.notch-spacer { display:none !important; }
   #app { display:block !important; visibility:visible !important; }
   .print-header { display:block !important; color:#1A2E1E !important; }
 
@@ -707,7 +779,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <div class="splash-sub">Dashboard</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version">v2.0.6</div>
+  <div class="splash-version">v2.1.0</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -719,7 +791,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     <span class="hdr-system">Dashboard</span>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill">v2.0.6</div>
+    <div class="hdr-pill">v2.1.0</div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -729,11 +801,26 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </button>
   </div>
 </div>
+<div class="mod-bar" id="modBar">
+  <button class="mod-btn active" data-mod="resultados" data-role="admin" onclick="switchModule('resultados',this)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="mod-lbl">Resultados</span>
+  </button>
+  <button class="mod-btn" data-mod="producao" data-role="all" onclick="switchModule('producao',this)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span class="mod-lbl">Produção</span>
+  </button>
+</div>
 <div class="tabs" id="tabsBar">
-  <button class="tab-btn active" data-role="admin" onclick="switchTab('metas',this)">2026</button>
-  <button class="tab-btn" data-role="admin" onclick="switchTab('historico',this)">Histórico</button>
-  <button class="tab-btn" data-role="all" onclick="switchTab('producao',this)">Produção</button>
-  <button class="tab-btn" data-role="all" onclick="switchTab('cores',this)">Desenv. Cor</button>
+  <div class="tab-group active" id="tg-resultados">
+    <button class="tab-btn active" onclick="switchTab('metas',this)">2026</button>
+    <button class="tab-btn" onclick="switchTab('historico',this)">Histórico</button>
+  </div>
+  <div class="tab-group" id="tg-producao">
+    <button class="tab-btn" onclick="switchTab('producao',this)">Produção</button>
+    <button class="tab-btn" onclick="switchTab('cores',this)">Desenv. Cor</button>
+    <button class="tab-btn" onclick="switchTab('timeline',this)">Timeline</button>
+  </div>
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
@@ -911,6 +998,66 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </div>
   </div>
 </div>
+<!-- ── Aba Timeline ── -->
+<div class="panel" id="panel-timeline">
+<div class="wrap">
+  <div class="tl-header">
+    <div class="sh" style="flex:1;margin:0"><h2>Timeline</h2><div class="sh-line"></div></div>
+    <button class="tl-fab" onclick="abrirTlModal()" aria-label="Novo registro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
+  <div class="tl-feed" id="tlFeed">
+    <div class="tl-empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <div style="font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:4px">Nenhum registro</div>
+      <div style="font-size:.68rem;color:var(--muted2)">Toque no + para adicionar o primeiro</div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- Modal criar evento timeline -->
+<div class="modal-bg" id="tlModal" onclick="if(event.target===this)fecharTlModal()">
+  <div class="modal" style="width:460px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Novo registro</div>
+    </div>
+    <div class="tl-form-field">
+      <label>Descrição *</label>
+      <textarea id="tlDesc" placeholder="O que aconteceu? Ex: Teste de solidez aprovado..."></textarea>
+    </div>
+    <div class="tl-form-row">
+      <div class="tl-form-field">
+        <label>Cliente</label>
+        <input type="text" id="tlCliente" placeholder="Nome do cliente">
+      </div>
+      <div class="tl-form-field">
+        <label>Ordem de Produção</label>
+        <input type="text" id="tlOp" placeholder="Ex: OP-12345">
+      </div>
+    </div>
+    <div class="tl-form-field">
+      <label>Cor</label>
+      <input type="text" id="tlCor" placeholder="Ex: Azul Royal 2040">
+    </div>
+    <div class="tl-form-field">
+      <label>Foto (opcional)</label>
+      <div class="tl-foto-upload" id="tlFotoArea" onclick="document.getElementById('tlFotoInput').click()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span id="tlFotoLabel">Toque para adicionar foto</span>
+        <input type="file" id="tlFotoInput" accept="image/*" onchange="tlFotoChange(this)">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+      <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharTlModal()">Cancelar</button>
+      <button class="save-btn" onclick="salvarTlEvento()">Salvar</button>
+    </div>
+  </div>
+</div>
+<!-- Fullscreen foto -->
+<div class="tl-fullimg" id="tlFullImg" onclick="this.classList.remove('open')">
+  <img id="tlFullImgSrc" src="">
+</div>
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
@@ -953,6 +1100,7 @@ function doLogout(){
 }
 
 function showSplash(nome, role){
+  window._currentUserName = nome;
   document.getElementById('loginScreen').classList.add('hide');
   const sp=document.getElementById('splash');
   const bar=sp.querySelector('.splash-bar');
@@ -967,22 +1115,27 @@ function showSplash(nome, role){
   },2400);
 }
 
-/** Configura abas visíveis por role */
+/** Configura módulos e abas visíveis por role */
 function setupTabs(role){
   window._userRole = role;
-  const btns = document.querySelectorAll('.tab-btn');
-  btns.forEach(b => {
+  const modBtns = document.querySelectorAll('.mod-btn');
+  modBtns.forEach(b => {
     const r = b.getAttribute('data-role');
     b.style.display = (r==='all' || role==='admin') ? '' : 'none';
   });
-  // Ativa aba padrão por role
   if(role==='producao'){
-    // Esconde painéis financeiros, mostra produção
-    btns.forEach(b => b.classList.remove('active'));
+    // Produção users: esconde módulo Resultados, ativa Produção
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    const prodBtn = document.querySelector('[onclick*="producao"]');
-    if(prodBtn) prodBtn.classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    modBtns.forEach(b => b.classList.remove('active'));
+    const prodMod = document.querySelector('.mod-btn[data-mod="producao"]');
+    if(prodMod) prodMod.classList.add('active');
+    document.querySelectorAll('.tab-group').forEach(g => g.classList.remove('active'));
+    document.getElementById('tg-producao').classList.add('active');
+    const firstTab = document.querySelector('#tg-producao .tab-btn');
+    if(firstTab) firstTab.classList.add('active');
     document.getElementById('panel-producao').classList.add('active');
+    window._activeModule = 'producao';
     renderProducao();
   }
 }
@@ -1106,6 +1259,19 @@ onValue(coresRef, (snapshot) => {
 });
 
 window._salvarCoresFirebase = (d) => set(coresRef, d).catch(e => console.error('Erro ao salvar cores:', e));
+
+// ── Timeline — Firebase ─────────────────────────────────────────────────
+const tlRef = ref(db, 'timeline-2026');
+
+onValue(tlRef, (snapshot) => {
+  const data = snapshot.val();
+  if (data) {
+    tlDados = data;
+    if (document.getElementById('panel-timeline')?.classList.contains('active')) renderTimeline();
+  }
+});
+
+window._salvarTlFirebase = (d) => set(tlRef, d).catch(e => console.error('Erro ao salvar timeline:', e));
 </script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1191,7 +1357,7 @@ const TOTAIS_FAT = {}, TOTAIS_LL = {}, TOTAIS_IPAC = {};
 Object.keys(HIST_FAT).forEach(a => TOTAIS_FAT[+a] = somaArray(HIST_FAT[+a]));
 Object.keys(HIST_LL).forEach(a => TOTAIS_LL[+a] = somaArray(HIST_LL[+a]));
 TOTAIS_LL[2024] = 3389298;  // Valor ajustado (diferente da soma simples)
-TOTAIS_LL[2025] = 4457229;  // Valor ajustado
+TOTAIS_LL[2025] = 4404551;  // Valor ajustado (4.404.550,86)
 Object.keys(HIST_IPAC).forEach(a => TOTAIS_IPAC[+a] = somaArray(HIST_IPAC[+a]));
 
 // ── Estado da aplicação ──────────────────────────────────────────────────
@@ -1708,15 +1874,32 @@ window.salvarMes = () => {
 /** Troca a métrica ativa no histórico */
 window.setMetrica = id => { metricaAtiva = id; renderHistorico(); };
 
-/** Troca de aba */
+/** Switch module (Resultados / Produção) */
+window._activeModule = 'resultados';
+
+window.switchModule = (mod, btn) => {
+  window._activeModule = mod;
+  document.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Show correct tab group
+  document.querySelectorAll('.tab-group').forEach(g => g.classList.remove('active'));
+  const tg = document.getElementById('tg-' + mod);
+  if (tg) tg.classList.add('active');
+  // Activate first tab of the group
+  const firstBtn = tg?.querySelector('.tab-btn');
+  if (firstBtn) firstBtn.click();
+};
+
 window.switchTab = (tab, btn) => {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const group = btn.closest('.tab-group');
+  if (group) group.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'historico') renderHistorico();
   if (tab === 'producao') renderProducao();
   if (tab === 'cores') renderCores();
+  if (tab === 'timeline') renderTimeline();
 };
 
 /** Toast notification */
@@ -2853,7 +3036,181 @@ window.renderRelatorio = () => {
   document.getElementById('relConteudo').innerHTML = html;
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TIMELINE — Feed de registros de testes de produção
+// ═══════════════════════════════════════════════════════════════════════════
+
+let tlDados = {};
+let tlFotoBase64 = null;
+
+function tlInit() { tlDados = {}; }
+
+function tlSave(d) {
+  if (window._salvarTlFirebase) window._salvarTlFirebase(d);
+}
+
+/** Abre modal de novo evento */
+window.abrirTlModal = () => {
+  document.getElementById('tlDesc').value = '';
+  document.getElementById('tlCliente').value = '';
+  document.getElementById('tlOp').value = '';
+  document.getElementById('tlCor').value = '';
+  tlFotoBase64 = null;
+  const area = document.getElementById('tlFotoArea');
+  area.classList.remove('has-foto');
+  document.getElementById('tlFotoLabel').textContent = 'Toque para adicionar foto';
+  const prev = area.querySelector('.tl-foto-preview');
+  if (prev) prev.remove();
+  document.getElementById('tlModal').classList.add('open');
+};
+
+window.fecharTlModal = () => {
+  document.getElementById('tlModal').classList.remove('open');
+};
+
+/** Processa foto selecionada — redimensiona para thumbnail */
+window.tlFotoChange = (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 480;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      tlFotoBase64 = c.toDataURL('image/jpeg', 0.7);
+      // Preview
+      const area = document.getElementById('tlFotoArea');
+      area.classList.add('has-foto');
+      let prev = area.querySelector('.tl-foto-preview');
+      if (!prev) { prev = document.createElement('img'); prev.className = 'tl-foto-preview'; area.prepend(prev); }
+      prev.src = tlFotoBase64;
+      document.getElementById('tlFotoLabel').textContent = 'Trocar foto';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+/** Salva evento no Firebase */
+window.salvarTlEvento = () => {
+  const desc = document.getElementById('tlDesc').value.trim();
+  if (!desc) { toast('Preencha a descrição', 'err'); return; }
+  const id = 'tl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  const evt = {
+    desc,
+    cliente: document.getElementById('tlCliente').value.trim() || '',
+    op: document.getElementById('tlOp').value.trim() || '',
+    cor: document.getElementById('tlCor').value.trim() || '',
+    foto: tlFotoBase64 || '',
+    criadoPor: window._currentUserName || 'admin',
+    criadoEm: new Date().toISOString()
+  };
+  tlDados[id] = evt;
+  tlSave(tlDados);
+  fecharTlModal();
+  toast('Registro salvo');
+  renderTimeline();
+};
+
+/** Exclui evento */
+window.tlExcluir = (id) => {
+  if (!confirm('Excluir este registro?')) return;
+  delete tlDados[id];
+  tlSave(tlDados);
+  toast('Registro excluído');
+  renderTimeline();
+};
+
+/** Abre foto fullscreen */
+window.tlAbrirFoto = (src) => {
+  document.getElementById('tlFullImgSrc').src = src;
+  document.getElementById('tlFullImg').classList.add('open');
+};
+
+/** Formata data relativa */
+function tlFormatDate(iso) {
+  const d = new Date(iso);
+  const hoje = new Date();
+  const ontem = new Date(hoje); ontem.setDate(ontem.getDate() - 1);
+  const dd = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  if (d.toDateString() === hoje.toDateString()) return 'Hoje';
+  if (d.toDateString() === ontem.toDateString()) return 'Ontem';
+  return dd;
+}
+
+function tlFormatTime(iso) {
+  return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+/** Renderiza o feed da timeline */
+function renderTimeline() {
+  const feed = document.getElementById('tlFeed');
+  const entries = Object.entries(tlDados).sort((a, b) => {
+    return new Date(b[1].criadoEm) - new Date(a[1].criadoEm);
+  });
+
+  if (entries.length === 0) {
+    feed.innerHTML = '<div class="tl-empty">' +
+      '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+      '<div style="font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:4px">Nenhum registro</div>' +
+      '<div style="font-size:.68rem;color:var(--muted2)">Toque no + para adicionar o primeiro</div></div>';
+    return;
+  }
+
+  let html = '';
+  let lastDate = '';
+  const isAdmin = window._userRole === 'admin';
+
+  entries.forEach(([id, evt]) => {
+    const dateLabel = tlFormatDate(evt.criadoEm);
+    if (dateLabel !== lastDate) {
+      lastDate = dateLabel;
+      html += '<div class="tl-date-sep"><div class="tl-dot"></div><span class="tl-date-lbl">' + dateLabel + '</span></div>';
+    }
+
+    const chips = [];
+    if (evt.cor) chips.push('<span class="tl-chip">' + evt.cor + '</span>');
+    if (evt.cliente) chips.push('<span class="tl-chip cli">' + evt.cliente + '</span>');
+    if (evt.op) chips.push('<span class="tl-chip op">' + evt.op + '</span>');
+
+    const fotoHtml = evt.foto
+      ? '<img class="tl-evt-foto" src="' + evt.foto + '" onclick="event.stopPropagation();tlAbrirFoto(this.src)" alt="Foto">'
+      : '';
+
+    const delBtn = isAdmin
+      ? '<button class="tl-evt-del" onclick="event.stopPropagation();tlExcluir(\'' + id + '\')" aria-label="Excluir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
+      : '';
+
+    html += '<div class="tl-evt">' +
+      '<div class="tl-evt-dot"></div>' +
+      '<div class="tl-evt-top">' +
+        fotoHtml +
+        '<div class="tl-evt-body">' +
+          '<div class="tl-evt-desc">' + evt.desc + '</div>' +
+          (chips.length ? '<div class="tl-evt-chips">' + chips.join('') + '</div>' : '') +
+        '</div>' +
+        delBtn +
+      '</div>' +
+      '<div class="tl-evt-meta">' +
+        '<span class="tl-evt-time">' + tlFormatTime(evt.criadoEm) + '</span>' +
+        '<span class="tl-evt-user">' + (evt.criadoPor || '') + '</span>' +
+      '</div>' +
+    '</div>';
+  });
+
+  feed.innerHTML = html;
+}
+
 // ── Boot ─────────────────────────────────────────────────────────────────
+tlInit();
 coresInit();
 prodInit();
 init();
