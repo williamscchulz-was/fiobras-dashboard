@@ -430,8 +430,8 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .tl-evt-top{display:flex;gap:12px;align-items:flex-start;}
 .tl-evt-foto{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--surface2);border:1px solid var(--border);flex-shrink:0;cursor:pointer;}
 .tl-evt-body{flex:1;min-width:0;}
-.tl-evt-desc{font-size:.82rem;font-weight:500;color:var(--text);line-height:1.5;margin-bottom:6px;word-break:break-word;}
-.tl-evt-chips{display:flex;gap:5px;flex-wrap:wrap;}
+.tl-evt-desc{font-size:.78rem;font-weight:500;color:var(--text);line-height:1.4;word-break:break-word;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.tl-evt-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
 .tl-chip{font-family:'DM Mono',monospace;font-size:.6rem;font-weight:500;padding:3px 8px;border-radius:4px;background:rgba(0,136,53,.08);color:var(--green);border:1px solid rgba(0,136,53,.2);white-space:nowrap;}
 .tl-chip.cli{background:rgba(0,118,190,.08);color:var(--blue);border-color:rgba(0,118,190,.2);}
 .tl-chip.op{background:rgba(255,203,0,.1);color:#b8920a;border-color:rgba(255,203,0,.25);}
@@ -462,6 +462,17 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 [data-theme="dark"] .tl-dot{background:var(--bg);}
 [data-theme="dark"] .tl-date-lbl{background:var(--bg);}
 [data-theme="dark"] .tl-chip.op{color:#d4a600;}
+/* ── Timeline detail modal ── */
+.tl-det-desc{font-size:.88rem;font-weight:400;color:var(--text);line-height:1.7;margin-bottom:16px;white-space:pre-wrap;word-break:break-word;}
+.tl-det-foto{width:100%;max-height:320px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:16px;cursor:pointer;background:var(--surface2);}
+.tl-det-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.tl-det-chip{font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;padding:5px 12px;border-radius:6px;display:flex;align-items:center;gap:5px;}
+.tl-det-chip svg{width:12px;height:12px;flex-shrink:0;}
+.tl-det-chip.cor{background:rgba(0,136,53,.08);color:var(--green);border:1px solid rgba(0,136,53,.2);}
+.tl-det-chip.cli{background:rgba(0,118,190,.08);color:var(--blue);border:1px solid rgba(0,118,190,.2);}
+.tl-det-chip.op{background:rgba(255,203,0,.1);color:#b8920a;border:1px solid rgba(255,203,0,.25);}
+[data-theme="dark"] .tl-det-chip.op{color:#d4a600;}
+.tl-det-meta{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted2);display:flex;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);margin-top:4px;}
 
 /* ══════════════════════════════════════════════════════════════════════════
    MOBILE RESPONSIVE — 375px–768px
@@ -1024,7 +1035,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 <div class="modal-bg" id="tlModal" onclick="if(event.target===this)fecharTlModal()">
   <div class="modal" style="width:460px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Novo registro</div>
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)" id="tlModalTitle">Novo registro</div>
     </div>
     <div class="tl-form-field">
       <label>Descrição *</label>
@@ -1061,6 +1072,13 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 <!-- Fullscreen foto -->
 <div class="tl-fullimg" id="tlFullImg" onclick="this.classList.remove('open')">
   <img id="tlFullImgSrc" src="">
+</div>
+<!-- Detail modal -->
+<div class="modal-bg" id="tlDetModal" onclick="if(event.target===this)fecharTlDet()">
+  <div class="modal" style="width:500px;max-height:90vh;overflow-y:auto">
+    <div id="tlDetConteudo"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end" id="tlDetActions"></div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -3046,6 +3064,7 @@ window.renderRelatorio = () => {
 
 let tlDados = {};
 let tlFotoBase64 = null;
+let tlEditId = null;
 
 function tlInit() { tlDados = {}; }
 
@@ -3053,23 +3072,34 @@ function tlSave(d) {
   if (window._salvarTlFirebase) window._salvarTlFirebase(d);
 }
 
-/** Abre modal de novo evento */
-window.abrirTlModal = () => {
-  document.getElementById('tlDesc').value = '';
-  document.getElementById('tlCliente').value = '';
-  document.getElementById('tlOp').value = '';
-  document.getElementById('tlCor').value = '';
-  tlFotoBase64 = null;
+/** Abre modal de novo evento ou edição */
+window.abrirTlModal = (id) => {
+  tlEditId = id || null;
+  const evt = id ? tlDados[id] : null;
+  document.getElementById('tlDesc').value = evt ? evt.desc : '';
+  document.getElementById('tlCliente').value = evt ? evt.cliente : '';
+  document.getElementById('tlOp').value = evt ? evt.op : '';
+  document.getElementById('tlCor').value = evt ? evt.cor : '';
+  tlFotoBase64 = evt ? (evt.foto || null) : null;
   const area = document.getElementById('tlFotoArea');
-  area.classList.remove('has-foto');
-  document.getElementById('tlFotoLabel').textContent = 'Toque para adicionar foto';
   const prev = area.querySelector('.tl-foto-preview');
-  if (prev) prev.remove();
+  if (tlFotoBase64) {
+    area.classList.add('has-foto');
+    if (!prev) { const img = document.createElement('img'); img.className = 'tl-foto-preview'; area.prepend(img); }
+    (prev || area.querySelector('.tl-foto-preview')).src = tlFotoBase64;
+    document.getElementById('tlFotoLabel').textContent = 'Trocar foto';
+  } else {
+    area.classList.remove('has-foto');
+    if (prev) prev.remove();
+    document.getElementById('tlFotoLabel').textContent = 'Toque para adicionar foto';
+  }
+  document.getElementById('tlModalTitle').textContent = id ? 'Editar registro' : 'Novo registro';
   document.getElementById('tlModal').classList.add('open');
 };
 
 window.fecharTlModal = () => {
   document.getElementById('tlModal').classList.remove('open');
+  tlEditId = null;
 };
 
 /** Processa foto selecionada — redimensiona para thumbnail */
@@ -3090,7 +3120,6 @@ window.tlFotoChange = (input) => {
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
       tlFotoBase64 = c.toDataURL('image/jpeg', 0.7);
-      // Preview
       const area = document.getElementById('tlFotoArea');
       area.classList.add('has-foto');
       let prev = area.querySelector('.tl-foto-preview');
@@ -3103,24 +3132,26 @@ window.tlFotoChange = (input) => {
   reader.readAsDataURL(file);
 };
 
-/** Salva evento no Firebase */
+/** Salva evento (novo ou edição) */
 window.salvarTlEvento = () => {
   const desc = document.getElementById('tlDesc').value.trim();
   if (!desc) { toast('Preencha a descrição', 'err'); return; }
-  const id = 'tl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  const id = tlEditId || ('tl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6));
+  const existing = tlEditId ? tlDados[tlEditId] : null;
   const evt = {
     desc,
     cliente: document.getElementById('tlCliente').value.trim() || '',
     op: document.getElementById('tlOp').value.trim() || '',
     cor: document.getElementById('tlCor').value.trim() || '',
     foto: tlFotoBase64 || '',
-    criadoPor: window._currentUserName || 'admin',
-    criadoEm: new Date().toISOString()
+    criadoPor: existing ? existing.criadoPor : (window._currentUserName || 'admin'),
+    criadoEm: existing ? existing.criadoEm : new Date().toISOString()
   };
   tlDados[id] = evt;
   tlSave(tlDados);
   fecharTlModal();
-  toast('Registro salvo');
+  toast(tlEditId ? 'Registro atualizado' : 'Registro salvo');
+  tlEditId = null;
   renderTimeline();
 };
 
@@ -3129,6 +3160,7 @@ window.tlExcluir = (id) => {
   if (!confirm('Excluir este registro?')) return;
   delete tlDados[id];
   tlSave(tlDados);
+  fecharTlDet();
   toast('Registro excluído');
   renderTimeline();
 };
@@ -3137,6 +3169,35 @@ window.tlExcluir = (id) => {
 window.tlAbrirFoto = (src) => {
   document.getElementById('tlFullImgSrc').src = src;
   document.getElementById('tlFullImg').classList.add('open');
+};
+
+/** Abre modal de detalhe do evento */
+window.tlAbrirDetalhe = (id) => {
+  const evt = tlDados[id];
+  if (!evt) return;
+  let html = '';
+  if (evt.foto) {
+    html += '<img class="tl-det-foto" src="' + evt.foto + '" onclick="tlAbrirFoto(this.src)" alt="Foto">';
+  }
+  html += '<div class="tl-det-desc">' + evt.desc.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+  const chips = [];
+  if (evt.cor) chips.push('<span class="tl-det-chip cor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>' + evt.cor + '</span>');
+  if (evt.cliente) chips.push('<span class="tl-det-chip cli"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + evt.cliente + '</span>');
+  if (evt.op) chips.push('<span class="tl-det-chip op"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>' + evt.op + '</span>');
+  if (chips.length) html += '<div class="tl-det-chips">' + chips.join('') + '</div>';
+  const dataFull = new Date(evt.criadoEm).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  html += '<div class="tl-det-meta"><span>' + dataFull + '</span><span>' + (evt.criadoPor || '') + '</span></div>';
+  document.getElementById('tlDetConteudo').innerHTML = html;
+  const isAdmin = window._userRole === 'admin';
+  document.getElementById('tlDetActions').innerHTML =
+    (isAdmin ? '<button class="save-btn" style="background:var(--red);box-shadow:0 2px 12px rgba(224,82,82,.25)" onclick="tlExcluir(\'' + id + '\')">Excluir</button>' : '') +
+    '<button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharTlDet()">Fechar</button>' +
+    '<button class="save-btn" onclick="fecharTlDet();abrirTlModal(\'' + id + '\')">Editar</button>';
+  document.getElementById('tlDetModal').classList.add('open');
+};
+
+window.fecharTlDet = () => {
+  document.getElementById('tlDetModal').classList.remove('open');
 };
 
 /** Formata data relativa */
@@ -3174,7 +3235,6 @@ function renderTimeline() {
 
   let html = '';
   let lastDate = '';
-  const isAdmin = window._userRole === 'admin';
 
   entries.forEach(([id, evt]) => {
     const dateLabel = tlFormatDate(evt.criadoEm);
@@ -3183,28 +3243,22 @@ function renderTimeline() {
       html += '<div class="tl-date-sep"><div class="tl-dot"></div><span class="tl-date-lbl">' + dateLabel + '</span></div>';
     }
 
-    const chips = [];
-    if (evt.cor) chips.push('<span class="tl-chip">' + evt.cor + '</span>');
-    if (evt.cliente) chips.push('<span class="tl-chip cli">' + evt.cliente + '</span>');
-    if (evt.op) chips.push('<span class="tl-chip op">' + evt.op + '</span>');
+    const firstChip = evt.cor ? '<span class="tl-chip">' + evt.cor + '</span>'
+      : evt.cliente ? '<span class="tl-chip cli">' + evt.cliente + '</span>'
+      : evt.op ? '<span class="tl-chip op">' + evt.op + '</span>' : '';
 
-    const fotoHtml = evt.foto
-      ? '<img class="tl-evt-foto" src="' + evt.foto + '" onclick="event.stopPropagation();tlAbrirFoto(this.src)" alt="Foto">'
+    const fotoThumb = evt.foto
+      ? '<img class="tl-evt-foto" src="' + evt.foto + '" alt="" style="width:40px;height:40px;border-radius:6px;">'
       : '';
 
-    const delBtn = isAdmin
-      ? '<button class="tl-evt-del" onclick="event.stopPropagation();tlExcluir(\'' + id + '\')" aria-label="Excluir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
-      : '';
-
-    html += '<div class="tl-evt">' +
+    html += '<div class="tl-evt" onclick="tlAbrirDetalhe(\'' + id + '\')" style="cursor:pointer;">' +
       '<div class="tl-evt-dot"></div>' +
       '<div class="tl-evt-top">' +
-        fotoHtml +
+        fotoThumb +
         '<div class="tl-evt-body">' +
           '<div class="tl-evt-desc">' + evt.desc + '</div>' +
-          (chips.length ? '<div class="tl-evt-chips">' + chips.join('') + '</div>' : '') +
+          (firstChip ? '<div class="tl-evt-chips">' + firstChip + '</div>' : '') +
         '</div>' +
-        delBtn +
       '</div>' +
       '<div class="tl-evt-meta">' +
         '<span class="tl-evt-time">' + tlFormatTime(evt.criadoEm) + '</span>' +
