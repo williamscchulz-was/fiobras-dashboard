@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.2.5  07/04/2026  Tirado riscado do contador pausado       ║
+  ║    • "7 dias" só esmaecido em cinza, sem line-through.        ║
+  ║                                                                ║
   ║  v2.2.4  07/04/2026  Regra de pausa de prazo corrigida        ║
   ║    • Desenvolvida não pausa mais — equipe ainda ativa.        ║
   ║    • Só Enviada (cliente externo) pausa o contador.           ║
@@ -425,7 +428,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .cor-status-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .cor-pausado{display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:.55rem;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);}
 .cor-pausado svg{flex-shrink:0;}
-.cor-dias-pausado{color:var(--muted2)!important;text-decoration:line-through;text-decoration-thickness:1px;text-decoration-color:var(--muted2);}
+.cor-dias-pausado{color:var(--muted2)!important;}
 .cor-info{display:flex;gap:20px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);}
 .cor-info span{display:flex;align-items:center;gap:4px;}
 .cor-dias{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;}
@@ -899,7 +902,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.4</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.5</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1283,10 +1286,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.2.4';
+const CURRENT_VERSION = '2.2.5';
 const CHANGELOG = [
   {
-    v:'2.2.4', d:'07 abr 2026', current:true,
+    v:'2.2.5', d:'07 abr 2026', current:true,
+    items:[
+      {type:'note', title:'Tirado o riscado do contador pausado.', desc:'Quando o status é Enviada, o "7 dias" não fica mais riscado — só esmaecido em cinza. Riscado dava impressão de valor cancelado/inválido, mas o número tá correto, é o acumulado real até o envio. A label "tempo pausado" ao lado já comunica o estado.'}
+    ]
+  },
+  {
+    v:'2.2.4', d:'07 abr 2026',
     items:[
       {type:'high', title:'Regra de pausa de prazo corrigida.', desc:'Status "Desenvolvida" agora não pausa mais o contador — equipe ainda tá ativa nessa fase (aprovação interna, aguardando envio). Só "Enviada ao cliente" pausa o prazo, porque aí depende de resposta externa.'},
       {type:'note', desc:'O histórico de cores existentes recalcula automaticamente — se você tinha alguma cor parada em Desenvolvida há vários dias, vai notar o contador pulando pra frente.'}
