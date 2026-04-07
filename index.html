@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.2.6  07/04/2026  Ícone de pausa ao lado dos dias          ║
+  ║    • Pequeno SVG de pausa antes do "7 dias" quando enviada.   ║
+  ║                                                                ║
   ║  v2.2.5  07/04/2026  Tirado riscado do contador pausado       ║
   ║    • "7 dias" só esmaecido em cinza, sem line-through.        ║
   ║                                                                ║
@@ -902,7 +905,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.5</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.6</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1286,10 +1289,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.2.5';
+const CURRENT_VERSION = '2.2.6';
 const CHANGELOG = [
   {
-    v:'2.2.5', d:'07 abr 2026', current:true,
+    v:'2.2.6', d:'07 abr 2026', current:true,
+    items:[
+      {type:'note', title:'Ícone de pausa também ao lado dos dias.', desc:'Quando o status é Enviada, agora aparece um pequeno ícone de pausa antes do "7 dias" no card. A label "tempo pausado" segue acima do badge — agora tem dois pontos visuais reforçando o estado.'}
+    ]
+  },
+  {
+    v:'2.2.5', d:'07 abr 2026',
     items:[
       {type:'note', title:'Tirado o riscado do contador pausado.', desc:'Quando o status é Enviada, o "7 dias" não fica mais riscado — só esmaecido em cinza. Riscado dava impressão de valor cancelado/inválido, mas o número tá correto, é o acumulado real até o envio. A label "tempo pausado" ao lado já comunica o estado.'}
     ]
@@ -2999,7 +3008,7 @@ function renderCoresLista() {
       '<div class="cor-info">' +
         '<span>'+c.cliente+'</span>' +
         '<span>Entrada: '+entradaFmt+'</span>' +
-        '<span class="cor-dias'+(pausado?' cor-dias-pausado':'')+'" style="color:'+(pausado?'var(--muted2)':diasColor)+'">'+dias+' dia'+(dias!==1?'s':'')+'</span>' +
+        '<span class="cor-dias'+(pausado?' cor-dias-pausado':'')+'" style="color:'+(pausado?'var(--muted2)':diasColor)+'">'+(pausado?'<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px;margin-right:4px;opacity:.75"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>':'')+dias+' dia'+(dias!==1?'s':'')+'</span>' +
         (op30 ? '<span style="color:var(--red);font-weight:700">OP>30d</span>' : '') +
       '</div>' +
       obsHTML +
