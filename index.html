@@ -1149,27 +1149,6 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   </div>
 </div>
 <div class="toast" id="toast"></div>
-
-<!-- Central de Atualizações (v2.2.0) -->
-<div class="cl-overlay" id="changelog-overlay" onclick="if(event.target===this)closeChangelog()">
-  <div class="cl-modal" role="dialog" aria-modal="true" aria-labelledby="changelog-title">
-    <div class="cl-head">
-      <div class="cl-head-left">
-        <div class="cl-head-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M8 14l4-4 4 4"/><circle cx="12" cy="12" r="10"/></svg>
-        </div>
-        <div>
-          <div class="cl-head-label">Novidades · Dashboard</div>
-          <div class="cl-head-title" id="changelog-title">Histórico de versões</div>
-        </div>
-      </div>
-      <button class="cl-close" onclick="closeChangelog()" aria-label="Fechar">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="cl-body" id="changelog-body"></div>
-  </div>
-</div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 
@@ -1223,6 +1202,7 @@ function showSplash(nome, role){
     sp.classList.add('hide');
     document.getElementById('app').classList.add('visible');
     setupTabs(role);
+    checkChangelog();
   },2400);
 }
 
@@ -1338,15 +1318,15 @@ document.addEventListener('keydown', e => {
     if(ov && ov.classList.contains('open')) closeChangelog();
   }
 });
-// Auto-abre uma vez quando há nova versão
-(function(){
+// Verifica se tem versão nova e abre automaticamente — chamado depois do login
+function checkChangelog(){
   try{
     const seen = localStorage.getItem('fiobras-last-seen-version');
     if(seen !== CURRENT_VERSION){
-      setTimeout(()=>{ if(document.getElementById('changelog-overlay')) openChangelog(); }, 1200);
+      setTimeout(()=>{ if(document.getElementById('changelog-overlay')) openChangelog(); }, 600);
     }
   }catch(e){}
-})();
+}
 
 // ── PWA Manifest ─────────────────────────────────────────────────────────
 (function(){
@@ -3473,5 +3453,27 @@ render();
   <div style="font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);text-align:right;">2026 FIOBRAS FIOS TINTOS LTDA.</div>
 </footer>
 </div><!-- /#app -->
+
+<!-- Central de Atualizações (v2.2.0) — fora do #app pra renderizar independente do auth -->
+<div class="cl-overlay" id="changelog-overlay" onclick="if(event.target===this)closeChangelog()">
+  <div class="cl-modal" role="dialog" aria-modal="true" aria-labelledby="changelog-title">
+    <div class="cl-head">
+      <div class="cl-head-left">
+        <div class="cl-head-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M8 14l4-4 4 4"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div>
+          <div class="cl-head-label">Novidades · Dashboard</div>
+          <div class="cl-head-title" id="changelog-title">Histórico de versões</div>
+        </div>
+      </div>
+      <button class="cl-close" onclick="closeChangelog()" aria-label="Fechar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="cl-body" id="changelog-body"></div>
+  </div>
+</div>
+
 </body>
 </html>
