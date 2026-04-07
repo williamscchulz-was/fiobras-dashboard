@@ -3,12 +3,24 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
   ╠═══════════════════════════════════════════════════════════════╣
-  ║  v2.2.0  07/04/2026  Header limpo + Central de Atualizações     ║
-  ║    • Header redesenhado: nav minimal sem fundo verde sólido.    ║
-  ║    • Módulos (Resultados/Produção) movidos pra dentro do header.║
-  ║    • Tabs internas mais compactas com underline verde fino.     ║
-  ║    • Central de Atualizações: clique na pílula de versão.       ║
-  ║    • Remove badge duplicado de nível no Acumulado 2026.         ║
+  ║  v2.2.3  07/04/2026  Tema light reformulado (cream warm)      ║
+  ║    • Saiu o branco puro #FFFFFF que cansava a vista.          ║
+  ║    • Entrou paleta cream warm: bg #F2F0E9, surface #FBFAF5.   ║
+  ║                                                                ║
+  ║  v2.2.2  07/04/2026  Indicador de tempo pausado em Desenv.Cor ║
+  ║    • Cards Enviada/Desenvolvida ganham label "tempo pausado". ║
+  ║    • Contador de dias riscado em cinza enquanto pausado.      ║
+  ║                                                                ║
+  ║  v2.2.1  07/04/2026  Fix Timeline + schema completo           ║
+  ║    • Fix do "undefined" nos cards (fallback evt.objetivo).    ║
+  ║    • Schema completo: Objetivo + Descrição + Resultado.       ║
+  ║                                                                ║
+  ║  v2.2.0  07/04/2026  Header limpo + Central de Atualizações   ║
+  ║    • Header redesenhado: nav minimal sem fundo verde sólido.  ║
+  ║    • Módulos (Resultados/Produção) movidos pra dentro do hdr. ║
+  ║    • Tabs internas mais compactas com underline verde fino.   ║
+  ║    • Central de Atualizações: clique na pílula de versão.     ║
+  ║    • Remove badge duplicado de nível no Acumulado 2026.       ║
   ║                                                                  ║
   ║  v2.1.1  02/04/2026  Timeline detalhe + edição + compressão      ║
   ║    • Card minimalista no feed (desc truncada 2 linhas, 1 chip).  ║
@@ -128,22 +140,22 @@
   --yellow:#FFCB00;
   --red:#C0392B;   --orange:#e07820;
 
-  /* ── Surfaces ── */
-  --bg:#EDF2EE; --surface:#FFFFFF; --surface2:#F5F8F5;
+  /* ── Surfaces · paleta cream (v2.2.3, mais confortável que branco puro) ── */
+  --bg:#F2F0E9; --surface:#FBFAF5; --surface2:#EBE9E0;
 
   /* ── Borders ── */
-  --border:#CDDBD2; --border2:#B0C9B8;
+  --border:#DCD8C9; --border2:#C2BCA9;
 
   /* ── Text ── */
-  --text:#1A2E1E; --muted:#567A5E; --muted2:#8AAF92;
+  --text:#1F1F1A; --muted:#6B6657; --muted2:#9A9583;
 
   /* ── Input ── */
-  --input-bg:#FFFFFF; --input-border:#C5DDD0;
+  --input-bg:#FBFAF5; --input-border:#D5D0BF;
   --input-glow:rgba(0,136,53,0.12);
 
   /* ── Shadow ── */
-  --shadow-sm:0 1px 4px rgba(0,0,0,.06);
-  --shadow-md:0 2px 10px rgba(0,0,0,.08);
+  --shadow-sm:0 1px 4px rgba(0,0,0,.05);
+  --shadow-md:0 2px 10px rgba(0,0,0,.07);
 
   /* ── Semantic ── */
   --status-danger:var(--red); --status-warning:var(--orange);
@@ -883,7 +895,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.3</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1266,16 +1278,35 @@ function toggleTheme(){
   if(document.getElementById('panel-historico')?.classList.contains('active')) renderHistorico();
 }
 
-// ── Central de Atualizações (v2.2.0) ─────────────────────────────────────
-const CURRENT_VERSION = '2.2.0';
+// ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
+const CURRENT_VERSION = '2.2.3';
 const CHANGELOG = [
   {
-    v:'2.2.0', d:'07 abr 2026', current:true,
+    v:'2.2.3', d:'07 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Tema light reformulado.', desc:'Saiu o branco puro que cansava a vista. Entrou uma paleta cream warm (papel) muito mais confortável pra usar o dia inteiro. Combina melhor com o verde Fiobras inclusive.'},
+      {type:'note', desc:'Tema dark continua igual.'}
+    ]
+  },
+  {
+    v:'2.2.2', d:'07 abr 2026',
+    items:[
+      {type:'feat', title:'Indicador de tempo pausado em Desenv. Cor.', desc:'Cards com status Enviada ou Desenvolvida agora mostram um ícone de pausa com a label "tempo pausado" abaixo do badge, e o contador de dias fica riscado em cinza pra deixar claro que a contagem está congelada.'},
+      {type:'note', desc:'A lógica de cálculo de dias úteis ativos não mudou — só ganhou indicação visual.'}
+    ]
+  },
+  {
+    v:'2.2.1', d:'07 abr 2026',
+    items:[
+      {type:'feat', title:'Timeline com Objetivo + Descrição + Resultado.', desc:'Modal de registro voltou ao schema completo: campo Objetivo (obrigatório) como título do card, Descrição do que foi feito, e Resultado separado.'},
+      {type:'note', desc:'Fix do "undefined" que aparecia em registros antigos. Eles continuam aparecendo normalmente via fallback no campo Objetivo.'}
+    ]
+  },
+  {
+    v:'2.2.0', d:'07 abr 2026',
     items:[
       {type:'feat', title:'Header redesenhado.', desc:'Navegação minimal sem fundo verde sólido. Os módulos Resultados e Produção agora ficam dentro do header em uma única linha. Tudo respira mais.'},
       {type:'high', title:'Central de Atualizações.', desc:'Esta janela aqui — clique na pílula de versão a qualquer momento pra ver o que mudou. Aparece automaticamente uma vez quando há nova versão.'},
-      {type:'feat', title:'Timeline com Objetivo + Descrição + Resultado.', desc:'Modal de registro voltou ao schema completo: campo Objetivo (obrigatório) como título do card, Descrição do que foi feito, e Resultado separado. Registros antigos com só "desc" continuam aparecendo normalmente via fallback.'},
-      {type:'feat', title:'Indicador de tempo pausado em Desenv. Cor.', desc:'Cards com status Enviada ou Desenvolvida agora mostram um ícone de pausa com a label "tempo pausado" abaixo do badge, e o contador de dias fica riscado em cinza pra deixar claro que a contagem está congelada.'},
       {type:'feat', title:'Tabs internas mais limpas.', desc:'Tipografia DM Mono compacta com underline verde fino no ativo.'},
       {type:'note', desc:'Removido o badge duplicado de nível no Acumulado 2026 (já tinha o card de KPIs mostrando os números).'}
     ]
