@@ -1106,22 +1106,20 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
       <div style="font-size:.9rem;font-weight:700;color:var(--text)" id="tlModalTitle">Novo registro</div>
     </div>
     <div class="tl-form-field">
-      <label>Descrição *</label>
-      <textarea id="tlDesc" placeholder="O que aconteceu? Ex: Teste de solidez aprovado..."></textarea>
+      <label>Objetivo *</label>
+      <textarea id="tlObjetivo" placeholder="O que será testado? Ex: Teste resistência PES"></textarea>
     </div>
-    <div class="tl-form-row">
-      <div class="tl-form-field">
-        <label>Cliente</label>
-        <input type="text" id="tlCliente" placeholder="Nome do cliente">
-      </div>
-      <div class="tl-form-field">
-        <label>Ordem de Produção</label>
-        <input type="text" id="tlOp" placeholder="Ex: OP-12345">
-      </div>
+    <div class="tl-form-field">
+      <label>Cliente</label>
+      <input type="text" id="tlCliente" placeholder="Nome do cliente">
+    </div>
+    <div class="tl-form-field">
+      <label>Ordem de Produção</label>
+      <input type="text" id="tlOp" placeholder="Ex: 201761">
     </div>
     <div class="tl-form-field">
       <label>Cor</label>
-      <input type="text" id="tlCor" placeholder="Ex: Azul Royal 2040">
+      <input type="text" id="tlCor" placeholder="Ex: Rondinha 6218">
     </div>
     <div class="tl-form-field">
       <label>Foto (opcional)</label>
@@ -1130,6 +1128,14 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
         <span id="tlFotoLabel">Toque para adicionar foto</span>
         <input type="file" id="tlFotoInput" accept="image/*" onchange="tlFotoChange(this)">
       </div>
+    </div>
+    <div class="tl-form-field">
+      <label>Descrição (o que foi feito)</label>
+      <textarea id="tlDescricao" placeholder="Descreva os testes realizados, procedimentos..."></textarea>
+    </div>
+    <div class="tl-form-field">
+      <label>Resultado</label>
+      <textarea id="tlResultado" placeholder="Aprovado / Reprovado / Observações do resultado..."></textarea>
     </div>
     <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
       <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharTlModal()">Cancelar</button>
@@ -1264,6 +1270,7 @@ const CHANGELOG = [
     items:[
       {type:'feat', title:'Header redesenhado.', desc:'Navegação minimal sem fundo verde sólido. Os módulos Resultados e Produção agora ficam dentro do header em uma única linha. Tudo respira mais.'},
       {type:'high', title:'Central de Atualizações.', desc:'Esta janela aqui — clique na pílula de versão a qualquer momento pra ver o que mudou. Aparece automaticamente uma vez quando há nova versão.'},
+      {type:'feat', title:'Timeline com Objetivo + Descrição + Resultado.', desc:'Modal de registro voltou ao schema completo: campo Objetivo (obrigatório) como título do card, Descrição do que foi feito, e Resultado separado. Registros antigos com só "desc" continuam aparecendo normalmente via fallback.'},
       {type:'feat', title:'Tabs internas mais limpas.', desc:'Tipografia DM Mono compacta com underline verde fino no ativo.'},
       {type:'note', desc:'Removido o badge duplicado de nível no Acumulado 2026 (já tinha o card de KPIs mostrando os números).'}
     ]
@@ -3216,10 +3223,13 @@ function tlSave(d) {
 window.abrirTlModal = (id) => {
   tlEditId = id || null;
   const evt = id ? tlDados[id] : null;
-  document.getElementById('tlDesc').value = evt ? evt.desc : '';
-  document.getElementById('tlCliente').value = evt ? evt.cliente : '';
-  document.getElementById('tlOp').value = evt ? evt.op : '';
-  document.getElementById('tlCor').value = evt ? evt.cor : '';
+  // Fallback: registros antigos têm `desc` no lugar de `objetivo`
+  document.getElementById('tlObjetivo').value  = evt ? (evt.objetivo || evt.desc || '') : '';
+  document.getElementById('tlCliente').value   = evt ? (evt.cliente || '') : '';
+  document.getElementById('tlOp').value        = evt ? (evt.op || '') : '';
+  document.getElementById('tlCor').value       = evt ? (evt.cor || '') : '';
+  document.getElementById('tlDescricao').value = evt ? (evt.descricao || '') : '';
+  document.getElementById('tlResultado').value = evt ? (evt.resultado || '') : '';
   tlFotoBase64 = evt ? (evt.foto || null) : null;
   const area = document.getElementById('tlFotoArea');
   const prev = area.querySelector('.tl-foto-preview');
@@ -3281,18 +3291,20 @@ window.tlFotoChange = (input) => {
 
 /** Salva evento (novo ou edição) */
 window.salvarTlEvento = () => {
-  const desc = document.getElementById('tlDesc').value.trim();
-  if (!desc) { toast('Preencha a descrição', 'err'); return; }
+  const objetivo = document.getElementById('tlObjetivo').value.trim();
+  if (!objetivo) { toast('Preencha o objetivo', 'err'); return; }
   const id = tlEditId || ('tl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6));
   const existing = tlEditId ? tlDados[tlEditId] : null;
   const evt = {
-    desc,
-    cliente: document.getElementById('tlCliente').value.trim() || '',
-    op: document.getElementById('tlOp').value.trim() || '',
-    cor: document.getElementById('tlCor').value.trim() || '',
-    foto: tlFotoBase64 || '',
+    objetivo,
+    cliente:   document.getElementById('tlCliente').value.trim() || '',
+    op:        document.getElementById('tlOp').value.trim() || '',
+    cor:       document.getElementById('tlCor').value.trim() || '',
+    foto:      tlFotoBase64 || '',
+    descricao: document.getElementById('tlDescricao').value.trim() || '',
+    resultado: document.getElementById('tlResultado').value.trim() || '',
     criadoPor: existing ? existing.criadoPor : (window._currentUserName || 'admin'),
-    criadoEm: existing ? existing.criadoEm : new Date().toISOString()
+    criadoEm:  existing ? existing.criadoEm : new Date().toISOString()
   };
   tlDados[id] = evt;
   tlSave(tlDados);
@@ -3322,16 +3334,25 @@ window.tlAbrirFoto = (src) => {
 window.tlAbrirDetalhe = (id) => {
   const evt = tlDados[id];
   if (!evt) return;
+  const esc = s => String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Fallback: registros antigos têm `desc` no lugar de `objetivo`
+  const titulo = evt.objetivo || evt.desc || '(sem título)';
   let html = '';
   if (evt.foto) {
     html += '<img class="tl-det-foto" src="' + evt.foto + '" onclick="tlAbrirFoto(this.src)" alt="Foto">';
   }
-  html += '<div class="tl-det-desc">' + evt.desc.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+  html += '<div class="tl-det-desc">' + esc(titulo) + '</div>';
   const chips = [];
-  if (evt.cor) chips.push('<span class="tl-det-chip cor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>' + evt.cor + '</span>');
-  if (evt.cliente) chips.push('<span class="tl-det-chip cli"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + evt.cliente + '</span>');
-  if (evt.op) chips.push('<span class="tl-det-chip op"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>' + evt.op + '</span>');
+  if (evt.cor) chips.push('<span class="tl-det-chip cor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>' + esc(evt.cor) + '</span>');
+  if (evt.cliente) chips.push('<span class="tl-det-chip cli"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + esc(evt.cliente) + '</span>');
+  if (evt.op) chips.push('<span class="tl-det-chip op"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>' + esc(evt.op) + '</span>');
   if (chips.length) html += '<div class="tl-det-chips">' + chips.join('') + '</div>';
+  if (evt.descricao) {
+    html += '<div style="margin-top:16px;"><div style="font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px;">Descrição</div><div style="font-size:.78rem;color:var(--text);line-height:1.55;white-space:pre-wrap;">' + esc(evt.descricao) + '</div></div>';
+  }
+  if (evt.resultado) {
+    html += '<div style="margin-top:14px;"><div style="font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px;">Resultado</div><div style="font-size:.78rem;color:var(--text);line-height:1.55;white-space:pre-wrap;">' + esc(evt.resultado) + '</div></div>';
+  }
   const dataFull = new Date(evt.criadoEm).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
   html += '<div class="tl-det-meta"><span>' + dataFull + '</span><span>' + (evt.criadoPor || '') + '</span></div>';
   document.getElementById('tlDetConteudo').innerHTML = html;
@@ -3390,6 +3411,9 @@ function renderTimeline() {
       html += '<div class="tl-date-sep"><div class="tl-dot"></div><span class="tl-date-lbl">' + dateLabel + '</span></div>';
     }
 
+    // Fallback: registros antigos têm `desc` no lugar de `objetivo`
+    const titulo = evt.objetivo || evt.desc || '(sem título)';
+
     const firstChip = evt.cor ? '<span class="tl-chip">' + evt.cor + '</span>'
       : evt.cliente ? '<span class="tl-chip cli">' + evt.cliente + '</span>'
       : evt.op ? '<span class="tl-chip op">' + evt.op + '</span>' : '';
@@ -3403,7 +3427,7 @@ function renderTimeline() {
       '<div class="tl-evt-top">' +
         fotoThumb +
         '<div class="tl-evt-body">' +
-          '<div class="tl-evt-desc">' + evt.desc + '</div>' +
+          '<div class="tl-evt-desc">' + titulo + '</div>' +
           (firstChip ? '<div class="tl-evt-chips">' + firstChip + '</div>' : '') +
         '</div>' +
       '</div>' +
