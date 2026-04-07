@@ -406,6 +406,10 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .cor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
 .cor-codigo{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;color:var(--text);}
 .cor-status-badge{font-family:'Poppins',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:5px;}
+.cor-status-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.cor-pausado{display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:.55rem;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);}
+.cor-pausado svg{flex-shrink:0;}
+.cor-dias-pausado{color:var(--muted2)!important;text-decoration:line-through;text-decoration-thickness:1px;text-decoration-color:var(--muted2);}
 .cor-info{display:flex;gap:20px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);}
 .cor-info span{display:flex;align-items:center;gap:4px;}
 .cor-dias{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;}
@@ -1271,6 +1275,7 @@ const CHANGELOG = [
       {type:'feat', title:'Header redesenhado.', desc:'Navegação minimal sem fundo verde sólido. Os módulos Resultados e Produção agora ficam dentro do header em uma única linha. Tudo respira mais.'},
       {type:'high', title:'Central de Atualizações.', desc:'Esta janela aqui — clique na pílula de versão a qualquer momento pra ver o que mudou. Aparece automaticamente uma vez quando há nova versão.'},
       {type:'feat', title:'Timeline com Objetivo + Descrição + Resultado.', desc:'Modal de registro voltou ao schema completo: campo Objetivo (obrigatório) como título do card, Descrição do que foi feito, e Resultado separado. Registros antigos com só "desc" continuam aparecendo normalmente via fallback.'},
+      {type:'feat', title:'Indicador de tempo pausado em Desenv. Cor.', desc:'Cards com status Enviada ou Desenvolvida agora mostram um ícone de pausa com a label "tempo pausado" abaixo do badge, e o contador de dias fica riscado em cinza pra deixar claro que a contagem está congelada.'},
       {type:'feat', title:'Tabs internas mais limpas.', desc:'Tipografia DM Mono compacta com underline verde fino no ativo.'},
       {type:'note', desc:'Removido o badge duplicado de nível no Acumulado 2026 (já tinha o card de KPIs mostrando os números).'}
     ]
@@ -2894,6 +2899,8 @@ function renderCoresLista() {
     const acoes = acoesPossiveis(c.status);
     const entrada = (c.historico||[]).find(h => h.acao === 'entrada');
     const entradaFmt = entrada ? entrada.data.split('-').reverse().join('/') : '—';
+    // Status pausados: contagem de dias está congelada (igual à lógica de calcDiasAtivos)
+    const pausado = c.status === 'enviada' || c.status === 'desenvolvida';
 
     const diasColor = c.status === 'cancelada'
       ? '#636366'
@@ -2922,15 +2929,23 @@ function renderCoresLista() {
     const editFullBtn = (isAdmin && isAtiva) ? '<button class="cor-act-btn" onclick="event.stopPropagation();editarCor(\''+c.id+'\')">Editar Tudo</button>' : '';
     const editNomeBtn = '<button class="cor-act-btn" onclick="event.stopPropagation();editarNomeObs(\''+c.id+'\')">Editar</button>';
 
+    // Indicador de tempo pausado (status enviada/desenvolvida congelam a contagem)
+    const pausadoHTML = pausado
+      ? '<div class="cor-pausado" title="A contagem de dias só retoma quando voltar pra Em Ajuste"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>tempo pausado</div>'
+      : '';
+
     return '<div class="cor-card" style="--cor-status:'+sc.cor+'" onclick="toggleCorHist(\''+c.id+'\')">' +
       '<div class="cor-top">' +
         '<div><span class="cor-codigo">'+c.codigo+'</span>'+(c.nome?' <span style="font-size:.76rem;color:var(--muted);font-weight:400;margin-left:6px">'+c.nome+'</span>':'')+(c.fibra?' <span style="font-family:\'DM Mono\',monospace;font-size:.58rem;font-weight:600;padding:2px 6px;border-radius:3px;background:rgba(0,118,190,.12);color:#4db3ff;margin-left:6px">'+c.fibra+'</span>':'')+'</div>' +
-        '<span class="cor-status-badge" style="color:'+sc.cor+';background:'+sc.bg+'">'+sc.lb+'</span>' +
+        '<div class="cor-status-wrap">' +
+          '<span class="cor-status-badge" style="color:'+sc.cor+';background:'+sc.bg+'">'+sc.lb+'</span>' +
+          pausadoHTML +
+        '</div>' +
       '</div>' +
       '<div class="cor-info">' +
         '<span>'+c.cliente+'</span>' +
         '<span>Entrada: '+entradaFmt+'</span>' +
-        '<span class="cor-dias" style="color:'+diasColor+'">'+dias+' dia'+(dias!==1?'s':'')+'</span>' +
+        '<span class="cor-dias'+(pausado?' cor-dias-pausado':'')+'" style="color:'+(pausado?'var(--muted2)':diasColor)+'">'+dias+' dia'+(dias!==1?'s':'')+'</span>' +
         (op30 ? '<span style="color:var(--red);font-weight:700">OP>30d</span>' : '') +
       '</div>' +
       obsHTML +
