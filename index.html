@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS DASHBOARD — CHANGELOG                               ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.2.4  07/04/2026  Regra de pausa de prazo corrigida        ║
+  ║    • Desenvolvida não pausa mais — equipe ainda ativa.        ║
+  ║    • Só Enviada (cliente externo) pausa o contador.           ║
+  ║                                                                ║
   ║  v2.2.3  07/04/2026  Tema light reformulado (cream warm)      ║
   ║    • Saiu o branco puro #FFFFFF que cansava a vista.          ║
   ║    • Entrou paleta cream warm: bg #F2F0E9, surface #FBFAF5.   ║
@@ -895,7 +899,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.3</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.4</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1279,10 +1283,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.2.3';
+const CURRENT_VERSION = '2.2.4';
 const CHANGELOG = [
   {
-    v:'2.2.3', d:'07 abr 2026', current:true,
+    v:'2.2.4', d:'07 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Regra de pausa de prazo corrigida.', desc:'Status "Desenvolvida" agora não pausa mais o contador — equipe ainda tá ativa nessa fase (aprovação interna, aguardando envio). Só "Enviada ao cliente" pausa o prazo, porque aí depende de resposta externa.'},
+      {type:'note', desc:'O histórico de cores existentes recalcula automaticamente — se você tinha alguma cor parada em Desenvolvida há vários dias, vai notar o contador pulando pra frente.'}
+    ]
+  },
+  {
+    v:'2.2.3', d:'07 abr 2026',
     items:[
       {type:'high', title:'Tema light reformulado.', desc:'Saiu o branco puro que cansava a vista. Entrou uma paleta cream warm (papel) muito mais confortável pra usar o dia inteiro. Combina melhor com o verde Fiobras inclusive.'},
       {type:'note', desc:'Tema dark continua igual.'}
@@ -2749,13 +2760,16 @@ function calcDiasAtivos(cor) {
       case 'entrada':
         inicioAtivo = ev.data;
         break;
-      case 'desenvolvida':
       case 'enviada':
-        // Pausa — soma período ativo
+        // Pausa — só envio ao cliente congela a contagem
         if (inicioAtivo) { total += diasUteis(inicioAtivo, ev.data); inicioAtivo = null; }
         break;
+      case 'desenvolvida':
+        // Não pausa — equipe ainda tá ativa (aprovação interna / aguardando envio)
+        if (!inicioAtivo) inicioAtivo = ev.data;
+        break;
       case 'em_ajuste':
-        // Retoma contagem
+        // Retoma contagem (cliente rejeitou, voltou pro lab)
         inicioAtivo = ev.data;
         break;
       case 'aprovada':
@@ -2930,8 +2944,8 @@ function renderCoresLista() {
     const acoes = acoesPossiveis(c.status);
     const entrada = (c.historico||[]).find(h => h.acao === 'entrada');
     const entradaFmt = entrada ? entrada.data.split('-').reverse().join('/') : '—';
-    // Status pausados: contagem de dias está congelada (igual à lógica de calcDiasAtivos)
-    const pausado = c.status === 'enviada' || c.status === 'desenvolvida';
+    // Status pausado: só "enviada" congela a contagem (cliente externo)
+    const pausado = c.status === 'enviada';
 
     const diasColor = c.status === 'cancelada'
       ? '#636366'
