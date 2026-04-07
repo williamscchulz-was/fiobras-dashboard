@@ -41,7 +41,8 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 .hdr-mod.active{background:rgba(0,136,53,.10);color:var(--green);font-weight:600;}
 [data-theme="dark"] .hdr-mod.active{background:rgba(62,207,110,.10);color:#3ecf6e;}
 .hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.hdr-pill{font-family:'DM Mono',monospace;font-size:.58rem;font-weight:500;color:var(--muted);display:flex;align-items:center;gap:6px;padding:0 4px;}
+.hdr-pill{font-family:'DM Mono',monospace;font-size:.58rem;font-weight:500;color:var(--muted);display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .15s;background:transparent;border:1px solid transparent;}
+.hdr-pill:hover{color:var(--text);background:var(--s1);border-color:var(--b1);}
 .hdr-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:#3ecf6e;}
 .hdr-divider{width:1px;height:14px;background:var(--b2);margin:0 4px;}
 .hdr-icon-btn{width:28px;height:28px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;border-radius:6px;transition:all .15s;}
@@ -187,43 +188,40 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 [data-theme="dark"] .pc-mes-row{background:var(--bg);}
 
 /* ── Central de Atualizações (v2.2.0) ── */
-.upd-btn{position:relative;}
-.upd-btn.has-update::after{content:'';position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:#FFCB00;box-shadow:0 0 0 2px var(--bg);}
-.upd-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:300;align-items:center;justify-content:center;padding:20px;animation:updFadeIn .2s ease;}
-.upd-modal-bg.open{display:flex;}
-@keyframes updFadeIn{from{opacity:0;}to{opacity:1;}}
-.upd-modal{background:var(--s1);border:1px solid var(--b2);border-radius:14px;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;animation:updSlideUp .25s cubic-bezier(.34,1.2,.64,1);}
-@keyframes updSlideUp{from{opacity:0;transform:translateY(12px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
-.upd-hdr{padding:20px 24px 18px;border-bottom:1px solid var(--b1);display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-shrink:0;}
-.upd-hdr-left{display:flex;align-items:flex-start;gap:12px;}
-.upd-icon-wrap{width:38px;height:38px;border-radius:10px;background:rgba(0,136,53,.12);border:1px solid rgba(0,136,53,.3);display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0;}
-[data-theme="dark"] .upd-icon-wrap{background:rgba(62,207,110,.12);border-color:rgba(62,207,110,.3);color:#3ecf6e;}
-.upd-eyebrow{font-family:'DM Mono',monospace;font-size:.54rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:3px;}
-[data-theme="dark"] .upd-eyebrow{color:#3ecf6e;}
-.upd-title{font-family:'Poppins',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);line-height:1.2;}
-.upd-close{width:30px;height:30px;border-radius:8px;background:var(--bg);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;flex-shrink:0;transition:all .15s;}
-.upd-close:hover{background:var(--b1);color:var(--text);}
-.upd-body{padding:22px 24px 16px;overflow-y:auto;flex:1;}
-.upd-ver{margin-bottom:26px;}
-.upd-ver:last-child{margin-bottom:8px;}
-.upd-ver-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-.upd-ver-num{font-family:'DM Mono',monospace;font-size:.92rem;font-weight:700;color:var(--text);}
-.upd-ver-date{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted2);}
-.upd-badge{font-family:'DM Mono',monospace;font-size:.55rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--green);background:rgba(0,136,53,.12);border:1px solid rgba(0,136,53,.35);padding:2px 8px;border-radius:5px;}
-[data-theme="dark"] .upd-badge{color:#3ecf6e;background:rgba(62,207,110,.12);border-color:rgba(62,207,110,.35);}
-.upd-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;}
-.upd-item:last-child{margin-bottom:0;}
-.upd-dot{width:6px;height:6px;border-radius:50%;margin-top:7px;flex-shrink:0;}
-.upd-dot-feat{background:var(--green);}
-[data-theme="dark"] .upd-dot-feat{background:#3ecf6e;}
-.upd-dot-highlight{background:var(--yellow);}
-.upd-dot-note{background:var(--muted2);}
-.upd-text{font-size:.75rem;color:var(--text);line-height:1.55;flex:1;}
-.upd-text strong.feat{color:var(--green);font-weight:600;}
-[data-theme="dark"] .upd-text strong.feat{color:#3ecf6e;}
-.upd-text strong.highlight{color:var(--yellow);font-weight:600;}
-[data-theme="dark"] .upd-text strong.highlight{color:#FFCB00;}
-.upd-item.note .upd-text{color:var(--muted);}
+.cl-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.cl-overlay.open{display:flex;}
+.cl-modal{background:var(--s1);border:1px solid var(--b2);border-radius:14px;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;}
+.cl-head{padding:20px 24px 18px;border-bottom:1px solid var(--b1);display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-shrink:0;}
+.cl-head-left{display:flex;align-items:flex-start;gap:12px;}
+.cl-head-icon{width:38px;height:38px;border-radius:10px;background:rgba(0,136,53,.12);border:1px solid rgba(0,136,53,.3);display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0;}
+[data-theme="dark"] .cl-head-icon{background:rgba(62,207,110,.15);border-color:rgba(62,207,110,.35);color:#3ecf6e;}
+.cl-head-label{font-family:'DM Mono',monospace;font-size:.54rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:3px;}
+[data-theme="dark"] .cl-head-label{color:#3ecf6e;}
+.cl-head-title{font-family:'Poppins',sans-serif;font-size:1.05rem;font-weight:700;color:var(--text);line-height:1.2;}
+.cl-close{width:30px;height:30px;border-radius:8px;background:var(--bg);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;flex-shrink:0;transition:all .15s;}
+.cl-close:hover{color:var(--text);background:var(--s1);}
+.cl-body{padding:22px 24px 16px;overflow-y:auto;flex:1;}
+.cl-ver{margin-bottom:26px;}
+.cl-ver:last-child{margin-bottom:8px;}
+.cl-ver-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.cl-ver-num{font-family:'DM Mono',monospace;font-size:.92rem;font-weight:700;color:var(--text);}
+.cl-ver-date{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted2);}
+.cl-ver-cur{font-family:'DM Mono',monospace;font-size:.55rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--green);background:rgba(0,136,53,.12);border:1px solid rgba(0,136,53,.35);padding:2px 8px;border-radius:5px;}
+[data-theme="dark"] .cl-ver-cur{color:#3ecf6e;background:rgba(62,207,110,.12);border-color:rgba(62,207,110,.35);}
+.cl-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;}
+.cl-item:last-child{margin-bottom:0;}
+.cl-dot{width:6px;height:6px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.cl-dot.feat{background:var(--green);}
+[data-theme="dark"] .cl-dot.feat{background:#3ecf6e;box-shadow:0 0 6px rgba(62,207,110,.5);}
+.cl-dot.high{background:var(--yellow);}
+.cl-dot.note{background:var(--muted2);}
+.cl-text{font-size:.74rem;color:var(--muted);line-height:1.55;}
+[data-theme="dark"] .cl-text{color:#C7C7CC;}
+.cl-text.note{color:var(--muted2);}
+.cl-title-feat{font-weight:600;color:var(--green);}
+[data-theme="dark"] .cl-title-feat{color:#3ecf6e;}
+.cl-title-high{font-weight:600;color:#a37a00;}
+[data-theme="dark"] .cl-title-high{color:#FFCB00;}
 </style>
 </head>
 <body>
@@ -237,11 +235,8 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     <button class="hdr-mod" onclick="switchModule('producao',this)">Produção</button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill">v2.2.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.2.0</div>
     <div class="hdr-divider"></div>
-    <button class="hdr-icon-btn upd-btn" id="updates-btn" onclick="openUpdates()" aria-label="Novidades">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19 10l-5.1 1.4L12 17l-1.9-5.6L5 10l5.1-1.4z"/></svg>
-    </button>
     <button class="hdr-icon-btn" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
@@ -285,6 +280,25 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="cl-overlay" id="changelog-overlay" onclick="if(event.target===this)closeChangelog()">
+  <div class="cl-modal">
+    <div class="cl-head">
+      <div class="cl-head-left">
+        <div class="cl-head-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M8 14l4-4 4 4"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div>
+          <div class="cl-head-label">Novidades · Dashboard</div>
+          <div class="cl-head-title">Histórico de versões</div>
+        </div>
+      </div>
+      <button class="cl-close" onclick="closeChangelog()" aria-label="Fechar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="cl-body" id="changelog-body"></div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 
@@ -312,7 +326,7 @@ const CHANGELOG = [
     v:'2.2.0', d:'07 abr 2026', current:true,
     items:[
       {type:'feat', title:'Header redesenhado.', desc:'Navegação minimal com módulos no topo (Resultados e Produção), fim do header com fundo verde sólido. Tudo respira mais.'},
-      {type:'highlight', title:'Central de atualizações.', desc:'Esta janela aqui — clique na estrela ao lado da versão a qualquer momento. Aparece automaticamente uma vez quando há nova versão.'},
+      {type:'highlight', title:'Central de atualizações.', desc:'Esta janela aqui — clique na pílula de versão a qualquer momento. Aparece automaticamente uma vez quando há nova versão.'},
       {type:'feat', title:'Toggle de tema em SVG.', desc:'Sai o emoji 🌙/☀️ com label, entra um ícone limpo que troca via CSS.'},
       {type:'note', desc:'Módulo Produção segue como placeholder, em desenvolvimento.'}
     ]
@@ -334,46 +348,42 @@ const CHANGELOG = [
   }
 ];
 function renderChangelog(){
-  const body = document.getElementById('upd-body');
+  const body = document.getElementById('changelog-body');
   if(!body) return;
-  body.innerHTML = CHANGELOG.map(v => {
-    const items = v.items.map(it => {
-      const type = it.type || 'feat';
-      const titleHTML = it.title ? '<strong class="'+type+'">'+it.title+'</strong> ' : '';
-      const descHTML = it.desc || '';
-      return '<div class="upd-item '+(type==='note'?'note':'')+'">'
-        + '<div class="upd-dot upd-dot-'+type+'"></div>'
-        + '<div class="upd-text">'+titleHTML+descHTML+'</div>'
-        + '</div>';
+  body.innerHTML = CHANGELOG.map(ver => {
+    const items = ver.items.map(it => {
+      const t = it.type || 'feat';
+      const dotCls = t === 'highlight' ? 'high' : t === 'note' ? 'note' : 'feat';
+      const txtCls = t === 'note' ? 'cl-text note' : 'cl-text';
+      const titleCls = t === 'highlight' ? 'cl-title-high' : 'cl-title-feat';
+      const titleHTML = it.title ? '<span class="'+titleCls+'">'+it.title+'</span> ' : '';
+      return '<div class="cl-item"><div class="cl-dot '+dotCls+'"></div><div class="'+txtCls+'">'+titleHTML+(it.desc||'')+'</div></div>';
     }).join('');
-    const badge = v.current ? '<span class="upd-badge">Atual</span>' : '';
-    return '<div class="upd-ver">'
-      + '<div class="upd-ver-hdr"><span class="upd-ver-num">v'+v.v+'</span><span class="upd-ver-date">'+v.d+'</span>'+badge+'</div>'
-      + items
-      + '</div>';
+    const cur = ver.current ? '<div class="cl-ver-cur">Atual</div>' : '';
+    return '<div class="cl-ver"><div class="cl-ver-head"><div class="cl-ver-num">v'+ver.v+'</div><div class="cl-ver-date">'+ver.d+'</div>'+cur+'</div>'+items+'</div>';
   }).join('');
 }
-function openUpdates(){
+function openChangelog(){
   renderChangelog();
-  document.getElementById('upd-modal').classList.add('open');
+  document.getElementById('changelog-overlay').classList.add('open');
 }
-function closeUpdates(){
-  document.getElementById('upd-modal').classList.remove('open');
+function closeChangelog(){
+  document.getElementById('changelog-overlay').classList.remove('open');
   localStorage.setItem('fiobras-last-seen-version', CURRENT_VERSION);
-  document.getElementById('updates-btn').classList.remove('has-update');
-}
-function checkForUpdates(){
-  const seen = localStorage.getItem('fiobras-last-seen-version');
-  if(seen !== CURRENT_VERSION){
-    document.getElementById('updates-btn').classList.add('has-update');
-    setTimeout(openUpdates, 900);
-  }
 }
 document.addEventListener('keydown', e => {
-  if(e.key === 'Escape' && document.getElementById('upd-modal').classList.contains('open')){
-    closeUpdates();
+  if(e.key === 'Escape'){
+    const ov = document.getElementById('changelog-overlay');
+    if(ov && ov.classList.contains('open')) closeChangelog();
   }
 });
+// Auto-abre uma vez quando há nova versão
+(function(){
+  const seen = localStorage.getItem('fiobras-last-seen-version');
+  if(seen !== CURRENT_VERSION){
+    setTimeout(()=>{ if(document.getElementById('changelog-overlay')) openChangelog(); }, 900);
+  }
+})();
 
 (function(){applyTheme(localStorage.getItem('fiobras-metas-theme')==='dark');})();
 
@@ -616,28 +626,8 @@ window.salvarMes=()=>{
 window.sHM=id=>{HM=id;rHist();};
 window.switchTab=(tab,btn)=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');if(tab==='historico')rHist();};
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
-init();render();checkForUpdates();
+init();render();
 </script>
-
-<div class="upd-modal-bg" id="upd-modal" onclick="if(event.target===this)closeUpdates()">
-  <div class="upd-modal" role="dialog" aria-modal="true" aria-labelledby="upd-title-el">
-    <div class="upd-hdr">
-      <div class="upd-hdr-left">
-        <div class="upd-icon-wrap">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19 10l-5.1 1.4L12 17l-1.9-5.6L5 10l5.1-1.4z"/></svg>
-        </div>
-        <div>
-          <div class="upd-eyebrow">Novidades · Dashboard</div>
-          <div class="upd-title" id="upd-title-el">Histórico de versões</div>
-        </div>
-      </div>
-      <button class="upd-close" onclick="closeUpdates()" aria-label="Fechar">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="upd-body" id="upd-body"></div>
-  </div>
-</div>
 
 <footer style="background:var(--s1);border-top:1px solid var(--b1);padding:0 32px;height:44px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
   <div style="display:flex;align-items:center;gap:12px;">
