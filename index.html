@@ -3,6 +3,18 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.4.0  08/04/2026  Módulo Apontamento Tintoria              ║
+  ║    • Nova aba \"Apontamento\" dentro do módulo Produção.        ║
+  ║    • Calendário mensal + detalhe do dia com 3 turnos          ║
+  ║      (3º → 1º → 2º) e 4 fibras (CO / PAC / PES / CV).         ║
+  ║    • 3 líderes de turno: Adelir (1º), Alexander (2º),         ║
+  ║      Djoniffer (3º) — só editam próprio turno (read-only      ║
+  ║      nos demais com cadeado + banner amarelo).                ║
+  ║    • Chefes (Anderson/Aldo/Geovani) e admin editam tudo.      ║
+  ║    • Totais do dia calculados em tempo real.                  ║
+  ║    • Botão pílula Apple-style com sombra verde.               ║
+  ║    • Firebase path: apontamento-tintoria-2026.                ║
+  ║                                                                ║
   ║  v2.3.0  08/04/2026  Rename → HUB · Apple style · pill 3D     ║
   ║    • Rename "Fiobras Dashboard" → "Fiobras HUB".              ║
   ║    • Tema light: paleta sage clarinho + cards brancos puros.  ║
@@ -914,6 +926,116 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 [data-theme="dark"] .cl-title-feat{color:#3ecf6e;}
 .cl-title-high{font-weight:600;color:#a37a00;}
 [data-theme="dark"] .cl-title-high{color:#FFCB00;}
+/* ═══════════════════════════════════════════════════════════════════════
+   APONTAMENTO · Tintoria (v2.4.0) — Apple refined sobre sage+white v2.3.0
+═══════════════════════════════════════════════════════════════════════ */
+.apt-badge{font-family:'DM Mono',monospace;font-size:.56rem;padding:4px 10px;border-radius:99px;background:var(--surface);color:var(--muted);letter-spacing:.5px;box-shadow:var(--shadow-sm);border:1px solid var(--border);}
+.apt-cal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px 18px 16px;margin-bottom:24px;box-shadow:var(--shadow-sm);}
+.apt-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px;}
+.apt-cal-navbtn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:var(--muted);border-radius:50%;transition:all .15s;}
+.apt-cal-navbtn:hover{background:var(--surface2);color:var(--text);}
+.apt-cal-month{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text);}
+.apt-cal-dows{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;}
+.apt-cal-dows>div{text-align:center;font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted2);padding:4px 0;letter-spacing:1px;text-transform:uppercase;}
+.apt-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.apt-day-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);border:1.5px solid transparent;border-radius:12px;cursor:pointer;position:relative;transition:all .18s;}
+.apt-day-cell:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);border-color:var(--border);}
+.apt-day-cell.muted{color:var(--muted2);background:transparent;cursor:default;}
+.apt-day-cell.muted:hover{transform:none;box-shadow:none;border-color:transparent;}
+.apt-day-cell.weekend{color:var(--muted2);opacity:.5;cursor:default;background:transparent;}
+.apt-day-cell.weekend:hover{transform:none;box-shadow:none;border-color:transparent;}
+.apt-day-cell.filled{background:rgba(0,136,53,.10);color:var(--green);font-weight:700;}
+.apt-day-cell.filled::after{content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--green);}
+.apt-day-cell.selected{background:var(--green);color:#fff;font-weight:700;box-shadow:0 6px 16px rgba(0,136,53,.35);border-color:var(--green);}
+.apt-day-cell.selected::after{background:var(--yellow);}
+.apt-day-cell.today:not(.selected){box-shadow:0 0 0 2px var(--green);}
+[data-theme="dark"] .apt-day-cell.filled{background:rgba(62,207,110,.14);color:#3ecf6e;}
+[data-theme="dark"] .apt-day-cell.filled::after{background:#3ecf6e;}
+[data-theme="dark"] .apt-day-cell.selected{background:#3ecf6e;border-color:#3ecf6e;color:#0d1510;box-shadow:0 6px 16px rgba(62,207,110,.35);}
+.apt-day{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px 20px 18px;box-shadow:var(--shadow-sm);}
+.apt-day-title{margin-bottom:16px;}
+.apt-day-lbl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.apt-day-date{font-family:'Outfit',sans-serif;font-size:1.25rem;font-weight:700;color:var(--text);letter-spacing:-.01em;}
+.apt-day-date .apt-day-date-val{color:var(--green);}
+[data-theme="dark"] .apt-day-date .apt-day-date-val{color:#3ecf6e;}
+.apt-turno-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.apt-turno-tab{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:11px 6px;cursor:pointer;text-align:center;transition:all .2s;position:relative;}
+.apt-turno-tab:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+.apt-turno-tab.active{background:var(--green);border-color:var(--green);box-shadow:0 6px 18px rgba(0,136,53,.28);transform:translateY(-1px);}
+[data-theme="dark"] .apt-turno-tab.active{background:#3ecf6e;border-color:#3ecf6e;box-shadow:0 6px 18px rgba(62,207,110,.3);}
+.apt-turno-tab-time{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:1.2px;color:var(--muted);margin-bottom:3px;}
+.apt-turno-tab.active .apt-turno-tab-time{color:rgba(255,255,255,.82);}
+.apt-turno-tab-name{font-family:'Poppins',sans-serif;font-size:.66rem;font-weight:700;color:var(--text);letter-spacing:.3px;}
+.apt-turno-tab.active .apt-turno-tab-name{color:#fff;}
+[data-theme="dark"] .apt-turno-tab.active .apt-turno-tab-name{color:#0d1510;}
+[data-theme="dark"] .apt-turno-tab.active .apt-turno-tab-time{color:rgba(13,21,16,.7);}
+.apt-turno-tab-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--green);opacity:0;}
+.apt-turno-tab.filled .apt-turno-tab-dot{opacity:1;}
+.apt-turno-tab.active.filled .apt-turno-tab-dot{background:var(--yellow);}
+.apt-turno-tab.locked{opacity:.88;}
+.apt-turno-tab-lock{position:absolute;top:6px;left:6px;width:10px;height:10px;display:flex;align-items:center;justify-content:center;color:var(--muted2);}
+.apt-turno-tab.active .apt-turno-tab-lock{color:rgba(255,255,255,.78);}
+[data-theme="dark"] .apt-turno-tab.active .apt-turno-tab-lock{color:rgba(13,21,16,.6);}
+.apt-readonly-banner{background:rgba(255,203,0,.14);border:1px solid rgba(255,203,0,.4);border-radius:14px;padding:11px 14px;display:none;align-items:center;gap:11px;margin-bottom:12px;}
+.apt-readonly-banner.show{display:flex;}
+.apt-readonly-icon{width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,203,0,.25);border-radius:50%;color:#8a6a00;}
+[data-theme="dark"] .apt-readonly-icon{color:var(--yellow);}
+.apt-readonly-text{flex:1;display:flex;flex-direction:column;line-height:1.25;}
+.apt-readonly-title{font-family:'Poppins',sans-serif;font-size:.66rem;font-weight:700;color:#7a5c00;letter-spacing:.2px;}
+.apt-readonly-sub{font-family:'DM Mono',monospace;font-size:.54rem;color:#8a6a00;letter-spacing:.5px;margin-top:2px;}
+[data-theme="dark"] .apt-readonly-title{color:var(--yellow);}
+[data-theme="dark"] .apt-readonly-sub{color:rgba(255,203,0,.75);}
+.apt-panel{margin-bottom:4px;}
+.apt-tp-card{background:var(--surface2);border-radius:16px;padding:18px 16px 16px;}
+.apt-tp-hours-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border);gap:12px;}
+.apt-tp-hours-label{display:flex;flex-direction:column;gap:2px;}
+.apt-tp-hours-title{font-family:'Poppins',sans-serif;font-size:.68rem;font-weight:700;color:var(--text);letter-spacing:.3px;text-transform:uppercase;}
+.apt-tp-hours-sub{font-family:'DM Mono',monospace;font-size:.54rem;color:var(--muted);letter-spacing:1px;}
+.apt-tp-hours-big{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:12px;padding:11px 14px;font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:600;color:var(--text);width:94px;text-align:center;outline:none;transition:all .15s;}
+.apt-tp-hours-big:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--input-glow);}
+.apt-tp-hours-big.readonly,.apt-tp-hours-big:disabled{background:transparent;border:1.5px dashed var(--border);color:var(--muted);cursor:not-allowed;}
+.apt-tp-fibras{display:flex;flex-direction:column;gap:10px;}
+.apt-tp-fibra-row{display:flex;align-items:center;gap:12px;}
+.apt-tp-fibra-lbl{width:48px;flex-shrink:0;display:flex;flex-direction:column;gap:1px;}
+.apt-tp-fibra-code{font-family:'DM Mono',monospace;font-size:.88rem;font-weight:700;color:var(--text);letter-spacing:.5px;}
+.apt-tp-fibra-name{font-family:'Poppins',sans-serif;font-size:.5rem;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;}
+.apt-tp-fibra-wrap{flex:1;display:flex;align-items:center;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:12px;overflow:hidden;transition:all .15s;}
+.apt-tp-fibra-wrap:focus-within{border-color:var(--green);box-shadow:0 0 0 3px var(--input-glow);}
+.apt-tp-fibra-wrap.readonly{background:transparent;border:1.5px dashed var(--border);}
+.apt-tp-fibra-input{flex:1;background:transparent;border:none;outline:none;padding:12px 14px;font-family:'DM Mono',monospace;font-size:.92rem;font-weight:500;color:var(--text);min-width:0;}
+.apt-tp-fibra-input.readonly,.apt-tp-fibra-input:disabled{color:var(--muted);cursor:not-allowed;}
+.apt-tp-fibra-unit{padding:0 14px 0 6px;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:1px;}
+.apt-tp-total{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.apt-tp-total-lbl{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.apt-tp-total-val{font-family:'DM Mono',monospace;font-size:.96rem;font-weight:700;color:var(--green);}
+.apt-tp-total-val.muted{color:var(--muted);}
+[data-theme="dark"] .apt-tp-total-val{color:#3ecf6e;}
+.apt-foot{margin-top:18px;padding-top:16px;border-top:1px solid var(--border);}
+.apt-foot-totals{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:0 4px;}
+.apt-foot-tot{display:flex;flex-direction:column;gap:1px;}
+.apt-foot-tot-lbl{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;}
+.apt-foot-tot-val{font-family:'DM Mono',monospace;font-size:.88rem;font-weight:700;color:var(--text);}
+.apt-foot-tot-val.green{color:var(--green);}
+[data-theme="dark"] .apt-foot-tot-val.green{color:#3ecf6e;}
+.apt-btn-save{width:100%;background:var(--green);color:#fff;border:none;border-radius:99px;padding:15px;font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 22px rgba(0,136,53,.3);transition:all .18s;}
+.apt-btn-save:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,136,53,.35);}
+.apt-btn-save:active{transform:translateY(0);}
+.apt-btn-save.disabled,.apt-btn-save:disabled{background:var(--surface2);color:var(--muted2);box-shadow:none;cursor:not-allowed;border:1.5px dashed var(--border);}
+.apt-btn-save.disabled:hover,.apt-btn-save:disabled:hover{transform:none;background:var(--surface2);}
+[data-theme="dark"] .apt-btn-save{background:#3ecf6e;color:#0d1510;box-shadow:0 8px 22px rgba(62,207,110,.25);}
+[data-theme="dark"] .apt-btn-save:hover{background:#4ada7a;}
+@media(max-width:600px){
+  .apt-cal{padding:14px 12px 12px;}
+  .apt-day{padding:16px 14px 14px;}
+  .apt-tp-card{padding:14px 12px 12px;}
+  .apt-day-date{font-size:1.1rem;}
+  .apt-turno-tab-name{font-size:.6rem;}
+  .apt-turno-tab-time{font-size:.48rem;}
+  .apt-tp-fibra-lbl{width:42px;}
+  .apt-tp-fibra-code{font-size:.82rem;}
+  .apt-tp-fibra-input{padding:11px 12px;font-size:.88rem;}
+}
+
 </style>
 </head>
 <body>
@@ -949,7 +1071,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <div class="splash-sub">HUB</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version">v2.3.0</div>
+  <div class="splash-version">v2.4.0</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -976,7 +1098,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.3.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.4.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -995,6 +1117,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   <div class="tab-group" id="tg-producao">
     <button class="tab-btn" onclick="switchTab('producao',this)">Produção</button>
     <button class="tab-btn" onclick="switchTab('cores',this)">Desenv. Cor</button>
+    <button class="tab-btn" onclick="switchTab('apontamento',this)">Apontamento</button>
     <button class="tab-btn" onclick="switchTab('timeline',this)">Timeline</button>
   </div>
 </div>
@@ -1175,6 +1298,43 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   </div>
 </div>
 </div>
+<!-- ── Aba Apontamento (tintoria) · v2.4.0 ── -->
+<div class="panel" id="panel-apontamento">
+<div class="wrap">
+  <div class="sh"><h2>Apontamento · Tintoria</h2><div class="sh-line"></div><div class="apt-badge" id="apt-badge-dias">0 DIAS</div></div>
+  <div class="apt-cal">
+    <div class="apt-cal-nav">
+      <button class="apt-cal-navbtn" onclick="aptMesNav(-1)" aria-label="Mês anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="apt-cal-month" id="apt-cal-month">—</div>
+      <button class="apt-cal-navbtn" onclick="aptMesNav(1)" aria-label="Próximo mês"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+    <div class="apt-cal-dows"><div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div></div>
+    <div class="apt-cal-grid" id="apt-cal-grid"></div>
+  </div>
+  <div class="apt-day" id="apt-day">
+    <div class="apt-day-title">
+      <div class="apt-day-lbl">Lançar produção</div>
+      <div class="apt-day-date" id="apt-day-date">—</div>
+    </div>
+    <div class="apt-turno-tabs" id="apt-turno-tabs"></div>
+    <div class="apt-readonly-banner" id="apt-readonly-banner">
+      <div class="apt-readonly-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+      <div class="apt-readonly-text"><span class="apt-readonly-title">Somente leitura</span><span class="apt-readonly-sub" id="apt-readonly-sub">—</span></div>
+    </div>
+    <div class="apt-panel" id="apt-turno-panel"></div>
+    <div class="apt-foot">
+      <div class="apt-foot-totals">
+        <div class="apt-foot-tot"><span class="apt-foot-tot-lbl">Horas Dia</span><span class="apt-foot-tot-val" id="apt-foot-horas">0.0 h</span></div>
+        <div class="apt-foot-tot"><span class="apt-foot-tot-lbl">Total Kg</span><span class="apt-foot-tot-val green" id="apt-foot-kg">0,00</span></div>
+      </div>
+      <button class="apt-btn-save" id="apt-btn-save" onclick="salvarApontamento()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="apt-btn-save-lbl">Salvar Apontamento</span>
+      </button>
+    </div>
+  </div>
+</div>
+</div>
 <!-- ── Aba Timeline ── -->
 <div class="panel" id="panel-timeline">
 <div class="wrap">
@@ -1257,10 +1417,14 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 
 // ── Usuários ─────────────────────────────────────────────────────────────
 const USERS={
-  admin:   {nome:'Admin',    senha:'admin', role:'admin'},
-  anderson:{nome:'Anderson', senha:null,    role:'producao'},
-  aldo:    {nome:'Aldo',     senha:null,    role:'producao'},
-  geovani: {nome:'Geovani',  senha:null,    role:'producao'}
+  admin:    {nome:'Admin',     senha:'admin', role:'admin'},
+  anderson: {nome:'Anderson',  senha:null,    role:'producao'},
+  aldo:     {nome:'Aldo',      senha:null,    role:'producao'},
+  geovani:  {nome:'Geovani',   senha:null,    role:'producao'},
+  // Líderes de turno (tintoria) — só editam o próprio turno no Apontamento
+  adelir:   {nome:'Adelir',    senha:null,    role:'producao', turno:1},
+  alexander:{nome:'Alexander', senha:null,    role:'producao', turno:2},
+  djoniffer:{nome:'Djoniffer', senha:null,    role:'producao', turno:3}
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -1294,6 +1458,9 @@ function doLogout(){
 
 function showSplash(nome, role){
   window._currentUserName = nome;
+  // Guardar turno do líder (1,2,3) ou null se chefe/admin
+  const sessUser = getSession()?.user;
+  window._currentUserTurno = (sessUser && USERS[sessUser]?.turno) || null;
   document.getElementById('loginScreen').classList.add('hide');
   const sp=document.getElementById('splash');
   const bar=sp.querySelector('.splash-bar');
@@ -1360,10 +1527,20 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.3.0';
+const CURRENT_VERSION = '2.4.0';
 const CHANGELOG = [
   {
-    v:'2.3.0', d:'08 abr 2026', current:true,
+    v:'2.4.0', d:'08 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Nova aba Apontamento na Produção.', desc:'Os líderes de turno agora lançam a produção da tintoria direto pelo HUB. Calendário do mês, toca no dia, escolhe o turno, preenche horas e as 4 fibras (CO, PAC, PES, CV). Salva instantâneo no Firebase.'},
+      {type:'feat', title:'3 novos usuários: Adelir, Alexander e Djoniffer.', desc:'Líderes de turno do 1º, 2º e 3º respectivamente. Cada um só edita o próprio turno — os outros aparecem em somente leitura com cadeado e banner de aviso. Chefes (Anderson/Aldo/Geovani) e admin editam qualquer turno.'},
+      {type:'feat', title:'Calendário visual com status.', desc:'Dias preenchidos aparecem em verde com bolinha. Fins de semana esmaecidos. Dia de hoje destacado. Toca e abre o detalhe com as 3 abas de turno (3º → 1º → 2º, ordem cronológica).'},
+      {type:'feat', title:'Totais do dia em tempo real.', desc:'Conforme digita os kg, o total do turno atualiza na hora. O footer mostra horas do dia e total em kg somando os 3 turnos — pega os outros dois do Firebase e o atual do input.'},
+      {type:'note', title:'Botão salvar pílula Apple-style.', desc:'Botão grande, 100% arredondado, sombra verde projetada. Muda pra desabilitado com cadeado quando você tá olhando turno que não é seu.'}
+    ]
+  },
+  {
+    v:'2.3.0', d:'08 abr 2026',
     items:[
       {type:'high', title:'Renomeado para Fiobras HUB.', desc:'O sistema agora se chama Fiobras HUB — refletindo melhor o que ele virou: ponto único de entrada pra todos os fluxos da empresa, não só dashboard. Mesmo app, nome novo.'},
       {type:'feat', title:'Tema light reformulado (sage + branco).', desc:'Saiu o cream warm. Entrou paleta sage clarinho de fundo com cards brancos puros. Pertence à família cromática do verde Fiobras e tem mais respiração.'},
@@ -1588,6 +1765,19 @@ onValue(tlRef, (snapshot) => {
 });
 
 window._salvarTlFirebase = (d) => set(tlRef, d).catch(e => console.error('Erro ao salvar timeline:', e));
+
+// ── Apontamento Tintoria — Firebase (v2.4.0) ─────────────────────────────
+const aptRef = ref(db, 'apontamento-tintoria-2026');
+
+onValue(aptRef, (snapshot) => {
+  const data = snapshot.val();
+  window._aptDados = data || {};
+  if (document.getElementById('panel-apontamento')?.classList.contains('active')) {
+    if (typeof renderApontamento === 'function') renderApontamento();
+  }
+});
+
+window._salvarAptFirebase = (d) => set(aptRef, d).catch(e => console.error('Erro ao salvar apontamento:', e));
 </script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2214,6 +2404,7 @@ window.switchTab = (tab, btn) => {
   if (tab === 'historico') renderHistorico();
   if (tab === 'producao') renderProducao();
   if (tab === 'cores') renderCores();
+  if (tab === 'apontamento') renderApontamento();
   if (tab === 'timeline') renderTimeline();
 };
 
@@ -3537,6 +3728,354 @@ function tlFormatDate(iso) {
   if (d.toDateString() === ontem.toDateString()) return 'Ontem';
   return dd;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// APONTAMENTO TINTORIA (v2.4.0)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const APT_TURNOS = [
+  { num:3, nome:'3º Turno', time:'00:00 — 07:00', horasPadrao:7.0 },
+  { num:1, nome:'1º Turno', time:'07:00 — 15:30', horasPadrao:8.5 },
+  { num:2, nome:'2º Turno', time:'15:30 — 00:00', horasPadrao:8.5 }
+];
+const APT_FIBRAS = [
+  { code:'CO',  nome:'Algodão'   },
+  { code:'PAC', nome:'Acrílico'  },
+  { code:'PES', nome:'Poliéster' },
+  { code:'CV',  nome:'Viscose'   }
+];
+
+window._aptDados = window._aptDados || {};
+let aptMesAtual = null;
+let aptDiaSel = null;
+let aptTurnoAtivo = null;
+let aptRascunho = {};
+
+function aptPodeEditar(turnoNum) {
+  const role = window._userRole;
+  if (role === 'admin') return true;
+  if (role !== 'producao') return false;
+  const meuTurno = window._currentUserTurno;
+  if (!meuTurno) return true;
+  return meuTurno === turnoNum;
+}
+
+function aptFmtKg(v) {
+  if (v == null || isNaN(v)) return '0,00';
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function aptFmtMesKey(date) {
+  return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+}
+function aptFmtDiaKey(year, month, day) {
+  return year + '-' + String(month+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+}
+function aptParseNum(str) {
+  if (str == null || str === '') return 0;
+  const n = parseFloat(String(str).replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+window.aptMesNav = function(delta) {
+  if (!aptMesAtual) aptMesAtual = new Date();
+  aptMesAtual = new Date(aptMesAtual.getFullYear(), aptMesAtual.getMonth() + delta, 1);
+  aptDiaSel = null;
+  aptRascunho = {};
+  renderApontamento();
+};
+
+function renderApontamento() {
+  if (!aptMesAtual) aptMesAtual = new Date();
+  const hoje = new Date();
+  if (!aptDiaSel) {
+    if (hoje.getFullYear() === aptMesAtual.getFullYear() && hoje.getMonth() === aptMesAtual.getMonth()) {
+      aptDiaSel = aptFmtDiaKey(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+    } else {
+      aptDiaSel = aptFmtDiaKey(aptMesAtual.getFullYear(), aptMesAtual.getMonth(), 1);
+    }
+    aptRascunho = {};
+  }
+  aptRenderCalendario();
+  aptRenderDia();
+}
+
+function aptRenderCalendario() {
+  const y = aptMesAtual.getFullYear();
+  const m = aptMesAtual.getMonth();
+  const mesKey = aptFmtMesKey(aptMesAtual);
+  const mesDados = window._aptDados[mesKey] || {};
+
+  const meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  document.getElementById('apt-cal-month').textContent = meses[m] + ' · ' + y;
+
+  const diasComDados = Object.keys(mesDados).filter(d => {
+    const dd = mesDados[d];
+    return dd && (dd[1] || dd[2] || dd[3]);
+  }).length;
+  document.getElementById('apt-badge-dias').textContent = diasComDados + (diasComDados === 1 ? ' DIA' : ' DIAS');
+
+  const grid = document.getElementById('apt-cal-grid');
+  grid.innerHTML = '';
+  const primeiroDia = new Date(y, m, 1);
+  const ultimoDia = new Date(y, m+1, 0);
+  const dowPrim = primeiroDia.getDay();
+  const numDias = ultimoDia.getDate();
+  const hoje = new Date();
+  const hojeStr = aptFmtDiaKey(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+
+  for (let i = 0; i < dowPrim; i++) {
+    const prevDate = new Date(y, m, -dowPrim + i + 1);
+    const cell = document.createElement('div');
+    cell.className = 'apt-day-cell muted';
+    cell.textContent = prevDate.getDate();
+    grid.appendChild(cell);
+  }
+
+  for (let d = 1; d <= numDias; d++) {
+    const cell = document.createElement('div');
+    const dowAtual = new Date(y, m, d).getDay();
+    const isWeekend = dowAtual === 0 || dowAtual === 6;
+    const diaKey = aptFmtDiaKey(y, m, d);
+    const dd = String(d).padStart(2,'0');
+    const temDados = mesDados[dd] && (mesDados[dd][1] || mesDados[dd][2] || mesDados[dd][3]);
+
+    cell.className = 'apt-day-cell';
+    if (isWeekend) cell.classList.add('weekend');
+    if (temDados) cell.classList.add('filled');
+    if (diaKey === aptDiaSel) cell.classList.add('selected');
+    if (diaKey === hojeStr) cell.classList.add('today');
+    cell.textContent = d;
+
+    if (!isWeekend) {
+      cell.onclick = () => {
+        aptDiaSel = diaKey;
+        aptRascunho = {};
+        aptTurnoAtivo = null;
+        aptRenderCalendario();
+        aptRenderDia();
+      };
+    }
+    grid.appendChild(cell);
+  }
+
+  const total = dowPrim + numDias;
+  const resto = (7 - (total % 7)) % 7;
+  for (let i = 1; i <= resto; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'apt-day-cell muted';
+    cell.textContent = i;
+    grid.appendChild(cell);
+  }
+}
+
+function aptRenderDia() {
+  if (!aptDiaSel) return;
+  const parts = aptDiaSel.split('-').map(Number);
+  const y = parts[0], m = parts[1], d = parts[2];
+  const dateObj = new Date(y, m-1, d);
+  const dows = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const diaLbl = dows[dateObj.getDay()] + ' · ';
+  const dataLbl = String(d).padStart(2,'0') + '/' + String(m).padStart(2,'0');
+  document.getElementById('apt-day-date').innerHTML = diaLbl + '<span class="apt-day-date-val">'+dataLbl+'</span>';
+
+  if (!aptTurnoAtivo) {
+    aptTurnoAtivo = window._currentUserTurno || 1;
+  }
+
+  const mesKey = aptFmtMesKey(new Date(y, m-1, 1));
+  const diaKey = String(d).padStart(2,'0');
+  const diaDados = (window._aptDados[mesKey] && window._aptDados[mesKey][diaKey]) || {};
+
+  const tabsEl = document.getElementById('apt-turno-tabs');
+  tabsEl.innerHTML = '';
+  APT_TURNOS.forEach(t => {
+    const tab = document.createElement('div');
+    const temDados = !!diaDados[t.num];
+    const podeEditar = aptPodeEditar(t.num);
+    tab.className = 'apt-turno-tab';
+    if (t.num === aptTurnoAtivo) tab.classList.add('active');
+    if (temDados) tab.classList.add('filled');
+    if (!podeEditar) tab.classList.add('locked');
+    tab.innerHTML =
+      (podeEditar ? '' : '<div class="apt-turno-tab-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>') +
+      '<div class="apt-turno-tab-dot"></div>' +
+      '<div class="apt-turno-tab-time">'+t.time+'</div>' +
+      '<div class="apt-turno-tab-name">'+t.nome+'</div>';
+    tab.onclick = () => {
+      aptCapturarRascunho();
+      aptTurnoAtivo = t.num;
+      aptRenderDia();
+    };
+    tabsEl.appendChild(tab);
+  });
+
+  const turnoDef = APT_TURNOS.find(t => t.num === aptTurnoAtivo);
+  const turnoDados = diaDados[aptTurnoAtivo] || {};
+  const rascunho = aptRascunho[aptTurnoAtivo] || {};
+  const podeEditar = aptPodeEditar(aptTurnoAtivo);
+  const panel = document.getElementById('apt-turno-panel');
+
+  const valH = rascunho.h != null ? rascunho.h : (turnoDados.h != null ? turnoDados.h : '');
+  const valCO = rascunho.co != null ? rascunho.co : (turnoDados.co != null ? turnoDados.co : '');
+  const valPAC = rascunho.pac != null ? rascunho.pac : (turnoDados.pac != null ? turnoDados.pac : '');
+  const valPES = rascunho.pes != null ? rascunho.pes : (turnoDados.pes != null ? turnoDados.pes : '');
+  const valCV = rascunho.cv != null ? rascunho.cv : (turnoDados.cv != null ? turnoDados.cv : '');
+
+  const subLbl = podeEditar
+    ? ('padrão ' + turnoDef.horasPadrao.toFixed(1) + ' h')
+    : ('lançado por ' + (turnoDados.by || '—').toLowerCase());
+
+  const mkFibra = (f, val) => {
+    const roCls = podeEditar ? '' : 'readonly';
+    const inputAttrs = podeEditar
+      ? 'oninput="aptCapturarRascunho(); aptAtualizarTotais()" inputmode="decimal"'
+      : 'readonly disabled';
+    return '<div class="apt-tp-fibra-row">' +
+      '<div class="apt-tp-fibra-lbl"><div class="apt-tp-fibra-code">'+f.code+'</div><div class="apt-tp-fibra-name">'+f.nome+'</div></div>' +
+      '<div class="apt-tp-fibra-wrap '+roCls+'">' +
+        '<input type="text" class="apt-tp-fibra-input '+roCls+'" id="apt-in-'+f.code.toLowerCase()+'" value="'+(val===''?'':val)+'" placeholder="0,00" '+inputAttrs+'>' +
+        '<span class="apt-tp-fibra-unit">kg</span>' +
+      '</div>' +
+    '</div>';
+  };
+
+  const hoursInputAttrs = podeEditar
+    ? 'oninput="aptCapturarRascunho(); aptAtualizarTotais()"'
+    : 'readonly disabled';
+
+  panel.innerHTML =
+    '<div class="apt-tp-card">' +
+      '<div class="apt-tp-hours-row">' +
+        '<div class="apt-tp-hours-label">' +
+          '<div class="apt-tp-hours-title">Horas trabalhadas</div>' +
+          '<div class="apt-tp-hours-sub">'+subLbl+'</div>' +
+        '</div>' +
+        '<input type="text" class="apt-tp-hours-big '+(podeEditar?'':'readonly')+'" id="apt-in-horas" value="'+(valH===''?'':valH)+'" placeholder="'+turnoDef.horasPadrao.toFixed(1)+'" inputmode="decimal" '+hoursInputAttrs+'>' +
+      '</div>' +
+      '<div class="apt-tp-fibras">' +
+        APT_FIBRAS.map(f => {
+          const val = f.code==='CO'?valCO:f.code==='PAC'?valPAC:f.code==='PES'?valPES:valCV;
+          return mkFibra(f, val);
+        }).join('') +
+      '</div>' +
+      '<div class="apt-tp-total">' +
+        '<div class="apt-tp-total-lbl">Total do Turno</div>' +
+        '<div class="apt-tp-total-val '+(podeEditar?'':'muted')+'" id="apt-total-turno">0,00 kg</div>' +
+      '</div>' +
+    '</div>';
+
+  const banner = document.getElementById('apt-readonly-banner');
+  if (!podeEditar) {
+    banner.classList.add('show');
+    const meuTurnoLbl = window._currentUserTurno ? (window._currentUserTurno + 'º') : '';
+    const byLbl = turnoDados.by
+      ? ('Turno de ' + turnoDados.by + ' · você edita apenas o ' + meuTurnoLbl)
+      : ('Turno ' + aptTurnoAtivo + 'º · você edita apenas o ' + meuTurnoLbl);
+    document.getElementById('apt-readonly-sub').textContent = byLbl;
+  } else {
+    banner.classList.remove('show');
+  }
+
+  const btn = document.getElementById('apt-btn-save');
+  const lbl = document.getElementById('apt-btn-save-lbl');
+  if (!podeEditar) {
+    btn.classList.add('disabled');
+    btn.disabled = true;
+    lbl.textContent = 'Sem permissão neste turno';
+  } else {
+    btn.classList.remove('disabled');
+    btn.disabled = false;
+    lbl.textContent = 'Salvar Apontamento';
+  }
+
+  aptAtualizarTotais();
+}
+
+window.aptCapturarRascunho = function() {
+  if (!aptPodeEditar(aptTurnoAtivo)) return;
+  const h = document.getElementById('apt-in-horas');
+  const co = document.getElementById('apt-in-co');
+  const pac = document.getElementById('apt-in-pac');
+  const pes = document.getElementById('apt-in-pes');
+  const cv = document.getElementById('apt-in-cv');
+  if (!h) return;
+  aptRascunho[aptTurnoAtivo] = {
+    h: h.value, co: co.value, pac: pac.value, pes: pes.value, cv: cv.value
+  };
+};
+
+window.aptAtualizarTotais = function() {
+  const co = aptParseNum(document.getElementById('apt-in-co')?.value);
+  const pac = aptParseNum(document.getElementById('apt-in-pac')?.value);
+  const pes = aptParseNum(document.getElementById('apt-in-pes')?.value);
+  const cv = aptParseNum(document.getElementById('apt-in-cv')?.value);
+  const totalTurno = co + pac + pes + cv;
+  const elTurno = document.getElementById('apt-total-turno');
+  if (elTurno) elTurno.textContent = aptFmtKg(totalTurno) + ' kg';
+
+  if (!aptDiaSel) return;
+  const parts = aptDiaSel.split('-').map(Number);
+  const y = parts[0], m = parts[1], d = parts[2];
+  const mesKey = aptFmtMesKey(new Date(y, m-1, 1));
+  const diaKey = String(d).padStart(2,'0');
+  const diaDados = (window._aptDados[mesKey] && window._aptDados[mesKey][diaKey]) || {};
+  let horasDia = 0, kgDia = 0;
+  APT_TURNOS.forEach(t => {
+    if (t.num === aptTurnoAtivo) {
+      horasDia += aptParseNum(document.getElementById('apt-in-horas')?.value);
+      kgDia += totalTurno;
+    } else {
+      const td = diaDados[t.num] || {};
+      horasDia += aptParseNum(td.h);
+      kgDia += aptParseNum(td.co) + aptParseNum(td.pac) + aptParseNum(td.pes) + aptParseNum(td.cv);
+    }
+  });
+  const elH = document.getElementById('apt-foot-horas');
+  const elKg = document.getElementById('apt-foot-kg');
+  if (elH) elH.textContent = horasDia.toFixed(1) + ' h';
+  if (elKg) elKg.textContent = aptFmtKg(kgDia);
+};
+
+window.salvarApontamento = function() {
+  if (!aptPodeEditar(aptTurnoAtivo)) {
+    toast('Sem permissão neste turno', 'err');
+    return;
+  }
+  aptCapturarRascunho();
+  const r = aptRascunho[aptTurnoAtivo];
+  if (!r) { toast('Nada para salvar', 'err'); return; }
+
+  const h = aptParseNum(r.h);
+  const co = aptParseNum(r.co);
+  const pac = aptParseNum(r.pac);
+  const pes = aptParseNum(r.pes);
+  const cv = aptParseNum(r.cv);
+  if (h <= 0) { toast('Informe as horas trabalhadas', 'err'); return; }
+  if (h > 24) { toast('Horas inválidas (máx 24h)', 'err'); return; }
+  if (co + pac + pes + cv <= 0) { toast('Informe ao menos uma fibra', 'err'); return; }
+
+  const parts = aptDiaSel.split('-').map(Number);
+  const y = parts[0], m = parts[1], d = parts[2];
+  const mesKey = aptFmtMesKey(new Date(y, m-1, 1));
+  const diaKey = String(d).padStart(2,'0');
+  const all = JSON.parse(JSON.stringify(window._aptDados || {}));
+  if (!all[mesKey]) all[mesKey] = {};
+  if (!all[mesKey][diaKey]) all[mesKey][diaKey] = {};
+  all[mesKey][diaKey][aptTurnoAtivo] = {
+    h: h, co: co, pac: pac, pes: pes, cv: cv,
+    by: window._currentUserName || 'admin',
+    at: new Date().toISOString()
+  };
+
+  if (window._salvarAptFirebase) {
+    window._salvarAptFirebase(all);
+  }
+  window._aptDados = all;
+  delete aptRascunho[aptTurnoAtivo];
+  toast('Apontamento salvo · ' + APT_TURNOS.find(t=>t.num===aptTurnoAtivo).nome, 'ok');
+  aptRenderCalendario();
+  aptRenderDia();
+};
 
 function tlFormatTime(iso) {
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
