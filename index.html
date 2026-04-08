@@ -3,6 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB · DASHBOARD — CHANGELOG                          ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.3.1  08/04/2026  Pill 3D nos módulos + Preço de Venda WIP ║
   ║  v2.3.0  08/04/2026  Rename → HUB · Apple style · sage+white  ║
   ║  v0.8    --/--/----  Versão inicial (Fiobras Dashboard)       ║
   ╚═══════════════════════════════════════════════════════════════╝
@@ -108,30 +109,74 @@ body{
   font-family:'DM Mono',monospace;font-size:10px;font-weight:500;
   letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);
 }
+/* Pill 3D toggle — módulos do HUB */
 .segmented{
-  background:var(--segmented-bg);
-  border-radius:10px;padding:3px;
-  display:inline-flex;gap:2px;
-  transition:background .35s;
+  position:relative;
+  background:linear-gradient(180deg,#e2e8df 0%,#eef2ea 50%,#d8e0d3 100%);
+  border-radius:99px;padding:5px;
+  display:inline-flex;gap:0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    inset 0 -1px 0 rgba(0,0,0,.06),
+    0 1px 2px rgba(0,40,15,.08),
+    0 6px 16px -4px rgba(0,40,15,.15);
+  transition:background .35s,box-shadow .35s;
+}
+[data-theme="dark"] .segmented{
+  background:linear-gradient(180deg,#0a1410 0%,#11201a 50%,#0a1410 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -1px 0 rgba(0,0,0,.6),
+    0 1px 2px rgba(0,0,0,.4),
+    0 8px 20px -6px rgba(0,40,15,.4);
 }
 .seg-btn{
-  padding:9px 22px;border:none;background:transparent;
+  position:relative;
+  padding:10px 20px;border:none;background:transparent;
   font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;
-  color:var(--text);
-  border-radius:8px;cursor:pointer;
-  transition:all .25s;
+  color:var(--muted);
+  border-radius:99px;cursor:pointer;
+  transition:color .25s;
   display:flex;align-items:center;gap:7px;
+  z-index:1;
 }
+[data-theme="dark"] .seg-btn{color:rgba(255,255,255,.55)}
+.seg-btn:hover{color:var(--text)}
+[data-theme="dark"] .seg-btn:hover{color:rgba(255,255,255,.85)}
 .seg-btn svg{width:14px;height:14px;stroke-width:2;fill:none;stroke:currentColor}
+
 .seg-btn.active{
-  background:var(--segmented-active);
-  font-weight:600;
-  color:var(--fb-green);
-  box-shadow:0 1px 2px rgba(0,0,0,.08),0 1px 6px rgba(0,0,0,.04);
+  color:#fff;font-weight:600;
+  background:linear-gradient(180deg,#00a843 0%,#008835 50%,#006627 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.4),
+    inset 0 -2px 3px rgba(0,0,0,.2),
+    0 2px 4px rgba(0,80,30,.35),
+    0 6px 12px rgba(0,80,30,.3);
 }
 [data-theme="dark"] .seg-btn.active{
-  color:#fff;
-  box-shadow:0 1px 2px rgba(0,0,0,.5);
+  background:linear-gradient(180deg,#00a843 0%,#008835 50%,#006627 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -2px 4px rgba(0,0,0,.25),
+    0 1px 2px rgba(0,0,0,.5),
+    0 6px 14px rgba(0,80,30,.55),
+    0 0 0 1px rgba(0,0,0,.3);
+}
+
+/* Botão "em construção" — opacidade reduzida + badge */
+.seg-btn.wip{opacity:.55}
+.seg-btn.wip:hover{opacity:.75}
+.seg-wip-tag{
+  font-family:'DM Mono',monospace;
+  font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 6px;border-radius:99px;
+  background:rgba(255,203,0,.2);color:#a07a00;
+  border:1px solid rgba(255,203,0,.4);
+}
+[data-theme="dark"] .seg-wip-tag{
+  background:rgba(255,203,0,.18);color:#ffcb00;
+  border-color:rgba(255,203,0,.35);
 }
 .header-right{display:flex;align-items:center;gap:8px}
 .icon-btn{
@@ -591,10 +636,15 @@ body{
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
         Produção
       </button>
+      <button class="seg-btn wip" onclick="toast('Preço de Venda em construção')">
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Preço de Venda
+        <span class="seg-wip-tag">WIP</span>
+      </button>
     </div>
 
     <div class="header-right">
-      <div class="version-pill">v2.3.0</div>
+      <div class="version-pill">v2.3.1</div>
       <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
         <svg id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       </button>
