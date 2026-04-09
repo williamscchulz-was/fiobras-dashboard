@@ -3,7 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
-  ║  v2.5.0  09/04/2026  Mobile First · Fases 1 + 2                ║
+  ║  v2.5.0  09/04/2026  Mobile First · Fases 1 + 2 + 3           ║
   ║    Fase 1 — Fundações técnicas:                                ║
   ║    • Anti-zoom iOS: inputs em mobile com font-size 16px.      ║
   ║    • Touch optimization: -webkit-tap-highlight-color:          ║
@@ -18,6 +18,14 @@
   ║      + toast "Sem permissão" ao tocar.                        ║
   ║    • Footer escondido em mobile (espaço pra pílula).          ║
   ║    • Toast reposicionado acima da pílula em mobile.           ║
+  ║    Fase 3 — Formulários mdet encorpados:                       ║
+  ║    • Cada métrica vira card branco grande com hierarquia     ║
+  ║      Poppins (label 12px sentence case, input 16px).         ║
+  ║    • Selos M/P/S viram grid 3-col legível abaixo do input.   ║
+  ║    • Histórico colapsado: só o ano mais recente em linha     ║
+  ║      discreta "vs 2025 · 1.31M · ↑8,2%".                     ║
+  ║    • Header mdet fica em 1 linha com Zerar/Salvar compactos. ║
+  ║    • Produção mdet ganha mesmo tratamento + charts menores.  ║
   ║                                                                ║
   ║  v2.4.0  08/04/2026  Módulo Apontamento Tintoria              ║
   ║    • Nova aba \"Apontamento\" dentro do módulo Produção.        ║
@@ -681,14 +689,170 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   .months-grid{grid-template-columns:repeat(3,1fr);}
 }
 
-/* ── Detail panel ── */
+/* ── Detail panel — v2.5.0 Fase 3: cards encorpados ── */
 @media(max-width:480px){
-  .mdet{padding:16px 14px;margin-bottom:16px;}
-  .mdet-hdr{flex-direction:column;align-items:flex-start;gap:10px;}
-  .mdet-title{font-size:.9rem;}
-  .mdet-actions{width:100%;display:flex;justify-content:flex-end;}
-  .mdet-grid{grid-template-columns:1fr !important;}
-  .save-btn{min-height:44px;padding:12px 18px;}
+  /* Container mdet: transparente, cards internos são os visuais */
+  .mdet{
+    background:transparent !important;
+    border:none !important;
+    box-shadow:none !important;
+    padding:0 !important;
+    margin-bottom:20px;
+  }
+  [data-theme="dark"] .mdet{background:transparent !important;}
+
+  /* Header: título à esquerda + ações alinhadas à direita, compacto */
+  .mdet-hdr{
+    flex-direction:row !important;
+    align-items:center !important;
+    justify-content:space-between;
+    flex-wrap:nowrap;
+    gap:8px;
+    margin-bottom:14px;
+    padding:0 2px;
+  }
+  .mdet-title{font-size:13px !important;font-weight:500;}
+  .mdet-actions{
+    width:auto !important;
+    display:flex !important;
+    align-items:center;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .mdet-actions .save-btn,.mdet-actions .prod-rel-btn{
+    padding:8px 12px !important;
+    font-size:10px !important;
+    min-height:36px !important;
+    letter-spacing:.3px;
+  }
+
+  /* Grid: 1 coluna, gap maior entre cards */
+  .mdet-grid{grid-template-columns:1fr !important;gap:10px;}
+
+  /* Cada .mf vira card branco encorpado */
+  .mdet .mf{
+    background:var(--surface);
+    border:0.5px solid var(--border);
+    border-radius:12px;
+    padding:14px 14px 12px;
+    box-shadow:var(--shadow-sm);
+  }
+  [data-theme="dark"] .mdet .mf{background:var(--surface);}
+
+  /* Label Poppins sentence-case + badge nivel à direita */
+  .mdet .mf label{
+    font-family:'Poppins',sans-serif !important;
+    font-size:12px !important;
+    font-weight:500 !important;
+    letter-spacing:0 !important;
+    text-transform:none !important;
+    color:var(--text) !important;
+    margin-bottom:9px !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:8px;
+    justify-content:space-between;
+  }
+  .mdet .mf label .level-badge{
+    font-size:9px !important;
+    padding:3px 8px !important;
+    flex-shrink:0;
+    margin-left:auto;
+  }
+
+  /* Input gordo, legível, sem zoom iOS */
+  .mdet .mf-wrap{
+    border-radius:9px;
+    border-width:1px;
+    background:var(--input-bg);
+  }
+  .mdet .mf-pfx{
+    padding:12px 11px !important;
+    font-size:12px !important;
+    background:transparent !important;
+    border-right:0.5px solid var(--border) !important;
+    color:var(--muted) !important;
+  }
+  .mdet .mf-wrap input{
+    padding:12px 12px !important;
+    font-size:16px !important;
+    font-weight:500;
+  }
+
+  /* Histórico: só o ano mais recente em linha discreta */
+  .mdet .mf-vs{
+    display:flex !important;
+    flex-direction:column;
+    margin-top:10px;
+    padding-top:9px;
+    border-top:0.5px solid var(--border);
+    gap:3px;
+  }
+  .mdet .mf-vs-row{display:none !important;}
+  .mdet .mf-vs-row:first-child{
+    display:flex !important;
+    align-items:center;
+    gap:6px;
+  }
+  .mdet .mf-vs-yr{
+    font-size:9px !important;
+    letter-spacing:1px;
+    color:var(--muted2) !important;
+    text-transform:uppercase;
+  }
+  .mdet .mf-vs-yr::before{content:'vs ';}
+  .mdet .mf-vs-val{font-size:11px !important;color:var(--text) !important;}
+  .mdet .mf-vs-d{font-size:10px !important;margin-left:auto;font-weight:600;}
+
+  /* Selos M/P/S em grid 3 colunas, grandes e legíveis */
+  .mdet .mf-lvls{
+    display:grid !important;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:5px;
+    margin-top:10px;
+    flex-wrap:unset;
+  }
+  .mdet .mf-lvl{
+    text-align:center;
+    padding:7px 4px !important;
+    border-radius:6px !important;
+    font-size:11px !important;
+    font-weight:600;
+    border:0.5px solid transparent;
+    font-family:'DM Mono',monospace;
+    letter-spacing:.3px;
+  }
+  .mdet .mf-lvl.level-meta{background:rgba(0,136,53,.1);color:#006828;border-color:rgba(0,136,53,.3);}
+  .mdet .mf-lvl.level-plus{background:rgba(0,118,190,.1);color:#005A93;border-color:rgba(0,118,190,.3);}
+  .mdet .mf-lvl.level-super{background:rgba(255,203,0,.14);color:#8A6A00;border-color:rgba(255,203,0,.4);}
+  [data-theme="dark"] .mdet .mf-lvl.level-meta{color:#52d47e;background:rgba(0,136,53,.2);border-color:rgba(0,136,53,.45);}
+  [data-theme="dark"] .mdet .mf-lvl.level-plus{color:#5bbeff;background:rgba(0,118,190,.2);border-color:rgba(0,118,190,.45);}
+  [data-theme="dark"] .mdet .mf-lvl.level-super{color:#ffd633;background:rgba(255,203,0,.2);border-color:rgba(255,203,0,.5);}
+
+  /* Produção mdet: mesmo tratamento no prod-group (cada KPI já é um card) */
+  #prodDet .prod-group{padding:14px 14px 12px !important;border-radius:12px;}
+  #prodDet .prod-group-title{font-size:11px !important;letter-spacing:1px;margin-bottom:12px;}
+  #prodDet .prod-group-title span{font-size:9px !important;}
+  #prodDet .prod-split{grid-template-columns:1fr !important;gap:14px;}
+  #prodDet .prod-fields{grid-template-columns:1fr 1fr !important;gap:8px;}
+  #prodDet .prod-fields .mf label{
+    font-family:'Poppins',sans-serif !important;
+    font-size:10px !important;
+    font-weight:500 !important;
+    letter-spacing:0 !important;
+    text-transform:none !important;
+    color:var(--muted) !important;
+    margin-bottom:5px !important;
+  }
+  #prodDet .prod-fields .mf-wrap input{font-size:16px !important;padding:11px 12px !important;}
+  #prodDet .prod-result{padding-top:10px !important;}
+  #prodDet .prod-result-lbl{font-size:10px !important;}
+  #prodDet .prod-result-val{font-size:13px !important;}
+  #prodDet .prod-chart-wrap{min-height:120px;}
+  #prodDet .prod-chart-wrap canvas{max-height:140px;}
+}
+@media(max-width:360px){
+  #prodDet .prod-fields{grid-template-columns:1fr !important;}
 }
 
 /* ── Anual block ── */
@@ -1674,9 +1838,11 @@ const CHANGELOG = [
   {
     v:'2.5.0', d:'09 abr 2026', current:true,
     items:[
-      {type:'high', title:'Patch Mobile First — Fases 1 e 2.', desc:'Grande patch pra deixar o HUB 100% mobile friendly. Fase 1 (fundações técnicas) + Fase 2 (nova navegação por pílula flutuante + regras de permissão).'},
+      {type:'high', title:'Patch Mobile First — Fases 1, 2 e 3.', desc:'Grande patch pra deixar o HUB 100% mobile friendly. Fase 1 (fundações técnicas) + Fase 2 (nova navegação por pílula flutuante + regras de permissão) + Fase 3 (redesign dos formulários mdet em cards encorpados).'},
       {type:'high', title:'Pílula flutuante de navegação no mobile.', desc:'Estilo Nubank/iOS: no celular, os módulos (Resultados / Produção / Preço) agora ficam numa pílula flutuante no rodapé, com fundo branco translúcido, blur, sombra verde no ativo. Sobe junto quando você rola, sempre ao alcance do polegar. No desktop continua tudo igual (pill 3D no header).'},
       {type:'high', title:'Todos os módulos visíveis pra todos.', desc:'Antes: usuários de produção não viam o botão Resultados. Agora: todos veem os 3 módulos, mas os sem permissão aparecem com cadeado sobreposto e opacity reduzida — ao tocar, aparece toast "Sem permissão". Deixa claro que existe algo ali, mas bloqueado.'},
+      {type:'high', title:'Formulários mdet redesenhados em mobile.', desc:'Na aba Resultados (Metas 2026), cada métrica agora vira um card branco encorpado com label grande (Poppins sentence case, não mais MAIÚSCULAS comprimidas), input grande de 16px (sem zoom iOS), selos M/P/S em grid 3-col legíveis embaixo e histórico colapsado em uma linha discreta "vs 2025 · 1.31M · ↑8,2%". Mesmo tratamento aplicado no mdet de Produção.'},
+      {type:'feat', title:'Header do mdet compacto.', desc:'Antes: em mobile o header do mdet (Zerar/Salvar) empilhava embaixo do título. Agora: tudo fica em uma linha só, título à esquerda, botões compactos à direita. Libera mais espaço vertical pros cards de métrica.'},
       {type:'feat', title:'Inputs em mobile não dão mais zoom no iOS.', desc:'Safari dá autozoom quando você toca num input com fonte menor que 16px. Agora todos os inputs em telas ≤480px usam exatamente 16px, eliminando o zoom-e-desalinha irritante.'},
       {type:'feat', title:'Toques mais rápidos e sem flash cinza.', desc:'Adicionado touch-action:manipulation nos botões e cards (remove o delay de 300ms do duplo-toque) e tap-highlight transparent global (acaba com o flash cinza feio do Android ao tocar).'},
       {type:'note', title:'Footer escondido em mobile.', desc:'Pra liberar espaço pra pílula flutuante. Os mesmos controles (tema, logout) continuam no header. No desktop o footer segue normal.'},
