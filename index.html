@@ -3,7 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
-  ║  v2.5.0  09/04/2026  Mobile First · Fases 1 + 2 + 3           ║
+  ║  v2.5.0  09/04/2026  Mobile First · Fases 1+2+3+4+5+rename    ║
   ║    Fase 1 — Fundações técnicas:                                ║
   ║    • Anti-zoom iOS: inputs em mobile com font-size 16px.      ║
   ║    • Touch optimization: -webkit-tap-highlight-color:          ║
@@ -12,20 +12,28 @@
   ║    • overflow-x:hidden proteção extra no .wrap mobile.        ║
   ║    Fase 2 — Nav pílula flutuante + permissões:                 ║
   ║    • Pílula flutuante estilo Nubank no rodapé em ≤640px.      ║
-  ║    • Backdrop blur, sombra verde no ativo, SVG + label.       ║
   ║    • Todos os módulos visíveis pra todos os usuários.         ║
   ║    • Módulos sem permissão: opacity + cadeado SVG no canto    ║
   ║      + toast "Sem permissão" ao tocar.                        ║
   ║    • Footer escondido em mobile (espaço pra pílula).          ║
-  ║    • Toast reposicionado acima da pílula em mobile.           ║
   ║    Fase 3 — Formulários mdet encorpados:                       ║
   ║    • Cada métrica vira card branco grande com hierarquia     ║
   ║      Poppins (label 12px sentence case, input 16px).         ║
   ║    • Selos M/P/S viram grid 3-col legível abaixo do input.   ║
-  ║    • Histórico colapsado: só o ano mais recente em linha     ║
-  ║      discreta "vs 2025 · 1.31M · ↑8,2%".                     ║
-  ║    • Header mdet fica em 1 linha com Zerar/Salvar compactos. ║
+  ║    • Histórico colapsado: só o ano mais recente.             ║
   ║    • Produção mdet ganha mesmo tratamento + charts menores.  ║
+  ║    Fase 4 — Tap-to-detail em Desenv. Cor:                      ║
+  ║    • Cards minimais (código + cliente/cor + badge + dias).  ║
+  ║    • Tap abre modal bottom-sheet com foto, chips, histórico  ║
+  ║      timeline vertical e ações agrupadas.                    ║
+  ║    • Cadeado SVG também no header pill 3D desktop — só       ║
+  ║      aparece no módulo sem permissão (admin não vê cadeado). ║
+  ║    • switchModule unificado: trata WIP e permissão.          ║
+  ║    Fase 5 — Polish final:                                      ║
+  ║    • Tabs horizontais com fade lateral (mask-image).         ║
+  ║    • Header mobile com altura natural (saiu height:48px).    ║
+  ║    Rename:                                                     ║
+  ║    • Módulo "Resultados" passa a se chamar "Gerencial".      ║
   ║                                                                ║
   ║  v2.4.0  08/04/2026  Módulo Apontamento Tintoria              ║
   ║    • Nova aba \"Apontamento\" dentro do módulo Produção.        ║
@@ -311,6 +319,22 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   background:rgba(255,203,0,.18);color:#ffcb00;
   border-color:rgba(255,203,0,.35);
 }
+/* Cadeado SVG no header pill 3D desktop (v2.5.0 Fase 4) — só aparece quando .locked */
+.hdr-modules .mod-btn{position:relative;}
+.hdr-modules .mod-btn .mod-btn-lock{display:none;}
+.hdr-modules .mod-btn.locked{opacity:.45;}
+.hdr-modules .mod-btn.locked:hover{opacity:.65;}
+.hdr-modules .mod-btn.locked .mod-btn-lock{
+  display:flex;position:absolute;top:1px;right:5px;
+  width:13px;height:13px;border-radius:50%;
+  background:rgba(20,30,20,0.88);color:#fff;
+  align-items:center;justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+.hdr-modules .mod-btn.locked .mod-btn-lock svg{width:7px;height:7px;display:block;}
+[data-theme="dark"] .hdr-modules .mod-btn.locked .mod-btn-lock{background:rgba(245,245,247,0.92);color:#0d1510;}
+/* Admin nunca vê cadeado no WIP — o wip-tag já comunica o estado */
+.hdr-modules .mod-btn.wip:not(.locked) .mod-btn-lock{display:none;}
 .hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .hdr-pill{font-family:'DM Mono',monospace;font-size:.58rem;font-weight:500;color:var(--muted);display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .15s;background:transparent;border:1px solid transparent;}
 .hdr-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:#3ecf6e;}
@@ -526,10 +550,163 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 .prod-rel-btn:disabled:hover{background:var(--green);transform:none;}
 
 /* ── Desenvolvimento de Cor ── */
+/* ── Desenv. Cor — cards minimalistas (v2.5.0 Fase 4 tap-to-detail) ── */
 .cor-filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.cor-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:10px;position:relative;overflow:hidden;transition:border-color .2s;cursor:pointer;}
-.cor-card:hover{border-color:var(--green);}
-.cor-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cor-status,var(--muted));border-radius:12px 0 0 12px;}
+.cor-card{
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-radius:12px;
+  padding:13px 16px 13px 18px;
+  margin-bottom:8px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .15s,transform .1s;
+  cursor:pointer;
+  box-shadow:var(--shadow-sm);
+}
+.cor-card:hover{border-color:var(--border2);}
+.cor-card:active{transform:scale(0.995);}
+.cor-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cor-status,var(--muted));}
+.cor-card-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.cor-card-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.cor-card-codigo{font-family:'DM Mono',monospace;font-size:.86rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cor-card-sub{font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:400;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cor-card-fibra{display:inline-block;font-family:'DM Mono',monospace;font-size:.56rem;font-weight:600;padding:1px 5px;border-radius:3px;background:rgba(0,118,190,.12);color:#4db3ff;margin-left:6px;vertical-align:1px;}
+.cor-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.cor-card-badge{font-family:'Poppins',sans-serif;font-size:.56rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:3px 9px;border-radius:5px;}
+.cor-card-dias{display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:.78rem;font-weight:600;color:var(--text);}
+.cor-card-dias svg{flex-shrink:0;opacity:.75;}
+.cor-card-dias.pausado{color:var(--muted2);}
+.cor-card-dias.warn{color:var(--red);}
+.cor-card-op30{font-family:'DM Mono',monospace;font-size:.58rem;font-weight:700;color:var(--red);}
+
+/* ── Cor Detail Modal (bottom sheet) ── */
+.cor-det-modal{
+  width:520px;max-width:520px;
+  max-height:88vh;
+  display:flex;flex-direction:column;
+  padding:0 !important;
+  overflow:hidden;
+}
+.cor-det-handle{
+  display:none;
+  width:38px;height:4px;border-radius:2px;background:var(--border2);
+  margin:10px auto 4px;flex-shrink:0;
+}
+.cor-det-hdr{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:22px 24px 14px;gap:12px;flex-shrink:0;
+}
+.cor-det-hdr-main{flex:1;min-width:0;}
+.cor-det-codigo{font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--text);margin-bottom:3px;}
+.cor-det-sub{font-family:'Poppins',sans-serif;font-size:.76rem;font-weight:400;color:var(--muted);}
+.cor-det-close{
+  width:30px;height:30px;flex-shrink:0;
+  background:var(--surface2);border:none;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.cor-det-close:hover{background:var(--border);color:var(--text);}
+.cor-det-close svg{width:13px;height:13px;}
+.cor-det-body{
+  flex:1;overflow-y:auto;
+  padding:0 24px 24px;
+  -webkit-overflow-scrolling:touch;
+}
+.cor-det-foto{
+  width:100%;max-height:240px;object-fit:cover;
+  border:0.5px solid var(--border);border-radius:12px;
+  background:var(--surface2);margin-bottom:14px;cursor:pointer;
+}
+.cor-det-chips{display:flex;gap:7px;margin-bottom:16px;}
+.cor-det-chip{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:10px 6px;border-radius:10px;
+  background:var(--surface2);border:0.5px solid var(--border);
+}
+.cor-det-chip.status{background:var(--cor-chip-bg,rgba(138,149,128,.14));border-color:var(--cor-chip-bd,rgba(138,149,128,.35));}
+.cor-det-chip-lbl{
+  font-family:'Poppins',sans-serif;font-size:.56rem;font-weight:500;
+  letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);
+}
+.cor-det-chip.status .cor-det-chip-lbl{color:var(--cor-chip-fg,var(--muted));}
+.cor-det-chip-val{
+  display:flex;align-items:center;gap:4px;
+  font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;color:var(--text);
+}
+.cor-det-chip.status .cor-det-chip-val{color:var(--cor-chip-fg,var(--text));}
+.cor-det-chip-val svg{flex-shrink:0;opacity:.75;}
+
+.cor-det-section{margin-bottom:16px;}
+.cor-det-section-lbl{
+  font-family:'Poppins',sans-serif;font-size:.6rem;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);
+  margin-bottom:8px;
+}
+.cor-det-obs{
+  font-family:'Poppins',sans-serif;font-size:.8rem;font-weight:400;
+  color:var(--text);line-height:1.55;white-space:pre-wrap;word-break:break-word;
+}
+.cor-det-hist{display:flex;flex-direction:column;gap:8px;}
+.cor-det-hist-row{display:flex;align-items:flex-start;gap:10px;}
+.cor-det-hist-dot{
+  width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;
+  background:var(--cor-hist-dot,var(--muted));
+  box-shadow:0 0 0 2px var(--bg);
+}
+.cor-det-hist-body{flex:1;min-width:0;}
+.cor-det-hist-lbl{
+  font-family:'Poppins',sans-serif;font-size:.76rem;font-weight:500;
+  color:var(--text);line-height:1.2;
+}
+.cor-det-hist-meta{
+  font-family:'DM Mono',monospace;font-size:.62rem;font-weight:400;
+  color:var(--muted2);margin-top:2px;letter-spacing:.3px;
+}
+
+.cor-det-actions{
+  display:grid;gap:6px;
+  margin-top:4px;
+}
+.cor-det-actions-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.cor-det-act{
+  padding:11px 12px;
+  border-radius:9px;
+  font-family:'Poppins',sans-serif;font-size:.76rem;font-weight:500;
+  cursor:pointer;transition:all .15s;
+  border:0.5px solid var(--border);background:var(--surface2);color:var(--text);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  min-height:44px;
+}
+.cor-det-act:hover{background:var(--border);}
+.cor-det-act.primary{background:var(--green);color:#fff;border-color:var(--green);}
+.cor-det-act.primary:hover{background:var(--green2);}
+[data-theme="dark"] .cor-det-act.primary{background:#3ecf6e;color:#0d1510;border-color:#3ecf6e;}
+.cor-det-act.danger{color:var(--red);border-color:rgba(192,57,43,.3);background:transparent;}
+.cor-det-act.danger:hover{background:rgba(192,57,43,.08);}
+.cor-det-act.info{color:var(--blue);border-color:rgba(0,118,190,.3);background:rgba(0,118,190,.06);}
+[data-theme="dark"] .cor-det-act.info{color:#5bbeff;}
+.cor-det-act.warn{color:#b8920a;border-color:rgba(255,203,0,.4);background:rgba(255,203,0,.1);}
+[data-theme="dark"] .cor-det-act.warn{color:#ffcb00;}
+
+/* Mobile: modal vira bottom sheet com handle */
+@media(max-width:480px){
+  .cor-det-modal{
+    width:100% !important;max-width:100vw !important;
+    border-radius:18px 18px 0 0 !important;
+    max-height:92vh !important;
+  }
+  .cor-det-handle{display:block;}
+  .cor-det-hdr{padding:4px 18px 12px;}
+  .cor-det-codigo{font-size:.96rem;}
+  .cor-det-body{padding:0 18px 20px;}
+  .cor-det-chips{gap:6px;}
+  .cor-det-chip{padding:9px 4px;}
+  .cor-det-chip-val{font-size:.76rem;}
+  .cor-det-actions-row{gap:6px;}
+}
+
+.cor-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:.78rem;}
 .cor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
 .cor-codigo{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;color:var(--text);}
 .cor-status-badge{font-family:'Poppins',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:5px;}
@@ -642,7 +819,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 
 /* ── Header mobile ── */
 @media(max-width:480px){
-  .hdr{padding:0 14px;height:48px;}
+  .hdr{padding:10px 14px;}
   .hdr-left{gap:6px;}
   .hdr-right{gap:8px;}
   .hdr-brand{font-size:.92rem;letter-spacing:.5px;}
@@ -650,11 +827,18 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   .hdr-pill{display:none;}
 }
 
-/* ── Tabs: scroll horizontal no mobile ── */
+/* ── Tabs: scroll horizontal com fade laterais (v2.5.0 Fase 5) ── */
 .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
 @media(max-width:480px){
-  .tabs{padding:0 12px;gap:0;top:calc(48px + env(safe-area-inset-top,0px));}
+  /* Wrapper com fade edges pra indicar scroll */
+  .tabs{
+    padding:0 12px;gap:0;
+    top:calc(env(safe-area-inset-top,0px) + 44px);
+    position:sticky;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);
+  }
   .tab-btn{padding:12px 14px;font-size:.64rem;letter-spacing:1px;white-space:nowrap;flex-shrink:0;min-height:44px;}
 }
 
@@ -1346,16 +1530,19 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="hdr-modules" id="modBar">
     <button class="mod-btn active" data-mod="resultados" data-role="admin" onclick="switchModule('resultados',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span class="mod-lbl">Resultados</span>
+      <span class="mod-lbl">Gerencial</span>
+      <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
     <button class="mod-btn" data-mod="producao" data-role="all" onclick="switchModule('producao',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       <span class="mod-lbl">Produção</span>
+      <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
-    <button class="mod-btn wip" data-mod="preco" data-role="admin" onclick="toast('Preço de Venda em construção')">
+    <button class="mod-btn wip" data-mod="preco" data-role="admin" onclick="switchModule('preco',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
       <span class="mod-lbl">Preço de Venda</span>
       <span class="mod-wip-tag">WIP</span>
+      <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
   </div>
   <div class="hdr-right">
@@ -1557,6 +1744,22 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
       </div>
     </div>
   </div>
+  <!-- Modal Detalhe de Cor (tap-to-detail v2.5.0 Fase 4) -->
+  <div class="modal-bg" id="corDetModal" onclick="if(event.target===this)fecharCorDet()">
+    <div class="modal cor-det-modal" id="corDetModalInner">
+      <div class="cor-det-handle"></div>
+      <div class="cor-det-hdr">
+        <div class="cor-det-hdr-main">
+          <div class="cor-det-codigo" id="corDetCodigo">—</div>
+          <div class="cor-det-sub" id="corDetSub">—</div>
+        </div>
+        <button class="cor-det-close" onclick="fecharCorDet()" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="cor-det-body" id="corDetBody"></div>
+    </div>
+  </div>
 </div>
 </div>
 <!-- ── Aba Apontamento (tintoria) · v2.4.0 ── -->
@@ -1674,9 +1877,9 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 </div>
 <!-- ── Mobile Nav Pill (v2.5.0 Fase 2) — pílula flutuante estilo Nubank ── -->
 <nav class="mnav-pill" id="mnavPill" aria-label="Navegação de módulos">
-  <button class="mnav-btn" data-mod="resultados" onclick="switchModuleMobile('resultados',this)" aria-label="Resultados">
+  <button class="mnav-btn" data-mod="resultados" onclick="switchModuleMobile('resultados',this)" aria-label="Gerencial">
     <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <span class="mnav-btn-lbl">Result.</span>
+    <span class="mnav-btn-lbl">Gerencial</span>
     <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
   </button>
   <button class="mnav-btn" data-mod="producao" onclick="switchModuleMobile('producao',this)" aria-label="Produção">
@@ -1763,28 +1966,29 @@ function canAccessModule(mod){
   return mod === 'producao';
 }
 
-/** Configura módulos e abas visíveis por role (v2.5.0: todos veem, locked nos sem permissão) */
+/** Módulos em construção — clique mostra toast WIP, não bloqueia por permissão */
+const WIP_MODULES = { preco: 'Preço de Venda em construção' };
+
+/** Configura módulos e abas visíveis por role (v2.5.0 Fase 4: desktop também mostra cadeado) */
 function setupTabs(role){
   window._userRole = role;
+  // Header pill 3D: marca .locked nos sem permissão (não esconde mais)
   const modBtns = document.querySelectorAll('.hdr-modules .mod-btn');
   modBtns.forEach(b => {
     const mod = b.getAttribute('data-mod');
-    const isWip = b.classList.contains('wip');
-    if(isWip) return; // WIP mantém comportamento próprio
-    // Header pill 3D (desktop): mantém o display:none pros sem permissão pra não quebrar layout do pill 3D
-    b.style.display = canAccessModule(mod) ? '' : 'none';
+    if(canAccessModule(mod)) b.classList.remove('locked');
+    else b.classList.add('locked');
+    b.style.display = ''; // garante visível (limpa display:none legado)
   });
-  // Mobile nav pill: marca locked nos sem permissão (todos aparecem)
+  // Mobile nav pill: mesma lógica
   const mnavBtns = document.querySelectorAll('#mnavPill .mnav-btn');
   mnavBtns.forEach(b => {
     const mod = b.getAttribute('data-mod');
-    const isWip = mod === 'preco'; // WIP por enquanto
-    if(isWip){ b.classList.add('locked'); return; }
-    if(!canAccessModule(mod)) b.classList.add('locked');
-    else b.classList.remove('locked');
+    if(canAccessModule(mod)) b.classList.remove('locked');
+    else b.classList.add('locked');
   });
   if(role === 'producao'){
-    // Produção users: esconde módulo Resultados, ativa Produção
+    // Produção users: abre direto em Produção
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     modBtns.forEach(b => b.classList.remove('active'));
@@ -1801,7 +2005,7 @@ function setupTabs(role){
     window._activeModule = 'producao';
     renderProducao();
   } else {
-    // Admin: resultados ativo por padrão
+    // Admin: Gerencial ativo por padrão
     const resMnav = document.querySelector('#mnavPill .mnav-btn[data-mod="resultados"]');
     if(resMnav) resMnav.classList.add('active');
   }
@@ -1838,14 +2042,18 @@ const CHANGELOG = [
   {
     v:'2.5.0', d:'09 abr 2026', current:true,
     items:[
-      {type:'high', title:'Patch Mobile First — Fases 1, 2 e 3.', desc:'Grande patch pra deixar o HUB 100% mobile friendly. Fase 1 (fundações técnicas) + Fase 2 (nova navegação por pílula flutuante + regras de permissão) + Fase 3 (redesign dos formulários mdet em cards encorpados).'},
-      {type:'high', title:'Pílula flutuante de navegação no mobile.', desc:'Estilo Nubank/iOS: no celular, os módulos (Resultados / Produção / Preço) agora ficam numa pílula flutuante no rodapé, com fundo branco translúcido, blur, sombra verde no ativo. Sobe junto quando você rola, sempre ao alcance do polegar. No desktop continua tudo igual (pill 3D no header).'},
-      {type:'high', title:'Todos os módulos visíveis pra todos.', desc:'Antes: usuários de produção não viam o botão Resultados. Agora: todos veem os 3 módulos, mas os sem permissão aparecem com cadeado sobreposto e opacity reduzida — ao tocar, aparece toast "Sem permissão". Deixa claro que existe algo ali, mas bloqueado.'},
-      {type:'high', title:'Formulários mdet redesenhados em mobile.', desc:'Na aba Resultados (Metas 2026), cada métrica agora vira um card branco encorpado com label grande (Poppins sentence case, não mais MAIÚSCULAS comprimidas), input grande de 16px (sem zoom iOS), selos M/P/S em grid 3-col legíveis embaixo e histórico colapsado em uma linha discreta "vs 2025 · 1.31M · ↑8,2%". Mesmo tratamento aplicado no mdet de Produção.'},
-      {type:'feat', title:'Header do mdet compacto.', desc:'Antes: em mobile o header do mdet (Zerar/Salvar) empilhava embaixo do título. Agora: tudo fica em uma linha só, título à esquerda, botões compactos à direita. Libera mais espaço vertical pros cards de métrica.'},
+      {type:'high', title:'Patch Mobile First — completo (Fases 1 a 5).', desc:'Grande patch pra deixar o HUB 100% mobile friendly, em 5 fases encadeadas: fundações técnicas, pílula flutuante, formulários encorpados, tap-to-detail no Desenv. Cor e polish final. Inclui o rename do módulo Resultados → Gerencial.'},
+      {type:'high', title:'Módulo Resultados agora se chama Gerencial.', desc:'Melhor reflete o escopo real do módulo: metas financeiras, histórico plurianual, prêmios, e tudo relacionado à visão executiva/gerencial da empresa. O que muda é só o nome — as abas internas (2026 / Histórico) continuam iguais.'},
+      {type:'high', title:'Pílula flutuante de navegação no mobile.', desc:'Estilo Nubank/iOS: no celular, os módulos (Gerencial / Produção / Preço) agora ficam numa pílula flutuante no rodapé, com fundo branco translúcido, blur, sombra verde no ativo. Sobe junto quando você rola, sempre ao alcance do polegar. No desktop continua com o pill 3D no header.'},
+      {type:'high', title:'Cadeado nos módulos sem permissão — desktop e mobile.', desc:'Agora todos os usuários enxergam todos os módulos, mas aqueles que não têm acesso aparecem com cadeado SVG sobreposto + opacity reduzida. Admin nunca vê cadeado (tem acesso a tudo). Anderson/Aldo/Geovani veem cadeado em Gerencial e Preço. Toque mostra toast "Sem permissão".'},
+      {type:'high', title:'Desenv. Cor: tap-to-detail em modal bottom-sheet.', desc:'Os cards de cor agora são mínimos (código + cliente/cor + badge de status + dias). Toca num card e abre um modal bottom-sheet com foto grande, 3 chips (Status/Prazo/Fibra), observações em destaque, histórico em timeline vertical com bolinhas coloridas e ações agrupadas no final (Aprovar, Em ajuste, Editar, Excluir). Mesmo padrão visual da Timeline.'},
+      {type:'high', title:'Formulários mdet redesenhados em mobile.', desc:'Em Gerencial (Metas 2026) e Produção (detalhe do mês), cada métrica agora vira um card branco encorpado com label grande (Poppins sentence case, não mais MAIÚSCULAS comprimidas), input grande de 16px (sem zoom iOS), selos M/P/S em grid 3-col legíveis embaixo e histórico colapsado em uma linha discreta "vs 2025 · 1.31M · ↑8,2%".'},
+      {type:'feat', title:'Tabs horizontais com fade lateral.', desc:'Em mobile, quando as abas internas do módulo não cabem todas na tela, as laterais ganham um fade suave indicando que tem mais conteúdo pra scrollar.'},
       {type:'feat', title:'Inputs em mobile não dão mais zoom no iOS.', desc:'Safari dá autozoom quando você toca num input com fonte menor que 16px. Agora todos os inputs em telas ≤480px usam exatamente 16px, eliminando o zoom-e-desalinha irritante.'},
       {type:'feat', title:'Toques mais rápidos e sem flash cinza.', desc:'Adicionado touch-action:manipulation nos botões e cards (remove o delay de 300ms do duplo-toque) e tap-highlight transparent global (acaba com o flash cinza feio do Android ao tocar).'},
+      {type:'feat', title:'switchModule unificado.', desc:'A função que troca de módulo agora trata sozinha WIP e permissão. Antes tinha lógica duplicada entre header e pílula mobile. Menos código, menos chance de bug.'},
       {type:'note', title:'Footer escondido em mobile.', desc:'Pra liberar espaço pra pílula flutuante. Os mesmos controles (tema, logout) continuam no header. No desktop o footer segue normal.'},
+      {type:'note', title:'Header mobile com altura natural.', desc:'Saiu a altura forçada de 48px. Agora o header se ajusta ao próprio conteúdo — mais limpo, mais consistente com safe-area.'},
       {type:'note', title:'Proteção extra contra scroll horizontal.', desc:'overflow-x:hidden no .wrap mobile além do body. Previne glitch de card que "vaza" em raras situações de conteúdo dinâmico.'}
     ]
   },
@@ -2703,7 +2911,12 @@ window.setMetrica = id => { metricaAtiva = id; renderHistorico(); };
 window._activeModule = 'resultados';
 
 window.switchModule = (mod, btn) => {
-  // Bloqueio: sem permissão → toast e sai
+  // WIP: módulo em construção — mostra toast e sai
+  if(WIP_MODULES[mod]){
+    toast(WIP_MODULES[mod], 'warn');
+    return;
+  }
+  // Permissão: sem acesso → toast e sai
   if(!canAccessModule(mod)){
     toast('Sem permissão', 'warn');
     return;
@@ -2723,14 +2936,8 @@ window.switchModule = (mod, btn) => {
   if (firstBtn) firstBtn.click();
 };
 
-/** Wrapper da pílula flutuante mobile — trata WIP e bloqueados */
-window.switchModuleMobile = (mod, btn) => {
-  if(mod === 'preco'){
-    toast('Preço de Venda em construção', 'warn');
-    return;
-  }
-  window.switchModule(mod, btn);
-};
+/** Wrapper legado da pílula mobile — switchModule já trata WIP e permissão */
+window.switchModuleMobile = (mod, btn) => window.switchModule(mod, btn);
 
 window.switchTab = (tab, btn) => {
   const group = btn.closest('.tab-group');
@@ -3564,71 +3771,146 @@ function renderCoresLista() {
     return;
   }
 
+  // Cards minimalistas — só resumo. Detalhe abre em modal via tap.
   document.getElementById('coresLista').innerHTML = lista.map(c => {
     const sc = STATUS_CONFIG[c.status] || STATUS_CONFIG.entrada;
     const dias = calcDiasAtivos(c);
     const op30 = corTemOp30(c);
-    const acoes = acoesPossiveis(c.status);
-    const entrada = (c.historico||[]).find(h => h.acao === 'entrada');
-    const entradaFmt = entrada ? entrada.data.split('-').reverse().join('/') : '—';
-    // Status pausado: só "enviada" congela a contagem (cliente externo)
     const pausado = c.status === 'enviada';
+    const warn = !pausado && c.status !== 'cancelada' && c.status !== 'aprovada' && dias > 10;
 
-    const diasColor = c.status === 'cancelada'
-      ? '#636366'
-      : c.status === 'aprovada'
-        ? (dias <= 10 ? '#3ecf6e' : 'var(--red)')
-        : (dias <= 10 ? 'var(--text)' : 'var(--red)');
-
-    const acoesHTML = acoes.map(a =>
-      '<button class="cor-act-btn '+a.cls+'" onclick="event.stopPropagation();corAcao(\''+c.id+'\',\''+a.acao+'\')">'+a.lb+'</button>'
-    ).join('');
-
-    // Histórico resumido
-    const histHTML = (c.historico||[]).map(h => {
-      const dt = h.data.split('-').reverse().join('/');
-      const sc2 = STATUS_CONFIG[h.acao] || {};
-      return '<span style="color:'+(sc2.cor||'var(--muted)')+'">'+dt+' '+((sc2.lb||h.acao))+'</span>';
-    }).join(' → ');
-
-    // Obs display
-    const obsHTML = c.obs ? '<div style="margin-top:8px;font-size:.68rem;color:var(--muted);font-style:italic;line-height:1.5"><span style="font-weight:600;font-style:normal;color:var(--muted2)">Obs:</span> '+c.obs+'</div>' : '';
-
-    // Botão editar: admin vê edição completa em cores ativas + edição nome/obs em todas
-    // Produção vê apenas edição nome/obs em todas as cores
-    const isAdmin = window._userRole === 'admin';
-    const isAtiva = c.status !== 'aprovada' && c.status !== 'cancelada';
-    const editFullBtn = (isAdmin && isAtiva) ? '<button class="cor-act-btn" onclick="event.stopPropagation();editarCor(\''+c.id+'\')">Editar Tudo</button>' : '';
-    const editNomeBtn = '<button class="cor-act-btn" onclick="event.stopPropagation();editarNomeObs(\''+c.id+'\')">Editar</button>';
-
-    // Indicador de tempo pausado (status enviada/desenvolvida congelam a contagem)
-    const pausadoHTML = pausado
-      ? '<div class="cor-pausado" title="A contagem de dias só retoma quando voltar pra Em Ajuste"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>tempo pausado</div>'
+    const pauseSVG = pausado
+      ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
       : '';
 
-    return '<div class="cor-card" style="--cor-status:'+sc.cor+'" onclick="toggleCorHist(\''+c.id+'\')">' +
-      '<div class="cor-top">' +
-        '<div><span class="cor-codigo">'+c.codigo+'</span>'+(c.nome?' <span style="font-size:.76rem;color:var(--muted);font-weight:400;margin-left:6px">'+c.nome+'</span>':'')+(c.fibra?' <span style="font-family:\'DM Mono\',monospace;font-size:.58rem;font-weight:600;padding:2px 6px;border-radius:3px;background:rgba(0,118,190,.12);color:#4db3ff;margin-left:6px">'+c.fibra+'</span>':'')+'</div>' +
-        '<div class="cor-status-wrap">' +
-          '<span class="cor-status-badge" style="color:'+sc.cor+';background:'+sc.bg+'">'+sc.lb+'</span>' +
-          pausadoHTML +
+    const diasCls = pausado ? 'pausado' : (warn ? 'warn' : '');
+    const clienteLinha = (c.cliente || '—') + (c.nome ? ' · ' + c.nome : '');
+
+    return '<div class="cor-card" style="--cor-status:'+sc.cor+'" onclick="abrirCorDetalhe(\''+c.id+'\')">' +
+      '<div class="cor-card-row">' +
+        '<div class="cor-card-left">' +
+          '<div class="cor-card-codigo">'+c.codigo+(c.fibra?'<span class="cor-card-fibra">'+c.fibra+'</span>':'')+'</div>' +
+          '<div class="cor-card-sub">'+clienteLinha+'</div>' +
+        '</div>' +
+        '<div class="cor-card-right">' +
+          '<span class="cor-card-badge" style="color:'+sc.cor+';background:'+sc.bg+'">'+sc.lb+'</span>' +
+          '<span class="cor-card-dias '+diasCls+'">'+pauseSVG+dias+' dia'+(dias!==1?'s':'')+'</span>' +
+          (op30 ? '<span class="cor-card-op30">OP>30d</span>' : '') +
         '</div>' +
       '</div>' +
-      '<div class="cor-info">' +
-        '<span>'+c.cliente+'</span>' +
-        '<span>Entrada: '+entradaFmt+'</span>' +
-        '<span class="cor-dias'+(pausado?' cor-dias-pausado':'')+'" style="color:'+(pausado?'var(--muted2)':diasColor)+'">'+(pausado?'<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px;margin-right:4px;opacity:.75"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>':'')+dias+' dia'+(dias!==1?'s':'')+'</span>' +
-        (op30 ? '<span style="color:var(--red);font-weight:700">OP>30d</span>' : '') +
-      '</div>' +
-      obsHTML +
-      '<div class="cor-bottom">' +
-        '<div class="cor-actions">'+acoesHTML+editNomeBtn+editFullBtn+
-          '<button class="cor-act-btn danger" onclick="event.stopPropagation();excluirCor(\''+c.id+'\')">Excluir</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="cor-hist" id="hist-'+c.id+'" style="display:none">'+histHTML+'</div>' +
     '</div>';
   }).join('');
+}
+
+// ── Cor Detail Modal (v2.5.0 Fase 4 tap-to-detail) ─────────────────────
+let corDetSelId = null;
+
+window.abrirCorDetalhe = id => {
+  const c = coresData[id];
+  if (!c) return;
+  corDetSelId = id;
+  renderCorDetalhe();
+  document.getElementById('corDetModal').classList.add('open');
+};
+
+window.fecharCorDet = () => {
+  document.getElementById('corDetModal').classList.remove('open');
+  corDetSelId = null;
+};
+
+function renderCorDetalhe() {
+  const id = corDetSelId;
+  if (!id) return;
+  const c = coresData[id];
+  if (!c) { fecharCorDet(); return; }
+
+  const sc = STATUS_CONFIG[c.status] || STATUS_CONFIG.entrada;
+  const dias = calcDiasAtivos(c);
+  const pausado = c.status === 'enviada';
+  const acoes = acoesPossiveis(c.status);
+  const isAdmin = window._userRole === 'admin';
+  const isAtiva = c.status !== 'aprovada' && c.status !== 'cancelada';
+
+  // Header
+  document.getElementById('corDetCodigo').textContent = c.codigo + (c.nome ? ' · ' + c.nome : '');
+  document.getElementById('corDetSub').textContent = c.cliente || '—';
+
+  // Chips
+  const pauseSVG = pausado
+    ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+    : '';
+
+  const chipsHTML =
+    '<div class="cor-det-chips">' +
+      '<div class="cor-det-chip status" style="--cor-chip-bg:'+sc.bg+';--cor-chip-bd:'+sc.cor+'40;--cor-chip-fg:'+sc.cor+'">' +
+        '<div class="cor-det-chip-lbl">Status</div>' +
+        '<div class="cor-det-chip-val">'+sc.lb+'</div>' +
+      '</div>' +
+      '<div class="cor-det-chip">' +
+        '<div class="cor-det-chip-lbl">Prazo</div>' +
+        '<div class="cor-det-chip-val">'+pauseSVG+dias+'d</div>' +
+      '</div>' +
+      '<div class="cor-det-chip">' +
+        '<div class="cor-det-chip-lbl">Fibra</div>' +
+        '<div class="cor-det-chip-val">'+(c.fibra||'—')+'</div>' +
+      '</div>' +
+    '</div>';
+
+  // Foto
+  const fotoHTML = c.foto
+    ? '<img class="cor-det-foto" src="'+c.foto+'" onclick="window.open(this.src)" alt="Foto da cor">'
+    : '';
+
+  // Obs
+  const obsHTML = c.obs
+    ? '<div class="cor-det-section"><div class="cor-det-section-lbl">Observações</div><div class="cor-det-obs">'+c.obs+'</div></div>'
+    : '';
+
+  // Histórico (timeline vertical)
+  const histRows = (c.historico || []).slice().reverse().map(h => {
+    const sc2 = STATUS_CONFIG[h.acao] || { lb: h.acao, cor: 'var(--muted)' };
+    const dt = h.data ? h.data.split('-').reverse().join('/') : '—';
+    const who = h.by ? ' · ' + h.by : '';
+    return '<div class="cor-det-hist-row">' +
+      '<div class="cor-det-hist-dot" style="--cor-hist-dot:'+sc2.cor+'"></div>' +
+      '<div class="cor-det-hist-body">' +
+        '<div class="cor-det-hist-lbl">'+sc2.lb+'</div>' +
+        '<div class="cor-det-hist-meta">'+dt+who+'</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  const histHTML = histRows
+    ? '<div class="cor-det-section"><div class="cor-det-section-lbl">Histórico</div><div class="cor-det-hist">'+histRows+'</div></div>'
+    : '';
+
+  // Ações — grid dinâmica
+  // Primeira linha: ações de workflow (cls varia)
+  const mainActs = acoes.map(a => {
+    const cls = a.cls === 'primary' ? 'primary' : (a.cls === 'danger' ? 'danger' : (a.cls === 'warn' ? 'warn' : 'info'));
+    return '<button class="cor-det-act '+cls+'" onclick="corAcao(\''+c.id+'\',\''+a.acao+'\');refreshCorDetAberto()">'+a.lb+'</button>';
+  }).join('');
+
+  // Segunda linha: editar + (admin only) editar tudo / excluir
+  const editBtn = '<button class="cor-det-act" onclick="fecharCorDet();editarNomeObs(\''+c.id+'\')">Editar Nome/Obs</button>';
+  const editFullBtn = (isAdmin && isAtiva) ? '<button class="cor-det-act" onclick="fecharCorDet();editarCor(\''+c.id+'\')">Editar Tudo</button>' : '';
+  const excluirBtn = isAdmin ? '<button class="cor-det-act danger" onclick="excluirCor(\''+c.id+'\');refreshCorDetAberto()">Excluir</button>' : '';
+
+  // Monta grid
+  let actsHTML = '<div class="cor-det-section"><div class="cor-det-section-lbl">Ações</div><div class="cor-det-actions">';
+  if (mainActs) actsHTML += '<div class="cor-det-actions-row" style="grid-template-columns:repeat('+Math.min(acoes.length,2)+',1fr)">'+mainActs+'</div>';
+  actsHTML += '<div class="cor-det-actions-row">'+editBtn+(editFullBtn||excluirBtn||'<div></div>')+'</div>';
+  if (editFullBtn && excluirBtn) actsHTML += '<div class="cor-det-actions-row" style="grid-template-columns:1fr">'+excluirBtn+'</div>';
+  actsHTML += '</div></div>';
+
+  document.getElementById('corDetBody').innerHTML = fotoHTML + chipsHTML + obsHTML + histHTML + actsHTML;
+}
+
+// Re-render detalhe após ações (se modal ainda aberto e cor existe)
+function refreshCorDetAberto() {
+  if (corDetSelId && document.getElementById('corDetModal').classList.contains('open')) {
+    renderCorDetalhe();
+  }
 }
 
 // ── Ações Cores ──────────────────────────────────────────────────────────
