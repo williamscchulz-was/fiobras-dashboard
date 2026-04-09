@@ -3,6 +3,22 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.5.0  09/04/2026  Mobile First · Fases 1 + 2                ║
+  ║    Fase 1 — Fundações técnicas:                                ║
+  ║    • Anti-zoom iOS: inputs em mobile com font-size 16px.      ║
+  ║    • Touch optimization: -webkit-tap-highlight-color:          ║
+  ║      transparent global + touch-action:manipulation nos       ║
+  ║      elementos tocáveis (remove delay 300ms).                 ║
+  ║    • overflow-x:hidden proteção extra no .wrap mobile.        ║
+  ║    Fase 2 — Nav pílula flutuante + permissões:                 ║
+  ║    • Pílula flutuante estilo Nubank no rodapé em ≤640px.      ║
+  ║    • Backdrop blur, sombra verde no ativo, SVG + label.       ║
+  ║    • Todos os módulos visíveis pra todos os usuários.         ║
+  ║    • Módulos sem permissão: opacity + cadeado SVG no canto    ║
+  ║      + toast "Sem permissão" ao tocar.                        ║
+  ║    • Footer escondido em mobile (espaço pra pílula).          ║
+  ║    • Toast reposicionado acima da pílula em mobile.           ║
+  ║                                                                ║
   ║  v2.4.0  08/04/2026  Módulo Apontamento Tintoria              ║
   ║    • Nova aba \"Apontamento\" dentro do módulo Produção.        ║
   ║    • Calendário mensal + detalhe do dia com 3 turnos          ║
@@ -205,8 +221,11 @@
 }
 [data-theme="light"]{color-scheme:light;}
 /* ── Base & Reset ── */
-*{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+/* ── Touch optimization (v2.5.0) — remove 300ms tap delay ── */
+button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.tab-btn,.mod-btn,.cor-card,.cor-act-btn,.save-btn,.prod-rel-btn,.apt-day-cell,.apt-turno-tab,.tl-evt,.mt-btn,.hdr-icon-btn,.hdr-pill{touch-action:manipulation;}
 
 /* ── Notch spacer (iOS safe area) ── */
 .notch-spacer{height:env(safe-area-inset-top,0px);background:var(--bg);position:sticky;top:0;z-index:101;}
@@ -633,7 +652,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 
 /* ── Wrap / content padding ── */
 @media(max-width:480px){
-  .wrap{padding:20px 12px 80px;}
+  .wrap{padding:20px 12px 80px;overflow-x:hidden;}
   .sh{gap:8px;margin-bottom:12px;}
   .sh h2{font-size:.6rem;letter-spacing:2px;}
 }
@@ -739,8 +758,10 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
 @media(max-width:480px){
   .modal{padding:20px 16px !important;width:100% !important;max-width:100vw !important;border-radius:14px 14px 0 0 !important;max-height:90vh !important;}
   .modal-bg.open{align-items:flex-end !important;}
-  .modal .mf input,.modal .mf select,.modal .mf textarea{font-size:.82rem !important;padding:12px !important;min-height:44px;}
-  .login-select{min-height:44px;}
+  /* Anti-zoom iOS (v2.5.0) — inputs devem ter ≥16px pra Safari não dar zoom on focus */
+  input[type="text"],input[type="number"],input[type="password"],input[type="email"],input[type="tel"],input[type="search"],select,textarea{font-size:16px !important;}
+  .modal .mf input,.modal .mf select,.modal .mf textarea{padding:12px !important;min-height:44px;}
+  .login-select,.login-input{font-size:16px !important;min-height:44px;}
 }
 
 /* ── Relatório modal mobile ── */
@@ -1036,6 +1057,82 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
   .apt-tp-fibra-input{padding:11px 12px;font-size:.88rem;}
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE NAV PILL (v2.5.0 Fase 2) — pílula flutuante estilo Nubank
+   ══════════════════════════════════════════════════════════════════════════ */
+.mnav-pill{display:none;}
+@media(max-width:640px){
+  /* Esconde pílula 3D do header e libera altura pro conteúdo */
+  .hdr-modules{display:none !important;}
+  .hdr{flex-wrap:nowrap;padding:10px 16px;}
+
+  /* Pílula flutuante */
+  .mnav-pill{
+    display:flex;align-items:center;gap:4px;
+    position:fixed;
+    bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    left:50%;transform:translateX(-50%);
+    z-index:150;
+    padding:6px;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border:0.5px solid rgba(218,227,210,0.6);
+    border-radius:99px;
+    box-shadow:0 8px 28px rgba(20,40,20,0.18),0 2px 8px rgba(20,40,20,0.08);
+  }
+  [data-theme="dark"] .mnav-pill{
+    background:rgba(28,28,30,0.88);
+    border-color:rgba(72,72,74,0.6);
+    box-shadow:0 8px 28px rgba(0,0,0,0.5),0 2px 8px rgba(0,0,0,0.35);
+  }
+
+  .mnav-btn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;padding:8px 14px;min-width:60px;
+    border-radius:99px;background:transparent;border:none;cursor:pointer;
+    color:var(--muted);transition:all .22s;position:relative;
+    font-family:'Poppins',sans-serif;
+  }
+  [data-theme="dark"] .mnav-btn{color:rgba(255,255,255,0.55);}
+  .mnav-btn svg.mnav-ic{width:16px;height:16px;display:block;}
+  .mnav-btn-lbl{font-size:9px;font-weight:500;letter-spacing:0.2px;line-height:1;margin-top:1px;}
+
+  .mnav-btn.active{
+    padding:8px 18px;
+    background:#008835;color:#fff;
+    box-shadow:0 4px 12px rgba(0,136,53,0.4);
+  }
+  [data-theme="dark"] .mnav-btn.active{
+    background:#3ecf6e;color:#0d1510;
+    box-shadow:0 4px 12px rgba(62,207,110,0.35);
+  }
+
+  /* Estado bloqueado — cadeado SVG sobreposto */
+  .mnav-btn.locked{opacity:.55;}
+  .mnav-btn.locked:hover{opacity:.72;}
+  .mnav-btn-lock{
+    position:absolute;top:3px;right:7px;
+    width:13px;height:13px;
+    background:rgba(20,30,20,0.92);
+    color:#fff;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 1px 3px rgba(0,0,0,0.3);
+  }
+  .mnav-btn-lock svg{width:7px;height:7px;display:block;}
+  [data-theme="dark"] .mnav-btn-lock{background:rgba(245,245,247,0.92);color:#0d1510;}
+
+  /* Libera espaço no conteúdo pra última linha não ficar atrás da pílula */
+  .wrap{padding-bottom:110px !important;}
+
+  /* Toast sobe pra não ficar embaixo da pílula */
+  .toast{bottom:calc(96px + env(safe-area-inset-bottom,0px)) !important;}
+
+  /* Esconde footer em mobile — espaço precioso, pílula já dá contexto */
+  .footer{display:none !important;}
+}
+
 </style>
 </head>
 <body>
@@ -1098,7 +1195,7 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.4.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.5.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1411,6 +1508,24 @@ body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;fon
     <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end" id="tlDetActions"></div>
   </div>
 </div>
+<!-- ── Mobile Nav Pill (v2.5.0 Fase 2) — pílula flutuante estilo Nubank ── -->
+<nav class="mnav-pill" id="mnavPill" aria-label="Navegação de módulos">
+  <button class="mnav-btn" data-mod="resultados" onclick="switchModuleMobile('resultados',this)" aria-label="Resultados">
+    <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="mnav-btn-lbl">Result.</span>
+    <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+  </button>
+  <button class="mnav-btn" data-mod="producao" onclick="switchModuleMobile('producao',this)" aria-label="Produção">
+    <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span class="mnav-btn-lbl">Produção</span>
+    <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+  </button>
+  <button class="mnav-btn" data-mod="preco" onclick="switchModuleMobile('preco',this)" aria-label="Preço de Venda">
+    <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    <span class="mnav-btn-lbl">Preço</span>
+    <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+  </button>
+</nav>
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
@@ -1476,21 +1591,44 @@ function showSplash(nome, role){
   },2400);
 }
 
-/** Configura módulos e abas visíveis por role */
+/** Retorna true se o role atual pode acessar o módulo */
+function canAccessModule(mod){
+  const role = window._userRole || 'producao';
+  if(role === 'admin') return true;
+  // Produção: só acessa o módulo producao
+  return mod === 'producao';
+}
+
+/** Configura módulos e abas visíveis por role (v2.5.0: todos veem, locked nos sem permissão) */
 function setupTabs(role){
   window._userRole = role;
-  const modBtns = document.querySelectorAll('.mod-btn');
+  const modBtns = document.querySelectorAll('.hdr-modules .mod-btn');
   modBtns.forEach(b => {
-    const r = b.getAttribute('data-role');
-    b.style.display = (r==='all' || role==='admin') ? '' : 'none';
+    const mod = b.getAttribute('data-mod');
+    const isWip = b.classList.contains('wip');
+    if(isWip) return; // WIP mantém comportamento próprio
+    // Header pill 3D (desktop): mantém o display:none pros sem permissão pra não quebrar layout do pill 3D
+    b.style.display = canAccessModule(mod) ? '' : 'none';
   });
-  if(role==='producao'){
+  // Mobile nav pill: marca locked nos sem permissão (todos aparecem)
+  const mnavBtns = document.querySelectorAll('#mnavPill .mnav-btn');
+  mnavBtns.forEach(b => {
+    const mod = b.getAttribute('data-mod');
+    const isWip = mod === 'preco'; // WIP por enquanto
+    if(isWip){ b.classList.add('locked'); return; }
+    if(!canAccessModule(mod)) b.classList.add('locked');
+    else b.classList.remove('locked');
+  });
+  if(role === 'producao'){
     // Produção users: esconde módulo Resultados, ativa Produção
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     modBtns.forEach(b => b.classList.remove('active'));
-    const prodMod = document.querySelector('.mod-btn[data-mod="producao"]');
+    mnavBtns.forEach(b => b.classList.remove('active'));
+    const prodMod = document.querySelector('.hdr-modules .mod-btn[data-mod="producao"]');
     if(prodMod) prodMod.classList.add('active');
+    const prodMnav = document.querySelector('#mnavPill .mnav-btn[data-mod="producao"]');
+    if(prodMnav) prodMnav.classList.add('active');
     document.querySelectorAll('.tab-group').forEach(g => g.classList.remove('active'));
     document.getElementById('tg-producao').classList.add('active');
     const firstTab = document.querySelector('#tg-producao .tab-btn');
@@ -1498,6 +1636,10 @@ function setupTabs(role){
     document.getElementById('panel-producao').classList.add('active');
     window._activeModule = 'producao';
     renderProducao();
+  } else {
+    // Admin: resultados ativo por padrão
+    const resMnav = document.querySelector('#mnavPill .mnav-btn[data-mod="resultados"]');
+    if(resMnav) resMnav.classList.add('active');
   }
 }
 
@@ -1527,10 +1669,22 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.4.0';
+const CURRENT_VERSION = '2.5.0';
 const CHANGELOG = [
   {
-    v:'2.4.0', d:'08 abr 2026', current:true,
+    v:'2.5.0', d:'09 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Patch Mobile First — Fases 1 e 2.', desc:'Grande patch pra deixar o HUB 100% mobile friendly. Fase 1 (fundações técnicas) + Fase 2 (nova navegação por pílula flutuante + regras de permissão).'},
+      {type:'high', title:'Pílula flutuante de navegação no mobile.', desc:'Estilo Nubank/iOS: no celular, os módulos (Resultados / Produção / Preço) agora ficam numa pílula flutuante no rodapé, com fundo branco translúcido, blur, sombra verde no ativo. Sobe junto quando você rola, sempre ao alcance do polegar. No desktop continua tudo igual (pill 3D no header).'},
+      {type:'high', title:'Todos os módulos visíveis pra todos.', desc:'Antes: usuários de produção não viam o botão Resultados. Agora: todos veem os 3 módulos, mas os sem permissão aparecem com cadeado sobreposto e opacity reduzida — ao tocar, aparece toast "Sem permissão". Deixa claro que existe algo ali, mas bloqueado.'},
+      {type:'feat', title:'Inputs em mobile não dão mais zoom no iOS.', desc:'Safari dá autozoom quando você toca num input com fonte menor que 16px. Agora todos os inputs em telas ≤480px usam exatamente 16px, eliminando o zoom-e-desalinha irritante.'},
+      {type:'feat', title:'Toques mais rápidos e sem flash cinza.', desc:'Adicionado touch-action:manipulation nos botões e cards (remove o delay de 300ms do duplo-toque) e tap-highlight transparent global (acaba com o flash cinza feio do Android ao tocar).'},
+      {type:'note', title:'Footer escondido em mobile.', desc:'Pra liberar espaço pra pílula flutuante. Os mesmos controles (tema, logout) continuam no header. No desktop o footer segue normal.'},
+      {type:'note', title:'Proteção extra contra scroll horizontal.', desc:'overflow-x:hidden no .wrap mobile além do body. Previne glitch de card que "vaza" em raras situações de conteúdo dinâmico.'}
+    ]
+  },
+  {
+    v:'2.4.0', d:'08 abr 2026',
     items:[
       {type:'high', title:'Nova aba Apontamento na Produção.', desc:'Os líderes de turno agora lançam a produção da tintoria direto pelo HUB. Calendário do mês, toca no dia, escolhe o turno, preenche horas e as 4 fibras (CO, PAC, PES, CV). Salva instantâneo no Firebase.'},
       {type:'feat', title:'3 novos usuários: Adelir, Alexander e Djoniffer.', desc:'Líderes de turno do 1º, 2º e 3º respectivamente. Cada um só edita o próprio turno — os outros aparecem em somente leitura com cadeado e banner de aviso. Chefes (Anderson/Aldo/Geovani) e admin editam qualquer turno.'},
@@ -2383,9 +2537,17 @@ window.setMetrica = id => { metricaAtiva = id; renderHistorico(); };
 window._activeModule = 'resultados';
 
 window.switchModule = (mod, btn) => {
+  // Bloqueio: sem permissão → toast e sai
+  if(!canAccessModule(mod)){
+    toast('Sem permissão', 'warn');
+    return;
+  }
   window._activeModule = mod;
-  document.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  // Sincroniza ambas navs (header pill 3D + mobile nav pill)
+  document.querySelectorAll('.hdr-modules .mod-btn, #mnavPill .mnav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('[data-mod="' + mod + '"]').forEach(b => {
+    if(b.closest('.hdr-modules') || b.closest('#mnavPill')) b.classList.add('active');
+  });
   // Show correct tab group
   document.querySelectorAll('.tab-group').forEach(g => g.classList.remove('active'));
   const tg = document.getElementById('tg-' + mod);
@@ -2393,6 +2555,15 @@ window.switchModule = (mod, btn) => {
   // Activate first tab of the group
   const firstBtn = tg?.querySelector('.tab-btn');
   if (firstBtn) firstBtn.click();
+};
+
+/** Wrapper da pílula flutuante mobile — trata WIP e bloqueados */
+window.switchModuleMobile = (mod, btn) => {
+  if(mod === 'preco'){
+    toast('Preço de Venda em construção', 'warn');
+    return;
+  }
+  window.switchModule(mod, btn);
 };
 
 window.switchTab = (tab, btn) => {
