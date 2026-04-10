@@ -2756,6 +2756,21 @@ onValue(aptRef, (snapshot) => {
 });
 
 window._salvarAptFirebase = (d) => set(aptRef, d).catch(e => console.error('Erro ao salvar apontamento:', e));
+
+// ── Stats Cor — Firebase (v2.6.0) ───────────────────────────────────────
+window._mixCoresData = window._mixCoresData || {};
+const SC_ANOS_LOAD = [2020,2021,2022,2023,2024,2025,2026];
+SC_ANOS_LOAD.forEach(ano => {
+  const r = ref(db, 'mix-cores-' + ano);
+  onValue(r, (snapshot) => {
+    window._mixCoresData[ano] = snapshot.val() || {};
+    if (typeof window.mixCoresData !== 'undefined') window.mixCoresData[ano] = window._mixCoresData[ano];
+    if (document.getElementById('panel-statscor')?.classList.contains('active')) {
+      if (typeof renderStatsCor === 'function') renderStatsCor();
+    }
+  });
+});
+window._salvarScFirebase = (ano, updates) => update(ref(db, 'mix-cores-' + ano), updates).catch(e => console.error('Erro ao salvar stats cor:', e));
 </script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
@@ -5225,7 +5240,8 @@ const SC_PALETA = {branco:'#D8ECD0',clara:'#7DC68E',media:'#008835',escura:'#1F5
 const SC_PALETA_BD = {branco:'#B8DCAE'};
 const SC_ANO_ATUAL = 2026;
 
-let mixCoresData = {};    // { 2021: { 0: {co:{...}, pac:{...}, ...}, 1: {...} }, 2022: {...} }
+let mixCoresData = window._mixCoresData || {};    // { 2021: { 0: {co:{...}, ...}, ... }, ... } — populado pelo módulo Firebase
+window._mixCoresData = mixCoresData;
 let scFibraAtiva = 'total';
 let scMesSel = null;      // null = mês mais recente lançado
 let scLancMesIdx = 0;
@@ -5234,7 +5250,8 @@ let scLancFibAtiva = 'co';
 // ── Helpers ──
 function scGetMesData(ano, mes, fibra){
   // Retorna objeto {branco, clara, ...} com kg; zera se não tem
-  const anoData = mixCoresData[ano] || {};
+  const src = window._mixCoresData || mixCoresData || {};
+  const anoData = src[ano] || {};
   const mesData = anoData[mes] || {};
   if(fibra === 'total'){
     const out = {branco:0,clara:0,media:0,escura:0,intensa:0,preta:0};
@@ -5550,8 +5567,8 @@ window.salvarScLancamento = async function(){
     SC_FIBRAS_REAIS.forEach(f => {
       updates[scLancMesIdx + '/' + f] = scLancBuffer[f];
     });
-    const r = ref(db, 'mix-cores-' + SC_ANO_ATUAL);
-    await update(r, updates);
+    if(typeof window._salvarScFirebase !== 'function'){ toast('Firebase não carregado','err'); return; }
+    await window._salvarScFirebase(SC_ANO_ATUAL, updates);
     toast('Mês lançado', 'ok');
     scLancBuffer = {};
     fecharScLancamento();
@@ -5561,19 +5578,8 @@ window.salvarScLancamento = async function(){
   }
 };
 
-// ── Firebase: carrega todos os anos com dados ──
-function scInit(){
-  const anos = [2020,2021,2022,2023,2024,2025,2026];
-  anos.forEach(ano => {
-    const r = ref(db, 'mix-cores-' + ano);
-    onValue(r, snap => {
-      mixCoresData[ano] = snap.val() || {};
-      // Re-renderiza se a aba estiver visível
-      const panel = document.getElementById('panel-statscor');
-      if(panel && panel.classList.contains('active')) renderStatsCor();
-    });
-  });
-}
+// ── Firebase: handled by module script (window._salvarScFirebase / window._mixCoresData) ──
+function scInit(){ /* no-op: Firebase subscriptions live in the module script */ }
 
 // ── Boot ─────────────────────────────────────────────────────────────────
 tlInit();
