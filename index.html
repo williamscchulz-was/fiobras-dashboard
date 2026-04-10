@@ -3,6 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.6.0  09/04/2026  Stats Cor — mix de tingimento por fibra ║
   ║  v2.5.0  09/04/2026  Mobile First · Fases 1+2+3+4+5+rename    ║
   ║    Fase 1 — Fundações técnicas:                                ║
   ║    • Anti-zoom iOS: inputs em mobile com font-size 16px.      ║
@@ -1481,6 +1482,327 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   .footer{display:none !important;}
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   STATS COR (v2.6.0) — Paleta mono verde Fiobras
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --sc-branco:#D8ECD0;
+  --sc-clara:#7DC68E;
+  --sc-media:#008835;
+  --sc-escura:#1F5A29;
+  --sc-intensa:#14341C;
+  --sc-preta:#0A1810;
+  --sc-branco-bd:#B8DCAE;
+}
+[data-theme="dark"]{
+  --sc-branco:#E8F4E0;
+  --sc-clara:#8FD4A0;
+  --sc-media:#3ecf6e;
+  --sc-escura:#2B7739;
+  --sc-intensa:#15401E;
+  --sc-preta:#050A07;
+  --sc-branco-bd:#5A8C60;
+}
+
+.sc-new-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:99px;
+  background:var(--green);color:#fff;border:none;
+  font-family:'Poppins',sans-serif;font-size:.66rem;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,136,53,.3);transition:all .15s;
+}
+.sc-new-btn:hover{background:var(--green2);transform:translateY(-1px);}
+[data-theme="dark"] .sc-new-btn{background:#3ecf6e;color:#0d1510;}
+
+.sc-fibras{
+  display:flex;gap:7px;margin-bottom:24px;flex-wrap:wrap;
+}
+.sc-fib{
+  padding:8px 16px;border-radius:99px;
+  background:var(--surface);color:var(--muted);
+  border:0.5px solid var(--border);
+  font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:500;
+  cursor:pointer;transition:all .2s;
+  display:inline-flex;align-items:baseline;gap:5px;
+}
+.sc-fib:hover{border-color:var(--border2);color:var(--text);}
+.sc-fib-sub{font-family:'Poppins',sans-serif;font-size:.58rem;font-weight:400;opacity:.75;}
+.sc-fib.active{
+  background:var(--green);color:#fff;border-color:var(--green);
+  box-shadow:0 4px 12px rgba(0,136,53,.3);
+}
+[data-theme="dark"] .sc-fib.active{background:#3ecf6e;color:#0d1510;border-color:#3ecf6e;}
+
+.sc-months{
+  display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin-bottom:24px;
+}
+@media(max-width:860px){.sc-months{grid-template-columns:repeat(6,1fr);}}
+@media(max-width:480px){.sc-months{grid-template-columns:repeat(4,1fr);gap:5px;}}
+.sc-mc{
+  background:var(--surface);border:0.5px solid var(--border);border-radius:9px;
+  padding:10px 6px 9px;text-align:center;cursor:pointer;
+  transition:all .18s;position:relative;box-shadow:var(--shadow-sm);
+}
+.sc-mc:hover{border-color:var(--border2);}
+.sc-mc.filled{border-color:rgba(0,136,53,.4);background:rgba(0,136,53,.06);}
+.sc-mc.sel{border-color:var(--green);background:rgba(0,136,53,.09);box-shadow:0 0 0 1px rgba(0,136,53,.15);}
+[data-theme="dark"] .sc-mc.sel{box-shadow:0 0 0 1px rgba(62,207,110,.2);}
+.sc-mc.future{opacity:.4;cursor:default;}
+.sc-mc-name{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.sc-mc.sel .sc-mc-name{color:var(--green);font-weight:600;}
+.sc-mc-dot{width:5px;height:5px;border-radius:50%;margin:0 auto 4px;background:var(--border2);}
+.sc-mc.filled .sc-mc-dot,.sc-mc.sel .sc-mc-dot{background:var(--green);}
+.sc-mc.sel .sc-mc-dot{box-shadow:0 0 6px var(--green);}
+.sc-mc-val{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);}
+
+.sc-detail{margin-bottom:28px;}
+.sc-detail-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:18px;align-items:stretch;}
+@media(max-width:860px){.sc-detail-grid{grid-template-columns:1fr;}}
+
+.sc-detail-list,.sc-detail-donut{
+  background:var(--surface);border:0.5px solid var(--border);border-radius:12px;
+  padding:20px 22px;box-shadow:var(--shadow-sm);
+}
+.sc-detail-hdr{margin-bottom:16px;}
+.sc-detail-title{font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.sc-detail-sub{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted2);margin-top:3px;}
+
+.sc-cats{display:flex;flex-direction:column;gap:11px;}
+.sc-cat{}
+.sc-cat-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;gap:10px;}
+.sc-cat-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.sc-cat-sw{width:11px;height:11px;border-radius:3px;flex-shrink:0;}
+.sc-cat-sw.sw-branco{background:var(--sc-branco);border:0.5px solid var(--sc-branco-bd);}
+.sc-cat-sw.sw-clara{background:var(--sc-clara);}
+.sc-cat-sw.sw-media{background:var(--sc-media);}
+.sc-cat-sw.sw-escura{background:var(--sc-escura);}
+.sc-cat-sw.sw-intensa{background:var(--sc-intensa);}
+.sc-cat-sw.sw-preta{background:var(--sc-preta);}
+.sc-cat-name{font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);}
+.sc-cat-dom{font-family:'DM Mono',monospace;font-size:.54rem;font-weight:600;letter-spacing:.5px;padding:1px 6px;border-radius:99px;background:rgba(0,136,53,.15);color:var(--green);}
+[data-theme="dark"] .sc-cat-dom{color:#3ecf6e;background:rgba(62,207,110,.2);}
+.sc-cat-right{display:flex;align-items:baseline;gap:8px;}
+.sc-cat-kg{font-family:'DM Mono',monospace;font-size:.64rem;color:var(--muted);}
+.sc-cat-pct{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;color:var(--text);min-width:44px;text-align:right;}
+.sc-cat-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.sc-cat-bar-fill{height:100%;transition:width .4s ease;}
+.sc-cat-bar-fill.sw-branco{background:var(--sc-branco);}
+.sc-cat-bar-fill.sw-clara{background:var(--sc-clara);}
+.sc-cat-bar-fill.sw-media{background:var(--sc-media);}
+.sc-cat-bar-fill.sw-escura{background:var(--sc-escura);}
+.sc-cat-bar-fill.sw-intensa{background:var(--sc-intensa);}
+.sc-cat-bar-fill.sw-preta{background:var(--sc-preta);}
+
+.sc-total-row{
+  margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border);
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.sc-total-lbl{font-family:'Poppins',sans-serif;font-size:.72rem;color:var(--muted);font-weight:500;}
+.sc-total-val{font-family:'DM Mono',monospace;font-size:1rem;font-weight:600;color:var(--text);}
+
+.sc-detail-donut{display:flex;flex-direction:column;}
+.sc-donut-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+.sc-donut-title{font-family:'Poppins',sans-serif;font-size:.84rem;font-weight:500;color:var(--text);}
+.sc-donut-sub{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted2);letter-spacing:.5px;}
+.sc-donut-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:14px 0;min-height:180px;}
+.sc-donut-wrap svg{width:100%;max-width:240px;height:auto;}
+.sc-donut-foot{
+  display:flex;gap:8px;margin-top:12px;padding-top:12px;
+  border-top:0.5px solid var(--border);
+}
+.sc-donut-kpi{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:9px 6px;background:var(--surface2);border-radius:9px;
+}
+.sc-donut-kpi-lbl{font-family:'Poppins',sans-serif;font-size:.52rem;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2);}
+.sc-donut-kpi-val{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:600;color:var(--text);margin-top:3px;text-align:center;}
+.sc-donut-kpi-val.pos{color:var(--green);}
+.sc-donut-kpi-val.neg{color:var(--red);}
+[data-theme="dark"] .sc-donut-kpi-val.pos{color:#3ecf6e;}
+
+.sc-hist{
+  background:var(--surface);border:0.5px solid var(--border);border-radius:12px;
+  padding:22px 24px;box-shadow:var(--shadow-sm);
+}
+.sc-hist-legend{
+  display:flex;flex-wrap:wrap;gap:14px;margin-bottom:18px;
+  padding:10px 14px;background:var(--surface2);border-radius:9px;
+}
+.sc-lg{display:flex;align-items:center;gap:6px;font-family:'Poppins',sans-serif;font-size:.7rem;color:var(--text);}
+.sc-lg-sw{width:11px;height:11px;border-radius:3px;}
+.sc-lg-sw.sw-branco{background:var(--sc-branco);border:0.5px solid var(--sc-branco-bd);}
+.sc-lg-sw.sw-clara{background:var(--sc-clara);}
+.sc-lg-sw.sw-media{background:var(--sc-media);}
+.sc-lg-sw.sw-escura{background:var(--sc-escura);}
+.sc-lg-sw.sw-intensa{background:var(--sc-intensa);}
+.sc-lg-sw.sw-preta{background:var(--sc-preta);}
+
+.sc-hist-chart-wrap{display:flex;gap:10px;height:300px;margin-bottom:8px;}
+.sc-hist-axis{
+  display:flex;flex-direction:column;justify-content:space-between;
+  font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted2);
+  padding:0 4px 30px 0;align-items:flex-end;
+}
+.sc-hist-chart{
+  flex:1;display:flex;gap:10px;align-items:flex-end;position:relative;
+}
+.sc-hist-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;}
+.sc-hist-bar-wrap.total-bar{flex:1.35;}
+.sc-hist-bar-box{
+  position:relative;flex:1;width:100%;min-height:240px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.sc-hist-bar{
+  width:56px;height:100%;
+  display:flex;flex-direction:column;justify-content:flex-end;
+}
+.total-bar .sc-hist-bar{
+  width:70px;box-shadow:0 0 0 2px var(--green);border-radius:2px;overflow:hidden;
+}
+[data-theme="dark"] .total-bar .sc-hist-bar{box-shadow:0 0 0 2px #3ecf6e;}
+.sc-hist-seg{
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;
+  overflow:hidden;min-height:0;
+}
+.sc-hist-seg.sw-branco{background:var(--sc-branco);color:#0A1810;border-top:0.5px solid var(--sc-branco-bd);}
+.sc-hist-seg.sw-clara{background:var(--sc-clara);color:#0A1810;}
+.sc-hist-seg.sw-media{background:var(--sc-media);color:#fff;}
+.sc-hist-seg.sw-escura{background:var(--sc-escura);color:#fff;}
+.sc-hist-seg.sw-intensa{background:var(--sc-intensa);color:#fff;}
+.sc-hist-seg.sw-preta{background:var(--sc-preta);color:#fff;}
+[data-theme="dark"] .sc-hist-seg.sw-branco{color:#0A1810;}
+.sc-hist-label{margin-top:10px;text-align:center;}
+.sc-hist-label-year{font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:500;color:var(--text);}
+.total-bar .sc-hist-label-year{color:var(--green);font-weight:600;letter-spacing:.5px;}
+[data-theme="dark"] .total-bar .sc-hist-label-year{color:#3ecf6e;}
+.sc-hist-label-kg{font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted2);margin-top:2px;}
+.sc-hist-divisor{
+  width:1.5px;background:var(--border);height:240px;
+  margin:0 8px;align-self:flex-end;margin-bottom:30px;flex-shrink:0;
+}
+.sc-hist-foot{
+  font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted2);
+  margin-top:10px;text-align:center;letter-spacing:.3px;
+}
+
+.sc-empty{
+  text-align:center;padding:48px 20px;color:var(--muted2);
+  font-family:'Poppins',sans-serif;font-size:.78rem;
+}
+
+/* ── Modal Lançar Mês ── */
+.sc-lanc-modal{
+  width:560px;max-width:560px;max-height:88vh;
+  display:flex;flex-direction:column;padding:0 !important;overflow:hidden;
+}
+.sc-lanc-handle{display:none;width:38px;height:4px;border-radius:2px;background:var(--border2);margin:10px auto 4px;}
+.sc-lanc-hdr{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:22px 24px 14px;gap:12px;
+}
+.sc-lanc-title{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:var(--text);}
+.sc-lanc-sub{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted);margin-top:3px;letter-spacing:.3px;}
+.sc-lanc-close{
+  width:30px;height:30px;flex-shrink:0;
+  background:var(--surface2);border:none;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;
+}
+.sc-lanc-close:hover{background:var(--border);color:var(--text);}
+.sc-lanc-close svg{width:13px;height:13px;}
+.sc-lanc-body{flex:1;overflow-y:auto;padding:0 24px 20px;}
+.sc-lanc-fib-sel{display:flex;gap:6px;margin-bottom:16px;}
+.sc-lanc-fib-tab{
+  flex:1;padding:9px 6px;text-align:center;
+  background:var(--surface2);border:0.5px solid var(--border);border-radius:9px;
+  font-family:'Poppins',sans-serif;font-size:.68rem;font-weight:500;
+  color:var(--muted);cursor:pointer;transition:all .2s;
+}
+.sc-lanc-fib-tab:hover{border-color:var(--border2);color:var(--text);}
+.sc-lanc-fib-tab.active{background:var(--green);color:#fff;border-color:var(--green);box-shadow:0 3px 10px rgba(0,136,53,.25);}
+[data-theme="dark"] .sc-lanc-fib-tab.active{background:#3ecf6e;color:#0d1510;border-color:#3ecf6e;}
+.sc-lanc-inputs{display:flex;flex-direction:column;gap:10px;}
+.sc-lanc-row{display:flex;align-items:center;gap:12px;}
+.sc-lanc-row-lbl{
+  flex:0 0 90px;display:flex;align-items:center;gap:7px;
+  font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:500;color:var(--text);
+}
+.sc-lanc-row-sw{width:12px;height:12px;border-radius:3px;}
+.sc-lanc-row-sw.sw-branco{background:var(--sc-branco);border:0.5px solid var(--sc-branco-bd);}
+.sc-lanc-row-sw.sw-clara{background:var(--sc-clara);}
+.sc-lanc-row-sw.sw-media{background:var(--sc-media);}
+.sc-lanc-row-sw.sw-escura{background:var(--sc-escura);}
+.sc-lanc-row-sw.sw-intensa{background:var(--sc-intensa);}
+.sc-lanc-row-sw.sw-preta{background:var(--sc-preta);}
+.sc-lanc-row-input-wrap{
+  flex:1;display:flex;align-items:center;
+  background:var(--input-bg);border:1px solid var(--border);border-radius:9px;overflow:hidden;
+}
+.sc-lanc-row-input-wrap:focus-within{border-color:var(--green);box-shadow:0 0 0 3px var(--input-glow);}
+.sc-lanc-row-input-wrap input{
+  flex:1;background:transparent;border:none;outline:none;
+  padding:11px 12px;font-family:'DM Mono',monospace;font-size:.88rem;
+  color:var(--text);min-width:0;
+}
+.sc-lanc-row-input-wrap .unit{
+  padding:0 12px;font-family:'DM Mono',monospace;font-size:.66rem;
+  color:var(--muted);letter-spacing:.5px;
+}
+.sc-lanc-total{
+  margin-top:14px;padding:11px 14px;background:var(--surface2);border-radius:9px;
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.sc-lanc-total-lbl{font-family:'Poppins',sans-serif;font-size:.72rem;color:var(--muted);font-weight:500;}
+.sc-lanc-total-val{font-family:'DM Mono',monospace;font-size:.96rem;font-weight:600;color:var(--text);}
+.sc-lanc-actions{
+  display:flex;gap:10px;justify-content:flex-end;
+  padding:14px 24px 20px;border-top:0.5px solid var(--border);
+}
+
+/* ── Mobile Stats Cor ── */
+@media(max-width:480px){
+  .sc-fibras{gap:5px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:6px;margin:0 -12px 16px;padding-left:12px;padding-right:12px;}
+  .sc-fib{flex-shrink:0;padding:7px 13px;font-size:.68rem;}
+  .sc-fib-sub{display:none;}
+  .sc-mc{padding:8px 4px 7px;}
+  .sc-mc-name{font-size:.56rem;}
+  .sc-mc-val{font-size:.56rem;}
+
+  .sc-detail-list,.sc-detail-donut{padding:14px 14px;}
+  .sc-detail-grid{gap:10px;}
+  .sc-donut-wrap{padding:6px 0;min-height:150px;}
+  .sc-donut-wrap svg{max-width:170px;}
+  .sc-cat-name{font-size:.72rem;}
+  .sc-cat-pct{font-size:.74rem;}
+  .sc-cat-kg{font-size:.58rem;}
+  .sc-total-val{font-size:.88rem;}
+  .sc-donut-title{font-size:.76rem;}
+
+  .sc-hist{padding:14px 13px;}
+  .sc-hist-legend{gap:10px 12px;padding:8px 11px;margin-bottom:14px;}
+  .sc-lg{font-size:.62rem;}
+  .sc-hist-chart-wrap{height:240px;gap:4px;}
+  .sc-hist-axis{font-size:.52rem;padding-bottom:26px;}
+  .sc-hist-chart{gap:3px;}
+  .sc-hist-bar{width:100%;}
+  .total-bar .sc-hist-bar{width:100%;}
+  .sc-hist-bar-box{min-height:180px;}
+  .sc-hist-seg{font-size:0;}
+  .sc-hist-label-year{font-size:.6rem;}
+  .sc-hist-label-kg{font-size:.5rem;}
+  .sc-hist-divisor{height:180px;margin:0 2px;margin-bottom:26px;}
+
+  .sc-lanc-modal{width:100% !important;max-width:100vw !important;border-radius:18px 18px 0 0 !important;max-height:92vh !important;}
+  .sc-lanc-handle{display:block;}
+  .sc-lanc-hdr{padding:4px 18px 12px;}
+  .sc-lanc-body{padding:0 18px 18px;}
+  .sc-lanc-row-lbl{flex:0 0 74px;font-size:.72rem;}
+  .sc-lanc-row-input-wrap input{font-size:16px !important;}
+  .sc-lanc-actions{padding:12px 18px 18px;}
+}
+
 </style>
 </head>
 <body>
@@ -1499,6 +1821,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
         <option value="anderson">Anderson</option>
         <option value="aldo">Aldo</option>
         <option value="geovani">Geovani</option>
+        <option value="lucivane">Lucivane</option>
       </select>
     </div>
     <div class="login-pass-wrap" id="loginPassWrap">
@@ -1546,7 +1869,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.5.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1567,6 +1890,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     <button class="tab-btn" onclick="switchTab('cores',this)">Desenv. Cor</button>
     <button class="tab-btn" onclick="switchTab('apontamento',this)">Apontamento</button>
     <button class="tab-btn" onclick="switchTab('timeline',this)">Timeline</button>
+    <button class="tab-btn tab-statscor" onclick="switchTab('statscor',this)">Stats Cor</button>
   </div>
 </div>
 <div class="panel active" id="panel-metas">
@@ -1820,6 +2144,99 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   </div>
 </div>
 </div>
+
+<!-- ── Aba Stats Cor · v2.6.0 ── -->
+<div class="panel" id="panel-statscor">
+<div class="wrap">
+  <div class="sh"><h2>Stats Cor</h2><div class="sh-line"></div><button class="sc-new-btn" id="scNewBtn" onclick="abrirScLancamento()" style="display:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lançar mês</button></div>
+
+  <div class="sc-fibras" id="scFibras">
+    <button class="sc-fib active" data-fib="total" onclick="scSetFibra('total',this)">Total</button>
+    <button class="sc-fib" data-fib="co" onclick="scSetFibra('co',this)">CO <span class="sc-fib-sub">Algodão</span></button>
+    <button class="sc-fib" data-fib="pac" onclick="scSetFibra('pac',this)">PAC <span class="sc-fib-sub">Acrílico</span></button>
+    <button class="sc-fib" data-fib="pes" onclick="scSetFibra('pes',this)">PES <span class="sc-fib-sub">Poliéster</span></button>
+    <button class="sc-fib" data-fib="cv" onclick="scSetFibra('cv',this)">CV <span class="sc-fib-sub">Viscose</span></button>
+  </div>
+
+  <div class="sh"><h2>Meses · clique pra selecionar</h2><div class="sh-line"></div></div>
+  <div class="sc-months" id="scMonths"></div>
+
+  <div class="sc-detail" id="scDetail">
+    <div class="sc-detail-grid">
+      <div class="sc-detail-list">
+        <div class="sc-detail-hdr">
+          <div class="sc-detail-title" id="scDetailTitle">—</div>
+          <div class="sc-detail-sub" id="scDetailSub">—</div>
+        </div>
+        <div class="sc-cats" id="scCats"></div>
+        <div class="sc-total-row">
+          <span class="sc-total-lbl">Total tinto no mês</span>
+          <span class="sc-total-val" id="scTotalVal">—</span>
+        </div>
+      </div>
+      <div class="sc-detail-donut">
+        <div class="sc-donut-hdr">
+          <div class="sc-donut-title" id="scDonutTitle">—</div>
+          <div class="sc-donut-sub" id="scDonutSub">6 categorias</div>
+        </div>
+        <div class="sc-donut-wrap">
+          <svg id="scDonut" viewBox="0 0 42 42"></svg>
+        </div>
+        <div class="sc-donut-foot">
+          <div class="sc-donut-kpi">
+            <div class="sc-donut-kpi-lbl">Dominante</div>
+            <div class="sc-donut-kpi-val" id="scDominante">—</div>
+          </div>
+          <div class="sc-donut-kpi">
+            <div class="sc-donut-kpi-lbl">Vs ano anterior</div>
+            <div class="sc-donut-kpi-val" id="scVsAnterior">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sh" style="margin-top:28px"><h2>Histórico plurianual</h2><div class="sh-line"></div></div>
+  <div class="sc-hist" id="scHist">
+    <div class="sc-hist-legend">
+      <div class="sc-lg"><span class="sc-lg-sw sw-branco"></span>Branco</div>
+      <div class="sc-lg"><span class="sc-lg-sw sw-clara"></span>Clara</div>
+      <div class="sc-lg"><span class="sc-lg-sw sw-media"></span>Média</div>
+      <div class="sc-lg"><span class="sc-lg-sw sw-escura"></span>Escura</div>
+      <div class="sc-lg"><span class="sc-lg-sw sw-intensa"></span>Intensa</div>
+      <div class="sc-lg"><span class="sc-lg-sw sw-preta"></span>Preta</div>
+    </div>
+    <div class="sc-hist-chart-wrap">
+      <div class="sc-hist-axis">
+        <div>100%</div><div>75%</div><div>50%</div><div>25%</div><div>0%</div>
+      </div>
+      <div class="sc-hist-chart" id="scHistChart"></div>
+    </div>
+    <div class="sc-hist-foot">* 2020 (jan-jul) e 2026 parciais · total atualizado conforme novos meses são lançados</div>
+  </div>
+</div>
+</div>
+
+<!-- Modal Lançar Mês Stats Cor (admin only) -->
+<div class="modal-bg" id="scLancarModal" onclick="if(event.target===this)fecharScLancamento()">
+  <div class="modal sc-lanc-modal">
+    <div class="sc-lanc-handle"></div>
+    <div class="sc-lanc-hdr">
+      <div>
+        <div class="sc-lanc-title">Lançar mês</div>
+        <div class="sc-lanc-sub" id="scLancSub">—</div>
+      </div>
+      <button class="sc-lanc-close" onclick="fecharScLancamento()" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sc-lanc-body" id="scLancBody"></div>
+    <div class="sc-lanc-actions">
+      <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharScLancamento()">Cancelar</button>
+      <button class="save-btn" onclick="salvarScLancamento()">Salvar</button>
+    </div>
+  </div>
+</div>
 <!-- Modal criar evento timeline -->
 <div class="modal-bg" id="tlModal" onclick="if(event.target===this)fecharTlModal()">
   <div class="modal" style="width:460px;max-height:90vh;overflow-y:auto">
@@ -1903,11 +2320,26 @@ const USERS={
   anderson: {nome:'Anderson',  senha:null,    role:'producao'},
   aldo:     {nome:'Aldo',      senha:null,    role:'producao'},
   geovani:  {nome:'Geovani',   senha:null,    role:'producao'},
+  lucivane: {nome:'Lucivane',  senha:null,    role:'producao'},
   // Líderes de turno (tintoria) — só editam o próprio turno no Apontamento
   adelir:   {nome:'Adelir',    senha:null,    role:'producao', turno:1},
   alexander:{nome:'Alexander', senha:null,    role:'producao', turno:2},
   djoniffer:{nome:'Djoniffer', senha:null,    role:'producao', turno:3}
 };
+
+// ── Permissões por aba (v2.6.0) ──────────────────────────────────────────
+// Se a aba está listada aqui, só os usernames no array podem acessar.
+// Abas não listadas = qualquer usuário do módulo pode acessar.
+const TAB_PERMS = {
+  statscor: ['admin','anderson','aldo','geovani','lucivane']
+};
+function canAccessTab(tab){
+  const perm = TAB_PERMS[tab];
+  if(!perm) return true;
+  const sess = getSession();
+  if(!sess) return false;
+  return perm.includes(sess.user);
+}
 
 // ── Auth ──────────────────────────────────────────────────────────────────
 function getSession(){try{return JSON.parse(localStorage.getItem('fiobras-dash-auth'));}catch(e){return null;}}
@@ -1987,6 +2419,12 @@ function setupTabs(role){
     if(canAccessModule(mod)) b.classList.remove('locked');
     else b.classList.add('locked');
   });
+  // Stats Cor: permissão por aba (v2.6.0) — esconde pra quem não tem acesso
+  const scTabBtn = document.querySelector('.tab-btn.tab-statscor');
+  if(scTabBtn) scTabBtn.style.display = canAccessTab('statscor') ? '' : 'none';
+  // Botão "Lançar mês" — só admin
+  const scNewBtn = document.getElementById('scNewBtn');
+  if(scNewBtn) scNewBtn.style.display = (role === 'admin') ? '' : 'none';
   if(role === 'producao'){
     // Produção users: abre direto em Produção
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -2037,10 +2475,22 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.5.0';
+const CURRENT_VERSION = '2.6.0';
 const CHANGELOG = [
   {
-    v:'2.5.0', d:'09 abr 2026', current:true,
+    v:'2.6.0', d:'09 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Nova aba Stats Cor — mix de tingimento por fibra.', desc:'Dentro do módulo Produção, quinta aba. Mostra a distribuição de cores tingidas (Branco / Clara / Média / Escura / Intensa / Preta) em kg e %, separado por fibra (Total, CO, PAC, PES, CV). Donut interativo do mês selecionado + lista com barras + KPIs de dominante e comparativo vs ano anterior.'},
+      {type:'high', title:'Gráfico histórico plurianual com barra TOTAL.', desc:'Abaixo do detalhe do mês, um gráfico de barras empilhadas 100% com os 6 últimos anos (2021 → 2026) culminando numa barra TOTAL destacada em verde que mostra o % geral acumulado. Dá pra ver de relance a evolução do mix e o quanto cada categoria pesou na história da Fiobras.'},
+      {type:'high', title:'Nova usuária: Lucivane.', desc:'Adicionada ao sistema com role produção. Aparece no dropdown de login junto com Anderson, Aldo e Geovani.'},
+      {type:'feat', title:'Paleta mono verde Fiobras nas categorias de cor.', desc:'Escala do verde clarinho (Branco) ao quase-preto (Preta), passando pelo verde Fiobras (#008835) na Média. 100% coerente com a identidade visual do sistema.'},
+      {type:'feat', title:'Permissão granular por aba (novidade no sistema).', desc:'Antes a permissão era só por módulo. Agora abas específicas podem ter sua própria lista de usuários permitidos — Stats Cor é o primeiro exemplo: só admin, Anderson, Aldo, Geovani e Lucivane veem. Os líderes de turno (Adelir, Alexander, Djoniffer) não veem a aba.'},
+      {type:'feat', title:'Modal Lançar Mês — admin only.', desc:'Botão "+ Lançar mês" no header da aba (aparece só pro admin). Abre modal com seletor de fibra (4 abas CO/PAC/PES/CV) e 6 inputs por fibra (um por categoria). Total da fibra calculado na hora. Salva direto no Firebase em mix-cores-{ano}.'},
+      {type:'note', title:'Histórico 2021–2026 importado da planilha.', desc:'Os dados de 6 anos da planilha ESTATÍSTICA DE CORES TINGIDAS FIOBRAS já foram importados na primeira rodagem — ~8,13M kg tingidos distribuídos em 72 meses × 4 fibras × 6 categorias.'}
+    ]
+  },
+  {
+    v:'2.5.0', d:'09 abr 2026',
     items:[
       {type:'high', title:'Patch Mobile First — completo (Fases 1 a 5).', desc:'Grande patch pra deixar o HUB 100% mobile friendly, em 5 fases encadeadas: fundações técnicas, pílula flutuante, formulários encorpados, tap-to-detail no Desenv. Cor e polish final. Inclui o rename do módulo Resultados → Gerencial.'},
       {type:'high', title:'Módulo Resultados agora se chama Gerencial.', desc:'Melhor reflete o escopo real do módulo: metas financeiras, histórico plurianual, prêmios, e tudo relacionado à visão executiva/gerencial da empresa. O que muda é só o nome — as abas internas (2026 / Histórico) continuam iguais.'},
@@ -2224,7 +2674,7 @@ if('serviceWorker' in navigator){
 </script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getDatabase, ref, onValue, set, update } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyCv2YsaTAj38o55M8nBbZ_3s939XWLAmM4",
@@ -2940,6 +3390,8 @@ window.switchModule = (mod, btn) => {
 window.switchModuleMobile = (mod, btn) => window.switchModule(mod, btn);
 
 window.switchTab = (tab, btn) => {
+  // Verificação de permissão por aba (v2.6.0)
+  if (!canAccessTab(tab)) { toast('Sem permissão', 'err'); return; }
   const group = btn.closest('.tab-group');
   if (group) group.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -2950,6 +3402,7 @@ window.switchTab = (tab, btn) => {
   if (tab === 'cores') renderCores();
   if (tab === 'apontamento') renderApontamento();
   if (tab === 'timeline') renderTimeline();
+  if (tab === 'statscor') renderStatsCor();
 };
 
 /** Toast notification */
@@ -4758,10 +5211,375 @@ function renderTimeline() {
   feed.innerHTML = html;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// STATS COR (v2.6.0) — Estatística de mix de cor tingida por fibra
+// ═══════════════════════════════════════════════════════════════════════════
+
+const SC_CATS = ['branco','clara','media','escura','intensa','preta'];
+const SC_CAT_LBL = {branco:'Branco',clara:'Clara',media:'Média',escura:'Escura',intensa:'Intensa',preta:'Preta'};
+const SC_FIBRAS_REAIS = ['co','pac','pes','cv']; // total é calculado
+const SC_FIB_LBL = {total:'Total',co:'CO · Algodão',pac:'PAC · Acrílico',pes:'PES · Poliéster',cv:'CV · Viscose'};
+const SC_MESES_LBL = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+const SC_MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const SC_PALETA = {branco:'#D8ECD0',clara:'#7DC68E',media:'#008835',escura:'#1F5A29',intensa:'#14341C',preta:'#0A1810'};
+const SC_PALETA_BD = {branco:'#B8DCAE'};
+const SC_ANO_ATUAL = 2026;
+
+let mixCoresData = {};    // { 2021: { 0: {co:{...}, pac:{...}, ...}, 1: {...} }, 2022: {...} }
+let scFibraAtiva = 'total';
+let scMesSel = null;      // null = mês mais recente lançado
+let scLancMesIdx = 0;
+let scLancFibAtiva = 'co';
+
+// ── Helpers ──
+function scGetMesData(ano, mes, fibra){
+  // Retorna objeto {branco, clara, ...} com kg; zera se não tem
+  const anoData = mixCoresData[ano] || {};
+  const mesData = anoData[mes] || {};
+  if(fibra === 'total'){
+    const out = {branco:0,clara:0,media:0,escura:0,intensa:0,preta:0};
+    SC_FIBRAS_REAIS.forEach(f => {
+      const fd = mesData[f] || {};
+      SC_CATS.forEach(c => out[c] += (+fd[c] || 0));
+    });
+    return out;
+  }
+  const fd = mesData[fibra] || {};
+  const out = {};
+  SC_CATS.forEach(c => out[c] = +fd[c] || 0);
+  return out;
+}
+function scMesTemDados(ano, mes){
+  const d = scGetMesData(ano, mes, 'total');
+  return SC_CATS.some(c => d[c] > 0);
+}
+function scSomaKg(obj){ return SC_CATS.reduce((s,c) => s + (+obj[c] || 0), 0); }
+function scFmtKg(kg){
+  if(!kg) return '—';
+  if(kg >= 1e6) return (kg/1e6).toFixed(2).replace('.',',') + 'M';
+  if(kg >= 1e3) return (kg/1e3).toFixed(1).replace('.',',') + 'k';
+  return Math.round(kg).toLocaleString('pt-BR');
+}
+function scFmtKgFull(kg){ return Math.round(kg || 0).toLocaleString('pt-BR') + ' kg'; }
+function scFmtPct(v){ return (v*100).toFixed(1).replace('.',',') + '%'; }
+
+// ── Handlers ──
+window.scSetFibra = function(fib, btn){
+  scFibraAtiva = fib;
+  document.querySelectorAll('#scFibras .sc-fib').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  scRenderMeses();
+  scRenderDetalhe();
+  scRenderHistorico();
+};
+window.scSelectMes = function(idx){
+  if(!scMesTemDados(SC_ANO_ATUAL, idx)) return;
+  scMesSel = idx;
+  scRenderMeses();
+  scRenderDetalhe();
+};
+
+// ── Render: entry ──
+window.renderStatsCor = function(){
+  if(!canAccessTab('statscor')){
+    const panel = document.getElementById('panel-statscor');
+    if(panel) panel.querySelector('.wrap').innerHTML = '<div class="sc-empty">Sem permissão para acessar Stats Cor.</div>';
+    return;
+  }
+  // Determina mês selecionado: último mês do ano atual com dados
+  if(scMesSel === null){
+    for(let m = 11; m >= 0; m--){
+      if(scMesTemDados(SC_ANO_ATUAL, m)){ scMesSel = m; break; }
+    }
+    if(scMesSel === null) scMesSel = 0;
+  }
+  scRenderMeses();
+  scRenderDetalhe();
+  scRenderHistorico();
+};
+
+// ── Render: calendário de meses ──
+function scRenderMeses(){
+  const cont = document.getElementById('scMonths');
+  if(!cont) return;
+  let html = '';
+  for(let m = 0; m < 12; m++){
+    const tem = scMesTemDados(SC_ANO_ATUAL, m);
+    const sel = (m === scMesSel);
+    const data = tem ? scGetMesData(SC_ANO_ATUAL, m, scFibraAtiva) : null;
+    const total = data ? scSomaKg(data) : 0;
+    const cls = 'sc-mc ' + (sel ? 'sel' : (tem ? 'filled' : 'future'));
+    const click = tem ? `onclick="scSelectMes(${m})"` : '';
+    const valTxt = tem && total > 0 ? scFmtKg(total) : '—';
+    html += `<div class="${cls}" ${click}>
+      <div class="sc-mc-name">${SC_MESES_LBL[m]}</div>
+      <div class="sc-mc-dot"></div>
+      <div class="sc-mc-val">${valTxt}</div>
+    </div>`;
+  }
+  cont.innerHTML = html;
+}
+
+// ── Render: detalhe do mês (lista + donut) ──
+function scRenderDetalhe(){
+  const data = scGetMesData(SC_ANO_ATUAL, scMesSel, scFibraAtiva);
+  const total = scSomaKg(data);
+  const tituloMes = SC_MESES_FULL[scMesSel] + ' ' + SC_ANO_ATUAL;
+  const fibLbl = SC_FIB_LBL[scFibraAtiva];
+
+  document.getElementById('scDetailTitle').textContent = tituloMes + ' · ' + fibLbl;
+  document.getElementById('scDonutTitle').textContent = tituloMes;
+  document.getElementById('scDonutSub').textContent = fibLbl.toUpperCase();
+
+  // Determina dominante
+  let domCat = null, domPct = 0;
+  if(total > 0){
+    SC_CATS.forEach(c => { const p = data[c]/total; if(p > domPct){ domPct = p; domCat = c; } });
+  }
+  document.getElementById('scDetailSub').textContent = domCat
+    ? 'Dominante: ' + SC_CAT_LBL[domCat] + ' · ' + scFmtPct(domPct)
+    : 'Sem lançamentos';
+
+  // Lista de categorias
+  let catsHtml = '';
+  SC_CATS.forEach(c => {
+    const kg = data[c];
+    const pct = total > 0 ? (kg/total) : 0;
+    const isDom = (c === domCat);
+    catsHtml += `<div class="sc-cat">
+      <div class="sc-cat-top">
+        <div class="sc-cat-left">
+          <span class="sc-cat-sw sw-${c}"></span>
+          <span class="sc-cat-name">${SC_CAT_LBL[c]}</span>
+          ${isDom ? '<span class="sc-cat-dom">DOM</span>' : ''}
+        </div>
+        <div class="sc-cat-right">
+          <span class="sc-cat-kg">${kg > 0 ? scFmtKgFull(kg) : '—'}</span>
+          <span class="sc-cat-pct">${total > 0 ? scFmtPct(pct) : '—'}</span>
+        </div>
+      </div>
+      <div class="sc-cat-bar"><div class="sc-cat-bar-fill sw-${c}" style="width:${(pct*100).toFixed(2)}%"></div></div>
+    </div>`;
+  });
+  document.getElementById('scCats').innerHTML = catsHtml;
+  document.getElementById('scTotalVal').textContent = total > 0 ? scFmtKgFull(total) : '—';
+
+  // Donut SVG
+  const svg = document.getElementById('scDonut');
+  scDesenharDonut(svg, data, total);
+
+  // Dominante (kpi)
+  document.getElementById('scDominante').textContent = domCat
+    ? SC_CAT_LBL[domCat] + ' · ' + scFmtPct(domPct) : '—';
+
+  // Vs ano anterior (mesmo mês)
+  const prevData = scGetMesData(SC_ANO_ATUAL - 1, scMesSel, scFibraAtiva);
+  const prevTotal = scSomaKg(prevData);
+  const kpi = document.getElementById('scVsAnterior');
+  if(total > 0 && prevTotal > 0){
+    const delta = (total - prevTotal) / prevTotal;
+    const arrow = delta >= 0 ? '↑' : '↓';
+    kpi.textContent = arrow + ' ' + (Math.abs(delta)*100).toFixed(1).replace('.',',') + '%';
+    kpi.className = 'sc-donut-kpi-val ' + (delta >= 0 ? 'pos' : 'neg');
+  } else {
+    kpi.textContent = '—';
+    kpi.className = 'sc-donut-kpi-val';
+  }
+}
+
+function scDesenharDonut(svg, data, total){
+  if(!svg) return;
+  if(total <= 0){
+    svg.innerHTML = `<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="var(--surface2)" stroke-width="6"/><text x="21" y="22" text-anchor="middle" font-family="Poppins,sans-serif" font-size="3.2" fill="var(--muted2)">sem dados</text>`;
+    return;
+  }
+  let offset = 0;
+  let segs = '<circle cx="21" cy="21" r="15.915" fill="var(--surface)" stroke="var(--surface2)" stroke-width="5.5"/>';
+  SC_CATS.forEach(c => {
+    const pct = (data[c]/total) * 100;
+    if(pct <= 0) return;
+    const dash = pct.toFixed(2);
+    const gap = (100 - pct).toFixed(2);
+    const stroke = SC_PALETA[c];
+    segs += `<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="${stroke}" stroke-width="5.5" stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${-offset}" transform="rotate(-90 21 21)"/>`;
+    offset += parseFloat(dash);
+  });
+  const lblKg = scFmtKg(total);
+  segs += `<text x="21" y="20" text-anchor="middle" font-family="Poppins,sans-serif" font-size="3.6" font-weight="600" fill="var(--text)">${lblKg}</text>`;
+  segs += `<text x="21" y="24" text-anchor="middle" font-family="DM Mono,monospace" font-size="1.7" fill="var(--muted2)" letter-spacing="0.2">kg tintos</text>`;
+  svg.innerHTML = segs;
+}
+
+// ── Render: histórico plurianual ──
+function scRenderHistorico(){
+  const cont = document.getElementById('scHistChart');
+  if(!cont) return;
+  const anos = [2020,2021,2022,2023,2024,2025,2026];
+  // Agrega por ano
+  const perAno = {};
+  const totalAno = {};
+  anos.forEach(ano => {
+    const agg = {branco:0,clara:0,media:0,escura:0,intensa:0,preta:0};
+    for(let m = 0; m < 12; m++){
+      const d = scGetMesData(ano, m, scFibraAtiva);
+      SC_CATS.forEach(c => agg[c] += d[c]);
+    }
+    perAno[ano] = agg;
+    totalAno[ano] = scSomaKg(agg);
+  });
+  // Total geral (soma tudo)
+  const aggTotal = {branco:0,clara:0,media:0,escura:0,intensa:0,preta:0};
+  anos.forEach(ano => { SC_CATS.forEach(c => aggTotal[c] += perAno[ano][c]); });
+  const totalGeral = scSomaKg(aggTotal);
+
+  function barHtml(year, agg, total, isTotal){
+    const parcial = (year === 2026 || year === 2020) ? '*' : '';
+    let segs = '';
+    if(total > 0){
+      // ordem visual (de baixo pra cima): branco, clara, media, escura, intensa, preta
+      [...SC_CATS].reverse().forEach(c => {
+        const pct = (agg[c]/total) * 100;
+        if(pct < 0.1){ segs += `<div class="sc-hist-seg sw-${c}" style="height:0;"></div>`; return; }
+        const showLbl = isTotal && pct >= 6;
+        segs += `<div class="sc-hist-seg sw-${c}" style="height:${pct.toFixed(2)}%">${showLbl ? pct.toFixed(1).replace('.',',') : ''}</div>`;
+      });
+    }
+    const wrapCls = 'sc-hist-bar-wrap' + (isTotal ? ' total-bar' : '');
+    const yearLbl = isTotal ? 'TOTAL' : (String(year).slice(-2) + parcial);
+    const kgLbl = total > 0 ? scFmtKg(total) + ' kg' : '—';
+    return `<div class="${wrapCls}">
+      <div class="sc-hist-bar-box"><div class="sc-hist-bar">${segs}</div></div>
+      <div class="sc-hist-label">
+        <div class="sc-hist-label-year">${yearLbl}</div>
+        <div class="sc-hist-label-kg">${kgLbl}</div>
+      </div>
+    </div>`;
+  }
+  let html = '';
+  anos.forEach(ano => { html += barHtml(ano, perAno[ano], totalAno[ano], false); });
+  html += '<div class="sc-hist-divisor"></div>';
+  html += barHtml(null, aggTotal, totalGeral, true);
+  cont.innerHTML = html;
+}
+
+// ── Modal Lançar Mês (admin only) ──
+window.abrirScLancamento = function(){
+  if((window._userRole || '') !== 'admin'){ toast('Apenas admin pode lançar','err'); return; }
+  scLancMesIdx = (scMesSel !== null) ? scMesSel : new Date().getMonth();
+  scLancFibAtiva = 'co';
+  document.getElementById('scLancSub').textContent = SC_MESES_FULL[scLancMesIdx] + ' ' + SC_ANO_ATUAL;
+  scRenderLancBody();
+  document.getElementById('scLancarModal').classList.add('show');
+};
+window.fecharScLancamento = function(){ document.getElementById('scLancarModal').classList.remove('show'); };
+window.scSetLancFib = function(fib){
+  scLancSalvarFormAtual();
+  scLancFibAtiva = fib;
+  scRenderLancBody();
+};
+
+// Cache em memória dos inputs do form (antes de salvar)
+let scLancBuffer = {}; // { co: {branco:.., ...}, pac: {...}, ... }
+
+function scLancInitBuffer(){
+  scLancBuffer = {};
+  SC_FIBRAS_REAIS.forEach(f => {
+    const d = scGetMesData(SC_ANO_ATUAL, scLancMesIdx, f);
+    scLancBuffer[f] = {};
+    SC_CATS.forEach(c => scLancBuffer[f][c] = d[c] || 0);
+  });
+}
+
+function scLancSalvarFormAtual(){
+  if(!scLancBuffer[scLancFibAtiva]) return;
+  SC_CATS.forEach(c => {
+    const el = document.getElementById('scLancInput_' + c);
+    if(el){
+      const v = parseFloat(el.value.replace(',','.')) || 0;
+      scLancBuffer[scLancFibAtiva][c] = v;
+    }
+  });
+}
+
+function scRenderLancBody(){
+  if(Object.keys(scLancBuffer).length === 0) scLancInitBuffer();
+  const body = document.getElementById('scLancBody');
+  const buffer = scLancBuffer[scLancFibAtiva];
+
+  let tabs = '<div class="sc-lanc-fib-sel">';
+  SC_FIBRAS_REAIS.forEach(f => {
+    const active = (f === scLancFibAtiva) ? ' active' : '';
+    tabs += `<div class="sc-lanc-fib-tab${active}" onclick="scSetLancFib('${f}')">${f.toUpperCase()}</div>`;
+  });
+  tabs += '</div>';
+
+  let inputs = '<div class="sc-lanc-inputs">';
+  SC_CATS.forEach(c => {
+    const val = buffer[c] || 0;
+    const valStr = val > 0 ? String(val).replace('.',',') : '';
+    inputs += `<div class="sc-lanc-row">
+      <div class="sc-lanc-row-lbl"><span class="sc-lanc-row-sw sw-${c}"></span>${SC_CAT_LBL[c]}</div>
+      <div class="sc-lanc-row-input-wrap">
+        <input type="text" inputmode="decimal" id="scLancInput_${c}" value="${valStr}" oninput="scLancRecalc()" placeholder="0">
+        <span class="unit">KG</span>
+      </div>
+    </div>`;
+  });
+  inputs += '</div>';
+
+  inputs += '<div class="sc-lanc-total"><span class="sc-lanc-total-lbl">Total fibra</span><span class="sc-lanc-total-val" id="scLancTotal">0 kg</span></div>';
+
+  body.innerHTML = tabs + inputs;
+  scLancRecalc();
+}
+
+window.scLancRecalc = function(){
+  let total = 0;
+  SC_CATS.forEach(c => {
+    const el = document.getElementById('scLancInput_' + c);
+    if(el) total += (parseFloat(el.value.replace(',','.')) || 0);
+  });
+  const el = document.getElementById('scLancTotal');
+  if(el) el.textContent = scFmtKgFull(total);
+};
+
+window.salvarScLancamento = async function(){
+  scLancSalvarFormAtual();
+  try{
+    const updates = {};
+    SC_FIBRAS_REAIS.forEach(f => {
+      updates[scLancMesIdx + '/' + f] = scLancBuffer[f];
+    });
+    const r = ref(db, 'mix-cores-' + SC_ANO_ATUAL);
+    await update(r, updates);
+    toast('Mês lançado', 'ok');
+    scLancBuffer = {};
+    fecharScLancamento();
+  } catch(e){
+    console.error(e);
+    toast('Erro ao salvar', 'err');
+  }
+};
+
+// ── Firebase: carrega todos os anos com dados ──
+function scInit(){
+  const anos = [2020,2021,2022,2023,2024,2025,2026];
+  anos.forEach(ano => {
+    const r = ref(db, 'mix-cores-' + ano);
+    onValue(r, snap => {
+      mixCoresData[ano] = snap.val() || {};
+      // Re-renderiza se a aba estiver visível
+      const panel = document.getElementById('panel-statscor');
+      if(panel && panel.classList.contains('active')) renderStatsCor();
+    });
+  });
+}
+
 // ── Boot ─────────────────────────────────────────────────────────────────
 tlInit();
 coresInit();
 prodInit();
+scInit();
 init();
 
 /** Sincroniza IPAC de todos os meses da Produção → resultados (aba 2026) */
