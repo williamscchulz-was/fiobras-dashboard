@@ -3,6 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.6.2  10/04/2026  Stats Cor: gráfico hist + botão lançar  ║
   ║  v2.6.1  10/04/2026  Cor: ações inline no card (rollback)    ║
   ║  v2.6.0  09/04/2026  Stats Cor — mix de tingimento por fibra ║
   ║  v2.5.0  09/04/2026  Mobile First · Fases 1+2+3+4+5+rename    ║
@@ -1512,7 +1513,9 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   font-family:'Poppins',sans-serif;font-size:.66rem;font-weight:600;
   letter-spacing:.5px;text-transform:uppercase;cursor:pointer;
   box-shadow:0 4px 12px rgba(0,136,53,.3);transition:all .15s;
+  position:relative;z-index:5;
 }
+.sc-toolbar{display:flex;justify-content:flex-end;margin:-8px 0 16px;}
 .sc-new-btn:hover{background:var(--green2);transform:translateY(-1px);}
 [data-theme="dark"] .sc-new-btn{background:#3ecf6e;color:#0d1510;}
 
@@ -1639,33 +1642,34 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 .sc-lg-sw.sw-intensa{background:var(--sc-intensa);}
 .sc-lg-sw.sw-preta{background:var(--sc-preta);}
 
-.sc-hist-chart-wrap{display:flex;gap:10px;height:300px;margin-bottom:8px;}
+.sc-hist-chart-wrap{display:flex;gap:10px;margin-bottom:8px;}
 .sc-hist-axis{
   display:flex;flex-direction:column;justify-content:space-between;
   font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted2);
-  padding:0 4px 30px 0;align-items:flex-end;
+  padding:0 4px 30px 0;align-items:flex-end;height:300px;
 }
 .sc-hist-chart{
-  flex:1;display:flex;gap:10px;align-items:flex-end;position:relative;
+  flex:1;display:flex;gap:10px;align-items:stretch;position:relative;height:300px;
 }
-.sc-hist-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;}
+.sc-hist-bar-wrap{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  height:100%;
+}
 .sc-hist-bar-wrap.total-bar{flex:1.35;}
-.sc-hist-bar-box{
-  position:relative;flex:1;width:100%;min-height:240px;
-  display:flex;align-items:flex-end;justify-content:center;
-}
 .sc-hist-bar{
-  width:56px;height:100%;
+  width:100%;max-width:60px;flex:1;
   display:flex;flex-direction:column;justify-content:flex-end;
+  min-height:0;
 }
 .total-bar .sc-hist-bar{
-  width:70px;box-shadow:0 0 0 2px var(--green);border-radius:2px;overflow:hidden;
+  max-width:74px;
+  box-shadow:0 0 0 2px var(--green);border-radius:3px;overflow:hidden;
 }
 [data-theme="dark"] .total-bar .sc-hist-bar{box-shadow:0 0 0 2px #3ecf6e;}
 .sc-hist-seg{
   display:flex;align-items:center;justify-content:center;
   font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;
-  overflow:hidden;min-height:0;
+  overflow:hidden;flex-shrink:0;
 }
 .sc-hist-seg.sw-branco{background:var(--sc-branco);color:#0A1810;border-top:0.5px solid var(--sc-branco-bd);}
 .sc-hist-seg.sw-clara{background:var(--sc-clara);color:#0A1810;}
@@ -1674,14 +1678,14 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 .sc-hist-seg.sw-intensa{background:var(--sc-intensa);color:#fff;}
 .sc-hist-seg.sw-preta{background:var(--sc-preta);color:#fff;}
 [data-theme="dark"] .sc-hist-seg.sw-branco{color:#0A1810;}
-.sc-hist-label{margin-top:10px;text-align:center;}
+.sc-hist-label{margin-top:8px;text-align:center;flex-shrink:0;}
 .sc-hist-label-year{font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:500;color:var(--text);}
 .total-bar .sc-hist-label-year{color:var(--green);font-weight:600;letter-spacing:.5px;}
 [data-theme="dark"] .total-bar .sc-hist-label-year{color:#3ecf6e;}
 .sc-hist-label-kg{font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted2);margin-top:2px;}
 .sc-hist-divisor{
-  width:1.5px;background:var(--border);height:240px;
-  margin:0 8px;align-self:flex-end;margin-bottom:30px;flex-shrink:0;
+  width:1.5px;background:var(--border);
+  margin:0 4px 30px;align-self:stretch;flex-shrink:0;
 }
 .sc-hist-foot{
   font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted2);
@@ -1789,7 +1793,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   .sc-hist-chart{gap:3px;}
   .sc-hist-bar{width:100%;}
   .total-bar .sc-hist-bar{width:100%;}
-  .sc-hist-bar-box{min-height:180px;}
+  .sc-hist-bar{max-width:100%;}
   .sc-hist-seg{font-size:0;}
   .sc-hist-label-year{font-size:.6rem;}
   .sc-hist-label-kg{font-size:.5rem;}
@@ -1870,7 +1874,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2149,7 +2153,8 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 <!-- ── Aba Stats Cor · v2.6.0 ── -->
 <div class="panel" id="panel-statscor">
 <div class="wrap">
-  <div class="sh"><h2>Stats Cor</h2><div class="sh-line"></div><button class="sc-new-btn" id="scNewBtn" onclick="abrirScLancamento()" style="display:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lançar mês</button></div>
+  <div class="sh"><h2>Stats Cor</h2><div class="sh-line"></div></div>
+  <div class="sc-toolbar"><button class="sc-new-btn" id="scNewBtn" onclick="abrirScLancamento()" style="display:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lançar mês</button></div>
 
   <div class="sc-fibras" id="scFibras">
     <button class="sc-fib active" data-fib="total" onclick="scSetFibra('total',this)">Total</button>
@@ -2476,10 +2481,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.6.1';
+const CURRENT_VERSION = '2.6.2';
 const CHANGELOG = [
   {
-    v:'2.6.1', d:'10 abr 2026', current:true,
+    v:'2.6.2', d:'10 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Stats Cor: gráfico histórico plurianual corrigido.', desc:'O gráfico mostrava só a barra TOTAL e as barras anuais (2020-2026) ficavam em branco. Era um problema clássico de altura percentual em pais sem altura definida — os segmentos coloridos viravam 0 porque o pai colapsava. Refeito o CSS do gráfico com altura concreta no chart container e flex:1 nas barras.'},
+      {type:'high', title:'Botão "Lançar mês" agora clica de verdade.', desc:'O botão estava dentro do header da seção (.sh) que tinha um divisor flex:1 cobrindo a área de hit do botão, deixando ele visualmente lá mas inacessível ao clique. Movido pra própria toolbar dedicada (.sc-toolbar) embaixo do título, com z-index pra garantir.'}
+    ]
+  },
+  {
+    v:'2.6.1', d:'10 abr 2026',
     items:[
       {type:'high', title:'Ações de cor voltam direto no card.', desc:'Rollback parcial do tap-to-detail v2.5.0 só pro Desenv. Cor. Os botões de ação (Aprovar, Enviar ao cliente, Em ajuste, Cancelar, etc.) agora aparecem direto no card de cor, sem precisar abrir o modal. O modal de detalhe continua acessível clicando no card pra ver foto, histórico e ações de admin (Editar/Excluir). Tap-to-detail da Timeline continua intacto — só Desenv. Cor voltou pro padrão antigo.'},
       {type:'note', title:'Bug fix: Gerencial não renderizava após v2.6.0.', desc:'A subscription Firebase do Stats Cor foi colocada por engano no bloco de script normal — onde db, ref, onValue e update não existem (esses símbolos só vivem no escopo do <script type=module>). ReferenceError no boot quebrava todo o restante do init, deixando Gerencial em branco. Corrigido movendo a subscription pro bloco module e expondo via window._mixCoresData / window._salvarScFirebase, igual fazem os outros módulos.'}
@@ -5483,7 +5495,7 @@ function scRenderHistorico(){
     const yearLbl = isTotal ? 'TOTAL' : (String(year).slice(-2) + parcial);
     const kgLbl = total > 0 ? scFmtKg(total) + ' kg' : '—';
     return `<div class="${wrapCls}">
-      <div class="sc-hist-bar-box"><div class="sc-hist-bar">${segs}</div></div>
+      <div class="sc-hist-bar">${segs}</div>
       <div class="sc-hist-label">
         <div class="sc-hist-label-year">${yearLbl}</div>
         <div class="sc-hist-label-kg">${kgLbl}</div>
