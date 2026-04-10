@@ -1875,7 +1875,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.5</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.6</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2482,10 +2482,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.6.5';
+const CURRENT_VERSION = '2.6.6';
 const CHANGELOG = [
   {
-    v:'2.6.5', d:'10 abr 2026', current:true,
+    v:'2.6.6', d:'10 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Nome editado da cor substitui o código no card.', desc:'Quando você edita uma cor e preenche o campo Nome, agora esse nome aparece como título principal do card (substituindo o código original) e a linha de baixo mostra só o cliente. O modal de detalhe segue o mesmo padrão: título principal usa o nome editado, e o código original aparece como sub se for diferente. Cores sem nome customizado continuam mostrando o código.'}
+    ]
+  },
+  {
+    v:'2.6.5', d:'10 abr 2026',
     items:[
       {type:'high', title:'Botões do modal de detalhe de cor finalmente funcionam.', desc:'Bug crítico: os botões do modal de detalhe (Editar Nome/Obs, Editar Tudo, Excluir, Aprovar, Cancelar, etc) usavam c.id pra passar o ID da cor pro handler — mas o objeto c vinha direto de coresData[id] sem o campo id injetado (diferente da lista de cards que faz Object.entries e injeta o id). Resultado: c.id era undefined, e os handlers chamavam coresData[\"undefined\"] que não existia. Corrigido usando a const local id que está no escopo da renderCorDetalhe.'}
     ]
@@ -4292,12 +4298,14 @@ function renderCoresLista() {
       : '';
 
     const diasCls = pausado ? 'pausado' : (warn ? 'warn' : '');
-    const clienteLinha = (c.cliente || '—') + (c.nome ? ' · ' + c.nome : '');
+    // v2.6.5: nome editado substitui o código no card; senão usa código original
+    const tituloPrincipal = (c.nome && c.nome.trim()) ? c.nome.trim() : c.codigo;
+    const clienteLinha = c.cliente || '—';
 
     return '<div class="cor-card" style="--cor-status:'+sc.cor+'" onclick="abrirCorDetalhe(\''+c.id+'\')">' +
       '<div class="cor-card-row">' +
         '<div class="cor-card-left">' +
-          '<div class="cor-card-codigo">'+c.codigo+(c.fibra?'<span class="cor-card-fibra">'+c.fibra+'</span>':'')+'</div>' +
+          '<div class="cor-card-codigo">'+tituloPrincipal+(c.fibra?'<span class="cor-card-fibra">'+c.fibra+'</span>':'')+'</div>' +
           '<div class="cor-card-sub">'+clienteLinha+'</div>' +
         '</div>' +
         '<div class="cor-card-right">' +
@@ -4350,7 +4358,10 @@ function renderCorDetalhe() {
   const isAtiva = c.status !== 'aprovada' && c.status !== 'cancelada';
 
   // Header
-  document.getElementById('corDetCodigo').textContent = c.codigo + (c.nome ? ' · ' + c.nome : '');
+  // v2.6.5: nome editado substitui código, igual nos cards da lista
+  const tituloDetMain = (c.nome && c.nome.trim()) ? c.nome.trim() : c.codigo;
+  const tituloDetSub  = (c.nome && c.nome.trim() && c.codigo !== c.nome.trim()) ? c.codigo : '';
+  document.getElementById('corDetCodigo').textContent = tituloDetMain + (tituloDetSub ? ' · ' + tituloDetSub : '');
   document.getElementById('corDetSub').textContent = c.cliente || '—';
 
   // Chips
