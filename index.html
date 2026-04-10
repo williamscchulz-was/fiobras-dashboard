@@ -1875,7 +1875,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.4</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.5</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2482,10 +2482,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.6.4';
+const CURRENT_VERSION = '2.6.5';
 const CHANGELOG = [
   {
-    v:'2.6.4', d:'10 abr 2026', current:true,
+    v:'2.6.5', d:'10 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Botões do modal de detalhe de cor finalmente funcionam.', desc:'Bug crítico: os botões do modal de detalhe (Editar Nome/Obs, Editar Tudo, Excluir, Aprovar, Cancelar, etc) usavam c.id pra passar o ID da cor pro handler — mas o objeto c vinha direto de coresData[id] sem o campo id injetado (diferente da lista de cards que faz Object.entries e injeta o id). Resultado: c.id era undefined, e os handlers chamavam coresData[\"undefined\"] que não existia. Corrigido usando a const local id que está no escopo da renderCorDetalhe.'}
+    ]
+  },
+  {
+    v:'2.6.4', d:'10 abr 2026',
     items:[
       {type:'high', title:'Botões do modal de detalhe robustos.', desc:'Os botões "Editar Nome/Obs", "Editar Tudo" e "Excluir" do modal de detalhe agora têm error handling com toast visível e usam (arguments[0]||window.event).stopPropagation() em vez de event.stopPropagation() — algumas situações de browser passavam onclick sem um event no escopo, fazendo o handler inteiro falhar antes de chegar na função. Também aumentei o delay do fechamento do modal de detalhe pra 80ms.'}
     ]
@@ -4398,15 +4404,16 @@ function renderCorDetalhe() {
 
   // Ações — grid dinâmica
   // Primeira linha: ações de workflow (cls varia)
+  // BUG FIX v2.6.5: usar `id` (const local) em vez de `c.id` que é undefined porque c vem direto de coresData[id] sem injeção da chave
   const mainActs = acoes.map(a => {
     const cls = a.cls === 'primary' ? 'primary' : (a.cls === 'danger' ? 'danger' : (a.cls === 'warn' ? 'warn' : 'info'));
-    return '<button class="cor-det-act '+cls+'" onclick="(arguments[0]||window.event).stopPropagation();corAcao(\''+c.id+'\',\''+a.acao+'\');refreshCorDetAberto();return false;">'+a.lb+'</button>';
+    return '<button class="cor-det-act '+cls+'" onclick="(arguments[0]||window.event).stopPropagation();corAcao(\''+id+'\',\''+a.acao+'\');refreshCorDetAberto();return false;">'+a.lb+'</button>';
   }).join('');
 
   // Segunda linha: editar + (admin only) editar tudo / excluir
-  const editBtn = '<button class="cor-det-act" onclick="(arguments[0]||window.event).stopPropagation();abrirEditNomeObsFromDet(\''+c.id+'\');return false;">Editar Nome/Obs</button>';
-  const editFullBtn = (isAdmin && isAtiva) ? '<button class="cor-det-act" onclick="(arguments[0]||window.event).stopPropagation();abrirEditFullFromDet(\''+c.id+'\');return false;">Editar Tudo</button>' : '';
-  const excluirBtn = isAdmin ? '<button class="cor-det-act danger" onclick="(arguments[0]||window.event).stopPropagation();excluirCor(\''+c.id+'\');refreshCorDetAberto();return false;">Excluir</button>' : '';
+  const editBtn = '<button class="cor-det-act" onclick="(arguments[0]||window.event).stopPropagation();abrirEditNomeObsFromDet(\''+id+'\');return false;">Editar Nome/Obs</button>';
+  const editFullBtn = (isAdmin && isAtiva) ? '<button class="cor-det-act" onclick="(arguments[0]||window.event).stopPropagation();abrirEditFullFromDet(\''+id+'\');return false;">Editar Tudo</button>' : '';
+  const excluirBtn = isAdmin ? '<button class="cor-det-act danger" onclick="(arguments[0]||window.event).stopPropagation();excluirCor(\''+id+'\');refreshCorDetAberto();return false;">Excluir</button>' : '';
 
   // Monta grid
   let actsHTML = '<div class="cor-det-section"><div class="cor-det-section-lbl">Ações</div><div class="cor-det-actions">';
@@ -4564,8 +4571,26 @@ window.editarNomeObs = id => {
   document.getElementById('corNomeObsModal').classList.add('open');
 };
 
-// v2.6.3+: wrappers que abrem o modal de edição ANTES de fechar o detalhe
+// v2.6.4: wrappers que abrem o modal de edição ANTES de fechar o detalhe
 // (evita race condition / "tela em branco" quando o detalhe fecha mas o de edição não abriu)
+// CRÍTICO: corNomeObsModal e corModal estão dentro de #panel-cores, então quando outro
+// panel está ativo eles ficam display:none herdado. Reparent pro body resolve.
+(function reparentCorModals(){
+  function move(){
+    ['corNomeObsModal','corModal','relModal'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el && el.parentNode !== document.body){
+        document.body.appendChild(el);
+      }
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', move);
+  } else {
+    move();
+  }
+})();
+
 window.abrirEditNomeObsFromDet = function(id){
   try {
     if(!coresData[id]){ toast('Cor não encontrada','err'); return; }
