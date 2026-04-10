@@ -3,6 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.6.3  10/04/2026  Cor: fix botões edit no modal detalhe   ║
   ║  v2.6.2  10/04/2026  Stats Cor: gráfico hist + botão lançar  ║
   ║  v2.6.1  10/04/2026  Cor: ações inline no card (rollback)    ║
   ║  v2.6.0  09/04/2026  Stats Cor — mix de tingimento por fibra ║
@@ -1874,7 +1875,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.3</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2481,10 +2482,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.6.2';
+const CURRENT_VERSION = '2.6.3';
 const CHANGELOG = [
   {
-    v:'2.6.2', d:'10 abr 2026', current:true,
+    v:'2.6.3', d:'10 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Botões "Editar Nome/Obs" e "Editar Tudo" do modal de detalhe consertados.', desc:'Ao clicar nesses botões, a tela ficava em branco. Causa: a sequência fecharCorDet() seguida de editarNomeObs() criava uma race condition — o modal de detalhe fechava antes do modal de edição abrir, deixando o usuário sem nada na tela. Agora os botões usam wrappers que abrem o modal de edição PRIMEIRO e só depois fecham o de detalhe (com 50ms de delay pra garantir que o DOM atualize).'},
+      {type:'note', title:'event.stopPropagation em todos os botões do modal.', desc:'Adicionado por garantia em todos os botões de ação dentro do modal de detalhe pra evitar que cliques propaguem pro overlay e fechem o modal acidentalmente.'}
+    ]
+  },
+  {
+    v:'2.6.2', d:'10 abr 2026',
     items:[
       {type:'high', title:'Stats Cor: gráfico histórico plurianual corrigido.', desc:'O gráfico mostrava só a barra TOTAL e as barras anuais (2020-2026) ficavam em branco. Era um problema clássico de altura percentual em pais sem altura definida — os segmentos coloridos viravam 0 porque o pai colapsava. Refeito o CSS do gráfico com altura concreta no chart container e flex:1 nas barras.'},
       {type:'high', title:'Botão "Lançar mês" agora clica de verdade.', desc:'O botão estava dentro do header da seção (.sh) que tinha um divisor flex:1 cobrindo a área de hit do botão, deixando ele visualmente lá mas inacessível ao clique. Movido pra própria toolbar dedicada (.sc-toolbar) embaixo do título, com z-index pra garantir.'}
@@ -4386,13 +4394,13 @@ function renderCorDetalhe() {
   // Primeira linha: ações de workflow (cls varia)
   const mainActs = acoes.map(a => {
     const cls = a.cls === 'primary' ? 'primary' : (a.cls === 'danger' ? 'danger' : (a.cls === 'warn' ? 'warn' : 'info'));
-    return '<button class="cor-det-act '+cls+'" onclick="corAcao(\''+c.id+'\',\''+a.acao+'\');refreshCorDetAberto()">'+a.lb+'</button>';
+    return '<button class="cor-det-act '+cls+'" onclick="event.stopPropagation();corAcao(\''+c.id+'\',\''+a.acao+'\');refreshCorDetAberto()">'+a.lb+'</button>';
   }).join('');
 
   // Segunda linha: editar + (admin only) editar tudo / excluir
-  const editBtn = '<button class="cor-det-act" onclick="fecharCorDet();editarNomeObs(\''+c.id+'\')">Editar Nome/Obs</button>';
-  const editFullBtn = (isAdmin && isAtiva) ? '<button class="cor-det-act" onclick="fecharCorDet();editarCor(\''+c.id+'\')">Editar Tudo</button>' : '';
-  const excluirBtn = isAdmin ? '<button class="cor-det-act danger" onclick="excluirCor(\''+c.id+'\');refreshCorDetAberto()">Excluir</button>' : '';
+  const editBtn = '<button class="cor-det-act" onclick="event.stopPropagation();abrirEditNomeObsFromDet(\''+c.id+'\')">Editar Nome/Obs</button>';
+  const editFullBtn = (isAdmin && isAtiva) ? '<button class="cor-det-act" onclick="event.stopPropagation();abrirEditFullFromDet(\''+c.id+'\')">Editar Tudo</button>' : '';
+  const excluirBtn = isAdmin ? '<button class="cor-det-act danger" onclick="event.stopPropagation();excluirCor(\''+c.id+'\');refreshCorDetAberto()">Excluir</button>' : '';
 
   // Monta grid
   let actsHTML = '<div class="cor-det-section"><div class="cor-det-section-lbl">Ações</div><div class="cor-det-actions">';
@@ -4548,6 +4556,17 @@ window.editarNomeObs = id => {
   document.getElementById('corNomeObsNome').value = c.nome || '';
   document.getElementById('corNomeObsObs').value = c.obs || '';
   document.getElementById('corNomeObsModal').classList.add('open');
+};
+
+// v2.6.3: wrappers que abrem o modal de edição ANTES de fechar o detalhe
+// (evita race condition / "tela em branco" quando o detalhe fecha mas o de edição não abriu)
+window.abrirEditNomeObsFromDet = id => {
+  editarNomeObs(id);
+  setTimeout(() => fecharCorDet(), 50);
+};
+window.abrirEditFullFromDet = id => {
+  editarCor(id);
+  setTimeout(() => fecharCorDet(), 50);
 };
 
 window.fecharNomeObsModal = () => {
