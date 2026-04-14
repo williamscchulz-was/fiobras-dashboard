@@ -3,6 +3,12 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.7.0  14/04/2026  Timeline: múltiplas fotos HD + legendas ║
+  ║    • Até 4 fotos por registro, cada uma com legenda própria. ║
+  ║    • Qualidade: 1200px máx, JPEG 0.82 (~210KB/foto).         ║
+  ║    • Schema: fotos:[{data,desc}]; fallback p/ foto legacy.   ║
+  ║    • Card no feed mostra 1ª foto + badge +N se houver mais.  ║
+  ║    • Modal detalhe: stack vertical com legenda em itálico.   ║
   ║  v2.6.3  10/04/2026  Cor: fix botões edit no modal detalhe   ║
   ║  v2.6.2  10/04/2026  Stats Cor: gráfico hist + botão lançar  ║
   ║  v2.6.1  10/04/2026  Cor: ações inline no card (rollback)    ║
@@ -793,11 +799,23 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 .tl-form-field textarea{resize:vertical;min-height:72px;}
 .tl-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 @media(max-width:480px){.tl-form-row{grid-template-columns:1fr;}}
-.tl-foto-upload{width:100%;height:80px;border:2px dashed var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:var(--muted);font-size:.72rem;font-weight:500;transition:border-color .2s,background .2s;}
-.tl-foto-upload:hover{border-color:var(--green);background:rgba(0,136,53,.03);}
-.tl-foto-upload.has-foto{border-style:solid;border-color:var(--green);}
-.tl-foto-preview{width:60px;height:60px;border-radius:6px;object-fit:cover;}
-.tl-foto-upload input[type="file"]{display:none;}
+.tl-fotos-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.tl-fotos-count{font-size:.62rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.05em;}
+.tl-fotos-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.tl-foto-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;gap:10px;align-items:flex-start;}
+.tl-foto-item-thumb{width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--bg);border:1px solid var(--border);cursor:pointer;}
+.tl-foto-item-desc{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 9px;color:var(--text);font-size:.74rem;font-family:inherit;resize:vertical;min-height:56px;}
+.tl-foto-item-desc:focus{outline:none;border-color:var(--green);}
+.tl-foto-item-rm{background:transparent;border:none;color:var(--red);font-size:1.15rem;cursor:pointer;padding:4px 6px;line-height:1;align-self:center;border-radius:6px;transition:background .15s;}
+.tl-foto-item-rm:hover{background:rgba(224,82,82,.12);}
+.tl-foto-add{width:100%;padding:14px;border:2px dashed var(--border2);border-radius:10px;background:transparent;color:var(--green);font-size:.72rem;font-weight:500;cursor:pointer;transition:border-color .2s,background .2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.tl-foto-add:hover{border-color:var(--green);background:rgba(0,136,53,.04);}
+.tl-foto-add:disabled{opacity:.4;cursor:not-allowed;}
+.tl-foto-add input[type="file"]{display:none;}
+.tl-evt-foto-wrap{position:relative;flex-shrink:0;}
+.tl-evt-foto-badge{position:absolute;bottom:-3px;right:-3px;background:var(--green);color:#fff;font-size:.58rem;font-weight:700;font-family:'DM Mono',monospace;padding:1px 5px;border-radius:999px;border:2px solid var(--surface);line-height:1.2;}
+.tl-det-foto-block{margin-bottom:14px;}
+.tl-det-foto-leg{font-size:.72rem;color:var(--muted);font-style:italic;line-height:1.45;padding:6px 2px 0;}
 .tl-fullimg{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;cursor:pointer;}
 .tl-fullimg.open{display:flex;}
 .tl-fullimg img{max-width:92vw;max-height:88vh;border-radius:8px;object-fit:contain;}
@@ -807,7 +825,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 [data-theme="dark"] .tl-chip.op{color:#d4a600;}
 /* ── Timeline detail modal ── */
 .tl-det-desc{font-size:.88rem;font-weight:400;color:var(--text);line-height:1.7;margin-bottom:16px;white-space:pre-wrap;word-break:break-word;}
-.tl-det-foto{width:100%;max-height:320px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:16px;cursor:pointer;background:var(--surface2);}
+.tl-det-foto{width:100%;max-height:320px;object-fit:contain;border-radius:10px;border:1px solid var(--border);cursor:pointer;background:var(--surface2);}
 .tl-det-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
 .tl-det-chip{font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;padding:5px 12px;border-radius:6px;display:flex;align-items:center;gap:5px;}
 .tl-det-chip svg{width:12px;height:12px;flex-shrink:0;}
@@ -1875,7 +1893,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.6.6</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2267,12 +2285,16 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
       <input type="text" id="tlCor" placeholder="Ex: Rondinha 6218">
     </div>
     <div class="tl-form-field">
-      <label>Foto (opcional)</label>
-      <div class="tl-foto-upload" id="tlFotoArea" onclick="document.getElementById('tlFotoInput').click()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span id="tlFotoLabel">Toque para adicionar foto</span>
-        <input type="file" id="tlFotoInput" accept="image/*" onchange="tlFotoChange(this)">
+      <div class="tl-fotos-head">
+        <label style="margin:0;">Fotos (opcional)</label>
+        <span class="tl-fotos-count" id="tlFotosCount">0 / 4</span>
       </div>
+      <div class="tl-fotos-list" id="tlFotosList"></div>
+      <label class="tl-foto-add" id="tlFotoAddBtn" for="tlFotoInput">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span id="tlFotoAddLbl">Adicionar foto</span>
+        <input type="file" id="tlFotoInput" accept="image/*" onchange="tlFotoChange(this)">
+      </label>
     </div>
     <div class="tl-form-field">
       <label>Descrição (o que foi feito)</label>
@@ -2482,10 +2504,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.6.6';
+const CURRENT_VERSION = '2.7.0';
 const CHANGELOG = [
   {
-    v:'2.6.6', d:'10 abr 2026', current:true,
+    v:'2.7.0', d:'14 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Timeline: múltiplas fotos com legenda por foto.', desc:'Agora cada registro da Timeline aceita até 4 fotos, e cada foto tem seu próprio campo de legenda opcional. No modal de edição, as fotos aparecem empilhadas numa lista — cada uma com sua thumb + textarea de legenda + botão de remover. Botão "Adicionar foto" abaixo da lista (desabilita quando atinge o limite de 4). No card do feed, a primeira foto aparece como thumb com um badge "+N" no canto quando há mais. Ao abrir o detalhe do registro, as fotos aparecem uma embaixo da outra, cada uma com sua legenda em itálico discreto logo abaixo.'},
+      {type:'high', title:'Qualidade de foto 4× melhor.', desc:'Compressão reformulada: lado máximo subiu de 300px pra 1200px, qualidade JPEG inicial de 0.5 pra 0.82, e o algoritmo agora usa smoothing de alta qualidade no canvas. Cada foto fica em ~210KB (vs ~80KB antes) mas finalmente dá pra ver textura de tecido, mancha, variação de cor, detalhe fino. Com 4 fotos/registro o payload fica em ~840KB, folgado pro Firebase.'},
+      {type:'note', title:'Schema novo com fallback pro legado.', desc:'Campo fotos:[{data,desc}] substitui foto:string. Registros antigos continuam funcionando — ao abrir, o código detecta foto (string) e converte pra [{data:foto,desc:""}] na leitura, e ao salvar já grava no schema novo. Zero migração destrutiva, zero perda de dados.'}
+    ]
+  },
+  {
+    v:'2.6.6', d:'10 abr 2026',
     items:[
       {type:'feat', title:'Nome editado da cor substitui o código no card.', desc:'Quando você edita uma cor e preenche o campo Nome, agora esse nome aparece como título principal do card (substituindo o código original) e a linha de baixo mostra só o cliente. O modal de detalhe segue o mesmo padrão: título principal usa o nome editado, e o código original aparece como sub se for diferente. Cores sem nome customizado continuam mostrando o código.'}
     ]
@@ -4750,7 +4780,10 @@ window.renderRelatorio = () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 let tlDados = {};
-let tlFotoBase64 = null;
+let tlFotos = []; // v2.7.0: array de {data, desc}
+const TL_FOTO_MAX_N = 4;
+const TL_FOTO_MAX_PX = 1200;
+const TL_FOTO_TARGET_BYTES = 280000; // ~210KB real após base64
 let tlEditId = null;
 
 function tlInit() { tlDados = {}; }
@@ -4770,19 +4803,16 @@ window.abrirTlModal = (id) => {
   document.getElementById('tlCor').value       = evt ? (evt.cor || '') : '';
   document.getElementById('tlDescricao').value = evt ? (evt.descricao || '') : '';
   document.getElementById('tlResultado').value = evt ? (evt.resultado || '') : '';
-  tlFotoBase64 = evt ? (evt.foto || null) : null;
-  const area = document.getElementById('tlFotoArea');
-  const prev = area.querySelector('.tl-foto-preview');
-  if (tlFotoBase64) {
-    area.classList.add('has-foto');
-    if (!prev) { const img = document.createElement('img'); img.className = 'tl-foto-preview'; area.prepend(img); }
-    (prev || area.querySelector('.tl-foto-preview')).src = tlFotoBase64;
-    document.getElementById('tlFotoLabel').textContent = 'Trocar foto';
-  } else {
-    area.classList.remove('has-foto');
-    if (prev) prev.remove();
-    document.getElementById('tlFotoLabel').textContent = 'Toque para adicionar foto';
+  // Fotos: fallback registro antigo (foto string única) -> array; novo: array direto
+  tlFotos = [];
+  if (evt) {
+    if (Array.isArray(evt.fotos) && evt.fotos.length) {
+      tlFotos = evt.fotos.map(f => ({ data: f.data || '', desc: f.desc || '' })).filter(f => f.data);
+    } else if (evt.foto) {
+      tlFotos = [{ data: evt.foto, desc: '' }];
+    }
   }
+  tlRenderFotos();
   document.getElementById('tlModalTitle').textContent = id ? 'Editar registro' : 'Novo registro';
   document.getElementById('tlModal').classList.add('open');
 };
@@ -4792,15 +4822,51 @@ window.fecharTlModal = () => {
   tlEditId = null;
 };
 
-/** Processa foto selecionada — redimensiona para thumbnail */
+/** Renderiza lista de fotos no form */
+function tlRenderFotos() {
+  const list = document.getElementById('tlFotosList');
+  const count = document.getElementById('tlFotosCount');
+  const addBtn = document.getElementById('tlFotoAddBtn');
+  const addLbl = document.getElementById('tlFotoAddLbl');
+  if (!list) return;
+  const esc = s => String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  list.innerHTML = tlFotos.map((f, i) =>
+    '<div class="tl-foto-item">' +
+      '<img class="tl-foto-item-thumb" src="' + f.data + '" alt="" onclick="tlAbrirFoto(this.src)">' +
+      '<textarea class="tl-foto-item-desc" placeholder="Legenda da foto (opcional)…" oninput="tlDescFoto(' + i + ', this.value)">' + esc(f.desc) + '</textarea>' +
+      '<button type="button" class="tl-foto-item-rm" onclick="tlRemoverFoto(' + i + ')" title="Remover foto">×</button>' +
+    '</div>'
+  ).join('');
+  count.textContent = tlFotos.length + ' / ' + TL_FOTO_MAX_N;
+  const full = tlFotos.length >= TL_FOTO_MAX_N;
+  addBtn.style.opacity = full ? '.4' : '1';
+  addBtn.style.pointerEvents = full ? 'none' : '';
+  addLbl.textContent = full ? 'Limite de ' + TL_FOTO_MAX_N + ' fotos atingido' : 'Adicionar foto';
+}
+
+window.tlDescFoto = (idx, val) => {
+  if (tlFotos[idx]) tlFotos[idx].desc = val;
+};
+
+window.tlRemoverFoto = (idx) => {
+  tlFotos.splice(idx, 1);
+  tlRenderFotos();
+};
+
+/** Processa foto selecionada — redimensiona mantendo qualidade pra ver detalhe */
 window.tlFotoChange = (input) => {
   const file = input.files[0];
   if (!file) return;
+  if (tlFotos.length >= TL_FOTO_MAX_N) {
+    toast('Limite de ' + TL_FOTO_MAX_N + ' fotos', 'err');
+    input.value = '';
+    return;
+  }
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
     img.onload = () => {
-      const MAX = 300;
+      const MAX = TL_FOTO_MAX_PX;
       let w = img.width, h = img.height;
       if (w > MAX || h > MAX) {
         if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
@@ -4808,21 +4874,20 @@ window.tlFotoChange = (input) => {
       }
       const c = document.createElement('canvas');
       c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      // Compressão iterativa — garante < 100KB no Firebase
-      let quality = 0.5;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+      // Compressão iterativa: 0.82 -> 0.55, alvo ~210KB
+      let quality = 0.82;
       let result = c.toDataURL('image/jpeg', quality);
-      while (result.length > 130000 && quality > 0.15) {
-        quality -= 0.1;
+      while (result.length > TL_FOTO_TARGET_BYTES && quality > 0.55) {
+        quality -= 0.07;
         result = c.toDataURL('image/jpeg', quality);
       }
-      tlFotoBase64 = result;
-      const area = document.getElementById('tlFotoArea');
-      area.classList.add('has-foto');
-      let prev = area.querySelector('.tl-foto-preview');
-      if (!prev) { prev = document.createElement('img'); prev.className = 'tl-foto-preview'; area.prepend(prev); }
-      prev.src = tlFotoBase64;
-      document.getElementById('tlFotoLabel').textContent = 'Trocar foto';
+      tlFotos.push({ data: result, desc: '' });
+      tlRenderFotos();
+      input.value = ''; // permite selecionar a mesma foto de novo se remover
     };
     img.src = e.target.result;
   };
@@ -4840,7 +4905,8 @@ window.salvarTlEvento = () => {
     cliente:   document.getElementById('tlCliente').value.trim() || '',
     op:        document.getElementById('tlOp').value.trim() || '',
     cor:       document.getElementById('tlCor').value.trim() || '',
-    foto:      tlFotoBase64 || '',
+    foto:      '', // legacy: zera string antiga, nova fonte é `fotos`
+    fotos:     tlFotos.map(f => ({ data: f.data, desc: (f.desc||'').trim() })),
     descricao: document.getElementById('tlDescricao').value.trim() || '',
     resultado: document.getElementById('tlResultado').value.trim() || '',
     criadoPor: existing ? existing.criadoPor : (window._currentUserName || 'admin'),
@@ -4878,9 +4944,17 @@ window.tlAbrirDetalhe = (id) => {
   // Fallback: registros antigos têm `desc` no lugar de `objetivo`
   const titulo = evt.objetivo || evt.desc || '(sem título)';
   let html = '';
-  if (evt.foto) {
-    html += '<img class="tl-det-foto" src="' + evt.foto + '" onclick="tlAbrirFoto(this.src)" alt="Foto">';
-  }
+  // v2.7.0: suporta array `fotos` + fallback pra string `foto` legacy
+  const fotos = (Array.isArray(evt.fotos) && evt.fotos.length)
+    ? evt.fotos
+    : (evt.foto ? [{ data: evt.foto, desc: '' }] : []);
+  fotos.forEach(f => {
+    if (!f.data) return;
+    html += '<div class="tl-det-foto-block">' +
+      '<img class="tl-det-foto" src="' + f.data + '" onclick="tlAbrirFoto(this.src)" alt="Foto">' +
+      (f.desc ? '<div class="tl-det-foto-leg">' + esc(f.desc) + '</div>' : '') +
+    '</div>';
+  });
   html += '<div class="tl-det-desc">' + esc(titulo) + '</div>';
   const chips = [];
   if (evt.cor) chips.push('<span class="tl-det-chip cor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>' + esc(evt.cor) + '</span>');
@@ -5306,8 +5380,15 @@ function renderTimeline() {
       : evt.cliente ? '<span class="tl-chip cli">' + evt.cliente + '</span>'
       : evt.op ? '<span class="tl-chip op">' + evt.op + '</span>' : '';
 
-    const fotoThumb = evt.foto
-      ? '<img class="tl-evt-foto" src="' + evt.foto + '" alt="" style="width:40px;height:40px;border-radius:6px;">'
+    // v2.7.0: 1ª foto como thumb + badge +N se tiver mais
+    const fotosArr = (Array.isArray(evt.fotos) && evt.fotos.length)
+      ? evt.fotos
+      : (evt.foto ? [{ data: evt.foto }] : []);
+    const fotoThumb = fotosArr.length
+      ? '<div class="tl-evt-foto-wrap">' +
+          '<img class="tl-evt-foto" src="' + fotosArr[0].data + '" alt="" style="width:40px;height:40px;border-radius:6px;">' +
+          (fotosArr.length > 1 ? '<span class="tl-evt-foto-badge">+' + (fotosArr.length - 1) + '</span>' : '') +
+        '</div>'
       : '';
 
     html += '<div class="tl-evt" onclick="tlAbrirDetalhe(\'' + id + '\')" style="cursor:pointer;">' +
