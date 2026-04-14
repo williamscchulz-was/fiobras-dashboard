@@ -3,6 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.7.2  14/04/2026  Fix: texto da tab ativa sumia em mobile ║
   ║  v2.7.1  14/04/2026  Mobile: fix cadeado + tabs fixas        ║
   ║    • Cadeado sumia pra admin (CSS agora respeita .locked).   ║
   ║    • Tabs secundárias em mobile: grid fixo, sem arrastar.    ║
@@ -876,8 +877,9 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     text-align:center;overflow:hidden;text-overflow:ellipsis;
   }
   /* v2.7.0: em mobile, quando o botão tem data-short, mostra essa label mais curta */
+  /* usa ::before porque ::after já é usado pelo underline verde do .active */
   .tab-btn[data-short]{font-size:0;}
-  .tab-btn[data-short]::after{
+  .tab-btn[data-short]::before{
     content:attr(data-short);
     font-size:.62rem;font-weight:500;letter-spacing:.5px;
     color:inherit;
@@ -1884,7 +1886,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="splash-sub">HUB</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version" id="splashVersion">v2.7.1</div>
+  <div class="splash-version" id="splashVersion">v2.7.2</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -1914,7 +1916,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2528,10 +2530,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.7.1';
+const CURRENT_VERSION = '2.7.2';
 const CHANGELOG = [
   {
-    v:'2.7.1', d:'14 abr 2026', current:true,
+    v:'2.7.2', d:'14 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Texto da aba ativa sumia em mobile.', desc:'Colisão de pseudo-elemento: o ::after já é usado pelo underline verde do .active (content:"") e na v2.7.1 eu reaproveitei o mesmo ::after pra renderizar a label curta (content:attr(data-short)). Quando a aba ficava ativa, o content:"" sobrescrevia o attr(data-short) e o texto sumia. Corrigido trocando a label curta pra ::before, que ninguém mais usa.'}
+    ]
+  },
+  {
+    v:'2.7.1', d:'14 abr 2026',
     items:[
       {type:'high', title:'Cadeado aparecia pra todo mundo na pílula mobile.', desc:'O ícone de cadeado da pílula flutuante mobile estava com display:flex fixo no CSS — aparecia mesmo quando o botão NÃO estava com a classe .locked. Resultado: admin via cadeado em todos os 3 módulos. Corrigido: cadeado agora fica display:none por padrão e só aparece quando o botão tem .locked, igual o CSS do header desktop já fazia certo.'},
       {type:'high', title:'Tabs secundárias ficam fixas em mobile.', desc:'As abas dentro dos módulos (Produção, Desenv. Cor, Apontamento, Timeline, Stats Cor) estavam com scroll horizontal — dava pra arrastar de lado. Em mobile isso é confuso e parece bug. Agora em ≤480px as abas viram grid com larguras iguais (repeat(auto-fit, minmax(0,1fr))) — ocupam toda a largura disponível, sem arrasto. Pra caber em 5 abas, cada botão mostra uma label curta (Cor / Apont. / Stats) via atributo data-short; no desktop segue mostrando o nome completo.'}
