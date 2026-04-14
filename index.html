@@ -3,6 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.8.1  14/04/2026  Fix shell: dropdown cortado + crumb     ║
   ║  v2.8.0  14/04/2026  Shell novo: sidebar + topbar + user    ║
   ║    • Sidebar à esquerda com ícones dos módulos.              ║
   ║    • Topbar com breadcrumb (módulo › aba) e dropdown user.   ║
@@ -296,9 +297,9 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 .sidenav-tip{position:absolute;left:56px;top:50%;transform:translateY(-50%);background:var(--surface);color:var(--text);padding:6px 10px;border-radius:8px;font-size:.65rem;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200;border:1px solid var(--border);box-shadow:var(--shadow-md);}
 .sidenav-item:hover .sidenav-tip{opacity:1;}
 
-.main-col{flex:1;min-width:0;background:var(--bg);border-radius:18px;border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;}
+.main-col{flex:1;min-width:0;background:var(--bg);border-radius:18px;border:1px solid var(--border);display:flex;flex-direction:column;min-height:calc(100vh - 20px);}
 
-.topbar{min-height:60px;padding:0 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--bg);position:sticky;top:0;z-index:90;}
+.topbar{min-height:60px;padding:0 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--bg);position:sticky;top:0;z-index:90;border-radius:18px 18px 0 0;}
 .topbar-crumb{display:flex;align-items:center;gap:9px;font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);min-width:0;}
 .topbar-crumb .crumb-sep{color:var(--muted2);opacity:.6;}
 .topbar-crumb .crumb-active{color:var(--text);font-weight:500;}
@@ -1986,7 +1987,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="splash-sub">HUB</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version" id="splashVersion">v2.8.0</div>
+  <div class="splash-version" id="splashVersion">v2.8.1</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -2093,7 +2094,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.8.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.8.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2745,9 +2746,32 @@ function setupTabs(role){
     renderProducao();
   } else {
     // Admin: Gerencial ativo por padrão
+    window._activeModule = 'resultados';
     const resMnav = document.querySelector('#mnavPill .mnav-btn[data-mod="resultados"]');
     if(resMnav) resMnav.classList.add('active');
+    // v2.8.0: marca sidenav resultados como active
+    const resSnav = document.querySelector('.sidenav-item[data-mod="resultados"]');
+    if(resSnav) resSnav.classList.add('active');
   }
+  // v2.8.0: marca sidenav se for produção
+  if(role === 'producao'){
+    const prodSnav = document.querySelector('.sidenav-item[data-mod="producao"]');
+    if(prodSnav) prodSnav.classList.add('active');
+  }
+  // v2.8.0: atualiza breadcrumb com módulo + aba ativos
+  updateCrumbFromState();
+}
+
+/** Lê o estado atual (módulo+tab ativos) e atualiza o breadcrumb */
+function updateCrumbFromState(){
+  const MOD_LBL = { resultados:'Gerencial', producao:'Produção', preco:'Preço de Venda' };
+  const mod = window._activeModule || 'resultados';
+  const crumbMod = document.getElementById('topbarCrumbMod');
+  if(crumbMod) crumbMod.textContent = MOD_LBL[mod] || mod;
+  const activeTg = document.querySelector('.tab-group.active');
+  const activeTab = activeTg?.querySelector('.tab-btn.active');
+  const crumbTab = document.getElementById('topbarCrumbTab');
+  if(crumbTab) crumbTab.textContent = (activeTab?.dataset.short || activeTab?.textContent || '').trim() || '—';
 }
 
 function checkAuth(){
@@ -2776,10 +2800,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.8.0';
+const CURRENT_VERSION = '2.8.1';
 const CHANGELOG = [
   {
-    v:'2.8.0', d:'14 abr 2026', current:true,
+    v:'2.8.1', d:'14 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Dropdown do user ficava cortado no topo.', desc:'O .main-col tinha overflow:hidden pra o border-radius funcionar, mas isso cortava o dropdown do usuário (que é position:absolute e escapa o limite do container). Removi o overflow:hidden e apliquei o border-radius direto na topbar sticky — ela agora é quem "recorta" o topo do canvas. Dropdown volta a aparecer inteiro com avatar + nome + email.'},
+      {type:'high', title:'Breadcrumb mostrava sempre "— › —".', desc:'O setupTabs seta o módulo/aba inicial direto via .classList.add("active") sem passar pelo switchModule/switchTab, então o breadcrumb nunca era atualizado na carga. Criei updateCrumbFromState() que lê o estado atual (módulo ativo + tab ativa) e preenche o crumb corretamente. Chamada adicionada no final do setupTabs. Agora o crumb mostra "Gerencial › 2026" ou "Produção › Cor" direto no primeiro render.'},
+      {type:'note', title:'Sidenav também ativa na carga inicial.', desc:'O item da sidebar correspondente ao módulo inicial (Gerencial pra admin, Produção pra produção) também não estava recebendo a classe .active porque o setupTabs não chamava switchModule. Corrigido: sidenav agora destaca o módulo ativo já na primeira render, com a barrinha verde lateral.'}
+    ]
+  },
+  {
+    v:'2.8.0', d:'14 abr 2026',
     items:[
       {type:'feat', title:'Shell redesenhado: sidebar + topbar com user dropdown.', desc:'Redesign de navegação inspirado em apps SaaS modernos. Sidebar estreita à esquerda com ícones dos 3 módulos (Gerencial, Produção, Preço) + divider + histórico de versões. Módulo ativo ganha barrinha verde lateral e highlight sutil. Topbar no topo mostra breadcrumb (módulo › aba ativa), botão de tema e bloco do usuário à direita (avatar + nome + role). Clicar no user abre dropdown com Minha conta, Tema, Histórico de versões e Sair. O header antigo com a pílula 3D de módulos foi aposentado no desktop.'},
       {type:'high', title:'Profundidade visual em camadas (dark mode).', desc:'Novo token --bg-deep (#0D0E10) serve como camada mais escura do shell; o bg dos painéis fica destacado como um "card flutuante" dentro dele, com border-radius 18px e borda suave. Três níveis de cinza agora: bg-deep (wrapper) → bg (canvas principal) → surface (cards internos). Light mode fica neutro (bg-deep = bg).'},
