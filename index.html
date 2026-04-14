@@ -3,6 +3,12 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.8.0  14/04/2026  Shell novo: sidebar + topbar + user    ║
+  ║    • Sidebar à esquerda com ícones dos módulos.              ║
+  ║    • Topbar com breadcrumb (módulo › aba) e dropdown user.   ║
+  ║    • Token --bg-deep (profundidade em camadas no dark).      ║
+  ║    • Tema, versão e logout migrados pro dropdown do user.    ║
+  ║    • Mobile: sidebar some, mantém pílula flutuante.          ║
   ║  v2.7.4  14/04/2026  Stats Cor: navegação de mês + Lucivane  ║
   ║  v2.7.3  14/04/2026  Fix: botão Lançar Mês (Stats Cor)       ║
   ║  v2.7.2  14/04/2026  Fix: texto da tab ativa sumia em mobile ║
@@ -242,7 +248,9 @@
   color-scheme:light;
 }
 /* ── Dark theme · v2.3.0 Apple style (camadas de cinza, não preto puro) ── */
+/* v2.8.0: + token --bg-deep (camada exterior) para profundidade de shell */
 [data-theme="dark"]{
+  --bg-deep:#0D0E10;
   --bg:#1C1C1E; --surface:#2C2C2E; --surface2:#3A3A3C;
   --border:#38383A; --border2:#48484A;
   --text:#F5F5F7; --muted:#98989D; --muted2:#636366;
@@ -252,16 +260,97 @@
   --shadow-sm:0 1px 3px rgba(0,0,0,.3); --shadow-md:0 4px 14px rgba(0,0,0,.35);
   color-scheme:dark;
 }
-[data-theme="light"]{color-scheme:light;}
+[data-theme="light"]{--bg-deep:var(--bg);color-scheme:light;}
 /* ── Base & Reset ── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+body{background:var(--bg-deep);color:var(--text);font-family:'Poppins',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
 /* ── Touch optimization (v2.5.0) — remove 300ms tap delay ── */
 button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.tab-btn,.mod-btn,.cor-card,.cor-act-btn,.save-btn,.prod-rel-btn,.apt-day-cell,.apt-turno-tab,.tl-evt,.mt-btn,.hdr-icon-btn,.hdr-pill{touch-action:manipulation;}
 
 /* ── Notch spacer (iOS safe area) ── */
-.notch-spacer{height:env(safe-area-inset-top,0px);background:var(--bg);position:sticky;top:0;z-index:101;}
+.notch-spacer{height:env(safe-area-inset-top,0px);background:var(--bg-deep);position:sticky;top:0;z-index:101;}
+
+/* ══════════════════════════════════════════════════════════════════
+   SHELL v2.8.0 — sidebar + topbar
+   ══════════════════════════════════════════════════════════════════ */
+.shell{display:flex;min-height:100vh;background:var(--bg-deep);padding:10px;gap:10px;}
+.sidenav{width:68px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;gap:4px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);align-self:flex-start;height:calc(100vh - 20px - env(safe-area-inset-top,0px));}
+.sidenav-logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#00A040,#006B2A);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,136,53,.28);margin-bottom:18px;cursor:pointer;}
+.sidenav-logo-txt{font-family:'Outfit',sans-serif;font-size:19px;font-weight:800;color:#fff;letter-spacing:-.5px;}
+.sidenav-item{position:relative;width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;background:transparent;border:1px solid transparent;transition:background .15s,color .15s,border-color .15s;padding:0;}
+.sidenav-item:hover{background:var(--surface);color:var(--text);}
+.sidenav-item svg{width:18px;height:18px;display:block;}
+.sidenav-item.active{background:rgba(62,207,110,.14);color:#3ecf6e;border-color:rgba(62,207,110,.22);}
+[data-theme="light"] .sidenav-item.active{background:rgba(0,136,53,.1);color:var(--green);border-color:rgba(0,136,53,.22);}
+.sidenav-item.active::before{content:'';position:absolute;left:-14px;top:50%;transform:translateY(-50%);width:3px;height:22px;background:#3ecf6e;border-radius:0 3px 3px 0;box-shadow:0 0 12px rgba(62,207,110,.5);}
+[data-theme="light"] .sidenav-item.active::before{background:var(--green);box-shadow:0 0 12px rgba(0,136,53,.35);}
+.sidenav-item.locked{opacity:.4;}
+.sidenav-item.locked .sidenav-lock{position:absolute;top:5px;right:5px;width:12px;height:12px;border-radius:50%;background:rgba(20,30,20,.9);color:#fff;display:flex;align-items:center;justify-content:center;}
+.sidenav-item.locked .sidenav-lock svg{width:7px;height:7px;}
+.sidenav-item:not(.locked) .sidenav-lock{display:none;}
+.sidenav-item.wip .sidenav-wip{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#FFCB00;border:2px solid var(--bg-deep);}
+.sidenav-item.locked .sidenav-wip{display:none;}
+.sidenav-divider{width:40px;height:1px;background:var(--border);margin:8px 0;opacity:.5;}
+.sidenav-spacer{flex:1;}
+.sidenav-tip{position:absolute;left:56px;top:50%;transform:translateY(-50%);background:var(--surface);color:var(--text);padding:6px 10px;border-radius:8px;font-size:.65rem;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200;border:1px solid var(--border);box-shadow:var(--shadow-md);}
+.sidenav-item:hover .sidenav-tip{opacity:1;}
+
+.main-col{flex:1;min-width:0;background:var(--bg);border-radius:18px;border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;}
+
+.topbar{min-height:60px;padding:0 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--bg);position:sticky;top:0;z-index:90;}
+.topbar-crumb{display:flex;align-items:center;gap:9px;font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);min-width:0;}
+.topbar-crumb .crumb-sep{color:var(--muted2);opacity:.6;}
+.topbar-crumb .crumb-active{color:var(--text);font-weight:500;}
+.topbar-spacer{flex:1;}
+.topbar-icon{width:34px;height:34px;border-radius:10px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;border:none;transition:all .15s;}
+.topbar-icon:hover{color:var(--text);background:var(--surface2);}
+.topbar-icon svg{width:14px;height:14px;}
+
+.topbar-user{display:flex;align-items:center;gap:10px;padding:4px 12px 4px 4px;border-radius:999px;background:var(--surface);border:1px solid var(--border);cursor:pointer;position:relative;transition:background .15s;}
+.topbar-user:hover{background:var(--surface2);}
+.topbar-user-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#00A040,#006B2A);color:#fff;font-size:.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;box-shadow:0 0 0 2px rgba(62,207,110,.22);flex-shrink:0;}
+.topbar-user-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.topbar-user-name{font-size:.72rem;font-weight:600;color:var(--text);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
+.topbar-user-role{font-size:.58rem;color:var(--muted);line-height:1;font-family:'DM Mono',monospace;letter-spacing:.5px;text-transform:uppercase;}
+.topbar-user-caret{color:var(--muted);transition:transform .2s;}
+.topbar-user.open .topbar-user-caret{transform:rotate(180deg);color:#3ecf6e;}
+
+/* Dropdown */
+.user-dd{position:absolute;top:calc(100% + 8px);right:0;width:260px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:6px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;z-index:150;box-shadow:var(--shadow-md);}
+.user-dd.open{opacity:1;visibility:visible;transform:translateY(0);}
+.user-dd-head{padding:14px 14px 12px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;gap:12px;align-items:center;}
+.user-dd-head-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00A040,#006B2A);color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px rgba(62,207,110,.2);flex-shrink:0;}
+.user-dd-head-info{flex:1;min-width:0;}
+.user-dd-name{font-size:.78rem;font-weight:600;color:var(--text);line-height:1.3;}
+.user-dd-email{font-size:.66rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-dd-item{padding:10px 12px;display:flex;align-items:center;gap:10px;color:var(--text);font-size:.76rem;border-radius:10px;cursor:pointer;transition:background .12s;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;}
+.user-dd-item:hover{background:var(--surface);}
+.user-dd-item svg{width:14px;height:14px;flex-shrink:0;}
+.user-dd-item .dd-right{margin-left:auto;font-size:.6rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.3px;}
+.user-dd-item .dd-tag{margin-left:auto;padding:2px 7px;background:rgba(62,207,110,.15);color:#3ecf6e;border-radius:999px;font-size:.55rem;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:.3px;}
+[data-theme="light"] .user-dd-item .dd-tag{color:var(--green);background:rgba(0,136,53,.12);}
+.user-dd-sep{height:1px;background:var(--border);margin:6px 8px;}
+.user-dd-item.danger{color:var(--red);}
+.user-dd-item.danger:hover{background:rgba(224,82,82,.08);}
+[data-theme="dark"] .user-dd-item.danger:hover{background:rgba(255,69,58,.1);}
+
+/* ══════════════════════════════════════════════════════════════════
+   SHELL v2.8.0 — esconde o .hdr antigo (substituído por sidenav+topbar)
+   ══════════════════════════════════════════════════════════════════ */
+.hdr{display:none !important;}
+@media (max-width:640px){
+  .shell{padding:0;gap:0;display:block;background:var(--bg);}
+  .sidenav{display:none;}
+  .main-col{border-radius:0;border:none;}
+  .topbar{min-height:50px;padding:0 14px;border-bottom:1px solid var(--border);}
+  .topbar-crumb{font-size:.6rem;}
+  .topbar-icon{display:none;}
+  .topbar-user{padding:4px;gap:0;border:none;background:transparent;}
+  .topbar-user-info,.topbar-user-caret{display:none;}
+  .topbar-user-av{width:34px;height:34px;}
+  .user-dd{right:4px;top:calc(100% + 6px);width:calc(100vw - 28px);max-width:320px;}
+}
 
 /* ── Header limpo (v2.2.0) ── */
 .hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;background:var(--bg);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--border);}
@@ -1897,12 +1986,89 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="splash-sub">HUB</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version" id="splashVersion">v2.7.4</div>
+  <div class="splash-version" id="splashVersion">v2.8.0</div>
 </div>
 
 <!-- ── App principal ── -->
 <div id="app">
 <div class="notch-spacer"></div>
+<div class="shell">
+<aside class="sidenav" id="sidenav">
+  <div class="sidenav-logo" title="Fiobras HUB">
+    <span class="sidenav-logo-txt">F</span>
+  </div>
+  <button class="sidenav-item" data-mod="resultados" onclick="switchModule('resultados',this)" aria-label="Gerencial">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="sidenav-tip">Gerencial</span>
+  </button>
+  <button class="sidenav-item" data-mod="producao" onclick="switchModule('producao',this)" aria-label="Produção">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="sidenav-tip">Produção</span>
+  </button>
+  <button class="sidenav-item wip" data-mod="preco" onclick="switchModule('preco',this)" aria-label="Preço de Venda">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    <span class="sidenav-wip" aria-hidden="true"></span>
+    <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="sidenav-tip">Preço de Venda · WIP</span>
+  </button>
+  <div class="sidenav-spacer"></div>
+  <div class="sidenav-divider"></div>
+  <button class="sidenav-item" onclick="openChangelog()" aria-label="Histórico de versões">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20M12 8v4l3 2"/></svg>
+    <span class="sidenav-tip">Histórico de versões</span>
+  </button>
+</aside>
+<div class="main-col">
+<div class="topbar">
+  <div class="topbar-crumb">
+    <span id="topbarCrumbMod">—</span>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-active" id="topbarCrumbTab">—</span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="topbar-icon" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
+    <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+    <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+  <div class="topbar-user" id="topbarUser" onclick="toggleUserDd(event)">
+    <div class="topbar-user-av" id="topbarUserAv">—</div>
+    <div class="topbar-user-info">
+      <div class="topbar-user-name" id="topbarUserName">—</div>
+      <div class="topbar-user-role" id="topbarUserRole">—</div>
+    </div>
+    <svg class="topbar-user-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <div class="user-dd" id="userDd" onclick="event.stopPropagation()">
+      <div class="user-dd-head">
+        <div class="user-dd-head-av" id="ddAv">—</div>
+        <div class="user-dd-head-info">
+          <div class="user-dd-name" id="ddName">—</div>
+          <div class="user-dd-email" id="ddEmail">—</div>
+        </div>
+      </div>
+      <button class="user-dd-item" onclick="toast('Minha conta disponível na v2.8.1','info')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Minha conta
+      </button>
+      <button class="user-dd-item" onclick="toggleTheme()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        Tema
+        <span class="dd-right" id="ddThemeLbl">escuro</span>
+      </button>
+      <button class="user-dd-item" onclick="openChangelog()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20M12 8v4l3 2"/></svg>
+        Histórico de versões
+        <span class="dd-tag" id="ddVersion">v2.8.0</span>
+      </button>
+      <div class="user-dd-sep"></div>
+      <button class="user-dd-item danger" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
+  </div>
+</div>
 <div class="hdr">
   <div class="hdr-left">
     <span class="hdr-brand">Fiobras</span>
@@ -1927,7 +2093,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.4</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.8.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2364,6 +2530,8 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end" id="tlDetActions"></div>
   </div>
 </div>
+</div>
+</div>
 <!-- ── Mobile Nav Pill (v2.5.0 Fase 2) — pílula flutuante estilo Nubank ── -->
 <nav class="mnav-pill" id="mnavPill" aria-label="Navegação de módulos">
   <button class="mnav-btn" data-mod="resultados" onclick="switchModuleMobile('resultados',this)" aria-label="Gerencial">
@@ -2454,6 +2622,8 @@ function showSplash(nome, role){
   // v2.7.0: versão dinâmica no splash (antes ficava hardcoded e esquecia de atualizar)
   const svEl = document.getElementById('splashVersion');
   if (svEl && typeof CURRENT_VERSION !== 'undefined') svEl.textContent = 'v' + CURRENT_VERSION;
+  // v2.8.0: popula topbar + dropdown user
+  populateUserShell(nome, role);
   bar.style.animation='none';
   sp.classList.remove('hide');
   requestAnimationFrame(()=>{bar.style.animation='splashLoad 2.2s ease-in-out forwards';});
@@ -2464,6 +2634,55 @@ function showSplash(nome, role){
     checkChangelog();
   },2400);
 }
+
+// ── v2.8.0: user shell (topbar + dropdown) ─────────────────────────────────
+function populateUserShell(nome, role){
+  const initials = nome.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+  const sess = getSession();
+  const userKey = sess?.user || '';
+  const email = USERS[userKey]?.email || 'Email não cadastrado';
+  const roleLbl = role === 'admin' ? 'admin' : (USERS[userKey]?.turno ? 'turno ' + USERS[userKey].turno : 'produção');
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set('topbarUserAv', initials);
+  set('topbarUserName', nome);
+  set('topbarUserRole', roleLbl);
+  set('ddAv', initials);
+  set('ddName', nome);
+  set('ddEmail', email);
+  if (typeof CURRENT_VERSION !== 'undefined') set('ddVersion', 'v' + CURRENT_VERSION);
+  // Label do tema atual
+  const themeLbl = document.getElementById('ddThemeLbl');
+  if(themeLbl) themeLbl.textContent = (document.documentElement.dataset.theme === 'light') ? 'claro' : 'escuro';
+}
+
+window.toggleUserDd = (e) => {
+  if(e) e.stopPropagation();
+  const user = document.getElementById('topbarUser');
+  const dd = document.getElementById('userDd');
+  if(!user || !dd) return;
+  const isOpen = dd.classList.contains('open');
+  if(isOpen){
+    dd.classList.remove('open');
+    user.classList.remove('open');
+  } else {
+    dd.classList.add('open');
+    user.classList.add('open');
+    // Atualiza label do tema ao abrir
+    const themeLbl = document.getElementById('ddThemeLbl');
+    if(themeLbl) themeLbl.textContent = (document.documentElement.dataset.theme === 'light') ? 'claro' : 'escuro';
+  }
+};
+
+// Click-outside fecha o dropdown
+document.addEventListener('click', (e) => {
+  const user = document.getElementById('topbarUser');
+  const dd = document.getElementById('userDd');
+  if(!user || !dd || !dd.classList.contains('open')) return;
+  if(!user.contains(e.target)){
+    dd.classList.remove('open');
+    user.classList.remove('open');
+  }
+});
 
 /** Retorna true se o role atual pode acessar o módulo */
 function canAccessModule(mod){
@@ -2479,13 +2698,20 @@ const WIP_MODULES = { preco: 'Preço de Venda em construção' };
 /** Configura módulos e abas visíveis por role (v2.5.0 Fase 4: desktop também mostra cadeado) */
 function setupTabs(role){
   window._userRole = role;
-  // Header pill 3D: marca .locked nos sem permissão (não esconde mais)
+  // Header pill 3D antigo: mantém por compat, mas escondido via CSS
   const modBtns = document.querySelectorAll('.hdr-modules .mod-btn');
   modBtns.forEach(b => {
     const mod = b.getAttribute('data-mod');
     if(canAccessModule(mod)) b.classList.remove('locked');
     else b.classList.add('locked');
     b.style.display = ''; // garante visível (limpa display:none legado)
+  });
+  // Sidenav (v2.8.0): mesma lógica de permissão
+  const snavBtns = document.querySelectorAll('.sidenav-item[data-mod]');
+  snavBtns.forEach(b => {
+    const mod = b.getAttribute('data-mod');
+    if(canAccessModule(mod)) b.classList.remove('locked');
+    else b.classList.add('locked');
   });
   // Mobile nav pill: mesma lógica
   const mnavBtns = document.querySelectorAll('#mnavPill .mnav-btn');
@@ -2550,10 +2776,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.7.4';
+const CURRENT_VERSION = '2.8.0';
 const CHANGELOG = [
   {
-    v:'2.7.4', d:'14 abr 2026', current:true,
+    v:'2.8.0', d:'14 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Shell redesenhado: sidebar + topbar com user dropdown.', desc:'Redesign de navegação inspirado em apps SaaS modernos. Sidebar estreita à esquerda com ícones dos 3 módulos (Gerencial, Produção, Preço) + divider + histórico de versões. Módulo ativo ganha barrinha verde lateral e highlight sutil. Topbar no topo mostra breadcrumb (módulo › aba ativa), botão de tema e bloco do usuário à direita (avatar + nome + role). Clicar no user abre dropdown com Minha conta, Tema, Histórico de versões e Sair. O header antigo com a pílula 3D de módulos foi aposentado no desktop.'},
+      {type:'high', title:'Profundidade visual em camadas (dark mode).', desc:'Novo token --bg-deep (#0D0E10) serve como camada mais escura do shell; o bg dos painéis fica destacado como um "card flutuante" dentro dele, com border-radius 18px e borda suave. Três níveis de cinza agora: bg-deep (wrapper) → bg (canvas principal) → surface (cards internos). Light mode fica neutro (bg-deep = bg).'},
+      {type:'note', title:'Mobile preservado.', desc:'No mobile (≤640px) a sidebar some, o shell perde borda/radius e a topbar fica slim com só o avatar à direita. A pílula flutuante estilo Nubank no rodapé (v2.5.0) continua sendo a nav primária em mobile. Dropdown do user vira bottom-sheet largo.'},
+      {type:'note', title:'Minha conta: em breve.', desc:'O item "Minha conta" do dropdown ainda está parcial — cadastro/edição de email e o fluxo de senha no login chegam na v2.8.1. Por enquanto, clicar na opção mostra um toast informativo.'}
+    ]
+  },
+  {
+    v:'2.7.4', d:'14 abr 2026',
     items:[
       {type:'feat', title:'Lançar mês agora navega entre meses.', desc:'O modal Lançar Mês do Stats Cor ganhou um seletor de mês com setas ‹ / › no header. Antes, o modal abria travado no último mês com dados e qualquer Salvar sobrescrevia — não dava pra criar um mês novo (abril, por exemplo). Agora ao abrir o modal, ele cai direto no primeiro mês SEM dados do ano atual (típico caso de uso: lançar o mês corrente). As setas navegam livremente pra qualquer mês de jan a dez. Um badge logo abaixo do nome do mês indica se é "Novo mês" (verde) ou "Atualizando dados existentes" (amarelo), pra ninguém sobrescrever dados sem querer.'},
       {type:'high', title:'Botão Lançar mês liberado pra Lucivane.', desc:'Antes só admin podia lançar. Agora quem tem acesso à aba Stats Cor (admin, Anderson, Aldo, Geovani, Lucivane) pode lançar/atualizar meses. A permissão da aba já filtra quem pode ver o botão — líderes de turno continuam sem acesso porque não veem a aba.'}
@@ -3536,11 +3771,15 @@ window.switchModule = (mod, btn) => {
     return;
   }
   window._activeModule = mod;
-  // Sincroniza ambas navs (header pill 3D + mobile nav pill)
-  document.querySelectorAll('.hdr-modules .mod-btn, #mnavPill .mnav-btn').forEach(b => b.classList.remove('active'));
+  // Sincroniza todas as navs (header pill 3D legacy + mobile nav pill + sidenav v2.8.0)
+  document.querySelectorAll('.hdr-modules .mod-btn, #mnavPill .mnav-btn, .sidenav-item[data-mod]').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('[data-mod="' + mod + '"]').forEach(b => {
-    if(b.closest('.hdr-modules') || b.closest('#mnavPill')) b.classList.add('active');
+    if(b.closest('.hdr-modules') || b.closest('#mnavPill') || b.closest('.sidenav')) b.classList.add('active');
   });
+  // v2.8.0: atualiza breadcrumb do módulo
+  const MOD_LBL = { resultados:'Gerencial', producao:'Produção', preco:'Preço de Venda' };
+  const crumbMod = document.getElementById('topbarCrumbMod');
+  if(crumbMod) crumbMod.textContent = MOD_LBL[mod] || mod;
   // Show correct tab group
   document.querySelectorAll('.tab-group').forEach(g => g.classList.remove('active'));
   const tg = document.getElementById('tg-' + mod);
@@ -3561,6 +3800,9 @@ window.switchTab = (tab, btn) => {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
+  // v2.8.0: atualiza breadcrumb do tab ativo
+  const crumbTab = document.getElementById('topbarCrumbTab');
+  if(crumbTab) crumbTab.textContent = (btn.dataset.short || btn.textContent || '').trim();
   if (tab === 'historico') renderHistorico();
   if (tab === 'producao') renderProducao();
   if (tab === 'cores') renderCores();
