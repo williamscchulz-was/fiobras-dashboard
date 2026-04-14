@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.7.1  14/04/2026  Mobile: fix cadeado + tabs fixas        ║
+  ║    • Cadeado sumia pra admin (CSS agora respeita .locked).   ║
+  ║    • Tabs secundárias em mobile: grid fixo, sem arrastar.    ║
+  ║    • Labels curtas via data-short pra caber em 5 abas.       ║
   ║  v2.7.0  14/04/2026  Timeline: múltiplas fotos HD + legendas ║
   ║    • Até 4 fotos por registro, cada uma com legenda própria. ║
   ║    • Qualidade: 1200px máx, JPEG 0.82 (~210KB/foto).         ║
@@ -853,15 +857,31 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
 @media(max-width:480px){
-  /* Wrapper com fade edges pra indicar scroll */
+  /* v2.7.0 fix: tabs fixas em mobile, distribuídas em grid — sem arrastar */
   .tabs{
     padding:0 12px;gap:0;
     top:calc(env(safe-area-inset-top,0px) + 44px);
     position:sticky;
-    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);
-            mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);
+    overflow:hidden;
+    -webkit-mask-image:none;mask-image:none;
   }
-  .tab-btn{padding:12px 14px;font-size:.64rem;letter-spacing:1px;white-space:nowrap;flex-shrink:0;min-height:44px;}
+  .tab-group.active{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(0,1fr));
+    gap:0;width:100%;
+  }
+  .tab-btn{
+    padding:12px 4px;font-size:.58rem;letter-spacing:.5px;
+    white-space:nowrap;min-width:0;min-height:44px;
+    text-align:center;overflow:hidden;text-overflow:ellipsis;
+  }
+  /* v2.7.0: em mobile, quando o botão tem data-short, mostra essa label mais curta */
+  .tab-btn[data-short]{font-size:0;}
+  .tab-btn[data-short]::after{
+    content:attr(data-short);
+    font-size:.62rem;font-weight:500;letter-spacing:.5px;
+    color:inherit;
+  }
 }
 
 /* ── Wrap / content padding ── */
@@ -1487,9 +1507,10 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     background:rgba(20,30,20,0.92);
     color:#fff;
     border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
+    display:none;align-items:center;justify-content:center;
     box-shadow:0 1px 3px rgba(0,0,0,0.3);
   }
+  .mnav-btn.locked .mnav-btn-lock{display:flex;}
   .mnav-btn-lock svg{width:7px;height:7px;display:block;}
   [data-theme="dark"] .mnav-btn-lock{background:rgba(245,245,247,0.92);color:#0d1510;}
 
@@ -1863,7 +1884,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="splash-sub">HUB</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version" id="splashVersion">v2.7.0</div>
+  <div class="splash-version" id="splashVersion">v2.7.1</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -1893,7 +1914,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1910,11 +1931,11 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     <button class="tab-btn" onclick="switchTab('historico',this)">Histórico</button>
   </div>
   <div class="tab-group" id="tg-producao">
-    <button class="tab-btn" onclick="switchTab('producao',this)">Produção</button>
-    <button class="tab-btn" onclick="switchTab('cores',this)">Desenv. Cor</button>
-    <button class="tab-btn" onclick="switchTab('apontamento',this)">Apontamento</button>
-    <button class="tab-btn" onclick="switchTab('timeline',this)">Timeline</button>
-    <button class="tab-btn tab-statscor" onclick="switchTab('statscor',this)">Stats Cor</button>
+    <button class="tab-btn" data-short="Produção" onclick="switchTab('producao',this)">Produção</button>
+    <button class="tab-btn" data-short="Cor" onclick="switchTab('cores',this)">Desenv. Cor</button>
+    <button class="tab-btn" data-short="Apont." onclick="switchTab('apontamento',this)">Apontamento</button>
+    <button class="tab-btn" data-short="Timeline" onclick="switchTab('timeline',this)">Timeline</button>
+    <button class="tab-btn tab-statscor" data-short="Stats" onclick="switchTab('statscor',this)">Stats Cor</button>
   </div>
 </div>
 <div class="panel active" id="panel-metas">
@@ -2507,10 +2528,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.7.0';
+const CURRENT_VERSION = '2.7.1';
 const CHANGELOG = [
   {
-    v:'2.7.0', d:'14 abr 2026', current:true,
+    v:'2.7.1', d:'14 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Cadeado aparecia pra todo mundo na pílula mobile.', desc:'O ícone de cadeado da pílula flutuante mobile estava com display:flex fixo no CSS — aparecia mesmo quando o botão NÃO estava com a classe .locked. Resultado: admin via cadeado em todos os 3 módulos. Corrigido: cadeado agora fica display:none por padrão e só aparece quando o botão tem .locked, igual o CSS do header desktop já fazia certo.'},
+      {type:'high', title:'Tabs secundárias ficam fixas em mobile.', desc:'As abas dentro dos módulos (Produção, Desenv. Cor, Apontamento, Timeline, Stats Cor) estavam com scroll horizontal — dava pra arrastar de lado. Em mobile isso é confuso e parece bug. Agora em ≤480px as abas viram grid com larguras iguais (repeat(auto-fit, minmax(0,1fr))) — ocupam toda a largura disponível, sem arrasto. Pra caber em 5 abas, cada botão mostra uma label curta (Cor / Apont. / Stats) via atributo data-short; no desktop segue mostrando o nome completo.'}
+    ]
+  },
+  {
+    v:'2.7.0', d:'14 abr 2026',
     items:[
       {type:'feat', title:'Timeline: múltiplas fotos com legenda por foto.', desc:'Agora cada registro da Timeline aceita até 4 fotos, e cada foto tem seu próprio campo de legenda opcional. No modal de edição, as fotos aparecem empilhadas numa lista — cada uma com sua thumb + textarea de legenda + botão de remover. Botão "Adicionar foto" abaixo da lista (desabilita quando atinge o limite de 4). No card do feed, a primeira foto aparece como thumb com um badge "+N" no canto quando há mais. Ao abrir o detalhe do registro, as fotos aparecem uma embaixo da outra, cada uma com sua legenda em itálico discreto logo abaixo.'},
       {type:'high', title:'Qualidade de foto 4× melhor.', desc:'Compressão reformulada: lado máximo subiu de 300px pra 1200px, qualidade JPEG inicial de 0.5 pra 0.82, e o algoritmo agora usa smoothing de alta qualidade no canvas. Cada foto fica em ~210KB (vs ~80KB antes) mas finalmente dá pra ver textura de tecido, mancha, variação de cor, detalhe fino. Com 4 fotos/registro o payload fica em ~840KB, folgado pro Firebase.'},
