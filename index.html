@@ -3,6 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.7.4  14/04/2026  Stats Cor: navegação de mês + Lucivane  ║
   ║  v2.7.3  14/04/2026  Fix: botão Lançar Mês (Stats Cor)       ║
   ║  v2.7.2  14/04/2026  Fix: texto da tab ativa sumia em mobile ║
   ║  v2.7.1  14/04/2026  Mobile: fix cadeado + tabs fixas        ║
@@ -1751,7 +1752,16 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   padding:22px 24px 14px;gap:12px;
 }
 .sc-lanc-title{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:var(--text);}
-.sc-lanc-sub{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted);margin-top:3px;letter-spacing:.3px;}
+.sc-lanc-nav{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.sc-lanc-nav-btn{width:28px;height:28px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0;transition:background .15s,border-color .15s;}
+.sc-lanc-nav-btn:hover{background:var(--border);border-color:var(--border2);}
+.sc-lanc-nav-btn:disabled{opacity:.35;cursor:not-allowed;}
+.sc-lanc-nav-btn svg{width:14px;height:14px;}
+.sc-lanc-nav-mes{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:600;color:var(--text);letter-spacing:.8px;text-transform:uppercase;min-width:130px;text-align:center;}
+.sc-lanc-badge{margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-family:'Poppins',sans-serif;font-size:.62rem;font-weight:500;letter-spacing:.3px;padding:3px 9px;border-radius:999px;}
+.sc-lanc-badge.novo{background:rgba(0,136,53,.12);color:var(--green);border:1px solid rgba(0,136,53,.25);}
+.sc-lanc-badge.existe{background:rgba(255,203,0,.12);color:#b88a00;border:1px solid rgba(255,203,0,.3);}
+[data-theme="dark"] .sc-lanc-badge.existe{color:#ffd545;}
 .sc-lanc-close{
   width:30px;height:30px;flex-shrink:0;
   background:var(--surface2);border:none;border-radius:50%;
@@ -1887,7 +1897,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="splash-sub">HUB</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version" id="splashVersion">v2.7.3</div>
+  <div class="splash-version" id="splashVersion">v2.7.4</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -1917,7 +1927,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.3</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.4</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2271,9 +2281,18 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="modal sc-lanc-modal">
     <div class="sc-lanc-handle"></div>
     <div class="sc-lanc-hdr">
-      <div>
+      <div style="flex:1;min-width:0;">
         <div class="sc-lanc-title">Lançar mês</div>
-        <div class="sc-lanc-sub" id="scLancSub">—</div>
+        <div class="sc-lanc-nav">
+          <button class="sc-lanc-nav-btn" onclick="scLancNavMes(-1)" aria-label="Mês anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="sc-lanc-nav-mes" id="scLancSub">—</div>
+          <button class="sc-lanc-nav-btn" onclick="scLancNavMes(1)" aria-label="Próximo mês">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="sc-lanc-badge" id="scLancBadge">—</div>
       </div>
       <button class="sc-lanc-close" onclick="fecharScLancamento()" aria-label="Fechar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2478,9 +2497,9 @@ function setupTabs(role){
   // Stats Cor: permissão por aba (v2.6.0) — esconde pra quem não tem acesso
   const scTabBtn = document.querySelector('.tab-btn.tab-statscor');
   if(scTabBtn) scTabBtn.style.display = canAccessTab('statscor') ? '' : 'none';
-  // Botão "Lançar mês" — só admin
+  // Botão "Lançar mês" — liberado pra todos que têm acesso à aba Stats Cor
   const scNewBtn = document.getElementById('scNewBtn');
-  if(scNewBtn) scNewBtn.style.display = (role === 'admin') ? '' : 'none';
+  if(scNewBtn) scNewBtn.style.display = canAccessTab('statscor') ? '' : 'none';
   if(role === 'producao'){
     // Produção users: abre direto em Produção
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -2531,10 +2550,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.7.3';
+const CURRENT_VERSION = '2.7.4';
 const CHANGELOG = [
   {
-    v:'2.7.3', d:'14 abr 2026', current:true,
+    v:'2.7.4', d:'14 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Lançar mês agora navega entre meses.', desc:'O modal Lançar Mês do Stats Cor ganhou um seletor de mês com setas ‹ / › no header. Antes, o modal abria travado no último mês com dados e qualquer Salvar sobrescrevia — não dava pra criar um mês novo (abril, por exemplo). Agora ao abrir o modal, ele cai direto no primeiro mês SEM dados do ano atual (típico caso de uso: lançar o mês corrente). As setas navegam livremente pra qualquer mês de jan a dez. Um badge logo abaixo do nome do mês indica se é "Novo mês" (verde) ou "Atualizando dados existentes" (amarelo), pra ninguém sobrescrever dados sem querer.'},
+      {type:'high', title:'Botão Lançar mês liberado pra Lucivane.', desc:'Antes só admin podia lançar. Agora quem tem acesso à aba Stats Cor (admin, Anderson, Aldo, Geovani, Lucivane) pode lançar/atualizar meses. A permissão da aba já filtra quem pode ver o botão — líderes de turno continuam sem acesso porque não veem a aba.'}
+    ]
+  },
+  {
+    v:'2.7.3', d:'14 abr 2026',
     items:[
       {type:'high', title:'Botão "Lançar mês" do Stats Cor não abria.', desc:'A função abrirScLancamento() estava adicionando a classe "show" no modal, mas o CSS do .modal-bg só responde à classe "open" (igual todos os outros modais do HUB). Incompatibilidade de classe — o modal até existia no DOM, só que o display:none do CSS nunca virava display:flex. Corrigido pra usar "open" na abertura e no fechamento.'}
     ]
@@ -5710,12 +5736,20 @@ function scRenderHistorico(){
   cont.innerHTML = html;
 }
 
-// ── Modal Lançar Mês (admin only) ──
+// ── Modal Lançar Mês ──
 window.abrirScLancamento = function(){
-  if((window._userRole || '') !== 'admin'){ toast('Apenas admin pode lançar','err'); return; }
-  scLancMesIdx = (scMesSel !== null) ? scMesSel : new Date().getMonth();
+  if(!canAccessTab('statscor')){ toast('Sem permissão','err'); return; }
+  // Default: abre no 1º mês SEM dados do ano atual (permite criar mês novo)
+  // Se todos têm dados, abre no mês atual
+  let mesInicial = null;
+  for(let m = 0; m < 12; m++){
+    if(!scMesTemDados(SC_ANO_ATUAL, m)){ mesInicial = m; break; }
+  }
+  if(mesInicial === null) mesInicial = new Date().getMonth();
+  scLancMesIdx = mesInicial;
   scLancFibAtiva = 'co';
-  document.getElementById('scLancSub').textContent = SC_MESES_FULL[scLancMesIdx] + ' ' + SC_ANO_ATUAL;
+  scLancInitBuffer();
+  scRenderLancHdr();
   scRenderLancBody();
   document.getElementById('scLancarModal').classList.add('open');
 };
@@ -5725,6 +5759,35 @@ window.scSetLancFib = function(fib){
   scLancFibAtiva = fib;
   scRenderLancBody();
 };
+
+// v2.7.4: navegação entre meses dentro do modal — permite criar meses novos
+window.scLancNavMes = function(delta){
+  scLancSalvarFormAtual();
+  const novo = scLancMesIdx + delta;
+  if(novo < 0 || novo > 11) return;
+  scLancMesIdx = novo;
+  scLancInitBuffer();
+  scRenderLancHdr();
+  scRenderLancBody();
+};
+
+function scRenderLancHdr(){
+  const sub = document.getElementById('scLancSub');
+  const badge = document.getElementById('scLancBadge');
+  if(sub) sub.textContent = SC_MESES_FULL[scLancMesIdx] + ' ' + SC_ANO_ATUAL;
+  if(badge){
+    const tem = scMesTemDados(SC_ANO_ATUAL, scLancMesIdx);
+    badge.textContent = tem ? 'Atualizando dados existentes' : 'Novo mês';
+    badge.className = 'sc-lanc-badge ' + (tem ? 'existe' : 'novo');
+  }
+  // Desabilita setas nos limites
+  const hdr = document.querySelector('.sc-lanc-nav');
+  if(hdr){
+    const btns = hdr.querySelectorAll('.sc-lanc-nav-btn');
+    if(btns[0]) btns[0].disabled = (scLancMesIdx <= 0);
+    if(btns[1]) btns[1].disabled = (scLancMesIdx >= 11);
+  }
+}
 
 // Cache em memória dos inputs do form (antes de salvar)
 let scLancBuffer = {}; // { co: {branco:.., ...}, pac: {...}, ... }
