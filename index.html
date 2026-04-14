@@ -1863,7 +1863,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="splash-sub">HUB</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version">v2.4.0</div>
+  <div class="splash-version" id="splashVersion">v2.7.0</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -2408,6 +2408,9 @@ function showSplash(nome, role){
   const sp=document.getElementById('splash');
   const bar=sp.querySelector('.splash-bar');
   document.getElementById('splashUser').textContent=nome;
+  // v2.7.0: versão dinâmica no splash (antes ficava hardcoded e esquecia de atualizar)
+  const svEl = document.getElementById('splashVersion');
+  if (svEl && typeof CURRENT_VERSION !== 'undefined') svEl.textContent = 'v' + CURRENT_VERSION;
   bar.style.animation='none';
   sp.classList.remove('hide');
   requestAnimationFrame(()=>{bar.style.animation='splashLoad 2.2s ease-in-out forwards';});
@@ -2511,7 +2514,8 @@ const CHANGELOG = [
     items:[
       {type:'feat', title:'Timeline: múltiplas fotos com legenda por foto.', desc:'Agora cada registro da Timeline aceita até 4 fotos, e cada foto tem seu próprio campo de legenda opcional. No modal de edição, as fotos aparecem empilhadas numa lista — cada uma com sua thumb + textarea de legenda + botão de remover. Botão "Adicionar foto" abaixo da lista (desabilita quando atinge o limite de 4). No card do feed, a primeira foto aparece como thumb com um badge "+N" no canto quando há mais. Ao abrir o detalhe do registro, as fotos aparecem uma embaixo da outra, cada uma com sua legenda em itálico discreto logo abaixo.'},
       {type:'high', title:'Qualidade de foto 4× melhor.', desc:'Compressão reformulada: lado máximo subiu de 300px pra 1200px, qualidade JPEG inicial de 0.5 pra 0.82, e o algoritmo agora usa smoothing de alta qualidade no canvas. Cada foto fica em ~210KB (vs ~80KB antes) mas finalmente dá pra ver textura de tecido, mancha, variação de cor, detalhe fino. Com 4 fotos/registro o payload fica em ~840KB, folgado pro Firebase.'},
-      {type:'note', title:'Schema novo com fallback pro legado.', desc:'Campo fotos:[{data,desc}] substitui foto:string. Registros antigos continuam funcionando — ao abrir, o código detecta foto (string) e converte pra [{data:foto,desc:""}] na leitura, e ao salvar já grava no schema novo. Zero migração destrutiva, zero perda de dados.'}
+      {type:'note', title:'Schema novo com fallback pro legado.', desc:'Campo fotos:[{data,desc}] substitui foto:string. Registros antigos continuam funcionando — ao abrir, o código detecta foto (string) e converte pra [{data:foto,desc:""}] na leitura, e ao salvar já grava no schema novo. Zero migração destrutiva, zero perda de dados.'},
+      {type:'note', title:'Splash: versão agora é dinâmica.', desc:'A versão no splash estava hardcoded em v2.4.0 desde abril e não atualizava junto com os bumps. Agora o splash lê direto do CURRENT_VERSION no JS, então todo bump futuro reflete automaticamente sem precisar editar o HTML do splash.'}
     ]
   },
   {
