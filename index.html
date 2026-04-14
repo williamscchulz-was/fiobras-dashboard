@@ -3,6 +3,7 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v2.7.3  14/04/2026  Fix: botão Lançar Mês (Stats Cor)       ║
   ║  v2.7.2  14/04/2026  Fix: texto da tab ativa sumia em mobile ║
   ║  v2.7.1  14/04/2026  Mobile: fix cadeado + tabs fixas        ║
   ║    • Cadeado sumia pra admin (CSS agora respeita .locked).   ║
@@ -1886,7 +1887,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   <div class="splash-sub">HUB</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
-  <div class="splash-version" id="splashVersion">v2.7.2</div>
+  <div class="splash-version" id="splashVersion">v2.7.3</div>
 </div>
 
 <!-- ── App principal ── -->
@@ -1916,7 +1917,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v2.7.3</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2530,10 +2531,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '2.7.2';
+const CURRENT_VERSION = '2.7.3';
 const CHANGELOG = [
   {
-    v:'2.7.2', d:'14 abr 2026', current:true,
+    v:'2.7.3', d:'14 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Botão "Lançar mês" do Stats Cor não abria.', desc:'A função abrirScLancamento() estava adicionando a classe "show" no modal, mas o CSS do .modal-bg só responde à classe "open" (igual todos os outros modais do HUB). Incompatibilidade de classe — o modal até existia no DOM, só que o display:none do CSS nunca virava display:flex. Corrigido pra usar "open" na abertura e no fechamento.'}
+    ]
+  },
+  {
+    v:'2.7.2', d:'14 abr 2026',
     items:[
       {type:'high', title:'Texto da aba ativa sumia em mobile.', desc:'Colisão de pseudo-elemento: o ::after já é usado pelo underline verde do .active (content:"") e na v2.7.1 eu reaproveitei o mesmo ::after pra renderizar a label curta (content:attr(data-short)). Quando a aba ficava ativa, o content:"" sobrescrevia o attr(data-short) e o texto sumia. Corrigido trocando a label curta pra ::before, que ninguém mais usa.'}
     ]
@@ -5710,9 +5717,9 @@ window.abrirScLancamento = function(){
   scLancFibAtiva = 'co';
   document.getElementById('scLancSub').textContent = SC_MESES_FULL[scLancMesIdx] + ' ' + SC_ANO_ATUAL;
   scRenderLancBody();
-  document.getElementById('scLancarModal').classList.add('show');
+  document.getElementById('scLancarModal').classList.add('open');
 };
-window.fecharScLancamento = function(){ document.getElementById('scLancarModal').classList.remove('show'); };
+window.fecharScLancamento = function(){ document.getElementById('scLancarModal').classList.remove('open'); };
 window.scSetLancFib = function(fib){
   scLancSalvarFormAtual();
   scLancFibAtiva = fib;
