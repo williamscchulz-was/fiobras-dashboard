@@ -575,6 +575,29 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
 </style>
 </head>
 <body>
+<!-- Overrides pra rodar dentro do HUB: esconde chrome duplicado (header, footer, mobile nav) -->
+<style>
+  /* Header interno do price é redundante com topbar do HUB */
+  .header, #appHeader { display: none !important; }
+  /* Footer do price não cabe dentro do iframe */
+  .footer, #appFooter { display: none !important; }
+  /* Mobile nav do price: HUB tem a própria pílula flutuante */
+  .mob-overlay, .mob-dropdown, .mob-nav-trigger { display: none !important; }
+  /* Tabs grudam no topo do iframe (sem header acima) */
+  .tabs, #appTabs { top: 0 !important; }
+  /* Em mobile, tabs viram scroll horizontal (substitui o dropdown removido) */
+  @media(max-width:700px){
+    .tabs, #appTabs {
+      display: flex !important;
+      overflow-x: auto !important;
+      scrollbar-width: none;
+      padding: 0 12px !important;
+      gap: 2px;
+    }
+    .tabs::-webkit-scrollbar, #appTabs::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 12px 14px !important; font-size: .62rem !important; flex-shrink: 0; }
+  }
+</style>
 <!-- Stubs pra não quebrar JS do price que referencia esses IDs -->
 <div id="splash" style="display:none"></div>
 <div id="loginScreen" style="display:none"></div>

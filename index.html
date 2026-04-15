@@ -3,6 +3,12 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.2.0  15/04/2026  Preço: shell interno removido (UX)      ║
+  ║    • Header verde duplicado com topbar do HUB: removido.     ║
+  ║    • Toggle tema + logout internos removidos (só no HUB).    ║
+  ║    • Footer removido dentro do iframe.                       ║
+  ║    • Mobile: tabs viram scroll horizontal (sem dropdown).    ║
+  ║    • Cache-buster: iframe.src = preco/?v=CURRENT_VERSION.    ║
   ║  v3.1.2  15/04/2026  Fix Preço: bootstrap nunca injetado     ║
   ║    • v3.1.1 tinha bug no script Python: bootstrap era        ║
   ║      substituído em string sem </body>, então nunca          ║
@@ -250,7 +256,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.1.0">
+<link rel="stylesheet" href="css/hub.css?v=3.2.0">
 </head>
 <body>
 
@@ -415,7 +421,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.1.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.2.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1432,10 +1438,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.1.2';
+const CURRENT_VERSION = '3.2.0';
 const CHANGELOG = [
   {
-    v:'3.1.2', d:'15 abr 2026', current:true,
+    v:'3.2.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Preço: shell interno removido, conteúdo encosta no topo.', desc:'O sub-app do Preço chegou na v3.1.x com todo o chrome do app standalone — header verde com "Fiobras · Formação de Preço · v3.4.0 · tema · logout" e um footer com copyright. Isso duplicava uma parte (topbar do HUB já mostra o breadcrumb e controles) e roubava ~70px verticais no topo pra nada. Agora o iframe aplica um <style> de override que esconde .header, .footer, .mob-overlay e .mob-dropdown, e grud a barra de abas (Vendas, Tingimento, etc.) direto no topo do iframe. Mais espaço útil, menos ruído visual, shell único do HUB por fora.'},
+      {type:'high', title:'Tema e logout só no HUB.', desc:'O toggle de tema e o botão de logout agora existem em um lugar só — o dropdown de user do HUB. Antes tinha toggle duplicado dentro do iframe que só mudava o iframe, criando dessincronia. A lógica de postMessage já propagava o tema do HUB pro iframe; ao tirar o toggle interno, eliminamos a fonte conflitante.'},
+      {type:'high', title:'Mobile: tabs do preço viram scroll horizontal.', desc:'O price tinha um dropdown hamburger pra navegação mobile, também parte do header verde. Com o header fora, as 6 abas internas aparecem como barra horizontal rolável em mobile (padrão que o HUB já usa no seu próprio tabs bar). Uma forma só de navegar dentro do sistema, consistente com o resto do HUB.'},
+      {type:'note', title:'Cache-buster na src do iframe.', desc:'iframe.src agora vem com ?v=CURRENT_VERSION no final. A cada bump o browser é forçado a baixar a versão nova do sub-app — resolve o problema de usuários ficarem com versão antiga cacheada quando a gente corrige algo dentro do /preco/. Mesma técnica do <link href="css/hub.css?v=..."> que usamos antes. Vai valer pra CRM e Manutenção também.'}
+    ]
+  },
+  {
+    v:'3.1.2', d:'15 abr 2026',
     items:[
       {type:'high', title:'Preço continuou com tela preta na v3.1.1.', desc:'A correção anterior não subiu porque meu script Python tinha um bug sutil: tentei dar replace do </body> por bootstrap+</body>, mas no intermediário o </body> tinha sido REMOVIDO da string (capturei numa variável mas não incluí na concatenação). Resultado: preco/index.html saiu sem </body> e sem o bootstrap. Corrigi manualmente agora — script de bootstrap injetado direto antes do </html>, revela appHeader/appTabs, chama showApp() numa trycatch, e se algo falhar força a ativação da primeira tab (Vendas). Também adicionei stubs ocultos de appFooter/mob-overlay/mob-dropdown pra silenciar null errors do código legado do price.'}
     ]
@@ -2550,9 +2565,10 @@ window.switchTab = (tab, btn) => {
   if (tab === 'timeline') renderTimeline();
   if (tab === 'statscor') renderStatsCor();
   // v3.1.0: lazy-load de sub-apps em iframe (preço, crm, manutenção)
-  if (tab === 'preco')     loadSubApp('precoFrame', 'preco/');
-  if (tab === 'crm')       loadSubApp('crmFrame', 'crm/');
-  if (tab === 'manutencao')loadSubApp('manutencaoFrame', 'manutencao/');
+  // v3.1.3: cache-buster com CURRENT_VERSION pra evitar browser segurar versão antiga
+  if (tab === 'preco')     loadSubApp('precoFrame', 'preco/?v=' + CURRENT_VERSION);
+  if (tab === 'crm')       loadSubApp('crmFrame', 'crm/?v=' + CURRENT_VERSION);
+  if (tab === 'manutencao')loadSubApp('manutencaoFrame', 'manutencao/?v=' + CURRENT_VERSION);
 };
 
 // Carrega o iframe só no primeiro acesso, depois mantém montado
