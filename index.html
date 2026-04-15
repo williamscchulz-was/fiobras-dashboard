@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.2.1  15/04/2026  Breadcrumb HUB › Módulo + tabs limpos   ║
+  ║    • Breadcrumb padronizado: "HUB › [módulo]".               ║
+  ║    • Iframe modules (Preço/CRM/Manut.) escondem tab-bar.     ║
+  ║    • Gerencial/Produção mantêm tab-bar (múltiplas abas).     ║
   ║  v3.2.0  15/04/2026  Preço: shell interno removido (UX)      ║
   ║    • Header verde duplicado com topbar do HUB: removido.     ║
   ║    • Toggle tema + logout internos removidos (só no HUB).    ║
@@ -421,7 +425,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.2.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.2.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1396,16 +1400,14 @@ function setupTabs(role){
   updateCrumbFromState();
 }
 
-/** Lê o estado atual (módulo+tab ativos) e atualiza o breadcrumb */
+/** Lê o estado atual e atualiza o breadcrumb no padrão HUB › Módulo (v3.2.1) */
 function updateCrumbFromState(){
   const MOD_LBL = { resultados:'Gerencial', producao:'Produção', preco:'Preço de Venda', manutencao:'Manutenção', crm:'CRM' };
   const mod = window._activeModule || 'resultados';
   const crumbMod = document.getElementById('topbarCrumbMod');
-  if(crumbMod) crumbMod.textContent = MOD_LBL[mod] || mod;
-  const activeTg = document.querySelector('.tab-group.active');
-  const activeTab = activeTg?.querySelector('.tab-btn.active');
+  if(crumbMod) crumbMod.textContent = 'HUB';
   const crumbTab = document.getElementById('topbarCrumbTab');
-  if(crumbTab) crumbTab.textContent = (activeTab?.dataset.short || activeTab?.textContent || '').trim() || '—';
+  if(crumbTab) crumbTab.textContent = MOD_LBL[mod] || mod;
 }
 
 function checkAuth(){
@@ -1438,10 +1440,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.2.0';
+const CURRENT_VERSION = '3.2.1';
 const CHANGELOG = [
   {
-    v:'3.2.0', d:'15 abr 2026', current:true,
+    v:'3.2.1', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Breadcrumb padronizado: HUB › Módulo.', desc:'Antes o crumb mostrava "Módulo › Aba" (ex: "Preço de Venda › Preço", "Produção › Cor"). Agora mostra "HUB › Módulo" sempre — mais simples, mais limpo e mais consistente com apps tipo Nubank/SaaS modernos. Abas ativas continuam visíveis via underline verde no tab-bar pra quem está em Gerencial ou Produção. O "HUB" na esquerda fica muted e o nome do módulo na direita é o destaque.'},
+      {type:'high', title:'Iframe-modules escondem tab-bar.', desc:'Preço, CRM e Manutenção são módulos que vivem dentro de iframes e têm sua navegação interna própria. A barra de "1 tab só" (Formação de Preço / CRM / Manutenção) que o HUB exibia por cima era redundância pura e consumia ~40px verticais. Agora o switchModule detecta esses módulos e esconde o tab-bar do HUB por inteiro; pra Gerencial e Produção o tab-bar continua aparecendo normal porque tem múltiplas abas úteis (2026/Histórico, Produção/Cor/Apontamento/Timeline/Stats).'},
+      {type:'note', title:'Lazy-load migrou pro switchModule.', desc:'Antes o carregamento do iframe rodava dentro do switchTab (porque cada módulo iframe tinha uma "tab" com mesmo nome). Agora que o tab-bar some pra esses módulos, o lazy-load e cache-buster (?v=CURRENT_VERSION) rodam direto do switchModule quando detecta um iframe-module.'}
+    ]
+  },
+  {
+    v:'3.2.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Preço: shell interno removido, conteúdo encosta no topo.', desc:'O sub-app do Preço chegou na v3.1.x com todo o chrome do app standalone — header verde com "Fiobras · Formação de Preço · v3.4.0 · tema · logout" e um footer com copyright. Isso duplicava uma parte (topbar do HUB já mostra o breadcrumb e controles) e roubava ~70px verticais no topo pra nada. Agora o iframe aplica um <style> de override que esconde .header, .footer, .mob-overlay e .mob-dropdown, e grud a barra de abas (Vendas, Tingimento, etc.) direto no topo do iframe. Mais espaço útil, menos ruído visual, shell único do HUB por fora.'},
       {type:'high', title:'Tema e logout só no HUB.', desc:'O toggle de tema e o botão de logout agora existem em um lugar só — o dropdown de user do HUB. Antes tinha toggle duplicado dentro do iframe que só mudava o iframe, criando dessincronia. A lógica de postMessage já propagava o tema do HUB pro iframe; ao tirar o toggle interno, eliminamos a fonte conflitante.'},
@@ -2531,17 +2541,30 @@ window.switchModule = (mod, btn) => {
   document.querySelectorAll('[data-mod="' + mod + '"]').forEach(b => {
     if(b.closest('.hdr-modules') || b.closest('#mnavPill') || b.closest('.sidenav')) b.classList.add('active');
   });
-  // v2.8.0: atualiza breadcrumb do módulo
+  // v3.2.1: breadcrumb no padrão HUB › Módulo
   const MOD_LBL = { resultados:'Gerencial', producao:'Produção', preco:'Preço de Venda', manutencao:'Manutenção', crm:'CRM' };
   const crumbMod = document.getElementById('topbarCrumbMod');
-  if(crumbMod) crumbMod.textContent = MOD_LBL[mod] || mod;
-  // Show correct tab group
+  const crumbTab = document.getElementById('topbarCrumbTab');
+  if(crumbMod) crumbMod.textContent = 'HUB';
+  if(crumbTab) crumbTab.textContent = MOD_LBL[mod] || mod;
+  // v3.2.1: iframe-based modules (preço, crm, manutenção) não têm tab-bar —
+  // apenas 1 "tab" redundante. Escondemos .tabs e ativamos o panel direto.
+  const IFRAME_FRAMES = { preco:['precoFrame','preco/'], crm:['crmFrame','crm/'], manutencao:['manutencaoFrame','manutencao/'] };
+  const tabsBar = document.getElementById('tabsBar');
   document.querySelectorAll('.tab-group').forEach(g => g.classList.remove('active'));
-  const tg = document.getElementById('tg-' + mod);
-  if (tg) tg.classList.add('active');
-  // Activate first tab of the group
-  const firstBtn = tg?.querySelector('.tab-btn');
-  if (firstBtn) firstBtn.click();
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  if(IFRAME_FRAMES[mod]){
+    if(tabsBar) tabsBar.style.display = 'none';
+    document.getElementById('panel-' + mod)?.classList.add('active');
+    const [frameId, path] = IFRAME_FRAMES[mod];
+    loadSubApp(frameId, path + '?v=' + CURRENT_VERSION);
+  } else {
+    if(tabsBar) tabsBar.style.display = '';
+    const tg = document.getElementById('tg-' + mod);
+    if (tg) tg.classList.add('active');
+    const firstBtn = tg?.querySelector('.tab-btn');
+    if (firstBtn) firstBtn.click();
+  }
 };
 
 /** Wrapper legado da pílula mobile — switchModule já trata WIP e permissão */
@@ -2555,20 +2578,13 @@ window.switchTab = (tab, btn) => {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
-  // v2.8.0: atualiza breadcrumb do tab ativo
-  const crumbTab = document.getElementById('topbarCrumbTab');
-  if(crumbTab) crumbTab.textContent = (btn.dataset.short || btn.textContent || '').trim();
+  // v3.2.1: breadcrumb fixo em "HUB › Módulo" — tab ativa é vista no tab-bar
   if (tab === 'historico') renderHistorico();
   if (tab === 'producao') renderProducao();
   if (tab === 'cores') renderCores();
   if (tab === 'apontamento') renderApontamento();
   if (tab === 'timeline') renderTimeline();
   if (tab === 'statscor') renderStatsCor();
-  // v3.1.0: lazy-load de sub-apps em iframe (preço, crm, manutenção)
-  // v3.1.3: cache-buster com CURRENT_VERSION pra evitar browser segurar versão antiga
-  if (tab === 'preco')     loadSubApp('precoFrame', 'preco/?v=' + CURRENT_VERSION);
-  if (tab === 'crm')       loadSubApp('crmFrame', 'crm/?v=' + CURRENT_VERSION);
-  if (tab === 'manutencao')loadSubApp('manutencaoFrame', 'manutencao/?v=' + CURRENT_VERSION);
 };
 
 // Carrega o iframe só no primeiro acesso, depois mantém montado
