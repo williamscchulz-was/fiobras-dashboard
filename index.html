@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.3.0  15/04/2026  Timeline: filtro por tag + contador     ║
+  ║    • Barra de pílulas acima do feed (toggle por tag).        ║
+  ║    • Contador de registros ao lado do título.                ║
+  ║    • Empty state específico pra filtro ativo.                ║
   ║  v3.2.1  15/04/2026  Breadcrumb HUB › Módulo + tabs limpos   ║
   ║    • Breadcrumb padronizado: "HUB › [módulo]".               ║
   ║    • Iframe modules (Preço/CRM/Manut.) escondem tab-bar.     ║
@@ -260,7 +264,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.2.0">
+<link rel="stylesheet" href="css/hub.css?v=3.3.0">
 </head>
 <body>
 
@@ -425,7 +429,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.2.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.3.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -691,15 +695,18 @@
 <!-- ── Aba Timeline ── -->
 <div class="panel" id="panel-timeline">
 <div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
     <div style="display:flex;align-items:center;gap:12px;">
       <h2 style="font-size:.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted2);margin:0;">Timeline</h2>
+      <span class="tl-count" id="tlCountBadge">—</span>
       <div style="flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);min-width:40px;"></div>
     </div>
     <button class="tl-fab" onclick="abrirTlModal()" aria-label="Novo registro" style="width:44px;height:44px;border-radius:50%;background:#008835;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,136,53,.3);flex-shrink:0;">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
   </div>
+  <!-- v3.3.0: Filtro por tag -->
+  <div class="tl-filter-bar" id="tlFilterBar"></div>
   <div id="tlFeed">
     <div style="text-align:center;padding:48px 20px;color:var(--muted2);">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1440,10 +1447,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.2.1';
+const CURRENT_VERSION = '3.3.0';
 const CHANGELOG = [
   {
-    v:'3.2.1', d:'15 abr 2026', current:true,
+    v:'3.3.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Timeline: filtro por tag.', desc:'Agora acima do feed da Timeline aparece uma barra de pílulas (Todas / Desenvolvimento / Problemas / Melhorias / +custom). Tap na pílula filtra o feed pra mostrar só registros daquela tag. Tap de novo na mesma pílula volta pra "Todas". As pílulas mostram a cor da tag quando ativas e um contador de registros embutido. Tags sem registro são escondidas automaticamente pra não poluir.'},
+      {type:'high', title:'Contador de registros ao lado do título.', desc:'Quando a Timeline está sem filtro, aparece "12 registros" (ou "1 registro") ao lado do título. Quando filtrado, mostra "3 de 12" — fica claro quantos registros batem com a tag ativa vs o total. Ajuda a navegar quando a base crescer.'},
+      {type:'note', title:'Empty state específico pra filtro.', desc:'Se aplica um filtro e não bate nada, a mensagem vazia muda pra "Nenhum registro com essa tag · Tente outra tag ou toque em Todas" em vez do genérico. Sutileza mas guia o usuário pra voltar ao estado completo.'}
+    ]
+  },
+  {
+    v:'3.2.1', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Breadcrumb padronizado: HUB › Módulo.', desc:'Antes o crumb mostrava "Módulo › Aba" (ex: "Preço de Venda › Preço", "Produção › Cor"). Agora mostra "HUB › Módulo" sempre — mais simples, mais limpo e mais consistente com apps tipo Nubank/SaaS modernos. Abas ativas continuam visíveis via underline verde no tab-bar pra quem está em Gerencial ou Produção. O "HUB" na esquerda fica muted e o nome do módulo na direita é o destaque.'},
       {type:'high', title:'Iframe-modules escondem tab-bar.', desc:'Preço, CRM e Manutenção são módulos que vivem dentro de iframes e têm sua navegação interna própria. A barra de "1 tab só" (Formação de Preço / CRM / Manutenção) que o HUB exibia por cima era redundância pura e consumia ~40px verticais. Agora o switchModule detecta esses módulos e esconde o tab-bar do HUB por inteiro; pra Gerencial e Produção o tab-bar continua aparecendo normal porque tem múltiplas abas úteis (2026/Histórico, Produção/Cor/Apontamento/Timeline/Stats).'},
@@ -4615,19 +4630,79 @@ function tlFormatTime(iso) {
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
+// v3.3.0: Filtro por tag ─────────────────────────────────────────────────
+let tlFilterTag = null; // null = todas
+
+window.tlSetFilterTag = function(tagId){
+  tlFilterTag = (tlFilterTag === tagId) ? null : tagId; // toggle: clicar ativa, clicar de novo volta pra "todas"
+  if(tagId === '__all__') tlFilterTag = null;
+  tlRenderFilterBar();
+  renderTimeline();
+};
+
+function tlRenderFilterBar(){
+  const host = document.getElementById('tlFilterBar');
+  if(!host) return;
+  const tags = tlAllTags();
+  const esc = s => String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Conta registros por tag
+  const counts = { __all__: 0 };
+  Object.values(tlDados).forEach(evt => {
+    counts.__all__++;
+    const t = evt.tag || '__notag__';
+    counts[t] = (counts[t] || 0) + 1;
+  });
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const bgA = isDark ? 0.22 : 0.13;
+  const entries = Object.entries(tags).sort((a,b)=>{
+    const sa = a[1].sistema ? 0 : 1;
+    const sb = b[1].sistema ? 0 : 1;
+    if(sa !== sb) return sa - sb;
+    return (a[1].nome||'').localeCompare(b[1].nome||'');
+  });
+  // Pílula "Todas"
+  let html = '<button type="button" class="tl-filter-pill all ' + (tlFilterTag===null?'active':'') + '" onclick="tlSetFilterTag(\'__all__\')">Todas <span style="opacity:.6;font-weight:400">· ' + (counts.__all__||0) + '</span></button>';
+  // Uma pílula por tag
+  html += entries.map(([id, t])=>{
+    const count = counts[id] || 0;
+    if(count === 0) return ''; // só mostra tags com ao menos 1 registro
+    const col = TL_TAG_COLORS[t.cor] || TL_TAG_COLORS.cinza;
+    const active = (tlFilterTag === id);
+    const style = active
+      ? 'background:' + tlTagHexToRGBA(col, bgA) + ';border-color:' + col + ';color:' + col + ';'
+      : 'color:var(--muted);';
+    return '<button type="button" class="tl-filter-pill ' + (active?'active':'') + '" style="' + style + '" onclick="tlSetFilterTag(\'' + id + '\')">' + esc(t.nome) + ' <span style="opacity:.7;font-weight:400">· ' + count + '</span></button>';
+  }).filter(Boolean).join('');
+  host.innerHTML = html;
+}
+
 /** Renderiza o feed da timeline */
 function renderTimeline() {
   const feed = document.getElementById('tlFeed');
-  const entries = Object.entries(tlDados).sort((a, b) => {
+  // v3.3.0: barra de filtros + contador no título
+  tlRenderFilterBar();
+  const allEntries = Object.entries(tlDados).sort((a, b) => {
     return new Date(b[1].criadoEm) - new Date(a[1].criadoEm);
   });
+  const entries = tlFilterTag ? allEntries.filter(([id, evt]) => evt.tag === tlFilterTag) : allEntries;
+  // Atualiza contador
+  const countEl = document.getElementById('tlCountBadge');
+  if(countEl){
+    if(tlFilterTag){
+      countEl.textContent = entries.length + ' de ' + allEntries.length;
+    } else {
+      countEl.textContent = allEntries.length + (allEntries.length === 1 ? ' registro' : ' registros');
+    }
+  }
 
   if (entries.length === 0) {
     feed.className = '';
+    const msg = tlFilterTag ? 'Nenhum registro com essa tag' : 'Nenhum registro';
+    const sub = tlFilterTag ? 'Tente outra tag ou toque em Todas' : 'Toque no + para adicionar o primeiro';
     feed.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--muted2);">' +
       '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-      '<div style="font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:4px">Nenhum registro</div>' +
-      '<div style="font-size:.68rem;color:var(--muted2)">Toque no + para adicionar o primeiro</div></div>';
+      '<div style="font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:4px">' + msg + '</div>' +
+      '<div style="font-size:.68rem;color:var(--muted2)">' + sub + '</div></div>';
     return;
   }
 
