@@ -575,42 +575,40 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
 </style>
 </head>
 <body>
+<!-- Stubs pra não quebrar JS do price que referencia esses IDs -->
+<div id="splash" style="display:none"></div>
+<div id="loginScreen" style="display:none"></div>
 <!-- HUB integration: session + theme sync -->
 <div id="noSessionGate" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:20px;text-align:center;font-family:Poppins,sans-serif;">
   <div style="font-size:1.1rem;font-weight:700;color:var(--text)">Acesso pelo HUB</div>
   <div style="font-size:.85rem;color:var(--muted);max-width:380px">Este módulo precisa ser aberto pelo Fiobras HUB. Faça login no HUB e selecione Preço de Venda na barra lateral.</div>
   <a href="../" style="margin-top:10px;padding:10px 22px;background:#008835;color:#fff;border-radius:8px;text-decoration:none;font-size:.75rem;font-weight:600">Abrir HUB</a>
 </div>
-<div class="toast" id="toast"></div>
 <script>
-// v3.1.0: sincronização com HUB
+// v3.1.1: integração com HUB (tema + sessão + bootstrap)
 (function hubIntegration(){
-  // 1) Tema inicial
   try {
     const t = localStorage.getItem('fiobras-dash-theme');
     document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
   } catch(e){}
-  // 2) Listener pra trocas de tema vindas do HUB
   window.addEventListener('message', (e) => {
     if(e.data && e.data.type === 'fiobras-theme'){
       document.documentElement.setAttribute('data-theme', e.data.theme);
     }
   });
-  // 3) Gate de sessão — só abre se for admin (o módulo é admin-only)
   let sess = null;
   try { sess = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null'); } catch(e){}
   if(!sess || sess.user !== 'admin'){
     document.getElementById('noSessionGate').style.display = 'flex';
-    return;
+    window.__hubBlocked = true;
+  } else {
+    window.__hubSession = sess;
   }
-  // Expõe o user pra lógica interna (o price usa currentUser em seu próprio escopo;
-  // se ele redeclarar, OK — isto só garante que a sessão do HUB é conhecida).
-  window.__hubSession = sess;
 })();
 </script>
 
 
-
+<div class="toast" id="toast"></div>
 
 <!-- SPLASH SCREEN -->
 
@@ -618,12 +616,44 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
 <!-- LOGIN SCREEN -->
 
 
+<div class="header" id="appHeader" style="display:none">
+  <div class="header-left">
+    <span class="header-brand">Fiobras</span>
+    <span class="header-system">Formação de Preço</span>
+    <button class="mob-nav-trigger" id="mob-nav-trigger" onclick="toggleMobNav()">
+      <span id="mob-nav-label">Vendas</span>
+      <span class="chevron">▾</span>
+    </button>
+  </div>
+  <div class="header-right">
+    <div class="version-badge" id="app-version">v3.4.0</div>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+      <span class="toggle-icon" id="toggle-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg></span>
+    </button>
+    <button class="logoff-btn" onclick="logoff()" title="Sair">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</div>
 
+<div class="tabs" id="appTabs" style="display:none">
+  <button class="tab-btn active" onclick="switchTab('vendas',this)">Vendas</button>
+  <button class="tab-btn" onclick="switchTab('tingimento',this)">Tingimento</button>
+  <button class="tab-btn" onclick="switchTab('preparacao',this)">Preparação / Repasse</button>
+  <button class="tab-btn" onclick="switchTab('retorcao',this)">Retorção</button>
+  <button class="tab-btn" onclick="switchTab('custos',this)">Custos</button>
+  <button class="tab-btn" onclick="switchTab('historico',this)">Histórico</button>
+</div>
 
-
-
-
-
+<div class="mob-overlay" id="mob-overlay" onclick="closeMobNav()"></div>
+<div class="mob-dropdown" id="mob-dropdown">
+  <button class="active" onclick="switchTabMob('vendas')">Vendas</button>
+  <button onclick="switchTabMob('tingimento')">Tingimento</button>
+  <button onclick="switchTabMob('preparacao')">Preparação / Repasse</button>
+  <button onclick="switchTabMob('retorcao')">Retorção</button>
+  <button onclick="switchTabMob('custos')">Custos</button>
+  <button onclick="switchTabMob('historico')">Histórico</button>
+</div>
 
 <!-- ===== RETORÇÃO ===== -->
 <div class="panel" id="panel-retorcao">
@@ -1287,18 +1317,13 @@ function salvarCustoHora(val){const btn=document.getElementById('r-saveHora');co
 window.addEventListener('DOMContentLoaded',()=>{const vEl=document.getElementById('app-version');if(vEl)vEl.textContent=APP_VERSION;const svEl=document.getElementById('splash-version');if(svEl)svEl.textContent=APP_VERSION;populaTipos();populaTingTipos();calcVendas();calcTingimento();calcRetorcao();calcPreparacao();});
 </script>
 
+<footer class="footer" id="appFooter" style="display:none">
+  <div class="footer-left">
+    <span class="footer-brand">Fiobras</span>
+    <span class="footer-sep">|</span>
+    <span class="footer-sub">Formação de Preço · Sistema Interno</span>
+  </div>
+  <div class="footer-copy">© 2026 FIOBRAS FIOS TINTOS LTDA.</div>
+</footer>
 
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    const s = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null');
-    if(s && s.user === 'admin' && typeof showApp === 'function'){
-      // Price's showApp expects a name argument
-      showApp('Admin');
-    }
-  } catch(e) { console.warn('preço bootstrap:', e); }
-});
-</script>
-</body>
 </html>

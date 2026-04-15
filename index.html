@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.1.1  15/04/2026  Fix Preço: tela preta (tabs stripadas)  ║
+  ║    • Preservadas appHeader/appTabs internas do price.        ║
+  ║    • Bootstrap chama showApp('Admin') em DOMContentLoaded.   ║
+  ║    • Stubs ocultos de splash/loginScreen pra JS legado.      ║
   ║  v3.1.0  15/04/2026  Preço de Venda integrado via /preco/    ║
   ║    • Sub-app em /preco/index.html embutido via iframe.       ║
   ║    • Sessão + tema sincronizados com o HUB.                  ║
@@ -407,7 +411,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.1.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.1.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1424,10 +1428,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.1.0';
+const CURRENT_VERSION = '3.1.1';
 const CHANGELOG = [
   {
-    v:'3.1.0', d:'15 abr 2026', current:true,
+    v:'3.1.1', d:'15 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Preço de Venda abria como tela preta.', desc:'Na v3.1.0 eu tinha stripado aggressivamente o body do /preco/index.html — removi splash, login, appHeader E appTabs. O problema: sem appTabs, as 6 sub-abas (Vendas, Tingimento, etc.) deixavam de existir, e como os panels são hidden por default e só ativam via switchTab, tudo ficava invisível = tela preta. Agora o strip preserva appHeader e appTabs (o shell interno do price), e removo só o splash (chato no iframe) e a tela de login (substituída pelo gate de sessão do HUB). Adicionei stubs ocultos pros IDs splash/loginScreen pra não quebrar código legado que checa esses elementos. O bootstrap no DOMContentLoaded chama showApp("Admin") — o próprio fluxo original do price que revela o header+tabs e ativa a primeira aba.'}
+    ]
+  },
+  {
+    v:'3.1.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Preço de Venda ativo dentro do HUB.', desc:'O sistema de Formação de Preço (antes WIP) agora vive em /preco/index.html e é carregado via iframe dentro do panel-preco do HUB. Todas as 6 abas internas (Vendas, Tingimento, Preparação/Repasse, Retorção, Custos, Histórico) funcionam como o app standalone original, mas agora dentro do shell unificado — sidebar, topbar e user dropdown do HUB continuam visíveis por fora.'},
       {type:'high', title:'Sessão e tema sincronizados automaticamente.', desc:'O sub-app lê a sessão do HUB via localStorage (fiobras-dash-auth) — quem não é admin cai numa tela "Abrir pelo HUB" com link pra raiz, mantendo a permissão admin-only do módulo. Tema é propagado via postMessage quando o toggle é clicado no HUB; o iframe aplica data-theme sem reload. No primeiro load do iframe, tema também é enviado via evento load.'},
