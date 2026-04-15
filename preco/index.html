@@ -578,6 +578,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
 <!-- Stubs pra não quebrar JS do price que referencia esses IDs -->
 <div id="splash" style="display:none"></div>
 <div id="loginScreen" style="display:none"></div>
+<div id="appFooter" style="display:none"></div>
+<div id="mob-overlay" style="display:none"></div>
+<div id="mob-dropdown" style="display:none"></div>
 <!-- HUB integration: session + theme sync -->
 <div id="noSessionGate" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:20px;text-align:center;font-family:Poppins,sans-serif;">
   <div style="font-size:1.1rem;font-weight:700;color:var(--text)">Acesso pelo HUB</div>
@@ -1326,4 +1329,33 @@ window.addEventListener('DOMContentLoaded',()=>{const vEl=document.getElementByI
   <div class="footer-copy">© 2026 FIOBRAS FIOS TINTOS LTDA.</div>
 </footer>
 
+<script>
+// v3.1.2: bootstrap do sub-app dentro do HUB.
+// showApp() do price referencia appFooter/appHeader/appTabs e depois
+// chama switchTab('vendas'). Qualquer null breaka a cadeia e deixa
+// tudo invisível. Aqui faço a revelação manualmente + fallback pra tab ativa.
+function __hubBootPreco(){
+  if(window.__hubBlocked) return;
+  const show = (id) => { const el = document.getElementById(id); if(el) el.style.display = ''; };
+  show('appHeader');
+  show('appTabs');
+  // Esconde o footer duplicado (nosso stub vs real) — o real fica escondido
+  // porque o layout do HUB não precisa dele
+  try { if(typeof showApp === 'function') showApp(); }
+  catch(e){ console.warn('[preco] showApp parcial:', e && e.message); }
+  // Garante que algum panel fique ativo
+  try {
+    if(!document.querySelector('.panel.active')){
+      const firstTab = document.querySelector('#appTabs .tab-btn');
+      if(firstTab && typeof switchTab === 'function') switchTab('vendas', firstTab);
+    }
+  } catch(e){ console.error('[preco bootstrap fallback]', e); }
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', __hubBootPreco);
+} else {
+  __hubBootPreco();
+}
+</script>
+</body>
 </html>

@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.1.2  15/04/2026  Fix Preço: bootstrap nunca injetado     ║
+  ║    • v3.1.1 tinha bug no script Python: bootstrap era        ║
+  ║      substituído em string sem </body>, então nunca          ║
+  ║      chegou no arquivo. Agora adicionado manualmente.        ║
   ║  v3.1.1  15/04/2026  Fix Preço: tela preta (tabs stripadas)  ║
   ║    • Preservadas appHeader/appTabs internas do price.        ║
   ║    • Bootstrap chama showApp('Admin') em DOMContentLoaded.   ║
@@ -411,7 +415,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.1.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.1.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1428,10 +1432,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.1.1';
+const CURRENT_VERSION = '3.1.2';
 const CHANGELOG = [
   {
-    v:'3.1.1', d:'15 abr 2026', current:true,
+    v:'3.1.2', d:'15 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Preço continuou com tela preta na v3.1.1.', desc:'A correção anterior não subiu porque meu script Python tinha um bug sutil: tentei dar replace do </body> por bootstrap+</body>, mas no intermediário o </body> tinha sido REMOVIDO da string (capturei numa variável mas não incluí na concatenação). Resultado: preco/index.html saiu sem </body> e sem o bootstrap. Corrigi manualmente agora — script de bootstrap injetado direto antes do </html>, revela appHeader/appTabs, chama showApp() numa trycatch, e se algo falhar força a ativação da primeira tab (Vendas). Também adicionei stubs ocultos de appFooter/mob-overlay/mob-dropdown pra silenciar null errors do código legado do price.'}
+    ]
+  },
+  {
+    v:'3.1.1', d:'15 abr 2026',
     items:[
       {type:'high', title:'Preço de Venda abria como tela preta.', desc:'Na v3.1.0 eu tinha stripado aggressivamente o body do /preco/index.html — removi splash, login, appHeader E appTabs. O problema: sem appTabs, as 6 sub-abas (Vendas, Tingimento, etc.) deixavam de existir, e como os panels são hidden por default e só ativam via switchTab, tudo ficava invisível = tela preta. Agora o strip preserva appHeader e appTabs (o shell interno do price), e removo só o splash (chato no iframe) e a tela de login (substituída pelo gate de sessão do HUB). Adicionei stubs ocultos pros IDs splash/loginScreen pra não quebrar código legado que checa esses elementos. O bootstrap no DOMContentLoaded chama showApp("Admin") — o próprio fluxo original do price que revela o header+tabs e ativa a primeira aba.'}
     ]
