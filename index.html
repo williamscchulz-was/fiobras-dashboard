@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.0.2  15/04/2026  Fix dropdown clip (real) + cache bust   ║
+  ║    • Dropdown movido pro body on open (sai do stacking ctx). ║
+  ║    • CSS ganha ?v=3.0.2 pra invalidar cache GitHub Pages.    ║
   ║  v3.0.1  15/04/2026  Minha Conta + fix dropdown clip         ║
   ║    • Minha Conta: nome, email, senha (SHA-256), foto.        ║
   ║    • Cada user edita o próprio perfil via dropdown.          ║
@@ -234,7 +237,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css">
+<link rel="stylesheet" href="css/hub.css?v=3.0.2">
 </head>
 <body>
 
@@ -401,7 +404,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.0.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.0.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1249,12 +1252,13 @@ window.toggleUserDd = (e) => {
   const user = document.getElementById('topbarUser');
   const dd = document.getElementById('userDd');
   if(!user || !dd) return;
+  // v3.0.2: garante que o dropdown esteja em document.body (sai do stacking context do topbar)
+  if(dd.parentElement !== document.body) document.body.appendChild(dd);
   const isOpen = dd.classList.contains('open');
   if(isOpen){
     dd.classList.remove('open');
     user.classList.remove('open');
   } else {
-    // v3.0.1: position:fixed + coords dinâmicos resolvem clip do stacking context
     const rect = user.getBoundingClientRect();
     const ddW = window.innerWidth <= 640 ? Math.min(window.innerWidth - 28, 320) : 260;
     dd.style.top = (rect.bottom + 8) + 'px';
@@ -1262,7 +1266,6 @@ window.toggleUserDd = (e) => {
     dd.style.width = ddW + 'px';
     dd.classList.add('open');
     user.classList.add('open');
-    // Atualiza label do tema ao abrir
     const themeLbl = document.getElementById('ddThemeLbl');
     if(themeLbl) themeLbl.textContent = (document.documentElement.dataset.theme === 'light') ? 'claro' : 'escuro';
   }
@@ -1282,7 +1285,8 @@ document.addEventListener('click', (e) => {
   const user = document.getElementById('topbarUser');
   const dd = document.getElementById('userDd');
   if(!user || !dd || !dd.classList.contains('open')) return;
-  if(!user.contains(e.target)){
+  // v3.0.2: dropdown agora vive no body, checa user OU dd
+  if(!user.contains(e.target) && !dd.contains(e.target)){
     dd.classList.remove('open');
     user.classList.remove('open');
   }
@@ -1403,10 +1407,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.0.1';
+const CURRENT_VERSION = '3.0.2';
 const CHANGELOG = [
   {
-    v:'3.0.1', d:'15 abr 2026', current:true,
+    v:'3.0.2', d:'15 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Dropdown do user continuava clipando.', desc:'O fix anterior (position:fixed + z-index 9999) não pegou porque o GitHub Pages serve o css/hub.css como arquivo separado e pode estar cacheado no browser com a versão antiga das regras de posicionamento. Agora aplico dois remédios combinados: (1) o <link> do CSS ganha ?v=3.0.2 como cache-buster — força download do stylesheet novo no primeiro load desta versão; (2) ao abrir, o dropdown é movido (appendChild) pra document.body, escapando de qualquer stacking context trap do topbar. Click-outside atualizado pra considerar o novo parent.'}
+    ]
+  },
+  {
+    v:'3.0.1', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Minha Conta: nome completo, email, senha e foto.', desc:'Cada usuário agora pode editar o próprio perfil pelo dropdown do user (canto superior direito → Minha conta). Quatro campos: foto (upload + crop quadrado automático + compressão), nome completo (substitui o display name do HUB), email (aparece no dropdown) e senha opcional. A senha é guardada como SHA-256 com salt no Firebase — evita ver em texto plano. Cada um edita só o próprio; admin também.'},
       {type:'high', title:'Login respeita senha cadastrada de qualquer usuário.', desc:'Antes só o admin pedia senha. Agora: se um usuário definiu senha em Minha Conta, o campo de senha aparece automaticamente no login quando esse user é selecionado. Produção continua podendo entrar sem senha se preferir — só passa a exigir se definir uma.'},
