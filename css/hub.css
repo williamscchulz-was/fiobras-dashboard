@@ -2,6 +2,23 @@
    v3.0.0 · split extraído de index.html
    Futuro: dividir em base.css / shell.css / <módulo>.css por módulo. */
 
+/* ── Minha Conta (v3.0.1) ──────────────────────────────────────────── */
+.mc-foto-row{display:flex;align-items:center;gap:16px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;}
+.mc-foto-wrap{position:relative;flex-shrink:0;}
+.mc-foto-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#00A040,#006B2A);color:#fff;font-size:1.35rem;font-weight:600;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;box-shadow:0 0 0 3px rgba(62,207,110,.22);overflow:hidden;}
+.mc-foto-avatar img{width:100%;height:100%;object-fit:cover;}
+.mc-foto-actions{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.mc-foto-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.72rem;color:var(--text);cursor:pointer;transition:all .15s;}
+.mc-foto-btn:hover{border-color:var(--green);color:var(--green);}
+.mc-foto-btn input[type="file"]{display:none;}
+.mc-foto-rm{background:transparent;border:none;color:var(--red);font-size:.65rem;cursor:pointer;text-align:left;padding:4px 2px;font-family:inherit;}
+.mc-foto-rm:hover{text-decoration:underline;}
+.mc-lbl-sub{font-weight:400;color:var(--muted2);text-transform:none;letter-spacing:0;}
+.mc-hint{font-size:.66rem;color:var(--muted2);font-style:italic;margin-top:-4px;margin-bottom:4px;}
+/* Avatares do topbar/dropdown com foto */
+.topbar-user-av.has-photo,.user-dd-head-av.has-photo{padding:0;overflow:hidden;}
+.topbar-user-av.has-photo img,.user-dd-head-av.has-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
 /* ── Placeholder de módulo em construção (v3.0.0) ──────────────────── */
 .wip-placeholder{max-width:520px;margin:48px auto;padding:44px 32px;background:var(--surface);border:1.5px dashed var(--border2);border-radius:18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;}
 .wip-placeholder .wip-ic{width:56px;height:56px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--muted);}
@@ -111,7 +128,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 .topbar-user.open .topbar-user-caret{transform:rotate(180deg);color:#3ecf6e;}
 
 /* Dropdown */
-.user-dd{position:absolute;top:calc(100% + 8px);right:0;width:260px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:6px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;z-index:150;box-shadow:var(--shadow-md);}
+.user-dd{position:fixed;top:64px;right:18px;width:260px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:6px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;z-index:9999;box-shadow:var(--shadow-md);}
 .user-dd.open{opacity:1;visibility:visible;transform:translateY(0);}
 .user-dd-head{padding:14px 14px 12px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;gap:12px;align-items:center;}
 .user-dd-head-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00A040,#006B2A);color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px rgba(62,207,110,.2);flex-shrink:0;}
@@ -143,7 +160,7 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   .topbar-user{padding:4px;gap:0;border:none;background:transparent;}
   .topbar-user-info,.topbar-user-caret{display:none;}
   .topbar-user-av{width:34px;height:34px;}
-  .user-dd{right:4px;top:calc(100% + 6px);width:calc(100vw - 28px);max-width:320px;}
+  .user-dd{right:8px;top:56px;width:calc(100vw - 28px);max-width:320px;}
 }
 
 /* ── Header limpo (v2.2.0) ── */

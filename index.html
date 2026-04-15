@@ -3,6 +3,12 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.0.1  15/04/2026  Minha Conta + fix dropdown clip         ║
+  ║    • Minha Conta: nome, email, senha (SHA-256), foto.        ║
+  ║    • Cada user edita o próprio perfil via dropdown.          ║
+  ║    • Login respeita senha cadastrada (não só admin).         ║
+  ║    • Dropdown agora position:fixed (não clipa mais).         ║
+  ║    • Path Firebase novo: users-profile/{user}.               ║
   ║  v3.0.0  15/04/2026  Refactor prep: CSS split + Manut + CRM  ║
   ║    • CSS extraído pra css/hub.css (index −1750 linhas).      ║
   ║    • Módulos Manutenção e CRM adicionados (placeholder).     ║
@@ -337,7 +343,7 @@
           <div class="user-dd-email" id="ddEmail">—</div>
         </div>
       </div>
-      <button class="user-dd-item" onclick="toast('Minha conta disponível na v2.8.1','info')">
+      <button class="user-dd-item" onclick="abrirMinhaConta()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Minha conta
       </button>
@@ -395,7 +401,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.0.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.0.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -861,6 +867,52 @@
     </div>
   </div>
 </div>
+<!-- Modal Minha Conta (v3.0.1) -->
+<div class="modal-bg" id="mcModal" onclick="if(event.target===this)fecharMinhaConta()">
+  <div class="modal" style="width:440px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Minha conta</div>
+      <button class="sc-lanc-close" onclick="fecharMinhaConta()" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mc-foto-row">
+      <div class="mc-foto-wrap" id="mcFotoWrap">
+        <div class="mc-foto-avatar" id="mcFotoAv">—</div>
+      </div>
+      <div class="mc-foto-actions">
+        <label class="mc-foto-btn" for="mcFotoInput">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Escolher foto</span>
+          <input type="file" id="mcFotoInput" accept="image/*" onchange="mcFotoChange(this)">
+        </label>
+        <button type="button" class="mc-foto-rm" id="mcFotoRm" onclick="mcRemoverFoto()" style="display:none">Remover foto</button>
+      </div>
+    </div>
+    <div class="tl-form-field">
+      <label>Nome completo</label>
+      <input type="text" id="mcNome" placeholder="Ex: William Schulz" maxlength="60">
+    </div>
+    <div class="tl-form-field">
+      <label>Email</label>
+      <input type="email" id="mcEmail" placeholder="Ex: william@fiobras.com.br" maxlength="80">
+    </div>
+    <div class="tl-form-field">
+      <label>Senha <span class="mc-lbl-sub" id="mcSenhaLbl">(definir nova)</span></label>
+      <input type="password" id="mcSenhaNova" placeholder="Mínimo 4 caracteres" maxlength="40">
+    </div>
+    <div class="tl-form-field">
+      <label>Confirmar senha</label>
+      <input type="password" id="mcSenhaConf" placeholder="Repita a senha" maxlength="40">
+    </div>
+    <div class="mc-hint" id="mcSenhaHint">Deixe os campos de senha vazios se não quiser alterar.</div>
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+      <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharMinhaConta()">Cancelar</button>
+      <button class="save-btn" onclick="salvarMinhaConta()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal gerenciar tags (admin only) -->
 <div class="modal-bg" id="tlTagsModal" onclick="if(event.target===this)fecharTlTagsManager()">
   <div class="modal" style="width:440px;max-height:90vh;overflow-y:auto">
@@ -966,22 +1018,37 @@ function setSession(user){localStorage.setItem('fiobras-dash-auth',JSON.stringif
 function clearSession(){localStorage.removeItem('fiobras-dash-auth');}
 
 function onUserChange(){
-  const sel=document.getElementById('loginUser').value;
-  const wrap=document.getElementById('loginPassWrap');
   const err=document.getElementById('loginErr');
-  err.textContent='';
-  if(sel==='admin'){wrap.classList.add('show');}else{wrap.classList.remove('show');}
+  if(err) err.textContent='';
+  if(typeof window._applyLoginSenhaField === 'function') window._applyLoginSenhaField();
 }
 
-function doLogin(){
+async function doLogin(){
   const sel=document.getElementById('loginUser').value;
   const pass=document.getElementById('loginPass').value;
   const err=document.getElementById('loginErr');
   if(!sel){err.textContent='Selecione um usuário';return;}
   const u=USERS[sel];
-  if(u.senha!==null&&pass!==u.senha){err.textContent='Senha incorreta';return;}
+  const profile = (window._usersProfile || {})[sel] || {};
+  // 1) Senha hardcoded (admin) continua valendo
+  if(u.senha!==null && u.senha!==undefined){
+    if(pass !== u.senha){ err.textContent='Senha incorreta'; return; }
+  }
+  // 2) Senha definida via Minha Conta (hash) — checa se existe
+  else if(profile.senhaHash){
+    if(!pass){ err.textContent='Senha necessária'; return; }
+    try{
+      const salt = 'fiobras-hub-v3';
+      const buf = new TextEncoder().encode(salt + '::' + pass);
+      const hash = await crypto.subtle.digest('SHA-256', buf);
+      const hex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+      if(hex !== profile.senhaHash){ err.textContent='Senha incorreta'; return; }
+    } catch(e){ err.textContent='Erro ao validar senha'; return; }
+  }
+  // 3) Sem senha: login direto (comportamento atual)
   setSession(sel);
-  showSplash(u.nome, u.role);
+  const displayName = (profile.nomeCompleto && profile.nomeCompleto.trim()) || u.nome;
+  showSplash(displayName, u.role);
 }
 
 function doLogout(){
@@ -1016,23 +1083,166 @@ function showSplash(nome, role){
 
 // ── v2.8.0: user shell (topbar + dropdown) ─────────────────────────────────
 function populateUserShell(nome, role){
-  const initials = nome.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
   const sess = getSession();
   const userKey = sess?.user || '';
-  const email = USERS[userKey]?.email || 'Email não cadastrado';
+  const profile = (window._usersProfile || {})[userKey] || {};
+  // Nome exibido: prioriza nomeCompleto do profile; fallback USERS[user].nome
+  const displayName = (profile.nomeCompleto && profile.nomeCompleto.trim()) || nome;
+  const initials = displayName.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+  const email = profile.email || 'Email não cadastrado';
   const roleLbl = role === 'admin' ? 'admin' : (USERS[userKey]?.turno ? 'turno ' + USERS[userKey].turno : 'produção');
+  const setAv = (id, initials, foto) => {
+    const el = document.getElementById(id); if(!el) return;
+    if(foto){
+      el.classList.add('has-photo');
+      el.innerHTML = '<img src="' + foto + '" alt="">';
+    } else {
+      el.classList.remove('has-photo');
+      el.textContent = initials;
+    }
+  };
   const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
-  set('topbarUserAv', initials);
-  set('topbarUserName', nome);
+  setAv('topbarUserAv', initials, profile.foto);
+  set('topbarUserName', displayName);
   set('topbarUserRole', roleLbl);
-  set('ddAv', initials);
-  set('ddName', nome);
+  setAv('ddAv', initials, profile.foto);
+  set('ddName', displayName);
   set('ddEmail', email);
   if (typeof CURRENT_VERSION !== 'undefined') set('ddVersion', 'v' + CURRENT_VERSION);
   // Label do tema atual
   const themeLbl = document.getElementById('ddThemeLbl');
   if(themeLbl) themeLbl.textContent = (document.documentElement.dataset.theme === 'light') ? 'claro' : 'escuro';
 }
+
+// ── Minha Conta (v3.0.1) ──────────────────────────────────────────────────
+window._applyUsersProfile = () => {
+  const sess = getSession();
+  if(!sess) return;
+  const role = window._userRole || USERS[sess.user]?.role || 'producao';
+  const nome = USERS[sess.user]?.nome || sess.user;
+  if(typeof populateUserShell === 'function') populateUserShell(nome, role);
+};
+
+// SHA-256 com salt fixo — não é criptografia forte, mas evita ver senha em texto no Firebase
+async function mcHashSenha(senha){
+  const salt = 'fiobras-hub-v3';
+  const buf = new TextEncoder().encode(salt + '::' + senha);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+let mcFotoData = ''; // data URL da foto em edição
+
+window.abrirMinhaConta = () => {
+  const sess = getSession();
+  if(!sess){ toast('Sessão expirada','err'); return; }
+  const profile = (window._usersProfile || {})[sess.user] || {};
+  // Fecha dropdown do user
+  const dd = document.getElementById('userDd'), user = document.getElementById('topbarUser');
+  if(dd) dd.classList.remove('open'); if(user) user.classList.remove('open');
+  // Preenche campos
+  document.getElementById('mcNome').value = profile.nomeCompleto || USERS[sess.user]?.nome || '';
+  document.getElementById('mcEmail').value = profile.email || '';
+  document.getElementById('mcSenhaNova').value = '';
+  document.getElementById('mcSenhaConf').value = '';
+  const hasSenha = !!profile.senhaHash;
+  document.getElementById('mcSenhaLbl').textContent = hasSenha ? '(alterar — deixe em branco pra manter)' : '(definir nova)';
+  mcFotoData = profile.foto || '';
+  mcRenderFotoPreview();
+  document.getElementById('mcModal').classList.add('open');
+};
+
+window.fecharMinhaConta = () => {
+  document.getElementById('mcModal').classList.remove('open');
+  mcFotoData = '';
+};
+
+function mcRenderFotoPreview(){
+  const av = document.getElementById('mcFotoAv');
+  const rm = document.getElementById('mcFotoRm');
+  if(!av) return;
+  const sess = getSession();
+  const nome = (document.getElementById('mcNome').value || USERS[sess?.user]?.nome || '').trim();
+  const initials = nome.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase() || '—';
+  if(mcFotoData){
+    av.innerHTML = '<img src="' + mcFotoData + '" alt="">';
+    rm.style.display = '';
+  } else {
+    av.textContent = initials;
+    rm.style.display = 'none';
+  }
+}
+
+window.mcFotoChange = (input) => {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 400;
+      let w = img.width, h = img.height;
+      // Crop centrado pra quadrado
+      const size = Math.min(w, h);
+      const sx = (w - size) / 2, sy = (h - size) / 2;
+      const c = document.createElement('canvas');
+      c.width = MAX; c.height = MAX;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, MAX, MAX);
+      mcFotoData = c.toDataURL('image/jpeg', 0.82);
+      mcRenderFotoPreview();
+      input.value = '';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.mcRemoverFoto = () => {
+  mcFotoData = '';
+  mcRenderFotoPreview();
+};
+
+window.salvarMinhaConta = async () => {
+  const sess = getSession();
+  if(!sess){ toast('Sessão expirada','err'); return; }
+  const nome = document.getElementById('mcNome').value.trim();
+  const email = document.getElementById('mcEmail').value.trim();
+  const senhaNova = document.getElementById('mcSenhaNova').value;
+  const senhaConf = document.getElementById('mcSenhaConf').value;
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ toast('Email inválido','err'); return; }
+  if(senhaNova || senhaConf){
+    if(senhaNova.length < 4){ toast('Senha mínimo 4 caracteres','err'); return; }
+    if(senhaNova !== senhaConf){ toast('Senhas não conferem','err'); return; }
+  }
+  const profile = Object.assign({}, (window._usersProfile || {})[sess.user] || {});
+  profile.nomeCompleto = nome || null;
+  profile.email = email || null;
+  profile.foto = mcFotoData || null;
+  if(senhaNova){
+    profile.senhaHash = await mcHashSenha(senhaNova);
+  }
+  if(window._salvarUserProfile) window._salvarUserProfile(sess.user, profile);
+  toast('Conta atualizada');
+  fecharMinhaConta();
+};
+
+// Aplica campo de senha no login quando o user selecionado tem senha cadastrada
+window._applyLoginSenhaField = () => {
+  const sel = document.getElementById('loginUser');
+  const wrap = document.getElementById('loginPassWrap');
+  if(!sel || !wrap) return;
+  const user = sel.value;
+  if(!user){ wrap.classList.remove('show'); return; }
+  // Admin sempre pede senha (hardcoded no USERS); demais: só se tiver profile com senhaHash
+  const hasHardcoded = USERS[user]?.senha !== null && USERS[user]?.senha !== undefined;
+  const profile = (window._usersProfile || {})[user] || {};
+  const hasProfileSenha = !!profile.senhaHash;
+  if(hasHardcoded || hasProfileSenha) wrap.classList.add('show');
+  else wrap.classList.remove('show');
+};
 
 window.toggleUserDd = (e) => {
   if(e) e.stopPropagation();
@@ -1044,6 +1254,12 @@ window.toggleUserDd = (e) => {
     dd.classList.remove('open');
     user.classList.remove('open');
   } else {
+    // v3.0.1: position:fixed + coords dinâmicos resolvem clip do stacking context
+    const rect = user.getBoundingClientRect();
+    const ddW = window.innerWidth <= 640 ? Math.min(window.innerWidth - 28, 320) : 260;
+    dd.style.top = (rect.bottom + 8) + 'px';
+    dd.style.right = Math.max(8, window.innerWidth - rect.right) + 'px';
+    dd.style.width = ddW + 'px';
     dd.classList.add('open');
     user.classList.add('open');
     // Atualiza label do tema ao abrir
@@ -1051,6 +1267,15 @@ window.toggleUserDd = (e) => {
     if(themeLbl) themeLbl.textContent = (document.documentElement.dataset.theme === 'light') ? 'claro' : 'escuro';
   }
 };
+// Reposiciona dropdown ao redimensionar janela
+window.addEventListener('resize', () => {
+  const dd = document.getElementById('userDd');
+  const user = document.getElementById('topbarUser');
+  if(!dd || !user || !dd.classList.contains('open')) return;
+  const rect = user.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 8) + 'px';
+  dd.style.right = Math.max(8, window.innerWidth - rect.right) + 'px';
+});
 
 // Click-outside fecha o dropdown
 document.addEventListener('click', (e) => {
@@ -1178,10 +1403,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.0.0';
+const CURRENT_VERSION = '3.0.1';
 const CHANGELOG = [
   {
-    v:'3.0.0', d:'15 abr 2026', current:true,
+    v:'3.0.1', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Minha Conta: nome completo, email, senha e foto.', desc:'Cada usuário agora pode editar o próprio perfil pelo dropdown do user (canto superior direito → Minha conta). Quatro campos: foto (upload + crop quadrado automático + compressão), nome completo (substitui o display name do HUB), email (aparece no dropdown) e senha opcional. A senha é guardada como SHA-256 com salt no Firebase — evita ver em texto plano. Cada um edita só o próprio; admin também.'},
+      {type:'high', title:'Login respeita senha cadastrada de qualquer usuário.', desc:'Antes só o admin pedia senha. Agora: se um usuário definiu senha em Minha Conta, o campo de senha aparece automaticamente no login quando esse user é selecionado. Produção continua podendo entrar sem senha se preferir — só passa a exigir se definir uma.'},
+      {type:'high', title:'Dropdown do user não clipa mais.', desc:'O dropdown estava com a parte de cima cortada (avatar + nome sumindo atrás do pill). Reescrito de position:absolute pra position:fixed com coordenadas computadas dinamicamente do bounding rect do pill + z-index 9999. Remove qualquer chance de stacking context trap. Reposiciona sozinho ao redimensionar a janela.'},
+      {type:'note', title:'Path Firebase novo: users-profile.', desc:'users-profile/{user}/{nomeCompleto, email, foto, senhaHash}. Só o próprio usuário grava no próprio ramo (validação client-side — Firebase RTDB rules ficam pra depois). Dados antigos hardcoded em USERS (nome/senha do admin) continuam valendo como fallback.'}
+    ]
+  },
+  {
+    v:'3.0.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Refactor prep: CSS separado + novos módulos.', desc:'Primeiro passo do refactor pra ES modules (planejado nas próximas sessões). Todo o CSS do HUB (~1750 linhas) saiu do index.html pra `css/hub.css`, linkado via `<link>`. O index.html desce de 6461 pra ~4700 linhas — fica mais fácil de navegar e editar. Comportamento visual idêntico, só split físico.'},
       {type:'feat', title:'Manutenção e CRM adicionados como módulos.', desc:'Dois módulos novos aparecem na sidebar, no header desktop e na pílula mobile: Manutenção (ícone de chave inglesa) e CRM (ícone de pessoas). Ambos abrem pra uma tela de placeholder "em construção" — estão prontos pra receber o código dos sistemas que o William tem prontos pra trazer pra dentro do HUB. Acesso liberado pra todos os usuários por enquanto; granularidade por aba a definir quando o conteúdo real entrar.'},
@@ -1566,6 +1800,17 @@ onValue(tlTagsRef, (snapshot) => {
   }
 });
 window._salvarTlTagsFirebase = (d) => set(tlTagsRef, d).catch(e => console.error('Erro ao salvar timeline-tags:', e));
+
+// ── Users profile — Firebase (v3.0.1) ──────────────────────────────────
+const usersProfileRef = ref(db, 'users-profile');
+window._usersProfile = window._usersProfile || {};
+onValue(usersProfileRef, (snapshot) => {
+  window._usersProfile = snapshot.val() || {};
+  // Repopula shell do user logado caso dados tenham mudado
+  if (typeof window._applyUsersProfile === 'function') window._applyUsersProfile();
+  if (typeof window._applyLoginSenhaField === 'function') window._applyLoginSenhaField();
+});
+window._salvarUserProfile = (user, profile) => update(ref(db, 'users-profile/' + user), profile).catch(e => console.error('Erro ao salvar perfil:', e));
 
 // ── Apontamento Tintoria — Firebase (v2.4.0) ─────────────────────────────
 const aptRef = ref(db, 'apontamento-tintoria-2026');
