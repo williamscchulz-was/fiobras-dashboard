@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.4.0  15/04/2026  CRM integrado via /crm/ iframe          ║
+  ║    • Sub-app em /crm/index.html (adaptado de fiobras-crm).   ║
+  ║    • Shell interno (.header + splash + login) escondido.     ║
+  ║    • Bootstrap: mapeia HUB admin → CRM admin.                ║
+  ║    • WIP removido do módulo CRM.                             ║
   ║  v3.3.0  15/04/2026  Timeline: filtro por tag + contador     ║
   ║    • Barra de pílulas acima do feed (toggle por tag).        ║
   ║    • Contador de registros ao lado do título.                ║
@@ -332,11 +337,10 @@
     <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     <span class="sidenav-tip">Manutenção · WIP</span>
   </button>
-  <button class="sidenav-item wip" data-mod="crm" onclick="switchModule('crm',this)" aria-label="CRM">
+  <button class="sidenav-item" data-mod="crm" onclick="switchModule('crm',this)" aria-label="CRM">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-    <span class="sidenav-wip" aria-hidden="true"></span>
     <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
-    <span class="sidenav-tip">CRM · WIP</span>
+    <span class="sidenav-tip">CRM</span>
   </button>
   <div class="sidenav-spacer"></div>
   <div class="sidenav-divider"></div>
@@ -421,15 +425,14 @@
       <span class="mod-wip-tag">WIP</span>
       <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
-    <button class="mod-btn wip" data-mod="crm" data-role="all" onclick="switchModule('crm',this)">
+    <button class="mod-btn" data-mod="crm" data-role="all" onclick="switchModule('crm',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       <span class="mod-lbl">CRM</span>
-      <span class="mod-wip-tag">WIP</span>
       <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.3.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.4.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -812,19 +815,11 @@
 </div>
 </div>
 
-<!-- ── CRM (v3.0.0 WIP) ── -->
+<!-- ── CRM (v3.4.0 · iframe do /crm/) ── -->
 <div class="panel" id="panel-crm">
-<div class="wrap">
-  <div class="sh"><h2>CRM</h2><div class="sh-line"></div></div>
-  <div class="wip-placeholder">
-    <div class="wip-ic">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-    </div>
-    <div class="wip-title">CRM · em construção</div>
-    <div class="wip-desc">Módulo criado e pronto pra receber o cadastro de clientes, contatos, histórico de atendimento e observações comerciais.</div>
-    <div class="wip-tag">v3.0.0 · módulo placeholder</div>
+  <div class="subapp-frame-wrap">
+    <iframe id="crmFrame" class="subapp-frame" title="CRM"></iframe>
   </div>
-</div>
 </div>
 
 <!-- Modal Lançar Mês Stats Cor (admin only) -->
@@ -1447,10 +1442,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.3.0';
+const CURRENT_VERSION = '3.4.0';
 const CHANGELOG = [
   {
-    v:'3.3.0', d:'15 abr 2026', current:true,
+    v:'3.4.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'CRM ativo dentro do HUB.', desc:'O sistema de CRM (antes WIP, repo williamscchulz-was/fiobras-crm) agora vive em /crm/index.html e é embutido via iframe no panel-crm do HUB. Todas as views internas (Dashboard, Pipeline, Lista de clientes) funcionam como no app standalone — zero migração de dados porque o Firebase project (fiobras-preco) e os paths (crm/clientes, crm/leads, crm/log) são os mesmos.'},
+      {type:'high', title:'Shell interno do CRM removido, tema sincronizado.', desc:'Mesma receita da Preço: .header interno + splash + loginScreen escondidos via override <style>. Tabs do CRM grudam no topo do iframe. Tema lê fiobras-dash-theme do HUB e escuta postMessage pra mudanças em tempo real. Cache-buster ?v=CURRENT_VERSION na src do iframe.'},
+      {type:'note', title:'Mapeamento de usuário: HUB → CRM admin.', desc:'Por enquanto todo HUB user que entra no CRM vira "CRM admin" (com acesso total). O CRM original tinha 3 perfis internos (admin/jacques/suyanne) com permissões diferentes. Mapeamento granular HUB→CRM pode vir depois — basta estender o bootstrap se quiser diferenciar views iniciais ou permissões.'},
+      {type:'note', title:'WIP removido do módulo CRM.', desc:'Sidenav e header desktop não mostram mais badge/lock. Acesso liberado pra todos os usuários do HUB. Se quiser restringir depois, é só adicionar regra em canAccessModule.'}
+    ]
+  },
+  {
+    v:'3.3.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Timeline: filtro por tag.', desc:'Agora acima do feed da Timeline aparece uma barra de pílulas (Todas / Desenvolvimento / Problemas / Melhorias / +custom). Tap na pílula filtra o feed pra mostrar só registros daquela tag. Tap de novo na mesma pílula volta pra "Todas". As pílulas mostram a cor da tag quando ativas e um contador de registros embutido. Tags sem registro são escondidas automaticamente pra não poluir.'},
       {type:'high', title:'Contador de registros ao lado do título.', desc:'Quando a Timeline está sem filtro, aparece "12 registros" (ou "1 registro") ao lado do título. Quando filtrado, mostra "3 de 12" — fica claro quantos registros batem com a tag ativa vs o total. Ajuda a navegar quando a base crescer.'},
