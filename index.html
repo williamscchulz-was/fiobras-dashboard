@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.1.0  15/04/2026  Preço de Venda integrado via /preco/    ║
+  ║    • Sub-app em /preco/index.html embutido via iframe.       ║
+  ║    • Sessão + tema sincronizados com o HUB.                  ║
+  ║    • Lazy-load: iframe só carrega no primeiro acesso.        ║
+  ║    • WIP removido do módulo Preço (admin-only ativo).        ║
   ║  v3.0.2  15/04/2026  Fix dropdown clip (real) + cache bust   ║
   ║    • Dropdown movido pro body on open (sai do stacking ctx). ║
   ║    • CSS ganha ?v=3.0.2 pra invalidar cache GitHub Pages.    ║
@@ -237,7 +242,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.0.2">
+<link rel="stylesheet" href="css/hub.css?v=3.1.0">
 </head>
 <body>
 
@@ -294,11 +299,10 @@
     <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     <span class="sidenav-tip">Produção</span>
   </button>
-  <button class="sidenav-item wip" data-mod="preco" onclick="switchModule('preco',this)" aria-label="Preço de Venda">
+  <button class="sidenav-item" data-mod="preco" onclick="switchModule('preco',this)" aria-label="Preço de Venda">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-    <span class="sidenav-wip" aria-hidden="true"></span>
     <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
-    <span class="sidenav-tip">Preço de Venda · WIP</span>
+    <span class="sidenav-tip">Preço de Venda</span>
   </button>
   <button class="sidenav-item wip" data-mod="manutencao" onclick="switchModule('manutencao',this)" aria-label="Manutenção">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
@@ -384,10 +388,9 @@
       <span class="mod-lbl">Produção</span>
       <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
-    <button class="mod-btn wip" data-mod="preco" data-role="admin" onclick="switchModule('preco',this)">
+    <button class="mod-btn" data-mod="preco" data-role="admin" onclick="switchModule('preco',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
       <span class="mod-lbl">Preço de Venda</span>
-      <span class="mod-wip-tag">WIP</span>
       <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
     <button class="mod-btn wip" data-mod="manutencao" data-role="all" onclick="switchModule('manutencao',this)">
@@ -404,7 +407,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.0.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.1.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -426,6 +429,9 @@
     <button class="tab-btn" data-short="Apont." onclick="switchTab('apontamento',this)">Apontamento</button>
     <button class="tab-btn" data-short="Timeline" onclick="switchTab('timeline',this)">Timeline</button>
     <button class="tab-btn tab-statscor" data-short="Stats" onclick="switchTab('statscor',this)">Stats Cor</button>
+  </div>
+  <div class="tab-group" id="tg-preco">
+    <button class="tab-btn" data-short="Preço" onclick="switchTab('preco',this)">Formação de preço</button>
   </div>
   <div class="tab-group" id="tg-manutencao">
     <button class="tab-btn" data-short="Manut." onclick="switchTab('manutencao',this)">Manutenção</button>
@@ -757,6 +763,13 @@
     <div class="sc-hist-foot">* 2020 (jan-jul) e 2026 parciais · total atualizado conforme novos meses são lançados</div>
   </div>
 </div>
+</div>
+
+<!-- ── Preço de Venda (v3.1.0 · iframe do /preco/) ── -->
+<div class="panel" id="panel-preco">
+  <div class="subapp-frame-wrap">
+    <iframe id="precoFrame" class="subapp-frame" title="Preço de Venda"></iframe>
+  </div>
 </div>
 
 <!-- ── Manutenção (v3.0.0 WIP) ── -->
@@ -1301,7 +1314,7 @@ function canAccessModule(mod){
 }
 
 /** Módulos em construção — clique mostra toast WIP, não bloqueia por permissão */
-const WIP_MODULES = { preco: 'Preço de Venda em construção' };
+const WIP_MODULES = { /* vazio — preço ativado na v3.1.0 via iframe /preco/ */ };
 
 /** Configura módulos e abas visíveis por role (v2.5.0 Fase 4: desktop também mostra cadeado) */
 function setupTabs(role){
@@ -1399,6 +1412,10 @@ function applyTheme(dark){
   const tc=document.querySelector('meta[name="theme-color"]');
   if(tc) tc.content=dark?'#1C1C1E':'#008835';
   localStorage.setItem('fiobras-dash-theme', dark?'dark':'light');
+  // v3.1.0: propaga tema pros sub-apps em iframe
+  document.querySelectorAll('iframe.subapp-frame').forEach(f => {
+    try { f.contentWindow && f.contentWindow.postMessage({type:'fiobras-theme', theme: dark?'dark':'light'}, '*'); } catch(e){}
+  });
 }
 function toggleTheme(){
   applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?false:true);
@@ -1407,10 +1424,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.0.2';
+const CURRENT_VERSION = '3.1.0';
 const CHANGELOG = [
   {
-    v:'3.0.2', d:'15 abr 2026', current:true,
+    v:'3.1.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Preço de Venda ativo dentro do HUB.', desc:'O sistema de Formação de Preço (antes WIP) agora vive em /preco/index.html e é carregado via iframe dentro do panel-preco do HUB. Todas as 6 abas internas (Vendas, Tingimento, Preparação/Repasse, Retorção, Custos, Histórico) funcionam como o app standalone original, mas agora dentro do shell unificado — sidebar, topbar e user dropdown do HUB continuam visíveis por fora.'},
+      {type:'high', title:'Sessão e tema sincronizados automaticamente.', desc:'O sub-app lê a sessão do HUB via localStorage (fiobras-dash-auth) — quem não é admin cai numa tela "Abrir pelo HUB" com link pra raiz, mantendo a permissão admin-only do módulo. Tema é propagado via postMessage quando o toggle é clicado no HUB; o iframe aplica data-theme sem reload. No primeiro load do iframe, tema também é enviado via evento load.'},
+      {type:'note', title:'Lazy-load: iframe só carrega quando abre o módulo.', desc:'No boot do HUB o iframe fica com src vazio. Quando o user clica Preço de Venda pela primeira vez, o src é setado e o sub-app carrega. Se sai e volta, mantém montado (sem recarregar). Mesma mecânica pronta pra CRM e Manutenção quando chegarem.'},
+      {type:'note', title:'Abordagem iframe vs integração inline.', desc:'Optei por /preco/ em vez de trazer o código inline pro index.html porque o price tinha 60+ funções JS com nomes que colidiam com o HUB (switchTab, canAccessTab, fecharModal, renderHistorico, toast, _salvarFirebase). Renomear tudo seria centenas de changes e risco alto. Com iframe, zero colisão, cada sistema mantém seu próprio contexto, e a integração visual segue coesa porque ambos compartilham fonts/paleta do BASE.'}
+    ]
+  },
+  {
+    v:'3.0.2', d:'15 abr 2026',
     items:[
       {type:'high', title:'Dropdown do user continuava clipando.', desc:'O fix anterior (position:fixed + z-index 9999) não pegou porque o GitHub Pages serve o css/hub.css como arquivo separado e pode estar cacheado no browser com a versão antiga das regras de posicionamento. Agora aplico dois remédios combinados: (1) o <link> do CSS ganha ?v=3.0.2 como cache-buster — força download do stylesheet novo no primeiro load desta versão; (2) ao abrir, o dropdown é movido (appendChild) pra document.body, escapando de qualquer stacking context trap do topbar. Click-outside atualizado pra considerar o novo parent.'}
     ]
@@ -2503,7 +2529,25 @@ window.switchTab = (tab, btn) => {
   if (tab === 'apontamento') renderApontamento();
   if (tab === 'timeline') renderTimeline();
   if (tab === 'statscor') renderStatsCor();
+  // v3.1.0: lazy-load de sub-apps em iframe (preço, crm, manutenção)
+  if (tab === 'preco')     loadSubApp('precoFrame', 'preco/');
+  if (tab === 'crm')       loadSubApp('crmFrame', 'crm/');
+  if (tab === 'manutencao')loadSubApp('manutencaoFrame', 'manutencao/');
 };
+
+// Carrega o iframe só no primeiro acesso, depois mantém montado
+function loadSubApp(frameId, path){
+  const f = document.getElementById(frameId);
+  if(!f) return;
+  if(!f.src){
+    f.src = path;
+    // Propaga tema quando o iframe terminar de carregar
+    f.addEventListener('load', () => {
+      const theme = document.documentElement.getAttribute('data-theme') || 'light';
+      try { f.contentWindow.postMessage({type:'fiobras-theme', theme}, '*'); } catch(e){}
+    }, { once: true });
+  }
+}
 
 /** Toast notification */
 function toast(msg, type='ok', ms=2500) {
