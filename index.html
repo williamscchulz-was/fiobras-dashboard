@@ -3,6 +3,12 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.14.0 16/04/2026  Nova identidade visual (símbolo F+ponto) ║
+  ║    • Símbolo: F com braço do meio = ponto amarelo.           ║
+  ║    • SVG inline em sidenav, splash, login.                   ║
+  ║    • Wordmark "Fiobras" + sub "H U B" letterspacing.         ║
+  ║    • Favicon SVG inline (data URI).                          ║
+  ║    • Ícones PWA 192/512 gerados em runtime via canvas.       ║
   ║  v3.13.0 15/04/2026  +7 users, sessões ativas, filtros log    ║
   ║    • +Hernandes,Vorlei,Pedro,Ivonei,Roland (manutenção)      ║
   ║    • +Jacques,Suyanne (CRM)                                  ║
@@ -321,14 +327,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HUB">
-<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%23008835%22%2F%3E%3Crect%20x%3D%2210%22%20y%3D%227%22%20width%3D%224%22%20height%3D%2218%22%20rx%3D%220.3%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Crect%20x%3D%2210%22%20y%3D%227%22%20width%3D%2214%22%20height%3D%224%22%20rx%3D%220.3%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2217%22%20r%3D%222.8%22%20fill%3D%22%23FFCB00%22%2F%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20180%20180%22%3E%3Crect%20width%3D%22180%22%20height%3D%22180%22%20rx%3D%2240%22%20fill%3D%22%23008835%22%2F%3E%3Crect%20x%3D%2263%22%20y%3D%2247%22%20width%3D%2218%22%20height%3D%2286%22%20rx%3D%221%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Crect%20x%3D%2263%22%20y%3D%2247%22%20width%3D%2261%22%20height%3D%2218%22%20rx%3D%221%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Ccircle%20cx%3D%22117%22%20cy%3D%2299%22%20r%3D%2213%22%20fill%3D%22%23FFCB00%22%2F%3E%3C%2Fsvg%3E">
 
 <!-- Windows -->
 <meta name="msapplication-TileColor" content="#008835">
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.13.0">
+<link rel="stylesheet" href="css/hub.css?v=3.14.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -354,6 +361,23 @@
     <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></symbol>
     <symbol id="i-panel-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></symbol>
+    <!-- v3.14.0: Marca Fiobras HUB (F com ponto amarelo) -->
+    <symbol id="i-fiobras-symbol" viewBox="0 0 60 68">
+      <rect x="16" y="10" width="12" height="48" rx="0.5" fill="#008835"/>
+      <rect x="16" y="10" width="42" height="12" rx="0.5" fill="#008835"/>
+      <circle cx="46" cy="40" r="8" fill="#FFCB00"/>
+    </symbol>
+    <symbol id="i-fiobras-symbol-inv" viewBox="0 0 60 68">
+      <rect x="16" y="10" width="12" height="48" rx="0.5" fill="#FFFFFF"/>
+      <rect x="16" y="10" width="42" height="12" rx="0.5" fill="#FFFFFF"/>
+      <circle cx="46" cy="40" r="8" fill="#FFCB00"/>
+    </symbol>
+    <symbol id="i-fiobras-mark" viewBox="0 0 200 200">
+      <rect width="200" height="200" rx="44" fill="#008835"/>
+      <rect x="70" y="52" width="20" height="96" rx="0.5" fill="#FFFFFF"/>
+      <rect x="70" y="52" width="68" height="20" rx="0.5" fill="#FFFFFF"/>
+      <circle cx="130" cy="110" r="14" fill="#FFCB00"/>
+    </symbol>
     <!-- v3.6.0: Status (tags semânticas) -->
     <symbol id="i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></symbol>
     <symbol id="i-loader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></symbol>
@@ -369,8 +393,13 @@
 <!-- ── Login ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <div class="login-logo">Fiobras</div>
-    <div class="login-sub">Dashboard</div>
+    <div class="login-mark">
+      <svg class="login-mark-svg" viewBox="0 0 60 68" aria-hidden="true"><use href="#i-fiobras-symbol"/></svg>
+      <div class="login-mark-text">
+        <div class="login-logo">Fiobras</div>
+        <div class="login-sub">H U B</div>
+      </div>
+    </div>
     <div class="login-line"></div>
     <div class="login-field">
       <label class="login-label">Usuário</label>
@@ -390,8 +419,9 @@
 
 <!-- ── Splash ── -->
 <div class="splash hide" id="splash">
+  <svg class="splash-mark" viewBox="0 0 60 68" aria-hidden="true"><use href="#i-fiobras-symbol-inv"/></svg>
   <div class="splash-brand">Fiobras</div>
-  <div class="splash-sub">HUB</div>
+  <div class="splash-sub">H U B</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
   <div class="splash-version" id="splashVersion">v2.8.1</div>
@@ -405,9 +435,12 @@
   <!-- v3.7.0: brand wrapper com logo + nome + toggle -->
   <div class="sidenav-brand">
     <div class="sidenav-logo" title="Fiobras HUB">
-      <span class="sidenav-logo-txt">F</span>
+      <svg class="sidenav-logo-svg" viewBox="0 0 60 68" aria-label="Fiobras HUB"><use href="#i-fiobras-symbol-inv"/></svg>
     </div>
-    <span class="sidenav-brand-name">Fiobras HUB</span>
+    <div class="sidenav-brand-text">
+      <span class="sidenav-brand-name">Fiobras</span>
+      <span class="sidenav-brand-sub">H U B</span>
+    </div>
     <button class="sidenav-toggle" id="sidenavToggle" onclick="toggleSidenav()" aria-label="Recolher/expandir menu">
       <svg class="icon sm"><use href="#i-panel-toggle"/></svg>
     </button>
@@ -539,7 +572,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.13.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.14.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2222,10 +2255,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.13.0';
+const CURRENT_VERSION = '3.14.0';
 const CHANGELOG = [
   {
-    v:'3.13.0', d:'15 abr 2026', current:true,
+    v:'3.14.0', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Nova identidade visual: símbolo F com ponto amarelo.', desc:'Marca da Fiobras HUB redesenhada — letra F com o braço do meio substituído por um círculo amarelo (conceito "F + hub"). 3 symbols novos no defs SVG: i-fiobras-symbol (verde sobre fundo claro), i-fiobras-symbol-inv (branco sobre fundo verde, pra usar em sidenav/splash), i-fiobras-mark (símbolo dentro do quadrado verde com cantos arredondados, pra ícones grandes).'},
+      {type:'high', title:'Aplicações: sidenav, splash, login, favicon, PWA.', desc:'Sidenav: o quadradinho verde no topo agora exibe a versão invertida do símbolo (F branco + ponto amarelo) em vez do texto "F". Quando expandida, "Fiobras" em Outfit 600 + "H U B" em Outfit 300 com letterspacing 3px (verde). Splash e login: marca composta (símbolo + Fiobras + HUB) centralizada. Favicon: SVG inline via data URI no <link rel="icon">. Apple touch icon: idem. Ícones PWA 192/512 são gerados em runtime via canvas a partir das proporções oficiais do símbolo (rect vertical, rect horizontal, círculo amarelo) — não dependem mais de PNG estáticos.'},
+      {type:'note', title:'Manifest: nome PWA ajustado pra "Fiobras HUB".', desc:'O manifest tinha name="Fiobras Dashboard" e short_name="Dashboard" desde o nome legado. Agora name="Fiobras HUB" e short_name="HUB", e background_color do splash do PWA mudou pra verde (#008835) pra combinar com a identidade.'}
+    ]
+  },
+  {
+    v:'3.13.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'+7 usuários (manutenção e CRM).', desc:'Adicionados ao USERS hardcoded: Hernandes, Vorlei, Pedro, Ivonei e Roland (técnicos da equipe de manutenção, vindos do app standalone williamscchulz-was/manutencao) + Jacques e Suyanne (equipe comercial, vindos do app fiobras-crm). Total agora: 1 admin + 16 produção. Todos entram com role producao default e sem senha — no primeiro login disparam o popup de definir senha. O admin (William) configura permissões granulares depois pelo Editar.'},
       {type:'feat', title:'Sessões ativas com força logout remoto.', desc:'Novo botão de pessoas no header do painel admin abre o modal "Sessões ativas". Mostra todos os usuários com login ativo (heartbeat enviado a cada 60 segundos pro path active-sessions/{user}). Mostra plataforma detectada (Android/iPhone/iPad/Windows/macOS/Linux) e quanto tempo desde o último ping. Botão "Forçar logout" em cada user que não seja você mesmo: marca um flag em force-logout/{user} com timestamp; o cliente do alvo, no próximo check, vê que o flag é mais recente que o início da sessão e desloga sozinho com aviso. Saída pela aba também limpa a sessão (beforeunload).'},
@@ -2660,25 +2701,71 @@ function checkChangelog(){
 }
 
 // ── PWA Manifest ─────────────────────────────────────────────────────────
+// v3.14.0: ícones gerados em runtime via canvas a partir do símbolo SVG novo
+function _buildHubIcon(size){
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+  // Fundo verde com cantos arredondados (rx ≈ 22% do tamanho)
+  const rx = Math.round(size * 0.22);
+  ctx.fillStyle = '#008835';
+  // Path arredondado
+  ctx.beginPath();
+  ctx.moveTo(rx, 0); ctx.lineTo(size - rx, 0); ctx.quadraticCurveTo(size, 0, size, rx);
+  ctx.lineTo(size, size - rx); ctx.quadraticCurveTo(size, size, size - rx, size);
+  ctx.lineTo(rx, size); ctx.quadraticCurveTo(0, size, 0, size - rx);
+  ctx.lineTo(0, rx); ctx.quadraticCurveTo(0, 0, rx, 0); ctx.closePath();
+  ctx.fill();
+  // F branco — proporções do símbolo 60×68 escaladas pra 200×200
+  // rect vertical: x=70 y=52 w=20 h=96 (no 200×200), em proporção: x=0.35 y=0.26 w=0.10 h=0.48
+  // rect horizontal: x=70 y=52 w=68 h=20 (no 200×200), em proporção: x=0.35 y=0.26 w=0.34 h=0.10
+  // circle: cx=130 cy=110 r=14 (no 200×200), em proporção: cx=0.65 cy=0.55 r=0.07
+  ctx.fillStyle = '#FFFFFF';
+  const fx = Math.round(size * 0.35);
+  const fy = Math.round(size * 0.26);
+  const vw = Math.round(size * 0.10);
+  const vh = Math.round(size * 0.48);
+  const hw = Math.round(size * 0.34);
+  const hh = Math.round(size * 0.10);
+  ctx.fillRect(fx, fy, vw, vh);
+  ctx.fillRect(fx, fy, hw, hh);
+  // Ponto amarelo
+  ctx.fillStyle = '#FFCB00';
+  const cx = Math.round(size * 0.65);
+  const cy = Math.round(size * 0.55);
+  const r  = Math.round(size * 0.07);
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  return c.toDataURL('image/png');
+}
 (function(){
+  let icon192, icon512;
+  try { icon192 = _buildHubIcon(192); icon512 = _buildHubIcon(512); }
+  catch(e){ console.warn('Falha ao gerar ícones PWA:', e); }
   const manifest={
-    name:"Fiobras Dashboard",
-    short_name:"Dashboard",
-    description:"Dashboard de metas Fiobras 2026",
+    name:"Fiobras HUB",
+    short_name:"HUB",
+    description:"Mini-ERP da Fiobras Fios Tintos",
     start_url:"./",
     scope:"./",
     display:"standalone",
-    background_color:"#EDF2EE",
+    background_color:"#008835",
     theme_color:"#008835",
     orientation:"portrait-primary",
-    icons:[
-      {src:"./icon-192.png",sizes:"192x192",type:"image/png",purpose:"any maskable"},
-      {src:"./icon-512.png",sizes:"512x512",type:"image/png",purpose:"any maskable"}
+    icons: [
+      icon192 ? {src:icon192,sizes:"192x192",type:"image/png",purpose:"any maskable"} : {src:"./icon-192.png",sizes:"192x192",type:"image/png"},
+      icon512 ? {src:icon512,sizes:"512x512",type:"image/png",purpose:"any maskable"} : {src:"./icon-512.png",sizes:"512x512",type:"image/png"}
     ]
   };
   const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
   const el=document.getElementById('pwa-manifest');
   if(el) el.href=URL.createObjectURL(blob);
+  // Substitui apple-touch-icon pelo ícone gerado também
+  if(icon192){
+    const apple = document.querySelector('link[rel="apple-touch-icon"]');
+    if(apple) apple.href = icon192;
+  }
 })();
 
 // ── Service Worker (PWA instalável) ──────────────────────────────────────
