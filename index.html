@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.8.2  15/04/2026  Fix Manut.: bootstrap usa '__admin__'   ║
+  ║    • Select interno usa '__admin__' (não 'admin'); fix       ║
+  ║      libera abas admin-only (Preventiva/Máquinas/Histórico/  ║
+  ║      Relatórios) que estavam escondidas por CSS.             ║
   ║  v3.8.1  15/04/2026  Fix Manutenção: splash + body close bug ║
   ║    • Splash interno escondido (era visual fora do HUB).      ║
   ║    • Bootstrap real antes do </body> (regex pegou primeiro    ║
@@ -511,7 +515,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.8.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.8.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1538,10 +1542,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.8.1';
+const CURRENT_VERSION = '3.8.2';
 const CHANGELOG = [
   {
-    v:'3.8.1', d:'15 abr 2026', current:true,
+    v:'3.8.2', d:'15 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Manutenção: admin só via Dashboard e Kanban (sem Preventiva, Máquinas, Histórico, Relatórios).', desc:'No app standalone do Manutenção, o select de login tem opção com value `__admin__` (que internamente o doLogin mapeia pra USERS.admin). Meu bootstrap setava `sel.value = "admin"` direto — como `admin` não é um value válido em nenhuma <option>, o browser silenciosamente vira `value = ""` (string vazia). Aí o doLogin abortava no primeiro check `if (!sel)` e nunca chegava a marcar `body.is-admin`, que é justamente o que faz o CSS revelar as abas admin-only (Preventiva/Máquinas/Histórico/Relatórios). Corrigido pra usar `__admin__` no value e tudo libera.'}
+    ]
+  },
+  {
+    v:'3.8.1', d:'15 abr 2026',
     items:[
       {type:'high', title:'Manutenção: splash azul cobrindo tudo + tela não abria.', desc:'Dois bugs conjugados na v3.8.0. Primeiro: o splash interno (fundo azul "Fiobras MANUTENÇÃO" com loading bar) não tava escondido — visualmente fora do padrão HUB e cobrindo o app por 2.5s mesmo logado. Segundo, mais grave: meu script Python que adapta o HTML usava regex non-greedy pra achar o <body>...</body>, e o manutencao.html original tem `</body>` literal dentro de uma string JS (usado pra gerar HTML de QR code via window.open). Resultado: meu bootstrap foi injetado NO MEIO de uma string JS, quebrando todo o JS subsequente. Agora regex usa rfind() pra pegar o ÚLTIMO </body> (o real), bootstrap fica no lugar certo. CSS extra: #app{display:block!important} defensivo caso doLogin trave em algum init de FCM/notif.'}
     ]

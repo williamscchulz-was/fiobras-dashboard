@@ -5504,7 +5504,8 @@ function __hubBootManut(){
     if(sp) sp.style.display = 'none';
     const sel = document.getElementById('login-user-sel');
     const senha = document.getElementById('login-senha');
-    if(sel) sel.value = 'admin';
+    // O select tem opção '__admin__' (mapeada pra USERS.admin no doLogin); setar 'admin' direto vira string vazia
+    if(sel) sel.value = '__admin__';
     if(senha) senha.value = 'admin';
     if(typeof doLogin === 'function'){
       try { doLogin(); }
