@@ -3,6 +3,12 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.17.0 16/04/2026  Manutenção: visual padronizado ao HUB    ║
+  ║    • Tokens light/dark sincronizados (sage clarinho/Apple).   ║
+  ║    • Tipografia Outfit Black 900 nos títulos/KPIs.            ║
+  ║    • Tabs internas no padrão DM Mono uppercase do HUB.        ║
+  ║    • Cards/buttons/inputs no border-radius e bordas HUB.      ║
+  ║    • Cores semânticas (prioridade/tipo/coluna) preservadas.   ║
   ║  v3.16.0 16/04/2026  Migração: fiobras-preco → fiobras-hub    ║
   ║    • Banco renomeado pra fiobras-hub-default-rtdb.            ║
   ║    • Config Firebase trocada nos 4 arquivos.                  ║
@@ -580,7 +586,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.16.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.17.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2263,10 +2269,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.16.0';
+const CURRENT_VERSION = '3.17.0';
 const CHANGELOG = [
   {
-    v:'3.16.0', d:'16 abr 2026', current:true,
+    v:'3.17.0', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção: visual completo no padrão HUB.', desc:'O sub-app de Manutenção rodava com visual próprio (paleta levemente diferente, fonte, bordas). Agora os tokens CSS interno são sobrepostos pra usar exatamente os mesmos do HUB: bg sage clarinho #EDF1EA no light, Apple style (#1C1C1E/#2C2C2E/#3A3A3C) no dark; fontes Outfit/Poppins/DM Mono nos lugares certos; border-radius 14px nos cards, 8px nos botões e inputs; tabs internas em DM Mono uppercase como o HUB.'},
+      {type:'high', title:'Outfit Black 900 nos KPIs e títulos.', desc:'Valores grandes do Dashboard interno do Manutenção (total de demandas, em andamento, etc.) e títulos de seções agora usam Outfit weight 900 com letterspacing -.015em — mesma presença visual de display dos KPIs do Gerencial e Stats Cor do HUB.'},
+      {type:'note', title:'Cores semânticas preservadas.', desc:'Tudo o que tinha cor com significado funcional foi mantido como estava: vermelho/amarelo/verde das tags Alta/Média/Baixa, azul/verde dos tipos Mecânica/Elétrica, bullets das colunas Kanban (A fazer, Em andamento, Concluído). Só o "chrome" (paleta de fundo, fontes, bordas, espaçamentos) virou padrão HUB.'},
+      {type:'note', title:'Mobile: anti-zoom iOS aplicado.', desc:'Inputs do Manutenção em mobile agora usam font-size:16px (regra do HUB §6.1) — Safari/iOS não dá mais zoom automático ao focar campos. Container interno respeita padding-bottom:96px pra não esconder conteúdo atrás da pílula flutuante de navegação.'}
+    ]
+  },
+  {
+    v:'3.16.0', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Migração de Firebase: fiobras-preco → fiobras-hub.', desc:'Projeto Firebase trocado pra refletir o nome real do produto. Dados completos exportados via JSON do projeto antigo (fiobras-preco) e importados no novo (fiobras-hub) — zero perda. Config atualizada nos 4 arquivos: HUB (index.html), Preço (preco/index.html), CRM (crm/index.html), Manutenção (manutencao/index.html + firebase-messaging-sw.js do FCM). URL nova do banco: https://fiobras-hub-default-rtdb.firebaseio.com.'},
       {type:'note', title:'O que NÃO mudou.', desc:'Login user+senha custom continua igual. Anonymous Auth continua sendo usado pelas rules. Estrutura de paths (metas-2026, cores-2026, crm/, manutencao/, etc.) idêntica. Pra usuário final é transparente — só o nome do projeto no console do Firebase mudou.'},

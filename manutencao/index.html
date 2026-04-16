@@ -1710,6 +1710,137 @@ display: none;
   body.logged-in #app > .container:first-of-type { padding-top: 8px !important; }
   /* App sempre visível dentro do HUB (defensivo) */
   #app { display: block !important; }
+
+  /* ── v3.17.0: Adapta\u00e7\u00e3o de tokens ao padr\u00e3o HUB ───────────── */
+  :root {
+    --bg:         #EDF1EA !important;  /* sage clarinho do HUB */
+    --surface:    #FFFFFF !important;
+    --border:     #DAE3D2 !important;
+    --border2:    #C5D2BC !important;
+    --text:       #1A2118 !important;
+    --text2:      #3D5C46 !important;
+    --muted:      #5A6450 !important;
+    --muted2:     #8A9580 !important;
+    --col-bg:     #F4F7F0 !important;
+    /* surface2 (segunda camada de cinza pra cards/headers) */
+    --surface2:   #F4F7F0 !important;
+    /* shadow tokens compat com HUB */
+    --shadow-sm:  0 1px 3px rgba(0,0,0,.04) !important;
+    --shadow-md:  0 4px 14px rgba(0,0,0,.06) !important;
+  }
+  [data-theme="dark"] {
+    --bg:         #1C1C1E !important;  /* Apple style do HUB */
+    --surface:    #2C2C2E !important;
+    --surface2:   #3A3A3C !important;
+    --border:     #38383A !important;
+    --border2:    #48484A !important;
+    --text:       #F5F5F7 !important;
+    --text2:      #C7C7CC !important;
+    --muted:      #98989D !important;
+    --muted2:     #636366 !important;
+    --col-bg:     #2C2C2E !important;
+  }
+
+  /* Tipografia: alinhar c/ HUB (Outfit Black 900 nos t\u00edtulos grandes) */
+  body, .container { font-family: 'Poppins', sans-serif; }
+  .kpi-card .kpi-val,
+  .dash-section h2,
+  .dash-num,
+  h1, h2 {
+    font-family: 'Outfit', sans-serif !important;
+    letter-spacing: -.015em;
+  }
+  .kpi-card .kpi-val,
+  .dash-num {
+    font-weight: 900 !important;
+  }
+
+  /* Tabs do shell interno mais limpas (alinhado ao .tab-btn do HUB) */
+  .tabs {
+    background: var(--bg) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: none !important;
+    padding: 0 22px !important;
+  }
+  .tab-btn {
+    font-family: 'DM Mono', monospace !important;
+    font-size: .62rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    padding: 13px 14px !important;
+    color: var(--muted2) !important;
+  }
+  .tab-btn:hover { color: var(--text) !important; }
+  .tab-btn.active {
+    color: var(--green) !important;
+    border-bottom-color: var(--green) !important;
+  }
+  [data-theme="dark"] .tab-btn.active { color: #3ecf6e !important; border-bottom-color: #3ecf6e !important; }
+
+  /* Cards (kanban + KPIs + dash) com border-radius e bordas no padr\u00e3o HUB */
+  .kanban-card,
+  .kpi-card,
+  .dash-section,
+  .preventiva-card,
+  .historico-row {
+    border-radius: 14px !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: border-color .2s ease, box-shadow .2s ease !important;
+  }
+  .kanban-card:hover,
+  .preventiva-card:hover {
+    border-color: var(--border2) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  /* Bot\u00f5es no padr\u00e3o HUB (.save-btn) */
+  .btn-primary, .btn-add, button.primary {
+    background: var(--green) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: .62rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 2px 12px rgba(0,136,53,.18) !important;
+    transition: background .15s, transform .1s !important;
+  }
+  .btn-primary:hover, .btn-add:hover, button.primary:hover {
+    background: var(--green2) !important;
+    transform: translateY(-1px);
+  }
+
+  /* Inputs no padr\u00e3o HUB (border-radius 8, fonte 16px no mobile) */
+  input[type="text"], input[type="number"], input[type="date"],
+  input[type="search"], input[type="email"], select, textarea {
+    border-radius: 8px !important;
+    border: 1.5px solid var(--border2) !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 14px;
+    transition: border-color .15s !important;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--green) !important;
+    outline: none !important;
+  }
+  @media(max-width:480px){
+    input[type="text"], input[type="number"], input[type="date"],
+    input[type="search"], input[type="email"], select, textarea {
+      font-size: 16px !important; /* anti-zoom iOS */
+    }
+  }
+
+  /* Modais com border-radius do HUB */
+  .modal, .modal-content { border-radius: 16px !important; }
+
+  /* Container interno: respeitar padding do HUB */
+  .container { max-width: 1280px !important; padding: 22px 22px 60px !important; }
+  @media(max-width:640px){
+    .container { padding: 14px 14px 96px !important; }
+  }
 </style>
 <div id="noSessionGate" style="display:none;position:fixed;inset:0;background:var(--bg,#EDF1EA);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:20px;text-align:center;font-family:Poppins,sans-serif;">
   <div style="font-size:1.1rem;font-weight:700;color:var(--text,#1A2118)">Acesso pelo HUB</div>
