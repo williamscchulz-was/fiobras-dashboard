@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.10.0 15/04/2026  Permissões editáveis na UI (admin)       ║
+  ║    • Painel ganha Editar: role, turno, módulos liberados.    ║
+  ║    • Helpers getEffectiveRole/Turno/Modules com override.    ║
+  ║    • canAccessModule consulta override via Firebase.         ║
   ║  v3.9.0  15/04/2026  Usuários: Edilson + Joacir, painel       ║
   ║    • Adicionados Edilson e Joacir (role: producao).          ║
   ║    • Popup obrigatório "Definir senha" no 1º login.          ║
@@ -309,7 +313,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.9.0">
+<link rel="stylesheet" href="css/hub.css?v=3.10.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -524,7 +528,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.9.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.10.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1073,6 +1077,46 @@
   </div>
 </div>
 
+<!-- Modal Editar usuário (admin only · v3.10.0) -->
+<div class="modal-bg" id="geuModal" onclick="if(event.target===this)fecharEditarUsuario()">
+  <div class="modal" style="width:480px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Editar usuário · <span id="geuNome">—</span></div>
+      <button class="sc-lanc-close" onclick="fecharEditarUsuario()" aria-label="Fechar">
+        <svg class="icon sm"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="tl-form-field">
+      <label>Tipo de acesso (role)</label>
+      <select id="geuRole" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg);">
+        <option value="producao">Produção</option>
+        <option value="admin">Administrador</option>
+      </select>
+    </div>
+    <div class="tl-form-field">
+      <label>Turno (Apontamento — só pra líderes de turno)</label>
+      <select id="geuTurno" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg);">
+        <option value="">Nenhum (acesso geral à tintoria)</option>
+        <option value="1">1º Turno</option>
+        <option value="2">2º Turno</option>
+        <option value="3">3º Turno</option>
+      </select>
+    </div>
+    <div class="tl-form-field">
+      <label>Módulos liberados</label>
+      <div id="geuModulos" class="geu-mods"></div>
+      <div class="mc-hint" style="margin-top:6px">Marque os módulos que esse usuário enxerga. Os não marcados ficam com cadeado.</div>
+    </div>
+    <div class="mc-hint" style="background:rgba(255,203,0,.08);border:1px solid rgba(255,203,0,.25);padding:9px 12px;border-radius:8px;color:var(--text);font-style:normal;margin-bottom:4px">
+      <strong>Atenção:</strong> mudanças entram em vigor no próximo login do usuário.
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharEditarUsuario()">Cancelar</button>
+      <button class="save-btn" onclick="salvarEditarUsuario()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal gerenciar tags (admin only) -->
 <div class="modal-bg" id="tlTagsModal" onclick="if(event.target===this)fecharTlTagsManager()">
   <div class="modal" style="width:440px;max-height:90vh;overflow-y:auto">
@@ -1210,7 +1254,7 @@ async function doLogin(){
   // 3) Sem senha: login direto (comportamento atual)
   setSession(sel);
   const displayName = (profile.nomeCompleto && profile.nomeCompleto.trim()) || u.nome;
-  showSplash(displayName, u.role);
+  showSplash(displayName, getEffectiveRole(sel));
 }
 
 function doLogout(){
@@ -1222,7 +1266,7 @@ function showSplash(nome, role){
   window._currentUserName = nome;
   // Guardar turno do líder (1,2,3) ou null se chefe/admin
   const sessUser = getSession()?.user;
-  window._currentUserTurno = (sessUser && USERS[sessUser]?.turno) || null;
+  window._currentUserTurno = sessUser ? getEffectiveTurno(sessUser) : null;
   document.getElementById('loginScreen').classList.add('hide');
   const sp=document.getElementById('splash');
   const bar=sp.querySelector('.splash-bar');
@@ -1475,22 +1519,70 @@ function renderGuList(){
     const senhaCls = temSenha ? 'tag tag--sm tag--success' : 'tag tag--sm tag--warning';
     // Admin com senha fixa não permite reset; outros sim
     const podeResetar = !(u.senha !== null && u.senha !== undefined) && !!p.senhaHash;
+    // v3.10.0: usar role/turno effective (override do profile)
+    const effRole = getEffectiveRole(key);
+    const effTurno = getEffectiveTurno(key);
+    const turnoLbl = effTurno ? ('turno ' + effTurno) : '';
     return '<div class="gu-row">' +
-      '<div class="gu-row-av' + (isAdmin?' admin':'') + '">' + esc(initials) + '</div>' +
+      '<div class="gu-row-av' + (effRole==='admin'?' admin':'') + '">' + esc(initials) + '</div>' +
       '<div class="gu-row-info">' +
         '<div class="gu-row-nome">' + esc(nomeShow) + '</div>' +
         '<div class="gu-row-meta">' +
-          '<span>' + esc(u.role) + '</span>' +
-          (turno ? '<span class="gu-row-meta-sep">·</span><span>' + turno + '</span>' : '') +
+          '<span>' + esc(effRole) + '</span>' +
+          (turnoLbl ? '<span class="gu-row-meta-sep">·</span><span>' + turnoLbl + '</span>' : '') +
           '<span class="gu-row-meta-sep">·</span><span class="' + senhaCls + '"><svg><use href="#' + senhaIcon + '"/></svg>' + senhaSrc + '</span>' +
         '</div>' +
       '</div>' +
+      '<button class="gu-row-act-edit" onclick="abrirEditarUsuario(\'' + key + '\')" title="Editar permissões"><svg class="icon sm"><use href="#i-pencil"/></svg></button>' +
       '<button class="gu-row-act' + (podeResetar?'':' disabled') + '" ' +
         (podeResetar ? 'onclick="resetarSenhaUser(\'' + key + '\')"' : 'disabled') +
         '>Resetar senha</button>' +
     '</div>';
   }).join('');
 }
+// v3.10.0: editar role/turno/módulos liberados de um user (admin only)
+let geuEditingKey = null;
+const MOD_LBL_FULL = { resultados:'Gerencial', producao:'Produção', preco:'Preço de Venda', manutencao:'Manutenção', crm:'CRM' };
+window.abrirEditarUsuario = (userKey) => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  const u = USERS[userKey]; if(!u){ toast('Usuário inválido','err'); return; }
+  geuEditingKey = userKey;
+  document.getElementById('geuNome').textContent = (((window._usersProfile||{})[userKey]||{}).nomeCompleto || u.nome);
+  document.getElementById('geuRole').value = getEffectiveRole(userKey);
+  const eff = getEffectiveTurno(userKey);
+  document.getElementById('geuTurno').value = eff ? String(eff) : '';
+  // Render checkboxes de módulos
+  const allowed = getEffectiveModules(userKey);
+  const host = document.getElementById('geuModulos');
+  host.innerHTML = ALL_MODULES.map(m => {
+    const checked = allowed.includes(m) ? 'checked' : '';
+    return '<label class="geu-mod"><input type="checkbox" value="' + m + '" ' + checked + '><span>' + MOD_LBL_FULL[m] + '</span></label>';
+  }).join('');
+  document.getElementById('geuModal').classList.add('open');
+};
+window.fecharEditarUsuario = () => {
+  document.getElementById('geuModal').classList.remove('open');
+  geuEditingKey = null;
+};
+window.salvarEditarUsuario = () => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  if(!geuEditingKey){ toast('Nada selecionado','err'); return; }
+  const role = document.getElementById('geuRole').value;
+  const turnoStr = document.getElementById('geuTurno').value;
+  const modulesAllowed = Array.from(document.querySelectorAll('#geuModulos input:checked')).map(i => i.value);
+  if(modulesAllowed.length === 0){ toast('Selecione ao menos 1 módulo','err'); return; }
+  const profile = Object.assign({}, (window._usersProfile||{})[geuEditingKey] || {});
+  profile.roleOverride = role;
+  // turnoOverride: null explícito quando "Nenhum", número quando 1/2/3
+  profile.turnoOverride = turnoStr ? parseInt(turnoStr, 10) : null;
+  profile.modulesAllowedOverride = modulesAllowed;
+  if(window._salvarUserProfile) window._salvarUserProfile(geuEditingKey, profile);
+  if(window._usersProfile) window._usersProfile[geuEditingKey] = profile;
+  toast('Salvo · efetiva no próximo login do usuário');
+  fecharEditarUsuario();
+  setTimeout(renderGuList, 200);
+};
+
 window.resetarSenhaUser = (userKey) => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
   const u = USERS[userKey]; if(!u){ toast('Usuário inválido','err'); return; }
@@ -1576,12 +1668,37 @@ document.addEventListener('click', (e) => {
   }
 });
 
-/** Retorna true se o role atual pode acessar o módulo */
+// v3.10.0: Módulos disponíveis e defaults por role
+const ALL_MODULES = ['resultados','producao','preco','manutencao','crm'];
+const DEFAULT_MODULES_BY_ROLE = {
+  admin:    ['resultados','producao','preco','manutencao','crm'],
+  producao: ['producao','manutencao','crm']
+};
+function getEffectiveRole(userKey){
+  const u = USERS[userKey]; if(!u) return 'producao';
+  const p = (window._usersProfile || {})[userKey] || {};
+  return p.roleOverride || u.role;
+}
+function getEffectiveTurno(userKey){
+  const u = USERS[userKey]; if(!u) return null;
+  const p = (window._usersProfile || {})[userKey] || {};
+  if(p.turnoOverride === null) return null; // admin removeu turno explicitamente
+  if(typeof p.turnoOverride === 'number') return p.turnoOverride;
+  return u.turno || null;
+}
+function getEffectiveModules(userKey){
+  const role = getEffectiveRole(userKey);
+  const p = (window._usersProfile || {})[userKey] || {};
+  if(Array.isArray(p.modulesAllowedOverride)) return p.modulesAllowedOverride;
+  return DEFAULT_MODULES_BY_ROLE[role] || DEFAULT_MODULES_BY_ROLE.producao;
+}
+
+/** Retorna true se o usuário logado pode acessar o módulo */
 function canAccessModule(mod){
-  const role = window._userRole || 'producao';
-  if(role === 'admin') return true;
-  // Produção: acessa producao + manutencao/crm (placeholders abertos, granular depois)
-  return mod === 'producao' || mod === 'manutencao' || mod === 'crm';
+  const sess = getSession();
+  if(!sess) return false;
+  const allowed = getEffectiveModules(sess.user);
+  return allowed.includes(mod);
 }
 
 /** Módulos em construção — clique mostra toast WIP, não bloqueia por permissão */
@@ -1667,7 +1784,7 @@ function checkAuth(){
   const s=getSession();
   if(s&&USERS[s.user]){
     document.getElementById('loginScreen').classList.add('hide');
-    showSplash(USERS[s.user].nome, USERS[s.user].role);
+    showSplash(USERS[s.user].nome, getEffectiveRole(s.user));
   }
 }
 
@@ -1693,10 +1810,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.9.0';
+const CURRENT_VERSION = '3.10.0';
 const CHANGELOG = [
   {
-    v:'3.9.0', d:'15 abr 2026', current:true,
+    v:'3.10.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Permissões editáveis na UI (admin only).', desc:'Cada linha do painel "Gerenciar usuários" agora tem um botão de lápis (editar). Abre um modal com 3 controles: tipo de acesso (Produção/Administrador), turno (Nenhum/1/2/3 — só serve pro Apontamento) e checkboxes dos 5 módulos (Gerencial, Produção, Preço, Manutenção, CRM). Marque os que esse user enxerga; os não marcados ficam com cadeado pra ele. Mudanças entram em vigor no próximo login do usuário (não muda a sessão atual dele).'},
+      {type:'high', title:'Sistema de overrides via Firebase.', desc:'Os campos novos vivem em users-profile/{user}: roleOverride (string), turnoOverride (number ou null), modulesAllowedOverride (array de modules). Helpers getEffectiveRole/Turno/Modules consultam os overrides primeiro, fallback pro USERS hardcoded. canAccessModule passou a usar getEffectiveModules — agora o cadeado dos módulos respeita o que o admin configurou. doLogin e showSplash usam getEffectiveRole pra decidir o role da sessão atual.'},
+      {type:'note', title:'Defaults preservados.', desc:'Se o admin não configurou nada, cada user mantém o role/turno/modulos default que veio do USERS hardcoded (admin vê tudo, produção vê producao+manutencao+crm). Configuração só sobrepõe quando explicitamente setada. Reverter pra default = limpar os campos override no Firebase (futuro: botão "Restaurar padrão" no modal).'},
+      {type:'note', title:'Próxima evolução.', desc:'Permissões granulares por aba (TAB_PERMS — hoje só Stats Cor é restrita por allowlist hardcoded) também passarão pro painel admin numa próxima versão. Mesmo padrão: array no profile, helper canAccessTab consulta override.'}
+    ]
+  },
+  {
+    v:'3.9.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Edilson e Joacir adicionados como usuários.', desc:'Dois usuários novos no HUB com role `producao` (sem turno). Passam a ver Produção, Manutenção e CRM por padrão; Gerencial e Preço bloqueados (cadeado), a definir granular depois. Total de usuários sobe pra 11 (1 admin + 10 produção).'},
       {type:'feat', title:'Popup obrigatório "Definir senha" no primeiro login.', desc:'Quando um usuário entra e ainda não tem senha cadastrada (USERS.senha=null e sem senhaHash no profile), aparece automaticamente um modal pedindo pra criar uma senha de pelo menos 4 caracteres. Sem botão de cancelar — é obrigatório seguir. A senha é salva como SHA-256 + salt no path users-profile/{user}/senhaHash. Nos próximos logins, esse user passa a precisar da senha.'},
