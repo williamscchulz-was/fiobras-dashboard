@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.20.5 16/04/2026  Fix editar/resetar user din. + selectAll ║
+  ║    • abrirEditarUsuario e resetarSenhaUser usam getUser.     ║
+  ║    • Botões "Marcar todos" e "Limpar" nos módulos.           ║
   ║  v3.20.4 16/04/2026  Stats Cor: liberada com módulo Produção  ║
   ║    • TAB_PERMS e RESTRICTED_TABS zerados.                    ║
   ║    • Quem acessa Produção acessa Stats Cor automaticamente.  ║
@@ -377,7 +380,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.19.0">
+<link rel="stylesheet" href="css/hub.css?v=3.20.5">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -614,7 +617,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.4</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.5</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1273,7 +1276,13 @@
       </select>
     </div>
     <div class="tl-form-field">
-      <label>Módulos liberados</label>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="margin:0">Módulos liberados</label>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="geu-mod-act" onclick="geuToggleAllModulos(true)">Marcar todos</button>
+          <button type="button" class="geu-mod-act" onclick="geuToggleAllModulos(false)">Limpar</button>
+        </div>
+      </div>
       <div id="geuModulos" class="geu-mods"></div>
       <div class="mc-hint" style="margin-top:6px">Marque os módulos que esse usuário enxerga. Os não marcados ficam com cadeado.</div>
     </div>
@@ -1996,7 +2005,7 @@ let geuEditingKey = null;
 const MOD_LBL_FULL = { resultados:'Gerencial', producao:'Produção', preco:'Preço de Venda', manutencao:'Manutenção', crm:'CRM' };
 window.abrirEditarUsuario = (userKey) => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
-  const u = USERS[userKey]; if(!u){ toast('Usuário inválido','err'); return; }
+  const u = getUser(userKey); if(!u){ toast('Usuário inválido','err'); return; }
   geuEditingKey = userKey;
   document.getElementById('geuNome').textContent = (((window._usersProfile||{})[userKey]||{}).nomeCompleto || u.nome);
   document.getElementById('geuRole').value = getEffectiveRole(userKey);
@@ -2033,6 +2042,12 @@ window.fecharEditarUsuario = () => {
   document.getElementById('geuModal').classList.remove('open');
   geuEditingKey = null;
 };
+// v3.20.5: marcar/limpar todos os checkboxes de módulos
+window.geuToggleAllModulos = (on) => {
+  document.querySelectorAll('#geuModulos input[type="checkbox"]').forEach(i => {
+    i.checked = !!on;
+  });
+};
 window.salvarEditarUsuario = () => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
   if(!geuEditingKey){ toast('Nada selecionado','err'); return; }
@@ -2061,7 +2076,7 @@ window.salvarEditarUsuario = () => {
 
 window.resetarSenhaUser = (userKey) => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
-  const u = USERS[userKey]; if(!u){ toast('Usuário inválido','err'); return; }
+  const u = getUser(userKey); if(!u){ toast('Usuário inválido','err'); return; }
   if(!confirm('Resetar a senha de ' + u.nome + '? Ele(a) vai precisar criar uma nova no próximo login.')) return;
   const profile = Object.assign({}, (window._usersProfile || {})[userKey] || {});
   delete profile.senhaHash;
@@ -2348,10 +2363,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.20.4';
+const CURRENT_VERSION = '3.20.5';
 const CHANGELOG = [
   {
-    v:'3.20.4', d:'16 abr 2026', current:true,
+    v:'3.20.5', d:'16 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Editar/resetar usuário criado pela UI dava "Usuário inválido".', desc:'Os handlers abrirEditarUsuario, salvarEditarUsuario, abrirCriarUsuario e excluirUsuarioDinamico estavam consultando USERS[userKey] direto (só os hardcoded) em vez de getUser(userKey) que faz merge com users-config (criados via UI). Resultado: Jairo (ou qualquer outro user criado pela UI) caía no toast "Usuário inválido" ao tentar editar/resetar. Substituído pelos 4 handlers usarem getUser, que cobre os dois mundos.'},
+      {type:'feat', title:'Botões "Marcar todos" e "Limpar" no editor de módulos.', desc:'No painel Editar Usuário, ao lado do label "Módulos liberados", aparecem 2 botões pequenos. "Marcar todos" libera os 5 módulos de uma vez (Gerencial / Produção / Preço / Manutenção / CRM); "Limpar" desmarca tudo. Útil pra usuários admin (marca todos) ou pra começar do zero. Defaults por role continuam sendo aplicados quando o user é criado.'}
+    ]
+  },
+  {
+    v:'3.20.4', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Stats Cor liberada pra todos do módulo Produção.', desc:'Antes Stats Cor tinha allowlist hardcoded (admin + Anderson + Aldo + Geovani + Lucivane). Agora qualquer usuário com acesso ao módulo Produção também acessa Stats Cor automaticamente — incluindo os líderes de turno (Adelir/Alexander/Djoniffer) que antes não viam. TAB_PERMS e RESTRICTED_TABS foram zerados; a seção "Abas restritas" do painel Editar Usuário some automaticamente quando não há abas restritas configuradas. Se algum dia precisar restringir alguma aba específica, basta popular o objeto RESTRICTED_TABS no código que a seção volta a aparecer.'}
     ]
