@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.12.0 15/04/2026  CRUD de usuários + audit log             ║
+  ║    • Criar/excluir usuários via UI (users-config Firebase).  ║
+  ║    • Login dropdown agora é dinâmico (USERS + dinâmicos).    ║
+  ║    • Audit log: todas as ações de admin gravadas.            ║
+  ║    • Botão "Histórico" no painel mostra últimas 100.         ║
   ║  v3.11.0 15/04/2026  Permissões por aba editáveis na UI       ║
   ║    • Editar usuário ganha seção "Abas restritas".            ║
   ║    • RESTRICTED_TABS define quais abas têm acesso limitado.  ║
@@ -317,7 +322,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.10.0">
+<link rel="stylesheet" href="css/hub.css?v=3.12.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -365,11 +370,7 @@
       <label class="login-label">Usuário</label>
       <select class="login-select" id="loginUser" onchange="onUserChange()">
         <option value="">Selecione...</option>
-        <option value="admin">Admin</option>
-        <option value="anderson">Anderson</option>
-        <option value="aldo">Aldo</option>
-        <option value="geovani">Geovani</option>
-        <option value="lucivane">Lucivane</option>
+        <!-- Opções dinâmicas adicionadas via _refreshLoginUserOptions() (v3.12.0) -->
       </select>
     </div>
     <div class="login-pass-wrap" id="loginPassWrap">
@@ -532,7 +533,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.11.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.12.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1070,14 +1071,66 @@
   <div class="modal" style="width:540px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-size:.9rem;font-weight:700;color:var(--text)">Gerenciar usuários</div>
-      <button class="sc-lanc-close" onclick="fecharGerenciarUsuarios()" aria-label="Fechar">
-        <svg class="icon sm"><use href="#i-x"/></svg>
-      </button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="gu-hdr-btn" onclick="abrirAuditLog()" title="Histórico de alterações"><svg class="icon sm"><use href="#i-clock"/></svg></button>
+        <button class="gu-hdr-btn primary" onclick="abrirCriarUsuario()" title="Criar usuário"><svg class="icon sm"><use href="#i-plus"/></svg> Novo</button>
+        <button class="sc-lanc-close" onclick="fecharGerenciarUsuarios()" aria-label="Fechar">
+          <svg class="icon sm"><use href="#i-x"/></svg>
+        </button>
+      </div>
     </div>
     <div style="font-size:.7rem;color:var(--muted);margin-bottom:14px;line-height:1.5">
       Lista de todos os usuários do HUB. Resetar senha apaga a senha cadastrada — no próximo login do usuário, o popup de definir senha aparece de novo.
     </div>
     <div class="gu-list" id="guList"></div>
+  </div>
+</div>
+
+<!-- Modal Criar usuário (admin only · v3.12.0) -->
+<div class="modal-bg" id="cuModal" onclick="if(event.target===this)fecharCriarUsuario()">
+  <div class="modal" style="width:440px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Novo usuário</div>
+      <button class="sc-lanc-close" onclick="fecharCriarUsuario()" aria-label="Fechar">
+        <svg class="icon sm"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="tl-form-field">
+      <label>Chave (login) — letras minúsculas, sem espaços</label>
+      <input type="text" id="cuKey" placeholder="Ex: maria, pedro2" maxlength="20" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'')">
+    </div>
+    <div class="tl-form-field">
+      <label>Nome de exibição</label>
+      <input type="text" id="cuNome" placeholder="Ex: Maria Silva" maxlength="40">
+    </div>
+    <div class="tl-form-field">
+      <label>Tipo de acesso</label>
+      <select id="cuRole" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg);">
+        <option value="producao">Produção</option>
+        <option value="admin">Administrador</option>
+      </select>
+    </div>
+    <div class="mc-hint" style="margin-top:6px">O usuário entra sem senha; no primeiro login, o popup pede definição. Permissões granulares (módulos/abas) configura depois pelo Editar.</div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="fecharCriarUsuario()">Cancelar</button>
+      <button class="save-btn" onclick="salvarCriarUsuario()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Audit log (admin only · v3.12.0) -->
+<div class="modal-bg" id="alModal" onclick="if(event.target===this)fecharAuditLog()">
+  <div class="modal" style="width:600px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Histórico de alterações</div>
+      <button class="sc-lanc-close" onclick="fecharAuditLog()" aria-label="Fechar">
+        <svg class="icon sm"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);margin-bottom:14px;line-height:1.5">
+      Últimas 100 ações administrativas registradas (criação/edição/exclusão de usuários, reset de senhas).
+    </div>
+    <div class="al-list" id="alList"></div>
   </div>
 </div>
 
@@ -1255,7 +1308,8 @@ async function doLogin(){
   const pass=document.getElementById('loginPass').value;
   const err=document.getElementById('loginErr');
   if(!sel){err.textContent='Selecione um usuário';return;}
-  const u=USERS[sel];
+  const u=getUser(sel);
+  if(!u){err.textContent='Usuário inválido';return;}
   const profile = (window._usersProfile || {})[sel] || {};
   // 1) Senha hardcoded (admin) continua valendo
   if(u.senha!==null && u.senha!==undefined){
@@ -1461,6 +1515,31 @@ window.salvarMinhaConta = async () => {
   fecharMinhaConta();
 };
 
+// v3.12.0: popula select do login com TODOS os users (USERS hardcoded + dinâmicos do Firebase)
+window._refreshLoginUserOptions = () => {
+  const sel = document.getElementById('loginUser');
+  if(!sel) return;
+  const cur = sel.value;
+  const all = getAllUsers();
+  const entries = Object.entries(all).sort(([ka,a],[kb,b]) => {
+    // admin no topo, restante alfabético por nome
+    if(ka === 'admin') return -1;
+    if(kb === 'admin') return 1;
+    return (a.nome || ka).localeCompare(b.nome || kb);
+  });
+  const esc = s => String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let html = '<option value="">Selecione...</option>';
+  html += entries.map(([key, u]) => '<option value="' + esc(key) + '">' + esc(u.nome || key) + '</option>').join('');
+  sel.innerHTML = html;
+  if(cur && sel.querySelector('option[value="' + cur + '"]')) sel.value = cur;
+};
+// Refresh inicial (caso Firebase já carregou ou ainda não, vai re-rodar quando carregar)
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', () => window._refreshLoginUserOptions());
+} else {
+  setTimeout(() => window._refreshLoginUserOptions(), 0);
+}
+
 // Aplica campo de senha no login quando o user selecionado tem senha cadastrada
 window._applyLoginSenhaField = () => {
   const sel = document.getElementById('loginUser');
@@ -1469,7 +1548,8 @@ window._applyLoginSenhaField = () => {
   const user = sel.value;
   if(!user){ wrap.classList.remove('show'); return; }
   // Admin sempre pede senha (hardcoded no USERS); demais: só se tiver profile com senhaHash
-  const hasHardcoded = USERS[user]?.senha !== null && USERS[user]?.senha !== undefined;
+  const _u = getUser(user);
+  const hasHardcoded = _u?.senha !== null && _u?.senha !== undefined;
   const profile = (window._usersProfile || {})[user] || {};
   const hasProfileSenha = !!profile.senhaHash;
   if(hasHardcoded || hasProfileSenha) wrap.classList.add('show');
@@ -1480,7 +1560,7 @@ window._applyLoginSenhaField = () => {
 function checkDefinirSenha(){
   const sess = getSession();
   if(!sess) return;
-  const u = USERS[sess.user];
+  const u = getUser(sess.user);
   if(!u) return;
   // Admin tem senha hardcoded; pula. Se um dia William quiser definir senha de admin, precisaria ajustar USERS.admin.senha=null
   if(u.senha !== null && u.senha !== undefined) return;
@@ -1506,6 +1586,7 @@ window.salvarPrimeiraSenha = async () => {
     profile.senhaHash = hash;
     if(window._salvarUserProfile) await window._salvarUserProfile(sess.user, profile);
     document.getElementById('psModal').classList.remove('open');
+    logAudit('user.definirSenha', sess.user, null);
     toast('Senha definida com sucesso');
   } catch(e){ console.error(e); toast('Erro ao salvar senha','err'); }
 };
@@ -1527,7 +1608,7 @@ function renderGuList(){
   if(!host) return;
   const profiles = window._usersProfile || {};
   const esc = s => String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const entries = Object.entries(USERS);
+  const entries = Object.entries(getAllUsers());
   host.innerHTML = entries.map(([key, u]) => {
     const p = profiles[key] || {};
     const nomeShow = (p.nomeCompleto && p.nomeCompleto.trim()) || u.nome;
@@ -1558,9 +1639,113 @@ function renderGuList(){
       '<button class="gu-row-act' + (podeResetar?'':' disabled') + '" ' +
         (podeResetar ? 'onclick="resetarSenhaUser(\'' + key + '\')"' : 'disabled') +
         '>Resetar senha</button>' +
+      // v3.12.0: lixeira só pra users dinâmicos (criados via UI). Hardcoded é intocável.
+      (isUserDinamico(key)
+        ? '<button class="gu-row-act-edit" onclick="excluirUsuarioDinamico(\'' + key + '\')" title="Excluir usuário" style="color:var(--red);border-color:var(--border2)"><svg class="icon sm"><use href="#i-trash"/></svg></button>'
+        : '') +
     '</div>';
   }).join('');
 }
+// ── v3.12.0: Audit log ────────────────────────────────────────────────
+function logAudit(action, target, details){
+  const sess = getSession();
+  const entry = {
+    ts: Date.now(),
+    by: sess?.user || 'unknown',
+    action, target,
+    details: details || null
+  };
+  if(window._gravarAuditLog) window._gravarAuditLog(entry);
+}
+window.abrirAuditLog = () => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  // Fecha modal de usuários se aberto (sobreposto)
+  // mas preferimos manter o gu aberto atrás
+  renderAuditLog();
+  document.getElementById('alModal').classList.add('open');
+};
+window.fecharAuditLog = () => {
+  document.getElementById('alModal').classList.remove('open');
+};
+function renderAuditLog(){
+  const host = document.getElementById('alList');
+  if(!host) return;
+  const entries = Object.entries(window._auditLog || {})
+    .map(([id, e]) => Object.assign({_id:id}, e))
+    .sort((a,b) => (b.ts||0) - (a.ts||0))
+    .slice(0, 100);
+  if(entries.length === 0){
+    host.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--muted2);font-size:.78rem">Nenhuma ação registrada ainda</div>';
+    return;
+  }
+  const esc = s => String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtData = ts => {
+    const d = new Date(ts);
+    return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  };
+  const ACTION_LBL = {
+    'user.criar':     {lbl:'Criou usuário',    icon:'i-plus',    cls:'success'},
+    'user.excluir':   {lbl:'Excluiu usuário',  icon:'i-trash',   cls:'danger'},
+    'user.editar':    {lbl:'Editou permissões',icon:'i-pencil',  cls:'info'},
+    'user.resetSenha':{lbl:'Resetou senha',    icon:'i-lock',    cls:'warning'},
+    'user.definirSenha':{lbl:'Definiu senha (1º login)',icon:'i-lock',cls:'submitted'}
+  };
+  host.innerHTML = entries.map(e => {
+    const a = ACTION_LBL[e.action] || {lbl:e.action,icon:'i-info',cls:'neutral'};
+    const detStr = e.details ? Object.entries(e.details).map(([k,v]) => esc(k)+': '+esc(typeof v==='object'?JSON.stringify(v):v)).join(' · ') : '';
+    return '<div class="al-row">' +
+      '<div class="al-row-icon"><span class="tag tag--sm tag--' + a.cls + '"><svg><use href="#' + a.icon + '"/></svg></span></div>' +
+      '<div class="al-row-body">' +
+        '<div class="al-row-main"><strong>' + esc(e.by) + '</strong> · ' + a.lbl + (e.target ? ' · <span style="color:var(--muted)">' + esc(e.target) + '</span>' : '') + '</div>' +
+        (detStr ? '<div class="al-row-det">' + detStr + '</div>' : '') +
+      '</div>' +
+      '<div class="al-row-ts">' + fmtData(e.ts) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── v3.12.0: Criar usuário dinâmico (admin only) ────────────────────
+window.abrirCriarUsuario = () => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  document.getElementById('cuKey').value = '';
+  document.getElementById('cuNome').value = '';
+  document.getElementById('cuRole').value = 'producao';
+  document.getElementById('cuModal').classList.add('open');
+  setTimeout(() => document.getElementById('cuKey').focus(), 200);
+};
+window.fecharCriarUsuario = () => {
+  document.getElementById('cuModal').classList.remove('open');
+};
+window.salvarCriarUsuario = () => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  const key = (document.getElementById('cuKey').value || '').trim();
+  const nome = (document.getElementById('cuNome').value || '').trim();
+  const role = document.getElementById('cuRole').value;
+  if(!key || key.length < 2){ toast('Chave precisa ter ao menos 2 caracteres','err'); return; }
+  if(!nome){ toast('Preencha o nome','err'); return; }
+  const all = getAllUsers();
+  if(all[key]){ toast('Já existe usuário com essa chave','err'); return; }
+  const data = { nome, role, senha: null };
+  if(window._criarUsuarioConfig) window._criarUsuarioConfig(key, data);
+  if(!window._usersConfig) window._usersConfig = {};
+  window._usersConfig[key] = data;
+  logAudit('user.criar', key, { nome, role });
+  toast('Usuário criado: ' + nome);
+  fecharCriarUsuario();
+  setTimeout(renderGuList, 200);
+};
+window.excluirUsuarioDinamico = (userKey) => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  if(!isUserDinamico(userKey)){ toast('Usuário fixo não pode ser excluído','err'); return; }
+  const u = getUser(userKey); if(!u) return;
+  if(!confirm('Excluir o usuário ' + u.nome + '? Essa ação não pode ser desfeita. (Profile com email/foto/senha permanece no Firebase pra retrocompat.)')) return;
+  if(window._excluirUsuarioConfig) window._excluirUsuarioConfig(userKey);
+  if(window._usersConfig) delete window._usersConfig[userKey];
+  logAudit('user.excluir', userKey, { nome: u.nome });
+  toast('Usuário excluído');
+  setTimeout(renderGuList, 200);
+};
+
 // v3.10.0: editar role/turno/módulos liberados de um user (admin only)
 let geuEditingKey = null;
 const MOD_LBL_FULL = { resultados:'Gerencial', producao:'Produção', preco:'Preço de Venda', manutencao:'Manutenção', crm:'CRM' };
@@ -1616,6 +1801,7 @@ window.salvarEditarUsuario = () => {
   profile.tabsAllowedOverride = tabsOverride;
   if(window._salvarUserProfile) window._salvarUserProfile(geuEditingKey, profile);
   if(window._usersProfile) window._usersProfile[geuEditingKey] = profile;
+  logAudit('user.editar', geuEditingKey, { role, turno: profile.turnoOverride, modules: modulesAllowed.join(',') });
   toast('Salvo · efetiva no próximo login do usuário');
   fecharEditarUsuario();
   setTimeout(renderGuList, 200);
@@ -1632,6 +1818,7 @@ window.resetarSenhaUser = (userKey) => {
   if(window._usersProfile) {
     window._usersProfile[userKey] = profile;
   }
+  logAudit('user.resetSenha', userKey, { nome: u.nome });
   toast('Senha resetada — ' + u.nome + ' vai criar nova no próximo login');
   setTimeout(renderGuList, 300);
 };
@@ -1712,13 +1899,23 @@ const DEFAULT_MODULES_BY_ROLE = {
   admin:    ['resultados','producao','preco','manutencao','crm'],
   producao: ['producao','manutencao','crm']
 };
+// v3.12.0: getAllUsers() merge USERS hardcoded + users criados via UI (Firebase)
+function getAllUsers(){
+  return Object.assign({}, USERS, window._usersConfig || {});
+}
+function getUser(userKey){
+  return USERS[userKey] || (window._usersConfig||{})[userKey] || null;
+}
+function isUserDinamico(userKey){
+  return !USERS[userKey] && !!(window._usersConfig||{})[userKey];
+}
 function getEffectiveRole(userKey){
-  const u = USERS[userKey]; if(!u) return 'producao';
+  const u = getUser(userKey); if(!u) return 'producao';
   const p = (window._usersProfile || {})[userKey] || {};
   return p.roleOverride || u.role;
 }
 function getEffectiveTurno(userKey){
-  const u = USERS[userKey]; if(!u) return null;
+  const u = getUser(userKey); if(!u) return null;
   const p = (window._usersProfile || {})[userKey] || {};
   if(p.turnoOverride === null) return null; // admin removeu turno explicitamente
   if(typeof p.turnoOverride === 'number') return p.turnoOverride;
@@ -1820,9 +2017,9 @@ function updateCrumbFromState(){
 
 function checkAuth(){
   const s=getSession();
-  if(s&&USERS[s.user]){
+  if(s && getUser(s.user)){
     document.getElementById('loginScreen').classList.add('hide');
-    showSplash(USERS[s.user].nome, getEffectiveRole(s.user));
+    showSplash(getUser(s.user).nome, getEffectiveRole(s.user));
   }
 }
 
@@ -1848,10 +2045,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.11.0';
+const CURRENT_VERSION = '3.12.0';
 const CHANGELOG = [
   {
-    v:'3.11.0', d:'15 abr 2026', current:true,
+    v:'3.12.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Criar e excluir usuários direto pela UI.', desc:'No painel "Gerenciar usuários" agora tem um botão verde "+ Novo" no topo. Abre modal pedindo chave (login lowercase, sem espaços), nome de exibição e role (Produção/Administrador). Usuário criado entra sem senha — no primeiro login dele aparece o popup de definir senha. Permissões granulares (módulos/abas) são configuradas depois pelo botão Editar (lápis). Os usuários dinâmicos aparecem com um botão de lixeira vermelho ao lado dos botões padrão; os 11 hardcoded (admin + produção originais) NÃO podem ser excluídos pra preservar referências em registros antigos.'},
+      {type:'high', title:'Login dropdown agora é dinâmico.', desc:'Antes o select da tela de login tinha 5 options hardcoded (Admin/Anderson/Aldo/Geovani/Lucivane). Agora é populado em runtime com TODOS os usuários (USERS hardcoded + dinâmicos do Firebase users-config). Lista é ordenada com Admin no topo e o resto alfabético por nome. Edilson, Joacir e os 3 líderes de turno (Adelir/Alexander/Djoniffer) que estavam ausentes da seleção agora aparecem.'},
+      {type:'feat', title:'Audit log: histórico de ações administrativas.', desc:'Tudo que admin faz no painel agora vira registro no path audit-log do Firebase (timestamp + quem + ação + alvo + detalhes). Coberto: criar usuário, excluir usuário, editar permissões (role/turno/módulos/abas), resetar senha de outro usuário, e definir senha do próprio user no primeiro login. No header do painel "Gerenciar usuários" tem um botão de relógio que abre o modal "Histórico de alterações" com as últimas 100 entradas, ordenadas por mais recente.'},
+      {type:'note', title:'Path Firebase novo.', desc:'users-config/{key} guarda os users criados via UI (pronto pra acesso de leitura via getAllUsers helper que faz merge com USERS hardcoded). audit-log/{ts_id} é append-only — cada entrada é um id único (al_<ts>_<rand>) com chaves ts/by/action/target/details. Limpeza periódica do log fica pra evolução futura (não é crítico — Firebase RTDB aguenta).'}
+    ]
+  },
+  {
+    v:'3.11.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Permissões por aba editáveis na UI.', desc:'Painel "Editar usuário" ganha uma seção "Abas restritas" com checkboxes pra cada aba que tem acesso limitado. Hoje a única é "Stats Cor (Produção)" — o admin marca/desmarca pra cada user e a permissão é aplicada no próximo login dele. Quando uma nova aba precisar de restrição (ex: Lançar Mês, Histórico Plurianual, etc.), basta adicionar uma entry em RESTRICTED_TABS no código e ela aparece automaticamente no painel.'},
       {type:'high', title:'tabsAllowedOverride no profile.', desc:'Novo campo: users-profile/{user}/tabsAllowedOverride = { tabName: bool }. canAccessTab consulta primeiro o override; se não existir, cai no TAB_PERMS hardcoded como fallback. Admin tem bypass automático (sempre acessa abas restritas — proteção contra trancar a si mesmo no painel). Mantém retrocompatibilidade: se nada configurado, comportamento idêntico à v3.10.x.'},
@@ -2398,6 +2604,31 @@ onValue(usersProfileRef, (snapshot) => {
   if (typeof window._applyLoginSenhaField === 'function') window._applyLoginSenhaField();
 });
 window._salvarUserProfile = (user, profile) => update(ref(db, 'users-profile/' + user), profile).catch(e => console.error('Erro ao salvar perfil:', e));
+
+// ── Users config (CRUD via UI) — Firebase (v3.12.0) ─────────────────────
+const usersConfigRef = ref(db, 'users-config');
+window._usersConfig = window._usersConfig || {};
+onValue(usersConfigRef, (snapshot) => {
+  window._usersConfig = snapshot.val() || {};
+  // Atualiza login dropdown e painel admin se abertos
+  if (typeof window._applyLoginSenhaField === 'function') window._applyLoginSenhaField();
+  if (typeof window._refreshLoginUserOptions === 'function') window._refreshLoginUserOptions();
+  if (document.getElementById('guModal')?.classList.contains('open') && typeof renderGuList === 'function') renderGuList();
+});
+window._criarUsuarioConfig = (key, data) => update(ref(db, 'users-config/' + key), data).catch(e => console.error('Erro ao criar user:', e));
+window._excluirUsuarioConfig = (key) => set(ref(db, 'users-config/' + key), null).catch(e => console.error('Erro ao excluir user:', e));
+
+// ── Audit log — Firebase (v3.12.0) ─────────────────────────────────────
+const auditLogRef = ref(db, 'audit-log');
+window._auditLog = window._auditLog || {};
+onValue(auditLogRef, (snapshot) => {
+  window._auditLog = snapshot.val() || {};
+  if (document.getElementById('alModal')?.classList.contains('open') && typeof renderAuditLog === 'function') renderAuditLog();
+});
+window._gravarAuditLog = (entry) => {
+  const id = 'al_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  return update(ref(db, 'audit-log/' + id), entry).catch(e => console.error('Erro ao gravar audit:', e));
+};
 
 // ── Apontamento Tintoria — Firebase (v2.4.0) ─────────────────────────────
 const aptRef = ref(db, 'apontamento-tintoria-2026');
