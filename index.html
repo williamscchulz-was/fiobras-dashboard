@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.0 16/04/2026  Role 'gerente' (acesso total sem admin)  ║
+  ║    • Hierarquia: Administrador > Gerente > Usuário.          ║
+  ║    • Gerente vê tudo, mas sem painel admin.                  ║
+  ║    • Labels friendly (Usuário/Gerente/Administrador).        ║
   ║  v3.20.5 16/04/2026  Fix editar/resetar user din. + selectAll ║
   ║    • abrirEditarUsuario e resetarSenhaUser usam getUser.     ║
   ║    • Botões "Marcar todos" e "Limpar" nos módulos.           ║
@@ -617,7 +621,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.5</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1191,7 +1195,8 @@
     <div class="tl-form-field">
       <label>Tipo de acesso</label>
       <select id="cuRole" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg);">
-        <option value="producao">Produção</option>
+        <option value="producao">Usuário</option>
+        <option value="gerente">Gerente</option>
         <option value="admin">Administrador</option>
       </select>
     </div>
@@ -1261,8 +1266,9 @@
     </div>
     <div class="tl-form-field">
       <label>Tipo de acesso (role)</label>
-      <select id="geuRole" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg);">
-        <option value="producao">Produção</option>
+      <select id="geuRole" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg);" onchange="geuOnRoleChange()">
+        <option value="producao">Usuário</option>
+        <option value="gerente">Gerente</option>
         <option value="admin">Administrador</option>
       </select>
     </div>
@@ -1275,7 +1281,7 @@
         <option value="3">3º Turno</option>
       </select>
     </div>
-    <div class="tl-form-field">
+    <div class="tl-form-field" id="geuModulosField">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
         <label style="margin:0">Módulos liberados</label>
         <div style="display:flex;gap:6px;">
@@ -1286,6 +1292,7 @@
       <div id="geuModulos" class="geu-mods"></div>
       <div class="mc-hint" style="margin-top:6px">Marque os módulos que esse usuário enxerga. Os não marcados ficam com cadeado.</div>
     </div>
+    <div class="mc-hint" id="geuRoleHint" style="display:none;background:rgba(0,136,53,.06);border:1px solid rgba(0,136,53,.2);padding:9px 12px;border-radius:8px;color:var(--text);font-style:normal;margin-bottom:4px"></div>
     <div class="tl-form-field" id="geuTabsField">
       <label>Abas restritas</label>
       <div id="geuTabs" class="geu-mods"></div>
@@ -1538,7 +1545,9 @@ function populateUserShell(nome, role){
   const displayName = (profile.nomeCompleto && profile.nomeCompleto.trim()) || nome;
   const initials = displayName.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
   const email = profile.email || 'Email não cadastrado';
-  const roleLbl = role === 'admin' ? 'admin' : (USERS[userKey]?.turno ? 'turno ' + USERS[userKey].turno : 'produção');
+  const _u = getUser(userKey) || {};
+  const _turno = getEffectiveTurno(userKey);
+  const roleLbl = (role === 'admin' || role === 'gerente') ? roleLabel(role).toLowerCase() : (_turno ? 'turno ' + _turno : roleLabel(role).toLowerCase());
   const setAv = (id, initials, foto) => {
     const el = document.getElementById(id); if(!el) return;
     if(foto){
@@ -1792,7 +1801,7 @@ function renderGuList(){
       '<div class="gu-row-info">' +
         '<div class="gu-row-nome">' + esc(nomeShow) + '</div>' +
         '<div class="gu-row-meta">' +
-          '<span>' + esc(effRole) + '</span>' +
+          '<span>' + esc(roleLabel(effRole)) + '</span>' +
           (turnoLbl ? '<span class="gu-row-meta-sep">·</span><span>' + turnoLbl + '</span>' : '') +
           '<span class="gu-row-meta-sep">·</span><span class="' + senhaCls + '"><svg><use href="#' + senhaIcon + '"/></svg>' + senhaSrc + '</span>' +
         '</div>' +
@@ -2036,6 +2045,8 @@ window.abrirEditarUsuario = (userKey) => {
       return '<label class="geu-mod"><input type="checkbox" data-tab="' + tab + '" ' + (isOn?'checked':'') + '><span>' + lbl + '</span></label>';
     }).join('');
   }
+  // v3.21.0: aplica visibilidade da seção de módulos baseado no role
+  geuOnRoleChange();
   document.getElementById('geuModal').classList.add('open');
 };
 window.fecharEditarUsuario = () => {
@@ -2048,13 +2059,32 @@ window.geuToggleAllModulos = (on) => {
     i.checked = !!on;
   });
 };
+// v3.21.0: ao mudar role, esconder/mostrar a seção de módulos
+window.geuOnRoleChange = () => {
+  const role = document.getElementById('geuRole').value;
+  const modField = document.getElementById('geuModulosField');
+  const hint = document.getElementById('geuRoleHint');
+  if(role === 'admin' || role === 'gerente'){
+    if(modField) modField.style.display = 'none';
+    if(hint){
+      hint.style.display = '';
+      hint.innerHTML = '<strong>' + roleLabel(role) + '</strong> tem acesso automático a todos os módulos do HUB.' +
+        (role === 'admin' ? ' Pode também gerenciar usuários, permissões e senhas.' : ' Não pode gerenciar usuários (só Administrador).');
+    }
+  } else {
+    if(modField) modField.style.display = '';
+    if(hint) hint.style.display = 'none';
+  }
+};
 window.salvarEditarUsuario = () => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
   if(!geuEditingKey){ toast('Nada selecionado','err'); return; }
   const role = document.getElementById('geuRole').value;
   const turnoStr = document.getElementById('geuTurno').value;
   const modulesAllowed = Array.from(document.querySelectorAll('#geuModulos input:checked')).map(i => i.value);
-  if(modulesAllowed.length === 0){ toast('Selecione ao menos 1 módulo','err'); return; }
+  // v3.21.0: admin/gerente não precisam de modules (acesso total automático)
+  const isFullAccess = (role === 'admin' || role === 'gerente');
+  if(!isFullAccess && modulesAllowed.length === 0){ toast('Selecione ao menos 1 módulo','err'); return; }
   // v3.11.0: monta tabsAllowedOverride a partir dos checkboxes de abas restritas
   const tabsOverride = {};
   document.querySelectorAll('#geuTabs input[data-tab]').forEach(i => {
@@ -2064,7 +2094,8 @@ window.salvarEditarUsuario = () => {
   profile.roleOverride = role;
   // turnoOverride: null explícito quando "Nenhum", número quando 1/2/3
   profile.turnoOverride = turnoStr ? parseInt(turnoStr, 10) : null;
-  profile.modulesAllowedOverride = modulesAllowed;
+  // v3.21.0: limpa modulesAllowedOverride se for admin/gerente (eles vêem tudo automático)
+  profile.modulesAllowedOverride = isFullAccess ? null : modulesAllowed;
   profile.tabsAllowedOverride = tabsOverride;
   if(window._salvarUserProfile) window._salvarUserProfile(geuEditingKey, profile);
   if(window._usersProfile) window._usersProfile[geuEditingKey] = profile;
@@ -2160,12 +2191,17 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// v3.10.0: Módulos disponíveis e defaults por role
+// v3.10.0+: Módulos disponíveis e defaults por role
+// v3.21.0: novo role 'gerente' (acesso total como admin, mas sem painel admin)
 const ALL_MODULES = ['resultados','producao','preco','manutencao','crm'];
 const DEFAULT_MODULES_BY_ROLE = {
   admin:    ['resultados','producao','preco','manutencao','crm'],
+  gerente:  ['resultados','producao','preco','manutencao','crm'],
   producao: ['producao','manutencao','crm']
 };
+// Labels de exibição (interno producao continua igual pra não quebrar dados antigos)
+const ROLE_LABELS = { admin:'Administrador', gerente:'Gerente', producao:'Usuário' };
+function roleLabel(role){ return ROLE_LABELS[role] || role; }
 // v3.12.0: getAllUsers() merge USERS hardcoded + users criados via UI (Firebase)
 function getAllUsers(){
   return Object.assign({}, USERS, window._usersConfig || {});
@@ -2241,6 +2277,8 @@ function getEffectiveTurno(userKey){
 }
 function getEffectiveModules(userKey){
   const role = getEffectiveRole(userKey);
+  // v3.21.0: admin e gerente sempre têm acesso a todos os módulos (override irrelevante)
+  if(role === 'admin' || role === 'gerente') return ALL_MODULES.slice();
   const p = (window._usersProfile || {})[userKey] || {};
   if(Array.isArray(p.modulesAllowedOverride)) return p.modulesAllowedOverride;
   return DEFAULT_MODULES_BY_ROLE[role] || DEFAULT_MODULES_BY_ROLE.producao;
@@ -2363,10 +2401,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.20.5';
+const CURRENT_VERSION = '3.21.0';
 const CHANGELOG = [
   {
-    v:'3.20.5', d:'16 abr 2026', current:true,
+    v:'3.21.0', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Novo role: Gerente.', desc:'Hierarquia de papéis agora tem 3 níveis: Administrador (você) > Gerente > Usuário. O Gerente tem acesso total a todos os módulos do HUB (Gerencial, Produção, Preço, Manutenção, CRM) e pode mexer em tudo dentro deles. A única coisa que NÃO pode é o painel administrativo: gerenciar usuários, editar permissões, resetar senhas e ver audit log/sessões ativas — isso continua exclusivo do Administrador. Útil pra delegar uso completo do sistema sem perder controle de quem entra e quem mexe em quem.'},
+      {type:'high', title:'Labels friendly: Usuário / Gerente / Administrador.', desc:'O role interno "producao" continua igual no Firebase pra não quebrar dados antigos, mas a UI agora mostra "Usuário" em vez de "Produção" — fica mais claro que é o usuário comum, e abre espaço pro novo "Gerente". Painel "Gerenciar usuários" e topbar do user mostram o label friendly.'},
+      {type:'note', title:'Visibilidade dinâmica do editor.', desc:'Quando você muda o role pra Administrador ou Gerente no painel Editar Usuário, a seção "Módulos liberados" some — eles têm acesso automático a tudo, então não faz sentido configurar. Aparece um aviso explicando: "Gerente tem acesso automático a todos os módulos. Não pode gerenciar usuários (só Administrador)". Ao voltar pra Usuário, a seção volta com os defaults.'},
+      {type:'note', title:'Como aplicar agora.', desc:'Vai em Gerenciar usuários, abre Editar do usuário que deseja promover, escolhe Gerente, salva. Próximo login dele vai ter acesso ao HUB inteiro. Se quiser depois voltar pra Usuário comum, mesma coisa em ordem reversa.'}
+    ]
+  },
+  {
+    v:'3.20.5', d:'16 abr 2026',
     items:[
       {type:'high', title:'Editar/resetar usuário criado pela UI dava "Usuário inválido".', desc:'Os handlers abrirEditarUsuario, salvarEditarUsuario, abrirCriarUsuario e excluirUsuarioDinamico estavam consultando USERS[userKey] direto (só os hardcoded) em vez de getUser(userKey) que faz merge com users-config (criados via UI). Resultado: Jairo (ou qualquer outro user criado pela UI) caía no toast "Usuário inválido" ao tentar editar/resetar. Substituído pelos 4 handlers usarem getUser, que cobre os dois mundos.'},
       {type:'feat', title:'Botões "Marcar todos" e "Limpar" no editor de módulos.', desc:'No painel Editar Usuário, ao lado do label "Módulos liberados", aparecem 2 botões pequenos. "Marcar todos" libera os 5 módulos de uma vez (Gerencial / Produção / Preço / Manutenção / CRM); "Limpar" desmarca tudo. Útil pra usuários admin (marca todos) ou pra começar do zero. Defaults por role continuam sendo aplicados quando o user é criado.'}
