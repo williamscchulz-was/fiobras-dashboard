@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.11.0 15/04/2026  Permissões por aba editáveis na UI       ║
+  ║    • Editar usuário ganha seção "Abas restritas".            ║
+  ║    • RESTRICTED_TABS define quais abas têm acesso limitado.  ║
+  ║    • Profile.tabsAllowedOverride sobrepõe TAB_PERMS.         ║
   ║  v3.10.0 15/04/2026  Permissões editáveis na UI (admin)       ║
   ║    • Painel ganha Editar: role, turno, módulos liberados.    ║
   ║    • Helpers getEffectiveRole/Turno/Modules com override.    ║
@@ -528,7 +532,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.10.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.11.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1107,6 +1111,11 @@
       <div id="geuModulos" class="geu-mods"></div>
       <div class="mc-hint" style="margin-top:6px">Marque os módulos que esse usuário enxerga. Os não marcados ficam com cadeado.</div>
     </div>
+    <div class="tl-form-field" id="geuTabsField">
+      <label>Abas restritas</label>
+      <div id="geuTabs" class="geu-mods"></div>
+      <div class="mc-hint" style="margin-top:6px">Abas com acesso limitado. Marque as que esse usuário pode ver.</div>
+    </div>
     <div class="mc-hint" style="background:rgba(255,203,0,.08);border:1px solid rgba(255,203,0,.25);padding:9px 12px;border-radius:8px;color:var(--text);font-style:normal;margin-bottom:4px">
       <strong>Atenção:</strong> mudanças entram em vigor no próximo login do usuário.
     </div>
@@ -1210,11 +1219,23 @@ const USERS={
 const TAB_PERMS = {
   statscor: ['admin','anderson','aldo','geovani','lucivane']
 };
+// v3.11.0: abas restritas editáveis no painel admin (label = como aparece no modal)
+const RESTRICTED_TABS = {
+  statscor: 'Stats Cor (Produção)'
+};
 function canAccessTab(tab){
   const perm = TAB_PERMS[tab];
   if(!perm) return true;
   const sess = getSession();
   if(!sess) return false;
+  // v3.11.0: admin sempre acessa abas restritas (segurança contra trancar a si mesmo)
+  if(getEffectiveRole(sess.user) === 'admin') return true;
+  // v3.11.0: override por user (profile.tabsAllowedOverride[tab] = bool)
+  const profile = (window._usersProfile || {})[sess.user] || {};
+  if(profile.tabsAllowedOverride && profile.tabsAllowedOverride[tab] !== undefined){
+    return !!profile.tabsAllowedOverride[tab];
+  }
+  // Fallback: allowlist hardcoded
   return perm.includes(sess.user);
 }
 
@@ -1558,6 +1579,17 @@ window.abrirEditarUsuario = (userKey) => {
     const checked = allowed.includes(m) ? 'checked' : '';
     return '<label class="geu-mod"><input type="checkbox" value="' + m + '" ' + checked + '><span>' + MOD_LBL_FULL[m] + '</span></label>';
   }).join('');
+  // v3.11.0: Render checkboxes de abas restritas
+  const tabsHost = document.getElementById('geuTabs');
+  const profile = (window._usersProfile||{})[userKey] || {};
+  const tabsOver = profile.tabsAllowedOverride || {};
+  tabsHost.innerHTML = Object.entries(RESTRICTED_TABS).map(([tab, lbl]) => {
+    // Estado atual: override ou allowlist hardcoded
+    let isOn;
+    if(tabsOver[tab] !== undefined) isOn = !!tabsOver[tab];
+    else isOn = (TAB_PERMS[tab] || []).includes(userKey);
+    return '<label class="geu-mod"><input type="checkbox" data-tab="' + tab + '" ' + (isOn?'checked':'') + '><span>' + lbl + '</span></label>';
+  }).join('');
   document.getElementById('geuModal').classList.add('open');
 };
 window.fecharEditarUsuario = () => {
@@ -1571,11 +1603,17 @@ window.salvarEditarUsuario = () => {
   const turnoStr = document.getElementById('geuTurno').value;
   const modulesAllowed = Array.from(document.querySelectorAll('#geuModulos input:checked')).map(i => i.value);
   if(modulesAllowed.length === 0){ toast('Selecione ao menos 1 módulo','err'); return; }
+  // v3.11.0: monta tabsAllowedOverride a partir dos checkboxes de abas restritas
+  const tabsOverride = {};
+  document.querySelectorAll('#geuTabs input[data-tab]').forEach(i => {
+    tabsOverride[i.dataset.tab] = i.checked;
+  });
   const profile = Object.assign({}, (window._usersProfile||{})[geuEditingKey] || {});
   profile.roleOverride = role;
   // turnoOverride: null explícito quando "Nenhum", número quando 1/2/3
   profile.turnoOverride = turnoStr ? parseInt(turnoStr, 10) : null;
   profile.modulesAllowedOverride = modulesAllowed;
+  profile.tabsAllowedOverride = tabsOverride;
   if(window._salvarUserProfile) window._salvarUserProfile(geuEditingKey, profile);
   if(window._usersProfile) window._usersProfile[geuEditingKey] = profile;
   toast('Salvo · efetiva no próximo login do usuário');
@@ -1810,10 +1848,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.10.0';
+const CURRENT_VERSION = '3.11.0';
 const CHANGELOG = [
   {
-    v:'3.10.0', d:'15 abr 2026', current:true,
+    v:'3.11.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Permissões por aba editáveis na UI.', desc:'Painel "Editar usuário" ganha uma seção "Abas restritas" com checkboxes pra cada aba que tem acesso limitado. Hoje a única é "Stats Cor (Produção)" — o admin marca/desmarca pra cada user e a permissão é aplicada no próximo login dele. Quando uma nova aba precisar de restrição (ex: Lançar Mês, Histórico Plurianual, etc.), basta adicionar uma entry em RESTRICTED_TABS no código e ela aparece automaticamente no painel.'},
+      {type:'high', title:'tabsAllowedOverride no profile.', desc:'Novo campo: users-profile/{user}/tabsAllowedOverride = { tabName: bool }. canAccessTab consulta primeiro o override; se não existir, cai no TAB_PERMS hardcoded como fallback. Admin tem bypass automático (sempre acessa abas restritas — proteção contra trancar a si mesmo no painel). Mantém retrocompatibilidade: se nada configurado, comportamento idêntico à v3.10.x.'},
+      {type:'note', title:'Quando precisar de aba nova restrita.', desc:'Adiciona em RESTRICTED_TABS no JS (ex: relatorios:"Relatórios"). A aba aparece no checkbox section do modal e o admin distribui acesso. Sem necessidade de alterar TAB_PERMS hardcoded — o tabsAllowedOverride do profile cobre.'}
+    ]
+  },
+  {
+    v:'3.10.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Permissões editáveis na UI (admin only).', desc:'Cada linha do painel "Gerenciar usuários" agora tem um botão de lápis (editar). Abre um modal com 3 controles: tipo de acesso (Produção/Administrador), turno (Nenhum/1/2/3 — só serve pro Apontamento) e checkboxes dos 5 módulos (Gerencial, Produção, Preço, Manutenção, CRM). Marque os que esse user enxerga; os não marcados ficam com cadeado pra ele. Mudanças entram em vigor no próximo login do usuário (não muda a sessão atual dele).'},
       {type:'high', title:'Sistema de overrides via Firebase.', desc:'Os campos novos vivem em users-profile/{user}: roleOverride (string), turnoOverride (number ou null), modulesAllowedOverride (array de modules). Helpers getEffectiveRole/Turno/Modules consultam os overrides primeiro, fallback pro USERS hardcoded. canAccessModule passou a usar getEffectiveModules — agora o cadeado dos módulos respeita o que o admin configurou. doLogin e showSplash usam getEffectiveRole pra decidir o role da sessão atual.'},
