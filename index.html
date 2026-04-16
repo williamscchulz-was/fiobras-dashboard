@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.7.1  15/04/2026  CRM: corte temporal — leads desde 2026  ║
+  ║    • Pipeline e Dashboard só mostram leads >= 01/01/2026.    ║
+  ║    • Lista mantém catálogo completo (incl. pre-2026).        ║
+  ║    • Helper leadsAtivos() filtra por window._leads.data.     ║
   ║  v3.7.0  15/04/2026  Sidebar com toggle expand/collapse      ║
   ║    • 64px (ícones) ↔ 232px (com nomes dos módulos).          ║
   ║    • Botão de toggle no header da sidebar (centro→direita).  ║
@@ -499,7 +503,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.7.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.7.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1534,10 +1538,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.7.0';
+const CURRENT_VERSION = '3.7.1';
 const CHANGELOG = [
   {
-    v:'3.7.0', d:'15 abr 2026', current:true,
+    v:'3.7.1', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'CRM: corte temporal — só leads de 2026 em diante.', desc:'Pipeline (kanban) e Dashboard (KPIs/contadores) agora só consideram leads com data >= 01/01/2026. Os antigos continuam intactos no Firebase, mas saem da operação ativa — viram histórico. A Lista de leads mantém o catálogo completo, incluindo pre-2026, pra você poder consultar quando precisar (ex: quem foi cliente em 2025, contato antigo, etc.).'},
+      {type:'note', title:'Como funciona internamente.', desc:'Adicionada constante CRM_CUTOFF_TS = 01/01/2026 e helper leadsAtivos() que filtra window._leads pelo campo `data` (timestamp ms). renderPipeline() e renderDashboard() leem do helper; renderLista() lê do raw window._leads. Reversível: se quiser voltar a tratar pre-2026 algum dia, é só mudar a constante.'}
+    ]
+  },
+  {
+    v:'3.7.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Sidebar com toggle expand/collapse.', desc:'A sidebar lateral (desktop) agora alterna entre dois estados: colapsada (68px, só ícones — padrão) e expandida (232px, com nomes dos módulos visíveis ao lado dos ícones). Botão de toggle vive no header da sidebar — quando colapsada, fica centralizado (ocupa o lugar do logo, que esconde com fade); quando expandida, vai pra direita, lado a lado com logo + brand "Fiobras HUB". Click-to-toggle (sem hover-to-expand). Estado persistido em localStorage (key fiobras-hub-sidebar-expanded), então o usuário escolhe uma vez e fica.'},
       {type:'high', title:'Itens lockados ganham apresentação melhor quando expandidos.', desc:'Em modo colapsado, módulos lockados (ex: Gerencial pra produção) mostram um pin de cadeado pequeno no canto superior direito do botão. Em modo expandido, esse cadeado vira um ícone normal alinhado à direita do nome — fica óbvio que tá bloqueado e por quê, sem visual de badge espremido. Tooltips são desabilitados quando a sidebar está expandida (nome já aparece).'},

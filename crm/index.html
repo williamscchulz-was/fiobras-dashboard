@@ -1198,8 +1198,19 @@ window.renderAll=()=>{
 };
 
 /* ═══ DASHBOARD ═══ */
+// v3.7.1: corte temporal — leads pre-2026 ficam só na Lista (catálogo histórico)
+const CRM_CUTOFF_TS = new Date(2026, 0, 1, 0, 0, 0).getTime();
+function leadsAtivos(){
+  const all = window._leads || {};
+  const out = {};
+  Object.entries(all).forEach(([id, l]) => {
+    if(!l.data || l.data >= CRM_CUTOFF_TS) out[id] = l;
+  });
+  return out;
+}
+
 function renderDashboard(){
-  const a=Object.values(window._leads||{});
+  const a=Object.values(leadsAtivos());
   const tot    =a.length;
   const quentes=a.filter(l=>l.qual==='quente').length;
   const frios  =a.filter(l=>l.qual==='frio').length;
@@ -1349,7 +1360,7 @@ function setPipelineEtapa(etapa,btn){
 window.setPipelineEtapa=setPipelineEtapa;
 
 function renderPipeline(){
-  const leads=window._leads||{};
+  const leads=leadsAtivos();
   const quentes=Object.entries(leads).filter(([,l])=>l.qual==='quente');
   /* Backward compat: map old keys */
   const mapEtapa=e=>e==='contato'?'novo':e==='ganho'?'fechado':e;
