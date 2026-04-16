@@ -3,6 +3,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.1 16/04/2026  Sub-tabs sticky no Preço/CRM/Manutenção  ║
+  ║    • Subheader das abas internas fica congelado ao rolar.    ║
   ║  v3.21.0 16/04/2026  Role 'gerente' (acesso total sem admin)  ║
   ║    • Hierarquia: Administrador > Gerente > Usuário.          ║
   ║    • Gerente vê tudo, mas sem painel admin.                  ║
@@ -621,7 +623,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2401,10 +2403,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.0';
+const CURRENT_VERSION = '3.21.1';
 const CHANGELOG = [
   {
-    v:'3.21.0', d:'16 abr 2026', current:true,
+    v:'3.21.1', d:'16 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Sub-tabs do Preço/CRM/Manutenção agora ficam sticky.', desc:'O subheader com as abas internas (Vendas/Tingimento/Preparação/Retorção/Custos/Histórico no Preço; Pipeline/Lista/Dashboard no CRM; Dashboard/Kanban/Histórico/etc. na Manutenção) sumia ao rolar a página pra baixo. Agora ele fica congelado no topo do iframe — quando você desce na lista/kanban, as abas continuam acessíveis sem precisar voltar pro topo. Aplicado nos 3 sub-apps com position:sticky;top:0;z-index:50; também garantido que html/body do iframe sejam o scroll container (overflow-y:auto).'}
+    ]
+  },
+  {
+    v:'3.21.0', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Novo role: Gerente.', desc:'Hierarquia de papéis agora tem 3 níveis: Administrador (você) > Gerente > Usuário. O Gerente tem acesso total a todos os módulos do HUB (Gerencial, Produção, Preço, Manutenção, CRM) e pode mexer em tudo dentro deles. A única coisa que NÃO pode é o painel administrativo: gerenciar usuários, editar permissões, resetar senhas e ver audit log/sessões ativas — isso continua exclusivo do Administrador. Útil pra delegar uso completo do sistema sem perder controle de quem entra e quem mexe em quem.'},
       {type:'high', title:'Labels friendly: Usuário / Gerente / Administrador.', desc:'O role interno "producao" continua igual no Firebase pra não quebrar dados antigos, mas a UI agora mostra "Usuário" em vez de "Produção" — fica mais claro que é o usuário comum, e abre espaço pro novo "Gerente". Painel "Gerenciar usuários" e topbar do user mostram o label friendly.'},

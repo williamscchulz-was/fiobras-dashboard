@@ -1755,13 +1755,17 @@ display: none;
     font-weight: 900 !important;
   }
 
-  /* Tabs do shell interno mais limpas (alinhado ao .tab-btn do HUB) */
+  /* Tabs do shell interno mais limpas + sticky */
   .tabs {
     background: var(--bg) !important;
     border-bottom: 1px solid var(--border) !important;
     box-shadow: none !important;
     padding: 0 22px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
   }
+  html, body { overflow-x: hidden; overflow-y: auto; }
   .tab-btn {
     font-family: 'DM Mono', monospace !important;
     font-size: .62rem !important;

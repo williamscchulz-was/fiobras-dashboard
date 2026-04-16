@@ -610,8 +610,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
     --text:#F5F5F7 !important; --muted:#98989D !important; --muted2:#636366 !important;
   }
   body { background:var(--bg) !important; color:var(--text) !important; font-family:'Poppins',sans-serif !important; min-height:100vh !important; }
-  /* Tabs do shell interno mais limpas */
-  .tabs { background:var(--bg) !important; border-bottom:1px solid var(--border) !important; box-shadow:none !important; }
+  /* Tabs do shell interno mais limpas + sticky */
+  .tabs {
+    background:var(--bg) !important;
+    border-bottom:1px solid var(--border) !important;
+    box-shadow:none !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
+  }
+  /* Garante que html/body do iframe sejam o scroll container */
+  html, body { overflow-x: hidden; overflow-y: auto; }
   .tab-btn {
     font-family:'DM Mono',monospace !important; font-size:.62rem !important; font-weight:700 !important;
     letter-spacing:1.5px !important; text-transform:uppercase !important;
