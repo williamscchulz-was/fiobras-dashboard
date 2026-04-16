@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.20.1 16/04/2026  Fix userChip: resolve chave por nome    ║
+  ║    • togglePrioridadeCor gravava nome em vez de chave.       ║
+  ║    • _resolveUserKey: fallback case-insensitive por nome.    ║
+  ║    • Apontamento e Timeline também passam a gravar chave.    ║
   ║  v3.20.0 16/04/2026  Avatares unificados (userChip em todo)  ║
   ║    • Sessões ativas e Gerenciar usuários: agora userChip.    ║
   ║    • Mesmo avatar (foto ou iniciais) em qualquer lista.      ║
@@ -600,7 +604,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2148,10 +2152,25 @@ function isUserDinamico(userKey){
   return !USERS[userKey] && !!(window._usersConfig||{})[userKey];
 }
 // v3.19.0: helper de avatar inline (substitui texto de username em cards/listas)
+// v3.20.1: tolerante a registros antigos que gravaram o NOME no lugar da CHAVE
+function _resolveUserKey(userKeyOrName){
+  if(!userKeyOrName) return null;
+  if(getUser(userKeyOrName)) return userKeyOrName; // já é chave válida
+  // Busca por nome (case-insensitive) — entries legacy
+  const lower = String(userKeyOrName).toLowerCase().trim();
+  for(const [key, u] of Object.entries(getAllUsers())){
+    if((u.nome || '').toLowerCase() === lower) return key;
+  }
+  for(const [key, p] of Object.entries(window._usersProfile || {})){
+    if((p.nomeCompleto || '').toLowerCase() === lower) return key;
+  }
+  return null;
+}
 function userDisplayName(userKey){
   if(!userKey) return '';
-  const u = getUser(userKey);
-  const p = (window._usersProfile||{})[userKey] || {};
+  const resolved = _resolveUserKey(userKey) || userKey;
+  const u = getUser(resolved);
+  const p = (window._usersProfile||{})[resolved] || {};
   return (p.nomeCompleto && p.nomeCompleto.trim()) || u?.nome || userKey;
 }
 function userInitials(userKey){
@@ -2163,18 +2182,20 @@ function userChip(userKey, opts){
   if(!userKey) return '';
   const o = opts || {};
   const size = o.size || 22;
-  const nome = userDisplayName(userKey);
-  const profile = (window._usersProfile||{})[userKey] || {};
-  const isAdmin = getEffectiveRole(userKey) === 'admin';
+  // v3.20.1: resolve chave verdadeira (tolerante a entries legacy que gravaram nome)
+  const resolved = _resolveUserKey(userKey) || userKey;
+  const nome = userDisplayName(resolved);
+  const profile = (window._usersProfile||{})[resolved] || {};
+  const isAdmin = getEffectiveRole(resolved) === 'admin';
   const esc = s => String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const cls = 'user-chip' + (isAdmin?' admin':'') + (o.cls?' '+o.cls:'');
   const style = 'width:'+size+'px;height:'+size+'px;font-size:'+(size*0.36)+'px;';
   // Mobile: tap mostra toast com nome (vai pro window.userChipTap)
-  const onclick = ' onclick="event.stopPropagation();window.userChipTap&&window.userChipTap(\''+esc(userKey)+'\')"';
+  const onclick = ' onclick="event.stopPropagation();window.userChipTap&&window.userChipTap(\''+esc(resolved)+'\')"';
   if(profile.foto){
     return '<span class="'+cls+' has-photo" style="'+style+'" title="'+esc(nome)+'"'+onclick+'><img src="'+profile.foto+'" alt="'+esc(nome)+'"></span>';
   }
-  return '<span class="'+cls+'" style="'+style+'" title="'+esc(nome)+'"'+onclick+'>'+esc(userInitials(userKey))+'</span>';
+  return '<span class="'+cls+'" style="'+style+'" title="'+esc(nome)+'"'+onclick+'>'+esc(userInitials(resolved))+'</span>';
 }
 window.userChipTap = (userKey) => {
   const nome = userDisplayName(userKey);
@@ -2317,10 +2338,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.20.0';
+const CURRENT_VERSION = '3.20.1';
 const CHANGELOG = [
   {
-    v:'3.20.0', d:'16 abr 2026', current:true,
+    v:'3.20.1', d:'16 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Foto não aparecia no histórico priorizada/despriorizada.', desc:'O togglePrioridadeCor (v3.18.0) tava gravando `by: window._currentUserName` (que é o NOME de exibição, ex: "Admin") em vez de `by: getSession().user` (que é a CHAVE, ex: "admin"). O userChip esperava a chave pra buscar o profile/foto, então registros antigos do tipo by:"Admin" caíam em fallback de iniciais sem foto. Mesma coisa no Timeline (criadoPor) e Apontamento (by). Corrigido nos 3 lugares.'},
+      {type:'high', title:'Fallback robusto pra registros legacy.', desc:'Adicionado helper _resolveUserKey que tenta achar a chave do usuário a partir do nome (case-insensitive) — primeiro pelo USERS hardcoded, depois pelo nomeCompleto do profile. Resolve registros antigos sem precisar de migração de dados. Se mesmo assim não achar, renderiza só com iniciais (sem foto, mas mostra o nome no tooltip).'}
+    ]
+  },
+  {
+    v:'3.20.0', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Avatares unificados em todo o HUB.', desc:'Todos os lugares que mostram usuário agora usam o mesmo helper userChip — Sessões Ativas e painel Gerenciar Usuários (que tinham o avatar próprio gu-row-av) passam a renderizar com o componente unificado. Resultado: quem tem foto cadastrada (Minha Conta) vê foto em qualquer lugar; quem não tem vê iniciais com gradient verde Fiobras (admin com gradient preto). Comportamento consistente: hover desktop = nome em tooltip, tap mobile = toast.'}
     ]
@@ -4633,7 +4661,7 @@ window.togglePrioridadeCor = (id) => {
   c.historico.push({
     acao: c.prioridade ? 'priorizada' : 'despriorizada',
     data: new Date().toISOString().slice(0,10),
-    by: window._currentUserName || 'admin'
+    by: (getSession()?.user) || 'admin'
   });
   coresSave(coresData);
   toast(c.prioridade ? 'Marcada como prioritária' : 'Prioridade removida');
@@ -5359,7 +5387,7 @@ window.salvarTlEvento = () => {
     fotos:     tlFotos.map(f => ({ data: f.data, desc: (f.desc||'').trim() })),
     descricao: document.getElementById('tlDescricao').value.trim() || '',
     resultado: document.getElementById('tlResultado').value.trim() || '',
-    criadoPor: existing ? existing.criadoPor : (window._currentUserName || 'admin'),
+    criadoPor: existing ? existing.criadoPor : ((getSession()?.user) || 'admin'),
     criadoEm:  existing ? existing.criadoEm : new Date().toISOString()
   };
   tlDados[id] = evt;
@@ -5778,7 +5806,7 @@ window.salvarApontamento = function() {
   if (!all[mesKey][diaKey]) all[mesKey][diaKey] = {};
   all[mesKey][diaKey][aptTurnoAtivo] = {
     h: h, co: co, pac: pac, pes: pes, cv: cv,
-    by: window._currentUserName || 'admin',
+    by: (getSession()?.user) || 'admin',
     at: new Date().toISOString()
   };
 
