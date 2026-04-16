@@ -1704,8 +1704,12 @@ display: none;
 <style>
   .header { display: none !important; }
   .login-screen, #login-screen { display: none !important; }
+  /* Splash do Manutenção é redundante com o shell do HUB — fora */
+  #splash-screen { display: none !important; }
   body.logged-in .container:first-of-type,
   body.logged-in #app > .container:first-of-type { padding-top: 8px !important; }
+  /* App sempre visível dentro do HUB (defensivo) */
+  #app { display: block !important; }
 </style>
 <div id="noSessionGate" style="display:none;position:fixed;inset:0;background:var(--bg,#EDF1EA);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:20px;text-align:center;font-family:Poppins,sans-serif;">
   <div style="font-size:1.1rem;font-weight:700;color:var(--text,#1A2118)">Acesso pelo HUB</div>
@@ -4934,29 +4938,7 @@ function imprimirQR() {
     '<p>Escaneie para registrar uma demanda</p>' +
     '</div>' +
     '\u003cscript\u003ewindow.onload=function(){window.print();}<\/script>' +
-    '
-<script>
-function __hubBootManut(){
-  if(window.__hubBlocked) return;
-  try {
-    const sel = document.getElementById('login-user-sel');
-    const senha = document.getElementById('login-senha');
-    if(sel) sel.value = 'admin';
-    if(senha) senha.value = 'admin';
-    if(typeof doLogin === 'function'){
-      doLogin();
-    } else {
-      console.warn('[manut] doLogin não encontrada');
-    }
-  } catch(e){ console.error('[manut bootstrap]', e); }
-}
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', __hubBootManut);
-} else {
-  __hubBootManut();
-}
-</script>
-</body></html>'
+    '</body></html>'
   );
   w.document.close();
 }
@@ -5509,5 +5491,34 @@ async function initFCMToken() {
 }
 </script>
 
+
+<script>
+// v3.8.1: bootstrap robusto. doLogin() pode quebrar parcialmente
+// na cadeia de init (FCM, notif, agendamentos), mas o app já tá visível
+// porque #app{display:block!important} e #splash-screen{display:none!important}.
+function __hubBootManut(){
+  if(window.__hubBlocked) return;
+  try {
+    // Esconde splash explicitamente caso tenha alguma transição pendente
+    const sp = document.getElementById('splash-screen');
+    if(sp) sp.style.display = 'none';
+    const sel = document.getElementById('login-user-sel');
+    const senha = document.getElementById('login-senha');
+    if(sel) sel.value = 'admin';
+    if(senha) senha.value = 'admin';
+    if(typeof doLogin === 'function'){
+      try { doLogin(); }
+      catch(e){ console.warn('[manut] doLogin parcial:', e && e.message); }
+    } else {
+      console.warn('[manut] doLogin não encontrada');
+    }
+  } catch(e){ console.error('[manut bootstrap]', e); }
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', __hubBootManut);
+} else {
+  __hubBootManut();
+}
+</script>
 </body>
 </html>
