@@ -696,6 +696,58 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
     .tabs { overflow-x: auto !important; scrollbar-width: none; }
     .tabs::-webkit-scrollbar { display: none; }
   }
+
+  /* ── v3.18.0: Adapta\u00e7\u00e3o de tokens ao padr\u00e3o HUB ───────────── */
+  :root {
+    --bg:#EDF1EA !important; --surface:#FFFFFF !important;
+    --surface2:#F4F7F0 !important; --border:#DAE3D2 !important; --border2:#C5D2BC !important;
+    --text:#1A2118 !important; --muted:#5A6450 !important; --muted2:#8A9580 !important;
+  }
+  [data-theme="dark"] {
+    --bg:#1C1C1E !important; --surface:#2C2C2E !important;
+    --surface2:#3A3A3C !important; --border:#38383A !important; --border2:#48484A !important;
+    --text:#F5F5F7 !important; --muted:#98989D !important; --muted2:#636366 !important;
+  }
+  body { background:var(--bg) !important; color:var(--text) !important; font-family:'Poppins',sans-serif !important; min-height:100vh !important; }
+  /* Tabs no padr\u00e3o HUB */
+  .tabs {
+    background:var(--bg) !important;
+    border-bottom:1px solid var(--border) !important;
+    box-shadow:none !important;
+  }
+  .tabs button, .tabs .tab {
+    font-family:'DM Mono',monospace !important; font-size:.62rem !important; font-weight:700 !important;
+    letter-spacing:1.5px !important; text-transform:uppercase !important;
+    color:var(--muted2) !important;
+  }
+  .tabs button.active, .tabs .tab.active, .tabs .active {
+    color:var(--green) !important; border-bottom-color:var(--green) !important;
+  }
+  /* Cards do kanban + lista */
+  .card, .col, .lead-row, .modal {
+    border-radius:14px !important; border:1px solid var(--border) !important;
+  }
+  .modal { border-radius:16px !important; }
+  /* Bot\u00f5es */
+  .btn, .btn-save, .btn-primary {
+    border-radius:8px !important; font-family:'Poppins',sans-serif !important;
+    font-weight:700 !important; letter-spacing:.5px !important;
+  }
+  /* Inputs anti-zoom mobile */
+  input[type="text"], input[type="number"], input[type="tel"], input[type="email"], select, textarea {
+    border-radius:8px !important; border:1.5px solid var(--border2) !important;
+    font-family:'Poppins',sans-serif !important;
+  }
+  @media(max-width:480px){
+    input, select, textarea { font-size:16px !important; }
+  }
+  /* Container respeita padding */
+  .container, .pipeline-wrap, .lista-wrap, .dash-wrap {
+    padding:22px 22px 60px !important;
+  }
+  @media(max-width:640px){
+    .container, .pipeline-wrap, .lista-wrap, .dash-wrap { padding:14px 14px 40px !important; }
+  }
 </style>
 <div id="noSessionGate" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:20px;text-align:center;font-family:Poppins,sans-serif;">
   <div style="font-size:1.1rem;font-weight:700;color:var(--text)">Acesso pelo HUB</div>

@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.18.0 16/04/2026  CRM/Preço visual + iframe full + prioridade ║
+  ║    • Preço e CRM padronizados ao HUB (mesma receita Manut).  ║
+  ║    • Iframe estica até bottom (flex 1, sem espaço vazio).    ║
+  ║    • Desenv. Cor: estrela de prioridade. Sobe pra topo.      ║
+  ║    • Histórico registra priorizada/despriorizada.            ║
   ║  v3.17.0 16/04/2026  Manutenção: visual padronizado ao HUB    ║
   ║    • Tokens light/dark sincronizados (sage clarinho/Apple).   ║
   ║    • Tipografia Outfit Black 900 nos títulos/KPIs.            ║
@@ -349,7 +354,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.14.0">
+<link rel="stylesheet" href="css/hub.css?v=3.18.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -586,7 +591,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.17.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.18.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2269,10 +2274,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.17.0';
+const CURRENT_VERSION = '3.18.0';
 const CHANGELOG = [
   {
-    v:'3.17.0', d:'16 abr 2026', current:true,
+    v:'3.18.0', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Preço e CRM padronizados ao visual do HUB.', desc:'Mesma receita aplicada na Manutenção (v3.17.0): tokens light/dark sincronizados (sage clarinho #EDF1EA / Apple style), tipografia Outfit Black 900 nos números principais, tabs internas em DM Mono uppercase, cards/buttons/inputs com border-radius do padrão HUB (14px cards, 8px controles), inputs com font-size 16px em mobile (anti-zoom iOS). Os 3 sub-apps agora têm visual consistente entre si e com o resto do HUB.'},
+      {type:'high', title:'Iframe estica até o final (sem espaço vazio embaixo).', desc:'Os panels Preço/CRM/Manutenção tinham um espaço chato embaixo do iframe — o min-height usava 100vh que não considerava o topbar+padding do shell. Reescrito com flex: o panel vira flex-column, o wrap do iframe pega flex:1, e o iframe estica naturalmente pra preencher o que sobrou do .main-col. Resultado: bottom do sub-app encosta no bottom do HUB.'},
+      {type:'feat', title:'Desenv. Cor: prioridade.', desc:'Toggle de estrela (amarela quando ativa) ao lado do código de cada cor na lista. Cor priorizada sobe pra topo da lista (ordenação: prioritárias abertas → demais abertas → fechadas, mantendo a data de entrada como tiebreaker). Cor com prioridade ganha borda esquerda amarela e box-shadow sutil amarelo. Toggle disponível pra admin + produção. Não-priorizadas e cores aprovadas/canceladas não aparecem como priorizadas (mesmo que tenham o flag) — uma vez fechadas, prioridade perde sentido. Histórico do registro grava a ação (priorizada/despriorizada) com data e usuário pra auditoria.'},
+      {type:'note', title:'Cache-buster CSS bump pra 3.18.0.', desc:'Atualizado pra forçar reload do hub.css que tinha ficado em ?v=3.14.0 desde o último release de identidade visual. Necessário pros estilos novos do iframe stretch e da estrela de prioridade aparecerem.'}
+    ]
+  },
+  {
+    v:'3.17.0', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Manutenção: visual completo no padrão HUB.', desc:'O sub-app de Manutenção rodava com visual próprio (paleta levemente diferente, fonte, bordas). Agora os tokens CSS interno são sobrepostos pra usar exatamente os mesmos do HUB: bg sage clarinho #EDF1EA no light, Apple style (#1C1C1E/#2C2C2E/#3A3A3C) no dark; fontes Outfit/Poppins/DM Mono nos lugares certos; border-radius 14px nos cards, 8px nos botões e inputs; tabs internas em DM Mono uppercase como o HUB.'},
       {type:'high', title:'Outfit Black 900 nos KPIs e títulos.', desc:'Valores grandes do Dashboard interno do Manutenção (total de demandas, em andamento, etc.) e títulos de seções agora usam Outfit weight 900 com letterspacing -.015em — mesma presença visual de display dos KPIs do Gerencial e Stats Cor do HUB.'},
@@ -4481,8 +4495,13 @@ function renderCoresLista() {
   }
   if (fCliente) lista = lista.filter(c => ((c.cliente||'')+(c.nome||'')+(c.codigo||'')).toLowerCase().includes(fCliente));
 
-  // Ordenar: abertas primeiro, depois por data entrada desc
+  // Ordenar: prioritárias primeiro, depois abertas, depois por data entrada desc (v3.18.0)
   lista.sort((a, b) => {
+    // Prioritárias sobem (mas só se não estiverem fechadas)
+    const aPrio = !!a.prioridade && a.status !== 'aprovada' && a.status !== 'cancelada';
+    const bPrio = !!b.prioridade && b.status !== 'aprovada' && b.status !== 'cancelada';
+    if (aPrio && !bPrio) return -1;
+    if (!aPrio && bPrio) return 1;
     if (a.status === 'aprovada' && b.status !== 'aprovada') return 1;
     if (a.status !== 'aprovada' && b.status === 'aprovada') return -1;
     const dA = (a.historico||[]).find(h => h.acao === 'entrada')?.data || '';
@@ -4514,10 +4533,13 @@ function renderCoresLista() {
     const tituloPrincipal = (c.nome && c.nome.trim()) ? c.nome.trim() : c.codigo;
     const clienteLinha = c.cliente || '—';
 
-    return '<div class="cor-card" style="--cor-status:'+sc.cor+'" onclick="abrirCorDetalhe(\''+c.id+'\')">' +
+    // v3.18.0: estrela de prioridade (toggle inline)
+    const isPrio = !!c.prioridade && c.status !== 'aprovada' && c.status !== 'cancelada';
+    const prioIc = '<button class="cor-card-prio'+(isPrio?' on':'')+'" onclick="event.stopPropagation();togglePrioridadeCor(\''+c.id+'\')" title="'+(isPrio?'Remover prioridade':'Marcar como prioritária')+'" aria-label="Prioridade"><svg viewBox="0 0 24 24" fill="'+(isPrio?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>';
+    return '<div class="cor-card'+(isPrio?' cor-card-prio-on':'')+'" style="--cor-status:'+sc.cor+'" onclick="abrirCorDetalhe(\''+c.id+'\')">' +
       '<div class="cor-card-row">' +
         '<div class="cor-card-left">' +
-          '<div class="cor-card-codigo">'+tituloPrincipal+(c.fibra?'<span class="cor-card-fibra">'+c.fibra+'</span>':'')+'</div>' +
+          '<div class="cor-card-codigo">'+prioIc+tituloPrincipal+(c.fibra?'<span class="cor-card-fibra">'+c.fibra+'</span>':'')+'</div>' +
           '<div class="cor-card-sub">'+clienteLinha+'</div>' +
         '</div>' +
         '<div class="cor-card-right">' +
@@ -4539,6 +4561,22 @@ function renderCoresLista() {
     '</div>';
   }).join('');
 }
+
+// v3.18.0: toggle de prioridade de cor (admin + produção)
+window.togglePrioridadeCor = (id) => {
+  const c = coresData[id]; if(!c) return;
+  c.prioridade = !c.prioridade;
+  // Adiciona evento ao histórico pra rastreabilidade
+  if(!c.historico) c.historico = [];
+  c.historico.push({
+    acao: c.prioridade ? 'priorizada' : 'despriorizada',
+    data: new Date().toISOString().slice(0,10),
+    by: window._currentUserName || 'admin'
+  });
+  coresSave(coresData);
+  toast(c.prioridade ? 'Marcada como prioritária' : 'Prioridade removida');
+  renderCores();
+};
 
 // ── Cor Detail Modal (v2.5.0 Fase 4 tap-to-detail) ─────────────────────
 let corDetSelId = null;
