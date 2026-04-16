@@ -1435,6 +1435,20 @@ function __hubBootPreco(){
       if(firstTab && typeof switchTab === 'function') switchTab('vendas', firstTab);
     }
   } catch(e){ console.error('[preco bootstrap fallback]', e); }
+  // v3.21.3: força tabs direto no body com position:fixed
+  // (algum ancestor com transform/overflow estava quebrando o fixed declarativo)
+  try {
+    const tabs = document.getElementById('appTabs');
+    if(tabs && tabs.parentElement !== document.body){
+      document.body.appendChild(tabs);
+    }
+    if(tabs){
+      Object.assign(tabs.style, {
+        position:'fixed', top:'0', left:'0', right:'0', zIndex:'50',
+        background:'var(--bg)', borderBottom:'1px solid var(--border)'
+      });
+    }
+  } catch(e){ console.warn('[preco fix tabs]', e); }
 }
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', __hubBootPreco);

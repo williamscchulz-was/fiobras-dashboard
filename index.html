@@ -3,6 +3,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.3 16/04/2026  Fix tabs Preço/Manut: move pro body JS   ║
+  ║    • Bootstrap move .tabs pro body c/ position:fixed inline. ║
   ║  v3.21.2 16/04/2026  Sub-tabs fixed (sticky não funcionava)   ║
   ║    • Posição fixed em vez de sticky pra estabilidade.        ║
   ║    • body padding-top compensa altura das tabs.              ║
@@ -626,7 +628,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.3</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2406,10 +2408,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.2';
+const CURRENT_VERSION = '3.21.3';
 const CHANGELOG = [
   {
-    v:'3.21.2', d:'16 abr 2026', current:true,
+    v:'3.21.3', d:'16 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Tabs do Preço e Manutenção: move pro body via JS.', desc:'No CRM o position:fixed funcionou direto. No Preço e Manutenção alguma regra CSS interna ou pai com transform/overflow estava quebrando o fixed declarativo. Solução robusta: bootstrap de cada um agora move o elemento .tabs pro <body> direto via appendChild + aplica position:fixed inline. Garante que o "fixed" se ancore no viewport do iframe sem ancestor interferir.'}
+    ]
+  },
+  {
+    v:'3.21.2', d:'16 abr 2026',
     items:[
       {type:'high', title:'Sub-tabs do Preço/CRM/Manutenção: fixed em vez de sticky.', desc:'A tentativa anterior com position:sticky não estava funcionando dentro do iframe — o subheader sumia ao rolar mesmo. Mudei pra position:fixed com top:0 + body padding-top:46px pra compensar a altura. Mais previsível em qualquer browser/contexto. As abas internas agora ficam coladas no topo do iframe ao rolar pra baixo.'}
     ]

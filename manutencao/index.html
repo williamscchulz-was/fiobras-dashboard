@@ -5653,6 +5653,22 @@ function __hubBootManut(){
       console.warn('[manut] doLogin não encontrada');
     }
   } catch(e){ console.error('[manut bootstrap]', e); }
+  // v3.21.3: força tabs direto no body com position:fixed
+  // Algumas regras CSS internas estavam ganhando do override; mover pro body resolve.
+  setTimeout(() => {
+    try {
+      const tabs = document.querySelector('.tabs');
+      if(tabs && tabs.parentElement !== document.body){
+        document.body.appendChild(tabs);
+      }
+      if(tabs){
+        Object.assign(tabs.style, {
+          position:'fixed', top:'0', left:'0', right:'0', zIndex:'50',
+          background:'var(--bg)', borderBottom:'1px solid var(--border)'
+        });
+      }
+    } catch(e){ console.warn('[manut fix tabs]', e); }
+  }, 100);
 }
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', __hubBootManut);
