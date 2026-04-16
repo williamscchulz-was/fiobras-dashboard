@@ -65,15 +65,19 @@
 .topbar-user-av.has-photo img,.user-dd-head-av.has-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 
 /* ── Sub-apps embutidos via iframe (v3.1.0) ────────────────────────── */
-/* v3.18.0: iframe estica até o final do main-col (sem espaço vazio embaixo) */
-.subapp-frame-wrap{position:relative;width:100%;flex:1;display:flex;background:var(--bg);overflow:hidden;min-height:0;}
-.subapp-frame{width:100%;flex:1;border:0;display:block;background:var(--bg);color-scheme:light dark;min-height:calc(100vh - 80px);}
-/* O panel pai precisa esticar no flex column do main-col */
+/* v3.21.4: iframe com altura fixa do viewport — scroll fica interno
+   (antes o iframe esticava até o conteúdo e a página HUB que rolava,
+    quebrando position:fixed das tabs internas) */
+.subapp-frame-wrap{position:relative;width:100%;flex:1;display:flex;background:var(--bg);overflow:hidden;min-height:0;height:calc(100vh - 80px);}
+.subapp-frame{width:100%;height:100%;flex:1;border:0;display:block;background:var(--bg);color-scheme:light dark;}
 .panel#panel-preco.active,
 .panel#panel-crm.active,
-.panel#panel-manutencao.active{display:flex;flex:1;flex-direction:column;min-height:0;}
+.panel#panel-manutencao.active{display:flex;flex:1;flex-direction:column;min-height:0;height:calc(100vh - 80px);overflow:hidden;}
 @media(max-width:640px){
-  .subapp-frame{min-height:calc(100vh - 110px);}
+  .subapp-frame-wrap,
+  .panel#panel-preco.active,
+  .panel#panel-crm.active,
+  .panel#panel-manutencao.active{height:calc(100vh - 110px);}
 }
 
 /* ── v3.19.0: Avatar inline (substitui texto de username em listas/cards) ── */

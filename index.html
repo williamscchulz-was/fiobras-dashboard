@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.4 16/04/2026  Iframe altura fixa — scroll só interno   ║
+  ║    • Iframe deixa de esticar; scroll fica dentro do iframe.  ║
+  ║    • Página HUB não rola junto. Tabs fixed funcionam.        ║
   ║  v3.21.3 16/04/2026  Fix tabs Preço/Manut: move pro body JS   ║
   ║    • Bootstrap move .tabs pro body c/ position:fixed inline. ║
   ║  v3.21.2 16/04/2026  Sub-tabs fixed (sticky não funcionava)   ║
@@ -391,7 +394,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.20.5">
+<link rel="stylesheet" href="css/hub.css?v=3.21.4">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -628,7 +631,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.3</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.4</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2408,10 +2411,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.3';
+const CURRENT_VERSION = '3.21.4';
 const CHANGELOG = [
   {
-    v:'3.21.3', d:'16 abr 2026', current:true,
+    v:'3.21.4', d:'16 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Tabs do Preço/Manutenção sumiam ao rolar — root cause real.', desc:'O problema não era CSS interno do sub-app. Era o WRAPPER do iframe no HUB: tinha min-height (não height fixo), então o iframe esticava até o conteúdo do sub-app inteiro. Quem rolava era a página principal do HUB — o iframe inteiro subia junto e o position:fixed interno seguia (porque é relativo ao iframe, que tava se movendo). CRM funcionava só porque o conteúdo dele cabia. Fix: panel-preco/crm/manutencao + .subapp-frame-wrap + .subapp-frame agora têm height:calc(100vh - 80px) FIXO + overflow:hidden no wrap. Resultado: o iframe ocupa exato o espaço disponível, scroll fica DENTRO dele, e tabs com position:fixed se ancoram no topo do viewport interno como esperado.'},
+      {type:'note', title:'Mobile: 110px em vez de 80px.', desc:'Mobile tem topbar mais compacto + pílula flutuante embaixo, então o cálculo é calc(100vh - 110px) pra dar espaço aos dois.'}
+    ]
+  },
+  {
+    v:'3.21.3', d:'16 abr 2026',
     items:[
       {type:'high', title:'Tabs do Preço e Manutenção: move pro body via JS.', desc:'No CRM o position:fixed funcionou direto. No Preço e Manutenção alguma regra CSS interna ou pai com transform/overflow estava quebrando o fixed declarativo. Solução robusta: bootstrap de cada um agora move o elemento .tabs pro <body> direto via appendChild + aplica position:fixed inline. Garante que o "fixed" se ancore no viewport do iframe sem ancestor interferir.'}
     ]
