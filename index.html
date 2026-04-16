@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.20.3 16/04/2026  Backfill cores → Geovani (registrante)  ║
+  ║    • Antes: admin. Corrigido para Geovani.                   ║
+  ║    • Re-roda automaticamente (flag v2).                      ║
   ║  v3.20.2 16/04/2026  Backfill: cores antigas → autor admin    ║
   ║    • Cores sem criadoPor recebem 'admin' (one-shot).         ║
   ║    • Avatar agora aparece no card de cores legacy.           ║
@@ -607,7 +610,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.3</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2341,10 +2344,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.20.2';
+const CURRENT_VERSION = '3.20.3';
 const CHANGELOG = [
   {
-    v:'3.20.2', d:'16 abr 2026', current:true,
+    v:'3.20.3', d:'16 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Backfill cores: registrante real é Geovani.', desc:'A v3.20.2 atribuiu admin como autor das cores antigas, mas quem cadastra cores no dia a dia da fábrica é o Geovani. Backfill v2 corrige: pra cada cor com criadoPor=admin (ou sem criadoPor), atribui geovani. Mesma coisa pro by do primeiro evento do histórico. Roda automaticamente quando você (admin) acessar o HUB pela próxima vez. Cores criadas a partir da v3.19.0 (com autor real gravado) não são afetadas.'}
+    ]
+  },
+  {
+    v:'3.20.2', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Backfill: cores antigas ganham autor.', desc:'Cores cadastradas antes da v3.19.0 (que introduziu o campo criadoPor) não tinham autor — então o avatar não aparecia no card. Agora um backfill one-shot atribui criadoPor=\'admin\' (e by:\'admin\' no primeiro evento do histórico) pra todas as cores que estão sem. Roda automaticamente no boot quando o admin abre o HUB pela primeira vez após a atualização. Flag em localStorage garante que só roda uma vez (se quiser re-rodar, apaga fiobras-backfill-cores-autor-v1 do localStorage). Resultado: cards antigos passam a mostrar a foto do admin como criador.'}
     ]
@@ -4663,28 +4672,30 @@ function renderCoresLista() {
   }).join('');
 }
 
-// v3.20.2: backfill one-shot de cores antigas sem criadoPor.
+// v3.20.3: backfill — cores antigas sem criadoPor → geovani (registrante real)
 // Roda só uma vez (flag em localStorage), e só se o user logado for admin.
 window._backfillCoresAutor = () => {
   try {
-    if(localStorage.getItem('fiobras-backfill-cores-autor-v1') === '1') return;
+    if(localStorage.getItem('fiobras-backfill-cores-autor-v2') === '1') return;
     const sess = getSession();
     if(!sess || getEffectiveRole(sess.user) !== 'admin') return;
     if(!coresData || typeof coresData !== 'object') return;
+    const AUTOR = 'geovani';
     let mudou = false;
     Object.entries(coresData).forEach(([id, c]) => {
       if(!c || typeof c !== 'object') return;
-      if(!c.criadoPor){ c.criadoPor = 'admin'; mudou = true; }
+      // Sobrescreve se ainda estiver no default antigo do v3.20.2 OU sem nada
+      if(!c.criadoPor || c.criadoPor === 'admin'){ c.criadoPor = AUTOR; mudou = true; }
       if(Array.isArray(c.historico)){
         const ent = c.historico.find(h => h.acao === 'entrada');
-        if(ent && !ent.by){ ent.by = 'admin'; mudou = true; }
+        if(ent && (!ent.by || ent.by === 'admin')){ ent.by = AUTOR; mudou = true; }
       }
     });
     if(mudou && window._salvarCoresFirebase){
       window._salvarCoresFirebase(coresData);
-      console.log('[backfill] cores antigas atribuídas ao admin');
+      console.log('[backfill v2] cores antigas atribuídas a:', AUTOR);
     }
-    localStorage.setItem('fiobras-backfill-cores-autor-v1', '1');
+    localStorage.setItem('fiobras-backfill-cores-autor-v2', '1');
   } catch(e){ console.warn('[backfill cores]', e); }
 };
 
