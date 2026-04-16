@@ -24,6 +24,26 @@
 .subapp-frame{width:100%;height:100%;border:0;display:block;min-height:calc(100vh - 180px);background:var(--bg);color-scheme:light dark;}
 @media(max-width:640px){.subapp-frame-wrap,.subapp-frame{min-height:calc(100vh - 220px);}}
 
+/* ── v3.6.0: Sistema de tags semânticas (8 variantes) ──────────────── */
+.tag{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 11px 5px 9px;border-radius:999px;
+  font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:500;
+  line-height:1;letter-spacing:.1px;white-space:nowrap;
+  transition:background-color .28s ease,color .28s ease,border-color .28s ease;
+}
+.tag svg{width:13px;height:13px;stroke-width:1.75;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.tag--sm{padding:3px 9px 3px 7px;font-size:10.5px;}
+.tag--sm svg{width:11px;height:11px;}
+.tag--success  {background:var(--tag-success-bg);  color:var(--tag-success-fg);}
+.tag--warning  {background:var(--tag-warning-bg);  color:var(--tag-warning-fg);}
+.tag--info     {background:var(--tag-info-bg);     color:var(--tag-info-fg);}
+.tag--submitted{background:var(--tag-submitted-bg);color:var(--tag-submitted-fg);}
+.tag--review   {background:var(--tag-review-bg);   color:var(--tag-review-fg);}
+.tag--danger   {background:var(--tag-danger-bg);   color:var(--tag-danger-fg);}
+.tag--neutral  {background:var(--tag-neutral-bg);  color:var(--tag-neutral-fg);}
+.tag--brand    {background:var(--tag-brand-bg);    color:var(--tag-brand-fg);}
+
 /* ── v3.5.0: Ícones unificados (line stroke 1.5 round, currentColor) ── */
 svg.icon{
   display:inline-block;
@@ -72,6 +92,16 @@ svg.icon.lg{width:22px;height:22px;}
   --yellow:#FFCB00;
   --red:#C0392B;   --orange:#e07820;
 
+  /* ── v3.6.0: Tag tokens semânticos (light) ── */
+  --tag-success-bg:#DEF1E5;   --tag-success-fg:#1F7A3D;
+  --tag-warning-bg:#FBE9CE;   --tag-warning-fg:#A1620E;
+  --tag-info-bg:#DBE9F7;      --tag-info-fg:#1A5A99;
+  --tag-submitted-bg:#E5DFF5; --tag-submitted-fg:#5841A8;
+  --tag-review-bg:#FCEFC8;    --tag-review-fg:#8E6F0E;
+  --tag-danger-bg:#F7DBDB;    --tag-danger-fg:#A5302E;
+  --tag-neutral-bg:#E8ECE5;   --tag-neutral-fg:#5A6450;
+  --tag-brand-bg:#D8ECD0;     --tag-brand-fg:#1F6F2C;
+
   /* ── Surfaces · v2.3.0 sage clarinho + cards brancos puros (variant C+A) ── */
   --bg:#EDF1EA; --surface:#FFFFFF; --surface2:#F4F7F0;
 
@@ -106,6 +136,15 @@ svg.icon.lg{width:22px;height:22px;}
   --input-bg:#1C1C1E; --input-border:#38383A;
   --input-glow:rgba(48,209,88,0.25);
   --shadow-sm:0 1px 3px rgba(0,0,0,.3); --shadow-md:0 4px 14px rgba(0,0,0,.35);
+  /* ── v3.6.0: Tag tokens semânticos (dark) ── */
+  --tag-success-bg:rgba(31,122,61,0.22);    --tag-success-fg:#5DD888;
+  --tag-warning-bg:rgba(181,104,14,0.22);   --tag-warning-fg:#F0B266;
+  --tag-info-bg:rgba(26,90,153,0.25);       --tag-info-fg:#7AB8F0;
+  --tag-submitted-bg:rgba(88,65,168,0.28);  --tag-submitted-fg:#B19DEC;
+  --tag-review-bg:rgba(142,111,14,0.25);    --tag-review-fg:#F2D770;
+  --tag-danger-bg:rgba(165,48,46,0.25);     --tag-danger-fg:#F08585;
+  --tag-neutral-bg:rgba(150,160,140,0.18);  --tag-neutral-fg:#B8C0AB;
+  --tag-brand-bg:rgba(0,136,53,0.20);       --tag-brand-fg:#5DD888;
   color-scheme:dark;
 }
 [data-theme="light"]{--bg-deep:var(--bg);color-scheme:light;}

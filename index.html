@@ -3,6 +3,13 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.6.0  15/04/2026  Sistema de tags semânticas (8 variantes) ║
+  ║    • Tokens CSS: success/warning/info/submitted/review/      ║
+  ║      danger/neutral/brand (light + dark).                    ║
+  ║    • Componente .tag base + 8 modificadores + .tag--sm.      ║
+  ║    • +8 ícones (alert-triangle, loader, paper-plane, eye,    ║
+  ║      badge-check, x-circle, info, check).                    ║
+  ║    • Desenv. Cor: badges migrados pra .tag + ícone.          ║
   ║  v3.5.0  15/04/2026  Refinamento visual: ícones + Outfit 900 ║
   ║    • Biblioteca de ícones SVG <symbol> em <defs> único.      ║
   ║    • Ícones unificados em line stroke 1.5 round.             ║
@@ -274,7 +281,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.5.0">
+<link rel="stylesheet" href="css/hub.css?v=3.6.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -299,6 +306,15 @@
     <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
     <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></symbol>
+    <!-- v3.6.0: Status (tags semânticas) -->
+    <symbol id="i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></symbol>
+    <symbol id="i-loader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></symbol>
+    <symbol id="i-paper-plane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-badge-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 014.78-4.77 4 4 0 016.74 0 4 4 0 014.78 4.78 4 4 0 010 6.74 4 4 0 01-4.77 4.78 4 4 0 01-6.75 0 4 4 0 01-4.78-4.77 4 4 0 010-6.76z"/><polyline points="9 12 11 14 15 10"/></symbol>
+    <symbol id="i-x-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="8.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
   </defs>
 </svg>
 
@@ -461,7 +477,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.5.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.6.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1471,10 +1487,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.5.0';
+const CURRENT_VERSION = '3.6.0';
 const CHANGELOG = [
   {
-    v:'3.5.0', d:'15 abr 2026', current:true,
+    v:'3.6.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Sistema de tags semânticas com 8 variantes.', desc:'Implementado o componente .tag com 8 modificadores definidos em CSS tokens: success (verde), warning (amarelo), info (azul), submitted (roxo), review (mostarda), danger (vermelho), neutral (cinza esverdeado), brand (verde Fiobras suave). Cada variante tem par de tokens bg/fg adaptados pra light e dark, garantindo contraste consistente. .tag e .tag--sm para densidades diferentes (lista vs card resumido). Componente reutilizável em qualquer status/badge novo do HUB.'},
+      {type:'high', title:'Desenv. Cor: badges de status migrados.', desc:'Cada estado da pipeline de cor (Entrada, Desenvolvida, Enviada, Em Ajuste, Aprovada, Cancelada) agora usa o componente .tag com a variante semântica correta + ícone à esquerda — Entrada (warning + alert-triangle), Desenvolvida (info + loader), Enviada (submitted + paper-plane), Em Ajuste (review + eye), Aprovada (success + badge-check), Cancelada (danger + x-circle). STATUS_CONFIG ganhou os campos `variant` e `icon` mantendo `cor`/`bg` pra retrocompat com o histórico timeline interno.'},
+      {type:'feat', title:'+8 ícones na biblioteca SVG.', desc:'alert-triangle, loader, paper-plane, eye, badge-check, x-circle, info, check — todos no mesmo padrão Lucide-style (line stroke 1.5 round, fill none, currentColor). Ficam disponíveis pra usar em qualquer tag ou contexto.'},
+      {type:'note', title:'Próxima frente.', desc:'v3.7.0 vai adicionar toggle expand/collapse na sidebar (64px ↔ 240px com nomes dos módulos visíveis quando expandida). Persiste no localStorage. Mobile mantém a pílula flutuante.'}
+    ]
+  },
+  {
+    v:'3.5.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Tipografia display: Outfit Black 900.', desc:'A Outfit já estava no stack, mas só usávamos até weight 800. Agora a 900 (Black) entra nos lugares de display: nome do usuário no dropdown, brand "F" da sidebar, valores de KPI, login hero e splash. Stack ganha presença de produto polido sem precisar de fonte nova. Letter-spacing negativo (-.01em a -.02em) ajuda em tamanhos grandes pra não parecerem soltos. Aplicado pontualmente — botões, sub-tabs, labels e corpo continuam Poppins, e tags ficam Poppins 500 como antes.'},
       {type:'feat', title:'Biblioteca de ícones unificada.', desc:'Criado um <svg defs> único no topo do body com 17 ícones SVG <symbol> da família Lucide-style: line stroke 1.5 round, fill none, currentColor. Acesso via <svg class="icon"><use href="#i-..."/></svg>. Sidebar (5 módulos + histórico), pílula mobile (5 módulos), topbar (theme toggle + caret) e dropdown do user (4 itens) migrados pro novo padrão. Resultado: menos KB de SVG inline duplicado e visual coeso entre todos os ícones.'},
@@ -3279,12 +3304,13 @@ function coresInit() {
 
 // ── Status helpers ───────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  entrada:      { lb:'Entrada',          cor:'#FFCB00', bg:'rgba(255,203,0,.15)' },
-  desenvolvida: { lb:'Desenvolvida',     cor:'#0076BE', bg:'rgba(0,118,190,.15)' },
-  enviada:      { lb:'Enviada',          cor:'#8E8E93', bg:'rgba(142,142,147,.15)' },
-  em_ajuste:    { lb:'Em Ajuste',        cor:'#e07820', bg:'rgba(224,120,32,.15)' },
-  aprovada:     { lb:'Aprovada',         cor:'#008835', bg:'rgba(0,136,53,.15)' },
-  cancelada:    { lb:'Cancelada',        cor:'#636366', bg:'rgba(99,99,102,.15)' }
+  // v3.6.0: variant/icon pra usar com componente .tag; cor/bg mantidos pra retrocompat
+  entrada:      { lb:'Entrada',      cor:'#FFCB00', bg:'rgba(255,203,0,.15)',   variant:'warning',   icon:'i-alert-triangle' },
+  desenvolvida: { lb:'Desenvolvida', cor:'#0076BE', bg:'rgba(0,118,190,.15)',   variant:'info',      icon:'i-loader' },
+  enviada:      { lb:'Enviada',      cor:'#8E8E93', bg:'rgba(142,142,147,.15)', variant:'submitted', icon:'i-paper-plane' },
+  em_ajuste:    { lb:'Em Ajuste',    cor:'#e07820', bg:'rgba(224,120,32,.15)',  variant:'review',    icon:'i-eye' },
+  aprovada:     { lb:'Aprovada',     cor:'#008835', bg:'rgba(0,136,53,.15)',    variant:'success',   icon:'i-badge-check' },
+  cancelada:    { lb:'Cancelada',    cor:'#636366', bg:'rgba(99,99,102,.15)',   variant:'danger',    icon:'i-x-circle' }
 };
 
 /** Calcula dias úteis ativos de desenvolvimento de uma cor */
@@ -3501,7 +3527,7 @@ function renderCoresLista() {
           '<div class="cor-card-sub">'+clienteLinha+'</div>' +
         '</div>' +
         '<div class="cor-card-right">' +
-          '<span class="cor-card-badge" style="color:'+sc.cor+';background:'+sc.bg+'">'+sc.lb+'</span>' +
+          '<span class="tag tag--sm tag--'+sc.variant+'"><svg><use href="#'+sc.icon+'"/></svg>'+sc.lb+'</span>' +
           '<span class="cor-card-dias '+diasCls+'">'+pauseSVG+dias+' dia'+(dias!==1?'s':'')+'</span>' +
           (op30 ? '<span class="cor-card-op30">OP>30d</span>' : '') +
         '</div>' +
