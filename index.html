@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.2 16/04/2026  Sub-tabs fixed (sticky não funcionava)   ║
+  ║    • Posição fixed em vez de sticky pra estabilidade.        ║
+  ║    • body padding-top compensa altura das tabs.              ║
   ║  v3.21.1 16/04/2026  Sub-tabs sticky no Preço/CRM/Manutenção  ║
   ║    • Subheader das abas internas fica congelado ao rolar.    ║
   ║  v3.21.0 16/04/2026  Role 'gerente' (acesso total sem admin)  ║
@@ -623,7 +626,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2403,10 +2406,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.1';
+const CURRENT_VERSION = '3.21.2';
 const CHANGELOG = [
   {
-    v:'3.21.1', d:'16 abr 2026', current:true,
+    v:'3.21.2', d:'16 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Sub-tabs do Preço/CRM/Manutenção: fixed em vez de sticky.', desc:'A tentativa anterior com position:sticky não estava funcionando dentro do iframe — o subheader sumia ao rolar mesmo. Mudei pra position:fixed com top:0 + body padding-top:46px pra compensar a altura. Mais previsível em qualquer browser/contexto. As abas internas agora ficam coladas no topo do iframe ao rolar pra baixo.'}
+    ]
+  },
+  {
+    v:'3.21.1', d:'16 abr 2026',
     items:[
       {type:'high', title:'Sub-tabs do Preço/CRM/Manutenção agora ficam sticky.', desc:'O subheader com as abas internas (Vendas/Tingimento/Preparação/Retorção/Custos/Histórico no Preço; Pipeline/Lista/Dashboard no CRM; Dashboard/Kanban/Histórico/etc. na Manutenção) sumia ao rolar a página pra baixo. Agora ele fica congelado no topo do iframe — quando você desce na lista/kanban, as abas continuam acessíveis sem precisar voltar pro topo. Aplicado nos 3 sub-apps com position:sticky;top:0;z-index:50; também garantido que html/body do iframe sejam o scroll container (overflow-y:auto).'}
     ]

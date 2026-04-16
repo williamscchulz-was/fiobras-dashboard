@@ -709,16 +709,17 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
     --text:#F5F5F7 !important; --muted:#98989D !important; --muted2:#636366 !important;
   }
   body { background:var(--bg) !important; color:var(--text) !important; font-family:'Poppins',sans-serif !important; min-height:100vh !important; }
-  /* Tabs no padr\u00e3o HUB + sticky */
+  /* Tabs no padr\u00e3o HUB + fixed no topo */
   .tabs {
     background:var(--bg) !important;
     border-bottom:1px solid var(--border) !important;
     box-shadow:none !important;
-    position: sticky !important;
-    top: 0 !important;
+    position: fixed !important;
+    top: 0 !important; left: 0 !important; right: 0 !important;
     z-index: 50 !important;
   }
-  html, body { overflow-x: hidden; overflow-y: auto; }
+  body { padding-top: 46px !important; }
+  @media(max-width:700px){ body { padding-top: 44px !important; } }
   .tabs button, .tabs .tab {
     font-family:'DM Mono',monospace !important; font-size:.62rem !important; font-weight:700 !important;
     letter-spacing:1.5px !important; text-transform:uppercase !important;
