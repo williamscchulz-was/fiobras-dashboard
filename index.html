@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.5.0  15/04/2026  Refinamento visual: ícones + Outfit 900 ║
+  ║    • Biblioteca de ícones SVG <symbol> em <defs> único.      ║
+  ║    • Ícones unificados em line stroke 1.5 round.             ║
+  ║    • Outfit Black 900 em hero/KPI/brand/dropdown name.       ║
+  ║    • Sidebar/mobile pill/topbar/dropdown migrados.           ║
   ║  v3.4.0  15/04/2026  CRM integrado via /crm/ iframe          ║
   ║    • Sub-app em /crm/index.html (adaptado de fiobras-crm).   ║
   ║    • Shell interno (.header + splash + login) escondido.     ║
@@ -268,10 +273,34 @@
 <meta name="msapplication-TileColor" content="#008835">
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.3.0">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/hub.css?v=3.5.0">
 </head>
 <body>
+<!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none" aria-hidden="true">
+  <defs>
+    <!-- Módulos -->
+    <symbol id="i-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+    <symbol id="i-factory" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V11l5 3V11l5 3V8l8-3v16z"/><line x1="9" y1="17" x2="9" y2="17.01"/><line x1="14" y1="17" x2="14" y2="17.01"/><line x1="19" y1="17" x2="19" y2="17.01"/></symbol>
+    <symbol id="i-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></symbol>
+    <symbol id="i-tool" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></symbol>
+    <!-- Sistema -->
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 018 0v4"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14.5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></symbol>
+    <!-- Ações -->
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></symbol>
+  </defs>
+</svg>
 
 <!-- ── Login ── -->
 <div class="login-screen" id="loginScreen">
@@ -317,35 +346,35 @@
     <span class="sidenav-logo-txt">F</span>
   </div>
   <button class="sidenav-item" data-mod="resultados" onclick="switchModule('resultados',this)" aria-label="Gerencial">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <svg class="icon"><use href="#i-dashboard"/></svg>
+    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
     <span class="sidenav-tip">Gerencial</span>
   </button>
   <button class="sidenav-item" data-mod="producao" onclick="switchModule('producao',this)" aria-label="Produção">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <svg class="icon"><use href="#i-factory"/></svg>
+    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
     <span class="sidenav-tip">Produção</span>
   </button>
   <button class="sidenav-item" data-mod="preco" onclick="switchModule('preco',this)" aria-label="Preço de Venda">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-    <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <svg class="icon"><use href="#i-dollar"/></svg>
+    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
     <span class="sidenav-tip">Preço de Venda</span>
   </button>
   <button class="sidenav-item wip" data-mod="manutencao" onclick="switchModule('manutencao',this)" aria-label="Manutenção">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    <svg class="icon"><use href="#i-tool"/></svg>
     <span class="sidenav-wip" aria-hidden="true"></span>
-    <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
     <span class="sidenav-tip">Manutenção · WIP</span>
   </button>
   <button class="sidenav-item" data-mod="crm" onclick="switchModule('crm',this)" aria-label="CRM">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-    <span class="sidenav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <svg class="icon"><use href="#i-users"/></svg>
+    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
     <span class="sidenav-tip">CRM</span>
   </button>
   <div class="sidenav-spacer"></div>
   <div class="sidenav-divider"></div>
   <button class="sidenav-item" onclick="openChangelog()" aria-label="Histórico de versões">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20M12 8v4l3 2"/></svg>
+    <svg class="icon"><use href="#i-clock"/></svg>
     <span class="sidenav-tip">Histórico de versões</span>
   </button>
 </aside>
@@ -358,8 +387,8 @@
   </div>
   <div class="topbar-spacer"></div>
   <button class="topbar-icon" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
-    <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
-    <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg id="icon-moon" class="icon sm"><use href="#i-moon"/></svg>
+    <svg id="icon-sun" class="icon sm" style="display:none"><use href="#i-sun"/></svg>
   </button>
   <div class="topbar-user" id="topbarUser" onclick="toggleUserDd(event)">
     <div class="topbar-user-av" id="topbarUserAv">—</div>
@@ -367,7 +396,7 @@
       <div class="topbar-user-name" id="topbarUserName">—</div>
       <div class="topbar-user-role" id="topbarUserRole">—</div>
     </div>
-    <svg class="topbar-user-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <svg class="topbar-user-caret icon" style="width:11px;height:11px;stroke-width:2"><use href="#i-chevron-down"/></svg>
     <div class="user-dd" id="userDd" onclick="event.stopPropagation()">
       <div class="user-dd-head">
         <div class="user-dd-head-av" id="ddAv">—</div>
@@ -377,22 +406,22 @@
         </div>
       </div>
       <button class="user-dd-item" onclick="abrirMinhaConta()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg class="icon sm"><use href="#i-user"/></svg>
         Minha conta
       </button>
       <button class="user-dd-item" onclick="toggleTheme()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="icon sm"><use href="#i-moon"/></svg>
         Tema
         <span class="dd-right" id="ddThemeLbl">escuro</span>
       </button>
       <button class="user-dd-item" onclick="openChangelog()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20M12 8v4l3 2"/></svg>
+        <svg class="icon sm"><use href="#i-clock"/></svg>
         Histórico de versões
         <span class="dd-tag" id="ddVersion">v2.8.0</span>
       </button>
       <div class="user-dd-sep"></div>
       <button class="user-dd-item danger" onclick="doLogout()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <svg class="icon sm"><use href="#i-logout"/></svg>
         Sair
       </button>
     </div>
@@ -432,7 +461,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.4.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.5.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -992,29 +1021,29 @@
 <!-- ── Mobile Nav Pill (v2.5.0 Fase 2) — pílula flutuante estilo Nubank ── -->
 <nav class="mnav-pill" id="mnavPill" aria-label="Navegação de módulos">
   <button class="mnav-btn" data-mod="resultados" onclick="switchModuleMobile('resultados',this)" aria-label="Gerencial">
-    <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <svg class="mnav-ic icon"><use href="#i-dashboard"/></svg>
     <span class="mnav-btn-lbl">Gerencial</span>
-    <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="mnav-btn-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
   </button>
   <button class="mnav-btn" data-mod="producao" onclick="switchModuleMobile('producao',this)" aria-label="Produção">
-    <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <svg class="mnav-ic icon"><use href="#i-factory"/></svg>
     <span class="mnav-btn-lbl">Produção</span>
-    <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="mnav-btn-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
   </button>
   <button class="mnav-btn" data-mod="preco" onclick="switchModuleMobile('preco',this)" aria-label="Preço de Venda">
-    <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    <svg class="mnav-ic icon"><use href="#i-dollar"/></svg>
     <span class="mnav-btn-lbl">Preço</span>
-    <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="mnav-btn-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
   </button>
   <button class="mnav-btn" data-mod="manutencao" onclick="switchModuleMobile('manutencao',this)" aria-label="Manutenção">
-    <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    <svg class="mnav-ic icon"><use href="#i-tool"/></svg>
     <span class="mnav-btn-lbl">Manut.</span>
-    <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="mnav-btn-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
   </button>
   <button class="mnav-btn" data-mod="crm" onclick="switchModuleMobile('crm',this)" aria-label="CRM">
-    <svg class="mnav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    <svg class="mnav-ic icon"><use href="#i-users"/></svg>
     <span class="mnav-btn-lbl">CRM</span>
-    <span class="mnav-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+    <span class="mnav-btn-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
   </button>
 </nav>
 <div class="toast" id="toast"></div>
@@ -1442,10 +1471,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.4.0';
+const CURRENT_VERSION = '3.5.0';
 const CHANGELOG = [
   {
-    v:'3.4.0', d:'15 abr 2026', current:true,
+    v:'3.5.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Tipografia display: Outfit Black 900.', desc:'A Outfit já estava no stack, mas só usávamos até weight 800. Agora a 900 (Black) entra nos lugares de display: nome do usuário no dropdown, brand "F" da sidebar, valores de KPI, login hero e splash. Stack ganha presença de produto polido sem precisar de fonte nova. Letter-spacing negativo (-.01em a -.02em) ajuda em tamanhos grandes pra não parecerem soltos. Aplicado pontualmente — botões, sub-tabs, labels e corpo continuam Poppins, e tags ficam Poppins 500 como antes.'},
+      {type:'feat', title:'Biblioteca de ícones unificada.', desc:'Criado um <svg defs> único no topo do body com 17 ícones SVG <symbol> da família Lucide-style: line stroke 1.5 round, fill none, currentColor. Acesso via <svg class="icon"><use href="#i-..."/></svg>. Sidebar (5 módulos + histórico), pílula mobile (5 módulos), topbar (theme toggle + caret) e dropdown do user (4 itens) migrados pro novo padrão. Resultado: menos KB de SVG inline duplicado e visual coeso entre todos os ícones.'},
+      {type:'note', title:'Classe .icon com tamanhos canônicos.', desc:'.icon (18px), .icon.sm (14px stroke 1.75), .icon.xs (12px stroke 1.75), .icon.lg (22px). Contextos específicos (sidenav-item, mnav-ic, etc.) podem fazer override de tamanho via CSS. Stroke-width sobe ligeiramente em ícones pequenos pra manter legibilidade.'},
+      {type:'note', title:'Próximas frentes do refinamento visual.', desc:'v3.6.0 vai trazer o sistema de tags semânticas (8 variantes: success/warning/info/submitted/review/danger/neutral/brand) generalizando o padrão da Timeline pro HUB todo. v3.7.0 adiciona toggle de expand/collapse na sidebar (64px ↔ 240px com nomes dos módulos visíveis). Cada uma vira commit isolado, sem bundlar.'}
+    ]
+  },
+  {
+    v:'3.4.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'CRM ativo dentro do HUB.', desc:'O sistema de CRM (antes WIP, repo williamscchulz-was/fiobras-crm) agora vive em /crm/index.html e é embutido via iframe no panel-crm do HUB. Todas as views internas (Dashboard, Pipeline, Lista de clientes) funcionam como no app standalone — zero migração de dados porque o Firebase project (fiobras-preco) e os paths (crm/clientes, crm/leads, crm/log) são os mesmos.'},
       {type:'high', title:'Shell interno do CRM removido, tema sincronizado.', desc:'Mesma receita da Preço: .header interno + splash + loginScreen escondidos via override <style>. Tabs do CRM grudam no topo do iframe. Tema lê fiobras-dash-theme do HUB e escuta postMessage pra mudanças em tempo real. Cache-buster ?v=CURRENT_VERSION na src do iframe.'},
