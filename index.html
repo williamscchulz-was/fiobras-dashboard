@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.7.0  15/04/2026  Sidebar com toggle expand/collapse      ║
+  ║    • 64px (ícones) ↔ 232px (com nomes dos módulos).          ║
+  ║    • Botão de toggle no header da sidebar (centro→direita).  ║
+  ║    • Estado persistido em localStorage.                      ║
+  ║    • Mobile: pílula flutuante mantida.                       ║
   ║  v3.6.0  15/04/2026  Sistema de tags semânticas (8 variantes) ║
   ║    • Tokens CSS: success/warning/info/submitted/review/      ║
   ║      danger/neutral/brand (light + dark).                    ║
@@ -281,7 +286,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.6.0">
+<link rel="stylesheet" href="css/hub.css?v=3.7.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -306,6 +311,7 @@
     <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
     <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></symbol>
+    <symbol id="i-panel-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></symbol>
     <!-- v3.6.0: Status (tags semânticas) -->
     <symbol id="i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></symbol>
     <symbol id="i-loader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></symbol>
@@ -358,41 +364,57 @@
 <div class="notch-spacer"></div>
 <div class="shell">
 <aside class="sidenav" id="sidenav">
-  <div class="sidenav-logo" title="Fiobras HUB">
-    <span class="sidenav-logo-txt">F</span>
+  <!-- v3.7.0: brand wrapper com logo + nome + toggle -->
+  <div class="sidenav-brand">
+    <div class="sidenav-logo" title="Fiobras HUB">
+      <span class="sidenav-logo-txt">F</span>
+    </div>
+    <span class="sidenav-brand-name">Fiobras HUB</span>
+    <button class="sidenav-toggle" id="sidenavToggle" onclick="toggleSidenav()" aria-label="Recolher/expandir menu">
+      <svg class="icon sm"><use href="#i-panel-toggle"/></svg>
+    </button>
   </div>
-  <button class="sidenav-item" data-mod="resultados" onclick="switchModule('resultados',this)" aria-label="Gerencial">
-    <svg class="icon"><use href="#i-dashboard"/></svg>
-    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
-    <span class="sidenav-tip">Gerencial</span>
-  </button>
-  <button class="sidenav-item" data-mod="producao" onclick="switchModule('producao',this)" aria-label="Produção">
-    <svg class="icon"><use href="#i-factory"/></svg>
-    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
-    <span class="sidenav-tip">Produção</span>
-  </button>
-  <button class="sidenav-item" data-mod="preco" onclick="switchModule('preco',this)" aria-label="Preço de Venda">
-    <svg class="icon"><use href="#i-dollar"/></svg>
-    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
-    <span class="sidenav-tip">Preço de Venda</span>
-  </button>
-  <button class="sidenav-item wip" data-mod="manutencao" onclick="switchModule('manutencao',this)" aria-label="Manutenção">
-    <svg class="icon"><use href="#i-tool"/></svg>
-    <span class="sidenav-wip" aria-hidden="true"></span>
-    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
-    <span class="sidenav-tip">Manutenção · WIP</span>
-  </button>
-  <button class="sidenav-item" data-mod="crm" onclick="switchModule('crm',this)" aria-label="CRM">
-    <svg class="icon"><use href="#i-users"/></svg>
-    <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
-    <span class="sidenav-tip">CRM</span>
-  </button>
+  <div class="sidenav-items">
+    <button class="sidenav-item" data-mod="resultados" onclick="switchModule('resultados',this)" aria-label="Gerencial">
+      <svg class="icon"><use href="#i-dashboard"/></svg>
+      <span class="sidenav-item-name">Gerencial</span>
+      <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
+      <span class="sidenav-tip">Gerencial</span>
+    </button>
+    <button class="sidenav-item" data-mod="producao" onclick="switchModule('producao',this)" aria-label="Produção">
+      <svg class="icon"><use href="#i-factory"/></svg>
+      <span class="sidenav-item-name">Produção</span>
+      <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
+      <span class="sidenav-tip">Produção</span>
+    </button>
+    <button class="sidenav-item" data-mod="preco" onclick="switchModule('preco',this)" aria-label="Preço de Venda">
+      <svg class="icon"><use href="#i-dollar"/></svg>
+      <span class="sidenav-item-name">Preço de Venda</span>
+      <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
+      <span class="sidenav-tip">Preço de Venda</span>
+    </button>
+    <button class="sidenav-item wip" data-mod="manutencao" onclick="switchModule('manutencao',this)" aria-label="Manutenção">
+      <svg class="icon"><use href="#i-tool"/></svg>
+      <span class="sidenav-item-name">Manutenção</span>
+      <span class="sidenav-wip" aria-hidden="true"></span>
+      <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
+      <span class="sidenav-tip">Manutenção · WIP</span>
+    </button>
+    <button class="sidenav-item" data-mod="crm" onclick="switchModule('crm',this)" aria-label="CRM">
+      <svg class="icon"><use href="#i-users"/></svg>
+      <span class="sidenav-item-name">CRM</span>
+      <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
+      <span class="sidenav-tip">CRM</span>
+    </button>
+  </div>
   <div class="sidenav-spacer"></div>
   <div class="sidenav-divider"></div>
   <button class="sidenav-item" onclick="openChangelog()" aria-label="Histórico de versões">
     <svg class="icon"><use href="#i-clock"/></svg>
+    <span class="sidenav-item-name">Versões</span>
     <span class="sidenav-tip">Histórico de versões</span>
   </button>
+  <div class="sidenav-foot-ver" id="sidenavFootVer">v—</div>
 </aside>
 <div class="main-col">
 <div class="topbar">
@@ -477,7 +499,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.6.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.7.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1325,6 +1347,31 @@ window._applyLoginSenhaField = () => {
   else wrap.classList.remove('show');
 };
 
+// v3.7.0: sidebar com toggle expand/collapse + persistência
+const SIDENAV_KEY = 'fiobras-hub-sidebar-expanded';
+window.toggleSidenav = function(){
+  const s = document.getElementById('sidenav');
+  if(!s) return;
+  const next = !s.classList.contains('expanded');
+  s.classList.toggle('expanded', next);
+  try { localStorage.setItem(SIDENAV_KEY, next ? '1' : '0'); } catch(e){}
+};
+function applySidenavInitial(){
+  const s = document.getElementById('sidenav');
+  if(!s) return;
+  let on = false;
+  try { on = localStorage.getItem(SIDENAV_KEY) === '1'; } catch(e){}
+  s.classList.toggle('expanded', on);
+  // Versão no rodapé da sidebar
+  const fv = document.getElementById('sidenavFootVer');
+  if(fv && typeof CURRENT_VERSION !== 'undefined') fv.textContent = 'v' + CURRENT_VERSION;
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', applySidenavInitial);
+} else {
+  applySidenavInitial();
+}
+
 window.toggleUserDd = (e) => {
   if(e) e.stopPropagation();
   const user = document.getElementById('topbarUser');
@@ -1487,10 +1534,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.6.0';
+const CURRENT_VERSION = '3.7.0';
 const CHANGELOG = [
   {
-    v:'3.6.0', d:'15 abr 2026', current:true,
+    v:'3.7.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Sidebar com toggle expand/collapse.', desc:'A sidebar lateral (desktop) agora alterna entre dois estados: colapsada (68px, só ícones — padrão) e expandida (232px, com nomes dos módulos visíveis ao lado dos ícones). Botão de toggle vive no header da sidebar — quando colapsada, fica centralizado (ocupa o lugar do logo, que esconde com fade); quando expandida, vai pra direita, lado a lado com logo + brand "Fiobras HUB". Click-to-toggle (sem hover-to-expand). Estado persistido em localStorage (key fiobras-hub-sidebar-expanded), então o usuário escolhe uma vez e fica.'},
+      {type:'high', title:'Itens lockados ganham apresentação melhor quando expandidos.', desc:'Em modo colapsado, módulos lockados (ex: Gerencial pra produção) mostram um pin de cadeado pequeno no canto superior direito do botão. Em modo expandido, esse cadeado vira um ícone normal alinhado à direita do nome — fica óbvio que tá bloqueado e por quê, sem visual de badge espremido. Tooltips são desabilitados quando a sidebar está expandida (nome já aparece).'},
+      {type:'note', title:'Mobile inalterado.', desc:'A pílula flutuante v2.5.0 continua sendo a navegação mobile. Sidebar tem display:none em ≤640px (já era assim). Toggle só funciona em desktop, por design.'},
+      {type:'note', title:'Versão no rodapé da sidebar.', desc:'Quando expandida, mostra "v3.7.0" discreto no rodapé (DM Mono, muted). Mais um ponto pra confirmar qual versão tá rodando sem precisar abrir o histórico.'}
+    ]
+  },
+  {
+    v:'3.6.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Sistema de tags semânticas com 8 variantes.', desc:'Implementado o componente .tag com 8 modificadores definidos em CSS tokens: success (verde), warning (amarelo), info (azul), submitted (roxo), review (mostarda), danger (vermelho), neutral (cinza esverdeado), brand (verde Fiobras suave). Cada variante tem par de tokens bg/fg adaptados pra light e dark, garantindo contraste consistente. .tag e .tag--sm para densidades diferentes (lista vs card resumido). Componente reutilizável em qualquer status/badge novo do HUB.'},
       {type:'high', title:'Desenv. Cor: badges de status migrados.', desc:'Cada estado da pipeline de cor (Entrada, Desenvolvida, Enviada, Em Ajuste, Aprovada, Cancelada) agora usa o componente .tag com a variante semântica correta + ícone à esquerda — Entrada (warning + alert-triangle), Desenvolvida (info + loader), Enviada (submitted + paper-plane), Em Ajuste (review + eye), Aprovada (success + badge-check), Cancelada (danger + x-circle). STATUS_CONFIG ganhou os campos `variant` e `icon` mantendo `cor`/`bg` pra retrocompat com o histórico timeline interno.'},
