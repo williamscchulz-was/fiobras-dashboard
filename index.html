@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.9.0  15/04/2026  Usuários: Edilson + Joacir, painel       ║
+  ║    • Adicionados Edilson e Joacir (role: producao).          ║
+  ║    • Popup obrigatório "Definir senha" no 1º login.          ║
+  ║    • Painel "Gerenciar usuários" no dropdown admin.          ║
+  ║    • Reset de senha individual.                              ║
   ║  v3.8.2  15/04/2026  Fix Manut.: bootstrap usa '__admin__'   ║
   ║    • Select interno usa '__admin__' (não 'admin'); fix       ║
   ║      libera abas admin-only (Preventiva/Máquinas/Histórico/  ║
@@ -304,7 +309,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.7.0">
+<link rel="stylesheet" href="css/hub.css?v=3.9.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -464,6 +469,10 @@
         <svg class="icon sm"><use href="#i-user"/></svg>
         Minha conta
       </button>
+      <button class="user-dd-item" id="ddGerenciarUsuarios" onclick="abrirGerenciarUsuarios()" style="display:none">
+        <svg class="icon sm"><use href="#i-users"/></svg>
+        Gerenciar usuários
+      </button>
       <button class="user-dd-item" onclick="toggleTheme()">
         <svg class="icon sm"><use href="#i-moon"/></svg>
         Tema
@@ -515,7 +524,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.8.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.9.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1024,6 +1033,46 @@
   </div>
 </div>
 
+<!-- Modal Definir senha (v3.9.0) — popup obrigatório no primeiro login -->
+<div class="modal-bg" id="psModal">
+  <div class="modal" style="width:420px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <svg class="icon lg" style="color:var(--green)"><use href="#i-lock"/></svg>
+      <div style="font-size:.95rem;font-weight:700;color:var(--text)">Defina sua senha</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--muted);line-height:1.55;margin-bottom:18px">
+      Bem-vindo, <span id="psNome" style="color:var(--text);font-weight:600">—</span>! Defina uma senha pra continuar usando o HUB. Vai ser pedida nos próximos logins.
+    </div>
+    <div class="tl-form-field">
+      <label>Nova senha</label>
+      <input type="password" id="psSenha" placeholder="Mínimo 4 caracteres" maxlength="40" autocomplete="new-password">
+    </div>
+    <div class="tl-form-field">
+      <label>Confirmar senha</label>
+      <input type="password" id="psSenhaConf" placeholder="Repita a senha" maxlength="40" autocomplete="new-password" onkeydown="if(event.key==='Enter')salvarPrimeiraSenha()">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+      <button class="save-btn" onclick="salvarPrimeiraSenha()">Salvar e continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Gerenciar usuários (admin only · v3.9.0) -->
+<div class="modal-bg" id="guModal" onclick="if(event.target===this)fecharGerenciarUsuarios()">
+  <div class="modal" style="width:540px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Gerenciar usuários</div>
+      <button class="sc-lanc-close" onclick="fecharGerenciarUsuarios()" aria-label="Fechar">
+        <svg class="icon sm"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);margin-bottom:14px;line-height:1.5">
+      Lista de todos os usuários do HUB. Resetar senha apaga a senha cadastrada — no próximo login do usuário, o popup de definir senha aparece de novo.
+    </div>
+    <div class="gu-list" id="guList"></div>
+  </div>
+</div>
+
 <!-- Modal gerenciar tags (admin only) -->
 <div class="modal-bg" id="tlTagsModal" onclick="if(event.target===this)fecharTlTagsManager()">
   <div class="modal" style="width:440px;max-height:90vh;overflow-y:auto">
@@ -1103,6 +1152,8 @@ const USERS={
   aldo:     {nome:'Aldo',      senha:null,    role:'producao'},
   geovani:  {nome:'Geovani',   senha:null,    role:'producao'},
   lucivane: {nome:'Lucivane',  senha:null,    role:'producao'},
+  edilson:  {nome:'Edilson',   senha:null,    role:'producao'},
+  joacir:   {nome:'Joacir',    senha:null,    role:'producao'},
   // Líderes de turno (tintoria) — só editam o próprio turno no Apontamento
   adelir:   {nome:'Adelir',    senha:null,    role:'producao', turno:1},
   alexander:{nome:'Alexander', senha:null,    role:'producao', turno:2},
@@ -1189,6 +1240,11 @@ function showSplash(nome, role){
     document.getElementById('app').classList.add('visible');
     setupTabs(role);
     checkChangelog();
+    // v3.9.0: força definir senha se ainda não tiver
+    setTimeout(checkDefinirSenha, 600);
+    // v3.9.0: mostra "Gerenciar usuários" no dropdown só pra admin
+    const ddGu = document.getElementById('ddGerenciarUsuarios');
+    if(ddGu) ddGu.style.display = (role === 'admin') ? '' : 'none';
   },2400);
 }
 
@@ -1353,6 +1409,101 @@ window._applyLoginSenhaField = () => {
   const hasProfileSenha = !!profile.senhaHash;
   if(hasHardcoded || hasProfileSenha) wrap.classList.add('show');
   else wrap.classList.remove('show');
+};
+
+// ── v3.9.0: Definir senha (popup obrigatório no 1º login) ──────────────
+function checkDefinirSenha(){
+  const sess = getSession();
+  if(!sess) return;
+  const u = USERS[sess.user];
+  if(!u) return;
+  // Admin tem senha hardcoded; pula. Se um dia William quiser definir senha de admin, precisaria ajustar USERS.admin.senha=null
+  if(u.senha !== null && u.senha !== undefined) return;
+  const profile = (window._usersProfile || {})[sess.user] || {};
+  if(profile.senhaHash) return; // já tem
+  // Popup
+  document.getElementById('psNome').textContent = (profile.nomeCompleto && profile.nomeCompleto.trim()) || u.nome;
+  document.getElementById('psSenha').value = '';
+  document.getElementById('psSenhaConf').value = '';
+  document.getElementById('psModal').classList.add('open');
+  setTimeout(() => { document.getElementById('psSenha').focus(); }, 200);
+}
+window.salvarPrimeiraSenha = async () => {
+  const sess = getSession();
+  if(!sess){ toast('Sessão expirada','err'); return; }
+  const s1 = document.getElementById('psSenha').value;
+  const s2 = document.getElementById('psSenhaConf').value;
+  if(s1.length < 4){ toast('Mínimo 4 caracteres','err'); return; }
+  if(s1 !== s2){ toast('Senhas não conferem','err'); return; }
+  try {
+    const hash = await mcHashSenha(s1);
+    const profile = Object.assign({}, (window._usersProfile || {})[sess.user] || {});
+    profile.senhaHash = hash;
+    if(window._salvarUserProfile) await window._salvarUserProfile(sess.user, profile);
+    document.getElementById('psModal').classList.remove('open');
+    toast('Senha definida com sucesso');
+  } catch(e){ console.error(e); toast('Erro ao salvar senha','err'); }
+};
+
+// ── v3.9.0: Painel "Gerenciar usuários" (admin only) ───────────────────
+window.abrirGerenciarUsuarios = () => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  // Fecha dropdown
+  const dd = document.getElementById('userDd'), user = document.getElementById('topbarUser');
+  if(dd) dd.classList.remove('open'); if(user) user.classList.remove('open');
+  renderGuList();
+  document.getElementById('guModal').classList.add('open');
+};
+window.fecharGerenciarUsuarios = () => {
+  document.getElementById('guModal').classList.remove('open');
+};
+function renderGuList(){
+  const host = document.getElementById('guList');
+  if(!host) return;
+  const profiles = window._usersProfile || {};
+  const esc = s => String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const entries = Object.entries(USERS);
+  host.innerHTML = entries.map(([key, u]) => {
+    const p = profiles[key] || {};
+    const nomeShow = (p.nomeCompleto && p.nomeCompleto.trim()) || u.nome;
+    const initials = nomeShow.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+    const isAdmin = u.role === 'admin';
+    const turno = u.turno ? ('turno ' + u.turno) : '';
+    const temSenha = (u.senha !== null && u.senha !== undefined) || !!p.senhaHash;
+    const senhaSrc = (u.senha !== null && u.senha !== undefined) ? 'fixa' : (p.senhaHash ? 'definida' : 'sem senha');
+    const senhaIcon = temSenha ? 'i-lock' : 'i-alert-triangle';
+    const senhaCls = temSenha ? 'tag tag--sm tag--success' : 'tag tag--sm tag--warning';
+    // Admin com senha fixa não permite reset; outros sim
+    const podeResetar = !(u.senha !== null && u.senha !== undefined) && !!p.senhaHash;
+    return '<div class="gu-row">' +
+      '<div class="gu-row-av' + (isAdmin?' admin':'') + '">' + esc(initials) + '</div>' +
+      '<div class="gu-row-info">' +
+        '<div class="gu-row-nome">' + esc(nomeShow) + '</div>' +
+        '<div class="gu-row-meta">' +
+          '<span>' + esc(u.role) + '</span>' +
+          (turno ? '<span class="gu-row-meta-sep">·</span><span>' + turno + '</span>' : '') +
+          '<span class="gu-row-meta-sep">·</span><span class="' + senhaCls + '"><svg><use href="#' + senhaIcon + '"/></svg>' + senhaSrc + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<button class="gu-row-act' + (podeResetar?'':' disabled') + '" ' +
+        (podeResetar ? 'onclick="resetarSenhaUser(\'' + key + '\')"' : 'disabled') +
+        '>Resetar senha</button>' +
+    '</div>';
+  }).join('');
+}
+window.resetarSenhaUser = (userKey) => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  const u = USERS[userKey]; if(!u){ toast('Usuário inválido','err'); return; }
+  if(!confirm('Resetar a senha de ' + u.nome + '? Ele(a) vai precisar criar uma nova no próximo login.')) return;
+  const profile = Object.assign({}, (window._usersProfile || {})[userKey] || {});
+  delete profile.senhaHash;
+  if(window._salvarUserProfile) window._salvarUserProfile(userKey, profile);
+  // Atualiza cache local enquanto Firebase não retorna
+  if(window._usersProfile) {
+    window._usersProfile[userKey] = profile;
+  }
+  toast('Senha resetada — ' + u.nome + ' vai criar nova no próximo login');
+  setTimeout(renderGuList, 300);
 };
 
 // v3.7.0: sidebar com toggle expand/collapse + persistência
@@ -1542,10 +1693,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.8.2';
+const CURRENT_VERSION = '3.9.0';
 const CHANGELOG = [
   {
-    v:'3.8.2', d:'15 abr 2026', current:true,
+    v:'3.9.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Edilson e Joacir adicionados como usuários.', desc:'Dois usuários novos no HUB com role `producao` (sem turno). Passam a ver Produção, Manutenção e CRM por padrão; Gerencial e Preço bloqueados (cadeado), a definir granular depois. Total de usuários sobe pra 11 (1 admin + 10 produção).'},
+      {type:'feat', title:'Popup obrigatório "Definir senha" no primeiro login.', desc:'Quando um usuário entra e ainda não tem senha cadastrada (USERS.senha=null e sem senhaHash no profile), aparece automaticamente um modal pedindo pra criar uma senha de pelo menos 4 caracteres. Sem botão de cancelar — é obrigatório seguir. A senha é salva como SHA-256 + salt no path users-profile/{user}/senhaHash. Nos próximos logins, esse user passa a precisar da senha.'},
+      {type:'high', title:'Painel "Gerenciar usuários" no dropdown do admin.', desc:'No dropdown do user (canto superior direito), o admin agora vê uma opção nova: "Gerenciar usuários". Abre um modal com a lista dos 11 usuários do HUB — cada linha mostra avatar, nome, role/turno, status da senha (fixa/definida/sem senha) e um botão "Resetar senha". Resetar = apaga senhaHash do Firebase, e no próximo login do usuário o popup de definir senha aparece de novo. Ferramenta pra quando alguém esquece a senha ou pra forçar troca por motivo de segurança.'},
+      {type:'note', title:'Próximo: permissões granulares.', desc:'A partir do painel atual, próxima evolução é permitir editar `role` e `turno` de cada user, e adicionar permissões granulares por aba (TAB_PERMS) editáveis na UI ao invés de hardcoded no JS. Por enquanto, mudança de role/turno continua via edição do USERS no index.html.'}
+    ]
+  },
+  {
+    v:'3.8.2', d:'15 abr 2026',
     items:[
       {type:'high', title:'Manutenção: admin só via Dashboard e Kanban (sem Preventiva, Máquinas, Histórico, Relatórios).', desc:'No app standalone do Manutenção, o select de login tem opção com value `__admin__` (que internamente o doLogin mapeia pra USERS.admin). Meu bootstrap setava `sel.value = "admin"` direto — como `admin` não é um value válido em nenhuma <option>, o browser silenciosamente vira `value = ""` (string vazia). Aí o doLogin abortava no primeiro check `if (!sel)` e nunca chegava a marcar `body.is-admin`, que é justamente o que faz o CSS revelar as abas admin-only (Preventiva/Máquinas/Histórico/Relatórios). Corrigido pra usar `__admin__` no value e tudo libera.'}
     ]
