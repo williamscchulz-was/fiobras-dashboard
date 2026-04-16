@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.20.2 16/04/2026  Backfill: cores antigas → autor admin    ║
+  ║    • Cores sem criadoPor recebem 'admin' (one-shot).         ║
+  ║    • Avatar agora aparece no card de cores legacy.           ║
   ║  v3.20.1 16/04/2026  Fix userChip: resolve chave por nome    ║
   ║    • togglePrioridadeCor gravava nome em vez de chave.       ║
   ║    • _resolveUserKey: fallback case-insensitive por nome.    ║
@@ -604,7 +607,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2338,10 +2341,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.20.1';
+const CURRENT_VERSION = '3.20.2';
 const CHANGELOG = [
   {
-    v:'3.20.1', d:'16 abr 2026', current:true,
+    v:'3.20.2', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Backfill: cores antigas ganham autor.', desc:'Cores cadastradas antes da v3.19.0 (que introduziu o campo criadoPor) não tinham autor — então o avatar não aparecia no card. Agora um backfill one-shot atribui criadoPor=\'admin\' (e by:\'admin\' no primeiro evento do histórico) pra todas as cores que estão sem. Roda automaticamente no boot quando o admin abre o HUB pela primeira vez após a atualização. Flag em localStorage garante que só roda uma vez (se quiser re-rodar, apaga fiobras-backfill-cores-autor-v1 do localStorage). Resultado: cards antigos passam a mostrar a foto do admin como criador.'}
+    ]
+  },
+  {
+    v:'3.20.1', d:'16 abr 2026',
     items:[
       {type:'high', title:'Foto não aparecia no histórico priorizada/despriorizada.', desc:'O togglePrioridadeCor (v3.18.0) tava gravando `by: window._currentUserName` (que é o NOME de exibição, ex: "Admin") em vez de `by: getSession().user` (que é a CHAVE, ex: "admin"). O userChip esperava a chave pra buscar o profile/foto, então registros antigos do tipo by:"Admin" caíam em fallback de iniciais sem foto. Mesma coisa no Timeline (criadoPor) e Apontamento (by). Corrigido nos 3 lugares.'},
       {type:'high', title:'Fallback robusto pra registros legacy.', desc:'Adicionado helper _resolveUserKey que tenta achar a chave do usuário a partir do nome (case-insensitive) — primeiro pelo USERS hardcoded, depois pelo nomeCompleto do profile. Resolve registros antigos sem precisar de migração de dados. Se mesmo assim não achar, renderiza só com iniciais (sem foto, mas mostra o nome no tooltip).'}
@@ -2982,6 +2991,8 @@ onValue(coresRef, (snapshot) => {
   const data = snapshot.val();
   if (data) {
     coresData = data;
+    // v3.20.2: backfill one-shot — cores antigas sem criadoPor → admin
+    if (typeof window._backfillCoresAutor === 'function') window._backfillCoresAutor();
     if (document.getElementById('panel-cores')?.classList.contains('active')) renderCores();
   }
 });
@@ -4651,6 +4662,31 @@ function renderCoresLista() {
     '</div>';
   }).join('');
 }
+
+// v3.20.2: backfill one-shot de cores antigas sem criadoPor.
+// Roda só uma vez (flag em localStorage), e só se o user logado for admin.
+window._backfillCoresAutor = () => {
+  try {
+    if(localStorage.getItem('fiobras-backfill-cores-autor-v1') === '1') return;
+    const sess = getSession();
+    if(!sess || getEffectiveRole(sess.user) !== 'admin') return;
+    if(!coresData || typeof coresData !== 'object') return;
+    let mudou = false;
+    Object.entries(coresData).forEach(([id, c]) => {
+      if(!c || typeof c !== 'object') return;
+      if(!c.criadoPor){ c.criadoPor = 'admin'; mudou = true; }
+      if(Array.isArray(c.historico)){
+        const ent = c.historico.find(h => h.acao === 'entrada');
+        if(ent && !ent.by){ ent.by = 'admin'; mudou = true; }
+      }
+    });
+    if(mudou && window._salvarCoresFirebase){
+      window._salvarCoresFirebase(coresData);
+      console.log('[backfill] cores antigas atribuídas ao admin');
+    }
+    localStorage.setItem('fiobras-backfill-cores-autor-v1', '1');
+  } catch(e){ console.warn('[backfill cores]', e); }
+};
 
 // v3.18.0: toggle de prioridade de cor (admin + produção)
 window.togglePrioridadeCor = (id) => {
