@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.20.4 16/04/2026  Stats Cor: liberada com módulo Produção  ║
+  ║    • TAB_PERMS e RESTRICTED_TABS zerados.                    ║
+  ║    • Quem acessa Produção acessa Stats Cor automaticamente.  ║
+  ║    • Seção "Abas restritas" do modal some quando vazia.      ║
   ║  v3.20.3 16/04/2026  Backfill cores → Geovani (registrante)  ║
   ║    • Antes: admin. Corrigido para Geovani.                   ║
   ║    • Re-roda automaticamente (flag v2).                      ║
@@ -610,7 +614,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.3</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.20.4</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1384,29 +1388,22 @@ const USERS={
   djoniffer:{nome:'Djoniffer', senha:null,    role:'producao', turno:3}
 };
 
-// ── Permissões por aba (v2.6.0) ──────────────────────────────────────────
-// Se a aba está listada aqui, só os usernames no array podem acessar.
-// Abas não listadas = qualquer usuário do módulo pode acessar.
-const TAB_PERMS = {
-  statscor: ['admin','anderson','aldo','geovani','lucivane']
-};
-// v3.11.0: abas restritas editáveis no painel admin (label = como aparece no modal)
-const RESTRICTED_TABS = {
-  statscor: 'Stats Cor (Produção)'
-};
+// ── Permissões por aba ───────────────────────────────────────────────────
+// v3.20.4: zerado — quem acessa o módulo (Produção) acessa todas as abas dele.
+// Estrutura mantida pra futuro: se precisar restringir alguma, popula RESTRICTED_TABS
+// e a seção "Abas restritas" do painel admin aparece automaticamente.
+const TAB_PERMS = {};
+const RESTRICTED_TABS = {};
 function canAccessTab(tab){
   const perm = TAB_PERMS[tab];
   if(!perm) return true;
   const sess = getSession();
   if(!sess) return false;
-  // v3.11.0: admin sempre acessa abas restritas (segurança contra trancar a si mesmo)
   if(getEffectiveRole(sess.user) === 'admin') return true;
-  // v3.11.0: override por user (profile.tabsAllowedOverride[tab] = bool)
   const profile = (window._usersProfile || {})[sess.user] || {};
   if(profile.tabsAllowedOverride && profile.tabsAllowedOverride[tab] !== undefined){
     return !!profile.tabsAllowedOverride[tab];
   }
-  // Fallback: allowlist hardcoded
   return perm.includes(sess.user);
 }
 
@@ -2012,17 +2009,24 @@ window.abrirEditarUsuario = (userKey) => {
     const checked = allowed.includes(m) ? 'checked' : '';
     return '<label class="geu-mod"><input type="checkbox" value="' + m + '" ' + checked + '><span>' + MOD_LBL_FULL[m] + '</span></label>';
   }).join('');
-  // v3.11.0: Render checkboxes de abas restritas
+  // v3.11.0+: Render checkboxes de abas restritas (esconde a seção se não há nenhuma)
+  const tabsField = document.getElementById('geuTabsField');
   const tabsHost = document.getElementById('geuTabs');
   const profile = (window._usersProfile||{})[userKey] || {};
   const tabsOver = profile.tabsAllowedOverride || {};
-  tabsHost.innerHTML = Object.entries(RESTRICTED_TABS).map(([tab, lbl]) => {
-    // Estado atual: override ou allowlist hardcoded
-    let isOn;
-    if(tabsOver[tab] !== undefined) isOn = !!tabsOver[tab];
-    else isOn = (TAB_PERMS[tab] || []).includes(userKey);
-    return '<label class="geu-mod"><input type="checkbox" data-tab="' + tab + '" ' + (isOn?'checked':'') + '><span>' + lbl + '</span></label>';
-  }).join('');
+  const tabsEntries = Object.entries(RESTRICTED_TABS);
+  if(tabsEntries.length === 0){
+    if(tabsField) tabsField.style.display = 'none';
+    if(tabsHost) tabsHost.innerHTML = '';
+  } else {
+    if(tabsField) tabsField.style.display = '';
+    tabsHost.innerHTML = tabsEntries.map(([tab, lbl]) => {
+      let isOn;
+      if(tabsOver[tab] !== undefined) isOn = !!tabsOver[tab];
+      else isOn = (TAB_PERMS[tab] || []).includes(userKey);
+      return '<label class="geu-mod"><input type="checkbox" data-tab="' + tab + '" ' + (isOn?'checked':'') + '><span>' + lbl + '</span></label>';
+    }).join('');
+  }
   document.getElementById('geuModal').classList.add('open');
 };
 window.fecharEditarUsuario = () => {
@@ -2344,10 +2348,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.20.3';
+const CURRENT_VERSION = '3.20.4';
 const CHANGELOG = [
   {
-    v:'3.20.3', d:'16 abr 2026', current:true,
+    v:'3.20.4', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Stats Cor liberada pra todos do módulo Produção.', desc:'Antes Stats Cor tinha allowlist hardcoded (admin + Anderson + Aldo + Geovani + Lucivane). Agora qualquer usuário com acesso ao módulo Produção também acessa Stats Cor automaticamente — incluindo os líderes de turno (Adelir/Alexander/Djoniffer) que antes não viam. TAB_PERMS e RESTRICTED_TABS foram zerados; a seção "Abas restritas" do painel Editar Usuário some automaticamente quando não há abas restritas configuradas. Se algum dia precisar restringir alguma aba específica, basta popular o objeto RESTRICTED_TABS no código que a seção volta a aparecer.'}
+    ]
+  },
+  {
+    v:'3.20.3', d:'16 abr 2026',
     items:[
       {type:'high', title:'Backfill cores: registrante real é Geovani.', desc:'A v3.20.2 atribuiu admin como autor das cores antigas, mas quem cadastra cores no dia a dia da fábrica é o Geovani. Backfill v2 corrige: pra cada cor com criadoPor=admin (ou sem criadoPor), atribui geovani. Mesma coisa pro by do primeiro evento do histórico. Roda automaticamente quando você (admin) acessar o HUB pela próxima vez. Cores criadas a partir da v3.19.0 (com autor real gravado) não são afetadas.'}
     ]
