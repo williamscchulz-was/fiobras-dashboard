@@ -3,6 +3,12 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.13.0 15/04/2026  +7 users, sessões ativas, filtros log    ║
+  ║    • +Hernandes,Vorlei,Pedro,Ivonei,Roland (manutenção)      ║
+  ║    • +Jacques,Suyanne (CRM)                                  ║
+  ║    • Modal "Sessões ativas" com heartbeat 60s.               ║
+  ║    • Botão "Forçar logout" remoto.                           ║
+  ║    • Filtros no histórico (user, ação, período).             ║
   ║  v3.12.0 15/04/2026  CRUD de usuários + audit log             ║
   ║    • Criar/excluir usuários via UI (users-config Firebase).  ║
   ║    • Login dropdown agora é dinâmico (USERS + dinâmicos).    ║
@@ -322,7 +328,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.12.0">
+<link rel="stylesheet" href="css/hub.css?v=3.13.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -533,7 +539,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.12.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.13.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1072,6 +1078,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-size:.9rem;font-weight:700;color:var(--text)">Gerenciar usuários</div>
       <div style="display:flex;align-items:center;gap:8px">
+        <button class="gu-hdr-btn" onclick="abrirSessoesAtivas()" title="Sessões ativas"><svg class="icon sm"><use href="#i-users"/></svg></button>
         <button class="gu-hdr-btn" onclick="abrirAuditLog()" title="Histórico de alterações"><svg class="icon sm"><use href="#i-clock"/></svg></button>
         <button class="gu-hdr-btn primary" onclick="abrirCriarUsuario()" title="Criar usuário"><svg class="icon sm"><use href="#i-plus"/></svg> Novo</button>
         <button class="sc-lanc-close" onclick="fecharGerenciarUsuarios()" aria-label="Fechar">
@@ -1118,19 +1125,50 @@
   </div>
 </div>
 
-<!-- Modal Audit log (admin only · v3.12.0) -->
+<!-- Modal Audit log (admin only · v3.12.0+) -->
 <div class="modal-bg" id="alModal" onclick="if(event.target===this)fecharAuditLog()">
-  <div class="modal" style="width:600px;max-height:90vh;overflow-y:auto">
+  <div class="modal" style="width:640px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-size:.9rem;font-weight:700;color:var(--text)">Histórico de alterações</div>
       <button class="sc-lanc-close" onclick="fecharAuditLog()" aria-label="Fechar">
         <svg class="icon sm"><use href="#i-x"/></svg>
       </button>
     </div>
-    <div style="font-size:.7rem;color:var(--muted);margin-bottom:14px;line-height:1.5">
-      Últimas 100 ações administrativas registradas (criação/edição/exclusão de usuários, reset de senhas).
+    <!-- v3.13.0: filtros -->
+    <div class="al-filters">
+      <select id="alFltUser" onchange="renderAuditLog()" class="al-flt"><option value="">Todos os usuários</option></select>
+      <select id="alFltAction" onchange="renderAuditLog()" class="al-flt">
+        <option value="">Todas as ações</option>
+        <option value="user.criar">Criar usuário</option>
+        <option value="user.excluir">Excluir usuário</option>
+        <option value="user.editar">Editar permissões</option>
+        <option value="user.resetSenha">Resetar senha</option>
+        <option value="user.definirSenha">Definir senha (1º login)</option>
+      </select>
+      <select id="alFltPeriod" onchange="renderAuditLog()" class="al-flt">
+        <option value="0">Tudo</option>
+        <option value="1">Últimas 24h</option>
+        <option value="7">Últimos 7 dias</option>
+        <option value="30">Últimos 30 dias</option>
+      </select>
     </div>
     <div class="al-list" id="alList"></div>
+  </div>
+</div>
+
+<!-- Modal Sessões ativas (admin only · v3.13.0) -->
+<div class="modal-bg" id="asModal" onclick="if(event.target===this)fecharSessoesAtivas()">
+  <div class="modal" style="width:540px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Sessões ativas</div>
+      <button class="sc-lanc-close" onclick="fecharSessoesAtivas()" aria-label="Fechar">
+        <svg class="icon sm"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);margin-bottom:14px;line-height:1.5">
+      Usuários com sessão ativa nos últimos 5 minutos. Heartbeat envia atualização a cada 60s. "Forçar logout" desconecta o usuário no próximo check (até 60s).
+    </div>
+    <div class="as-list" id="asList"></div>
   </div>
 </div>
 
@@ -1260,6 +1298,15 @@ const USERS={
   lucivane: {nome:'Lucivane',  senha:null,    role:'producao'},
   edilson:  {nome:'Edilson',   senha:null,    role:'producao'},
   joacir:   {nome:'Joacir',    senha:null,    role:'producao'},
+  // Equipe manutenção (vindos do app Manutenção)
+  hernandes:{nome:'Hernandes', senha:null,    role:'producao'},
+  vorlei:   {nome:'Vorlei',    senha:null,    role:'producao'},
+  pedro:    {nome:'Pedro',     senha:null,    role:'producao'},
+  ivonei:   {nome:'Ivonei',    senha:null,    role:'producao'},
+  roland:   {nome:'Roland',    senha:null,    role:'producao'},
+  // Equipe comercial / CRM (vindos do app CRM)
+  jacques:  {nome:'Jacques',   senha:null,    role:'producao'},
+  suyanne:  {nome:'Suyanne',   senha:null,    role:'producao'},
   // Líderes de turno (tintoria) — só editam o próprio turno no Apontamento
   adelir:   {nome:'Adelir',    senha:null,    role:'producao', turno:1},
   alexander:{nome:'Alexander', senha:null,    role:'producao', turno:2},
@@ -1333,9 +1380,45 @@ async function doLogin(){
 }
 
 function doLogout(){
+  // v3.13.0: limpa sessão ativa do Firebase
+  const s = getSession();
+  if(s && window._removerSessao) window._removerSessao(s.user);
+  if(window.__hbTimer) { clearInterval(window.__hbTimer); window.__hbTimer = null; }
   clearSession();
   location.reload();
 }
+
+// v3.13.0: heartbeat de sessão ativa (60s) + check de force logout
+window.__sessionStartTs = 0;
+function iniciarHeartbeat(){
+  const s = getSession(); if(!s) return;
+  if(window.__hbTimer) clearInterval(window.__hbTimer);
+  window.__sessionStartTs = Date.now();
+  const send = () => {
+    if(window._gravarSessao){
+      window._gravarSessao(s.user, {
+        lastSeen: Date.now(),
+        userAgent: navigator.userAgent.substring(0, 120),
+        startedAt: window.__sessionStartTs
+      });
+    }
+  };
+  send();
+  window.__hbTimer = setInterval(send, 60 * 1000);
+  // Marca como offline ao fechar a aba
+  window.addEventListener('beforeunload', () => {
+    try { if(window._removerSessao) window._removerSessao(s.user); } catch(e){}
+  });
+}
+window._checkForceLogout = () => {
+  const s = getSession();
+  if(!s || !window.__sessionStartTs) return;
+  const fl = (window._forceLogout || {})[s.user];
+  if(fl && fl.ts > window.__sessionStartTs){
+    alert('Sua sessão foi encerrada pelo administrador.');
+    doLogout();
+  }
+};
 
 function showSplash(nome, role){
   window._currentUserName = nome;
@@ -1364,6 +1447,8 @@ function showSplash(nome, role){
     // v3.9.0: mostra "Gerenciar usuários" no dropdown só pra admin
     const ddGu = document.getElementById('ddGerenciarUsuarios');
     if(ddGu) ddGu.style.display = (role === 'admin') ? '' : 'none';
+    // v3.13.0: inicia heartbeat de sessão ativa
+    iniciarHeartbeat();
   },2400);
 }
 
@@ -1670,8 +1755,27 @@ window.fecharAuditLog = () => {
 function renderAuditLog(){
   const host = document.getElementById('alList');
   if(!host) return;
+  // v3.13.0: popula select de users do filtro
+  const fltUser = document.getElementById('alFltUser');
+  if(fltUser){
+    const cur = fltUser.value;
+    const allUsers = Object.entries(getAllUsers()).sort(([,a],[,b]) => (a.nome||'').localeCompare(b.nome||''));
+    fltUser.innerHTML = '<option value="">Todos os usuários</option>' +
+      allUsers.map(([k,u]) => '<option value="' + k + '">' + (u.nome||k) + '</option>').join('');
+    if(cur) fltUser.value = cur;
+  }
+  const fU = document.getElementById('alFltUser')?.value || '';
+  const fA = document.getElementById('alFltAction')?.value || '';
+  const fP = parseInt(document.getElementById('alFltPeriod')?.value || '0', 10);
+  const cutoff = fP > 0 ? (Date.now() - fP * 24 * 60 * 60 * 1000) : 0;
   const entries = Object.entries(window._auditLog || {})
     .map(([id, e]) => Object.assign({_id:id}, e))
+    .filter(e => {
+      if(fU && e.by !== fU) return false;
+      if(fA && e.action !== fA) return false;
+      if(cutoff && (e.ts || 0) < cutoff) return false;
+      return true;
+    })
     .sort((a,b) => (b.ts||0) - (a.ts||0))
     .slice(0, 100);
   if(entries.length === 0){
@@ -1688,7 +1792,8 @@ function renderAuditLog(){
     'user.excluir':   {lbl:'Excluiu usuário',  icon:'i-trash',   cls:'danger'},
     'user.editar':    {lbl:'Editou permissões',icon:'i-pencil',  cls:'info'},
     'user.resetSenha':{lbl:'Resetou senha',    icon:'i-lock',    cls:'warning'},
-    'user.definirSenha':{lbl:'Definiu senha (1º login)',icon:'i-lock',cls:'submitted'}
+    'user.definirSenha':{lbl:'Definiu senha (1º login)',icon:'i-lock',cls:'submitted'},
+    'user.forceLogout': {lbl:'Forçou logout',  icon:'i-logout',  cls:'danger'}
   };
   host.innerHTML = entries.map(e => {
     const a = ACTION_LBL[e.action] || {lbl:e.action,icon:'i-info',cls:'neutral'};
@@ -1703,6 +1808,78 @@ function renderAuditLog(){
     '</div>';
   }).join('');
 }
+
+// ── v3.13.0: Sessões ativas (admin only) ────────────────────────────
+window.abrirSessoesAtivas = () => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  renderActiveSessions();
+  document.getElementById('asModal').classList.add('open');
+};
+window.fecharSessoesAtivas = () => {
+  document.getElementById('asModal').classList.remove('open');
+};
+function renderActiveSessions(){
+  const host = document.getElementById('asList');
+  if(!host) return;
+  const now = Date.now();
+  const ATIVO_MS = 5 * 60 * 1000; // 5 min
+  const sessions = window._activeSessions || {};
+  const entries = Object.entries(sessions)
+    .filter(([k,s]) => s && (now - (s.lastSeen||0)) < ATIVO_MS)
+    .sort((a,b) => (b[1].lastSeen||0) - (a[1].lastSeen||0));
+  if(entries.length === 0){
+    host.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--muted2);font-size:.78rem">Nenhuma sessão ativa no momento</div>';
+    return;
+  }
+  const esc = s => String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtAgo = ts => {
+    const ms = now - ts;
+    const m = Math.floor(ms / 60000);
+    if(m < 1) return 'agora';
+    if(m === 1) return '1 min atrás';
+    if(m < 60) return m + ' min atrás';
+    const h = Math.floor(m / 60);
+    return h + 'h atrás';
+  };
+  // Detecta plataforma a partir do userAgent
+  const detectPlat = ua => {
+    ua = (ua || '').toLowerCase();
+    if(ua.includes('android')) return 'Android';
+    if(ua.includes('iphone')) return 'iPhone';
+    if(ua.includes('ipad')) return 'iPad';
+    if(ua.includes('windows')) return 'Windows';
+    if(ua.includes('macintosh') || ua.includes('mac os')) return 'macOS';
+    if(ua.includes('linux')) return 'Linux';
+    return 'Desconhecido';
+  };
+  host.innerHTML = entries.map(([userKey, s]) => {
+    const u = getUser(userKey);
+    const nome = (((window._usersProfile||{})[userKey])?.nomeCompleto) || u?.nome || userKey;
+    const initials = nome.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+    const plat = detectPlat(s.userAgent);
+    const ago = fmtAgo(s.lastSeen);
+    const isMe = userKey === getSession()?.user;
+    return '<div class="as-row">' +
+      '<div class="gu-row-av' + (getEffectiveRole(userKey)==='admin'?' admin':'') + '">' + esc(initials) + '</div>' +
+      '<div class="gu-row-info">' +
+        '<div class="gu-row-nome">' + esc(nome) + (isMe?' <span style="color:var(--green);font-size:.65rem">(você)</span>':'') + '</div>' +
+        '<div class="gu-row-meta"><span>' + esc(plat) + '</span><span class="gu-row-meta-sep">·</span><span>último ping ' + ago + '</span></div>' +
+      '</div>' +
+      (isMe ? '<span style="color:var(--muted2);font-size:.65rem;font-family:DM Mono,monospace">—</span>' :
+        '<button class="gu-row-act" onclick="forcarLogout(\'' + userKey + '\')">Forçar logout</button>') +
+    '</div>';
+  }).join('');
+}
+window.forcarLogout = (userKey) => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  const u = getUser(userKey); if(!u) return;
+  if(!confirm('Forçar logout de ' + u.nome + '? Ele(a) será desconectado(a) em até 60s.')) return;
+  if(window._marcarForceLogout) window._marcarForceLogout(userKey);
+  if(window._removerSessao) window._removerSessao(userKey);
+  logAudit('user.forceLogout', userKey, { nome: u.nome });
+  toast('Logout solicitado para ' + u.nome);
+  setTimeout(renderActiveSessions, 300);
+};
 
 // ── v3.12.0: Criar usuário dinâmico (admin only) ────────────────────
 window.abrirCriarUsuario = () => {
@@ -2045,10 +2222,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.12.0';
+const CURRENT_VERSION = '3.13.0';
 const CHANGELOG = [
   {
-    v:'3.12.0', d:'15 abr 2026', current:true,
+    v:'3.13.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'+7 usuários (manutenção e CRM).', desc:'Adicionados ao USERS hardcoded: Hernandes, Vorlei, Pedro, Ivonei e Roland (técnicos da equipe de manutenção, vindos do app standalone williamscchulz-was/manutencao) + Jacques e Suyanne (equipe comercial, vindos do app fiobras-crm). Total agora: 1 admin + 16 produção. Todos entram com role producao default e sem senha — no primeiro login disparam o popup de definir senha. O admin (William) configura permissões granulares depois pelo Editar.'},
+      {type:'feat', title:'Sessões ativas com força logout remoto.', desc:'Novo botão de pessoas no header do painel admin abre o modal "Sessões ativas". Mostra todos os usuários com login ativo (heartbeat enviado a cada 60 segundos pro path active-sessions/{user}). Mostra plataforma detectada (Android/iPhone/iPad/Windows/macOS/Linux) e quanto tempo desde o último ping. Botão "Forçar logout" em cada user que não seja você mesmo: marca um flag em force-logout/{user} com timestamp; o cliente do alvo, no próximo check, vê que o flag é mais recente que o início da sessão e desloga sozinho com aviso. Saída pela aba também limpa a sessão (beforeunload).'},
+      {type:'feat', title:'Filtros no histórico de alterações.', desc:'Modal "Histórico" agora tem 3 selects no topo: por usuário (todos/Admin/Anderson/...), por ação (Criar/Excluir/Editar/Resetar/Definir), por período (Tudo/24h/7d/30d). Filtros combinam — escolhe os 3 e a lista fica enxuta. Útil quando o log crescer (atualmente 100 entries no max).'},
+      {type:'note', title:'Paths Firebase novos.', desc:'active-sessions/{user} = { lastSeen, userAgent, startedAt }. force-logout/{user} = { ts }. Heartbeat só roda enquanto a aba está aberta. Se a aba fecha de forma anormal (crash, kill), a entry de active-sessions vai expirar naturalmente quando passar dos 5 minutos do filtro de "ativo".'}
+    ]
+  },
+  {
+    v:'3.12.0', d:'15 abr 2026',
     items:[
       {type:'feat', title:'Criar e excluir usuários direto pela UI.', desc:'No painel "Gerenciar usuários" agora tem um botão verde "+ Novo" no topo. Abre modal pedindo chave (login lowercase, sem espaços), nome de exibição e role (Produção/Administrador). Usuário criado entra sem senha — no primeiro login dele aparece o popup de definir senha. Permissões granulares (módulos/abas) são configuradas depois pelo botão Editar (lápis). Os usuários dinâmicos aparecem com um botão de lixeira vermelho ao lado dos botões padrão; os 11 hardcoded (admin + produção originais) NÃO podem ser excluídos pra preservar referências em registros antigos.'},
       {type:'high', title:'Login dropdown agora é dinâmico.', desc:'Antes o select da tela de login tinha 5 options hardcoded (Admin/Anderson/Aldo/Geovani/Lucivane). Agora é populado em runtime com TODOS os usuários (USERS hardcoded + dinâmicos do Firebase users-config). Lista é ordenada com Admin no topo e o resto alfabético por nome. Edilson, Joacir e os 3 líderes de turno (Adelir/Alexander/Djoniffer) que estavam ausentes da seleção agora aparecem.'},
@@ -2629,6 +2815,25 @@ window._gravarAuditLog = (entry) => {
   const id = 'al_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   return update(ref(db, 'audit-log/' + id), entry).catch(e => console.error('Erro ao gravar audit:', e));
 };
+
+// ── Sessões ativas — Firebase (v3.13.0) ─────────────────────────────────
+const activeSessionsRef = ref(db, 'active-sessions');
+window._activeSessions = window._activeSessions || {};
+onValue(activeSessionsRef, (snapshot) => {
+  window._activeSessions = snapshot.val() || {};
+  if (document.getElementById('asModal')?.classList.contains('open') && typeof renderActiveSessions === 'function') renderActiveSessions();
+});
+window._gravarSessao = (user, data) => update(ref(db, 'active-sessions/' + user), data).catch(e => console.error('Erro sessão:', e));
+window._removerSessao = (user) => set(ref(db, 'active-sessions/' + user), null).catch(e => console.error('Erro remover sessão:', e));
+
+const forceLogoutRef = ref(db, 'force-logout');
+window._forceLogout = window._forceLogout || {};
+onValue(forceLogoutRef, (snapshot) => {
+  window._forceLogout = snapshot.val() || {};
+  // Cliente checa se foi forçado a deslogar
+  if (typeof window._checkForceLogout === 'function') window._checkForceLogout();
+});
+window._marcarForceLogout = (user) => update(ref(db, 'force-logout/' + user), { ts: Date.now() }).catch(e => console.error('Erro force logout:', e));
 
 // ── Apontamento Tintoria — Firebase (v2.4.0) ─────────────────────────────
 const aptRef = ref(db, 'apontamento-tintoria-2026');
