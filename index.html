@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.16.0 16/04/2026  Migração: fiobras-preco → fiobras-hub    ║
+  ║    • Banco renomeado pra fiobras-hub-default-rtdb.            ║
+  ║    • Config Firebase trocada nos 4 arquivos.                  ║
+  ║    • Dados migrados via export/import JSON.                   ║
   ║  v3.15.0 16/04/2026  Banco protegido (Firebase Anon Auth)    ║
   ║    • signInAnonymously no HUB e nos 3 sub-apps.              ║
   ║    • Rules .read/.write: auth != null (firebase-rules.json). ║
@@ -576,7 +580,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.15.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.16.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2259,10 +2263,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.15.0';
+const CURRENT_VERSION = '3.16.0';
 const CHANGELOG = [
   {
-    v:'3.15.0', d:'16 abr 2026', current:true,
+    v:'3.16.0', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Migração de Firebase: fiobras-preco → fiobras-hub.', desc:'Projeto Firebase trocado pra refletir o nome real do produto. Dados completos exportados via JSON do projeto antigo (fiobras-preco) e importados no novo (fiobras-hub) — zero perda. Config atualizada nos 4 arquivos: HUB (index.html), Preço (preco/index.html), CRM (crm/index.html), Manutenção (manutencao/index.html + firebase-messaging-sw.js do FCM). URL nova do banco: https://fiobras-hub-default-rtdb.firebaseio.com.'},
+      {type:'note', title:'O que NÃO mudou.', desc:'Login user+senha custom continua igual. Anonymous Auth continua sendo usado pelas rules. Estrutura de paths (metas-2026, cores-2026, crm/, manutencao/, etc.) idêntica. Pra usuário final é transparente — só o nome do projeto no console do Firebase mudou.'},
+      {type:'note', title:'Projeto antigo fica como backup.', desc:'O fiobras-preco continua existindo no Firebase Console com os dados intactos. Nenhuma escrita nova vai mais pra ele. Se quiser deletar pra economizar inventário no console, pode (Project Settings → Geral → Delete project), mas não tem custo manter parado. Recomendo manter por algumas semanas como backup, depois exclui.'}
+    ]
+  },
+  {
+    v:'3.15.0', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Banco de dados protegido com Firebase Anonymous Auth.', desc:'Antes o banco fiobras-preco estava em "test mode" com rules abertas e prazo de expiração — qualquer um com o URL conseguia ler/escrever. Agora o HUB e os 3 sub-apps (Preço, CRM, Manutenção) chamam signInAnonymously() ao iniciar; isso dá um UID Firebase ao browser. As rules do banco passam a exigir auth != null pra ler ou escrever — quem tentar acessar o URL direto fora do app é bloqueado pelo Firebase. Login do HUB (user + senha custom) NÃO mudou — a auth anônima do Firebase é puramente técnica, transparente pro usuário.'},
       {type:'high', title:'Como aplicar as rules no Firebase Console.', desc:'Arquivo firebase-rules.json no repo tem o conteúdo a copiar. Passo a passo: (1) Abrir Firebase Console → Realtime Database → aba "Regras". (2) Apagar tudo que tá lá. (3) Colar o conteúdo do firebase-rules.json. (4) Clicar Publicar. Pronto. O acesso ao banco direto via URL passa a ser bloqueado, mas o HUB e sub-apps continuam funcionando porque cada um faz signInAnonymously antes das primeiras operações.'},
@@ -2800,13 +2812,13 @@ import { getDatabase, ref, onValue, set, update } from 'https://www.gstatic.com/
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
-  apiKey:            "AIzaSyCv2YsaTAj38o55M8nBbZ_3s939XWLAmM4",
-  authDomain:        "fiobras-preco.firebaseapp.com",
-  databaseURL:       "https://fiobras-preco-default-rtdb.firebaseio.com",
-  projectId:         "fiobras-preco",
-  storageBucket:     "fiobras-preco.firebasestorage.app",
-  messagingSenderId: "828256608601",
-  appId:             "1:828256608601:web:8e73fde16eaa9ad5882c48"
+  apiKey:            "AIzaSyD5RolINTR58dWJ9xEfCfqTxQw-NBeoeeI",
+  authDomain:        "fiobras-hub.firebaseapp.com",
+  databaseURL:       "https://fiobras-hub-default-rtdb.firebaseio.com",
+  projectId:         "fiobras-hub",
+  storageBucket:     "fiobras-hub.firebasestorage.app",
+  messagingSenderId: "504628003811",
+  appId:             "1:504628003811:web:adcc27c0f04e72b02b96d6"
 };
 
 const app = initializeApp(firebaseConfig);
