@@ -1066,6 +1066,7 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getDatabase,ref,onValue,push,update,remove,set,get}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import{getAuth,signInAnonymously}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 const cfg={
   apiKey:"AIzaSyCv2YsaTAj38o55M8nBbZ_3s939XWLAmM4",
   authDomain:"fiobras-preco.firebaseapp.com",
@@ -1075,7 +1076,10 @@ const cfg={
   messagingSenderId:"828256608601",
   appId:"1:828256608601:web:8e73fde16eaa9ad5882c48"
 };
-const db=getDatabase(initializeApp(cfg));
+const _app=initializeApp(cfg);
+const db=getDatabase(_app);
+// v3.15.0: Auth anônimo pra passar pelas rules
+signInAnonymously(getAuth(_app)).catch(e=>console.error('[Auth anon falhou]',e));
 const lr=ref(db,'crm/leads');
 onValue(lr,s=>{window._leads=s.val()||{};window.renderAll&&window.renderAll();});
 window._push=d=>push(lr,d);

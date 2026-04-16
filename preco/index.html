@@ -994,6 +994,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, onValue, set, push, remove, child } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey:"AIzaSyCv2YsaTAj38o55M8nBbZ_3s939XWLAmM4",authDomain:"fiobras-preco.firebaseapp.com",
@@ -1004,6 +1005,8 @@ const firebaseConfig = {
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
+// v3.15.0: Auth anônimo pra passar pelas rules ".read"/".write": "auth != null"
+signInAnonymously(getAuth(app)).catch(e => console.error('[Auth anon falhou]', e));
 const cadastroRef=ref(db,'cadastro');
 const custoHoraRef=ref(db,'custoHoraRetorcao');
 const custoHoraPrepRef=ref(db,'custoHoraPreparacao');

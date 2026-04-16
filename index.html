@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.15.0 16/04/2026  Banco protegido (Firebase Anon Auth)    ║
+  ║    • signInAnonymously no HUB e nos 3 sub-apps.              ║
+  ║    • Rules .read/.write: auth != null (firebase-rules.json). ║
+  ║    • Login user+senha custom continua igual.                 ║
   ║  v3.14.0 16/04/2026  Nova identidade visual (símbolo F+ponto) ║
   ║    • Símbolo: F com braço do meio = ponto amarelo.           ║
   ║    • SVG inline em sidenav, splash, login.                   ║
@@ -572,7 +576,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.14.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.15.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2255,10 +2259,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.14.0';
+const CURRENT_VERSION = '3.15.0';
 const CHANGELOG = [
   {
-    v:'3.14.0', d:'16 abr 2026', current:true,
+    v:'3.15.0', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Banco de dados protegido com Firebase Anonymous Auth.', desc:'Antes o banco fiobras-preco estava em "test mode" com rules abertas e prazo de expiração — qualquer um com o URL conseguia ler/escrever. Agora o HUB e os 3 sub-apps (Preço, CRM, Manutenção) chamam signInAnonymously() ao iniciar; isso dá um UID Firebase ao browser. As rules do banco passam a exigir auth != null pra ler ou escrever — quem tentar acessar o URL direto fora do app é bloqueado pelo Firebase. Login do HUB (user + senha custom) NÃO mudou — a auth anônima do Firebase é puramente técnica, transparente pro usuário.'},
+      {type:'high', title:'Como aplicar as rules no Firebase Console.', desc:'Arquivo firebase-rules.json no repo tem o conteúdo a copiar. Passo a passo: (1) Abrir Firebase Console → Realtime Database → aba "Regras". (2) Apagar tudo que tá lá. (3) Colar o conteúdo do firebase-rules.json. (4) Clicar Publicar. Pronto. O acesso ao banco direto via URL passa a ser bloqueado, mas o HUB e sub-apps continuam funcionando porque cada um faz signInAnonymously antes das primeiras operações.'},
+      {type:'note', title:'Roadmap futuro.', desc:'Anonymous Auth dá um UID por dispositivo (renova a cada limpeza de cache), então não dá pra escrever rules tipo "só o admin escreve em /audit-log". Pra granularidade real precisaria Firebase Auth com email/senha (custom claims). Por agora é o suficiente — bloqueia bots e curiosos com a URL, sem atrapalhar o login custom.'}
+    ]
+  },
+  {
+    v:'3.14.0', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Nova identidade visual: símbolo F com ponto amarelo.', desc:'Marca da Fiobras HUB redesenhada — letra F com o braço do meio substituído por um círculo amarelo (conceito "F + hub"). 3 symbols novos no defs SVG: i-fiobras-symbol (verde sobre fundo claro), i-fiobras-symbol-inv (branco sobre fundo verde, pra usar em sidenav/splash), i-fiobras-mark (símbolo dentro do quadrado verde com cantos arredondados, pra ícones grandes).'},
       {type:'high', title:'Aplicações: sidenav, splash, login, favicon, PWA.', desc:'Sidenav: o quadradinho verde no topo agora exibe a versão invertida do símbolo (F branco + ponto amarelo) em vez do texto "F". Quando expandida, "Fiobras" em Outfit 600 + "H U B" em Outfit 300 com letterspacing 3px (verde). Splash e login: marca composta (símbolo + Fiobras + HUB) centralizada. Favicon: SVG inline via data URI no <link rel="icon">. Apple touch icon: idem. Ícones PWA 192/512 são gerados em runtime via canvas a partir das proporções oficiais do símbolo (rect vertical, rect horizontal, círculo amarelo) — não dependem mais de PNG estáticos.'},
@@ -2785,6 +2797,7 @@ if('serviceWorker' in navigator){
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, onValue, set, update } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyCv2YsaTAj38o55M8nBbZ_3s939XWLAmM4",
@@ -2798,6 +2811,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
+// v3.15.0: Firebase Anonymous Auth — necessário pras rules ".read"/".write": "auth != null"
+// Login do HUB continua user+senha custom; isso só dá um UID Firebase pro cliente passar pelas rules.
+const auth = getAuth(app);
+signInAnonymously(auth).catch(e => console.error('[Firebase Auth] anônimo falhou:', e));
+window._firebaseAuthReady = new Promise(resolve => {
+  onAuthStateChanged(auth, (user) => { if(user) resolve(user); });
+});
 const metasRef = ref(db, 'metas-2026');
 
 // Escuta mudanças em tempo real
