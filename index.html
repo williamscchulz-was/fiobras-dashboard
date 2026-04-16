@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.8.0  15/04/2026  Manutenção integrada via /manutencao/   ║
+  ║    • Sub-app em /manutencao/index.html (5500 linhas).        ║
+  ║    • firebase-messaging-sw.js copiado pra FCM funcionar.     ║
+  ║    • Bootstrap simula login com USERS.admin.                 ║
+  ║    • WIP removido do módulo Manutenção.                      ║
   ║  v3.7.1  15/04/2026  CRM: corte temporal — leads desde 2026  ║
   ║    • Pipeline e Dashboard só mostram leads >= 01/01/2026.    ║
   ║    • Lista mantém catálogo completo (incl. pre-2026).        ║
@@ -397,12 +402,11 @@
       <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
       <span class="sidenav-tip">Preço de Venda</span>
     </button>
-    <button class="sidenav-item wip" data-mod="manutencao" onclick="switchModule('manutencao',this)" aria-label="Manutenção">
+    <button class="sidenav-item" data-mod="manutencao" onclick="switchModule('manutencao',this)" aria-label="Manutenção">
       <svg class="icon"><use href="#i-tool"/></svg>
       <span class="sidenav-item-name">Manutenção</span>
-      <span class="sidenav-wip" aria-hidden="true"></span>
       <span class="sidenav-lock" aria-hidden="true"><svg class="icon xs"><use href="#i-lock"/></svg></span>
-      <span class="sidenav-tip">Manutenção · WIP</span>
+      <span class="sidenav-tip">Manutenção</span>
     </button>
     <button class="sidenav-item" data-mod="crm" onclick="switchModule('crm',this)" aria-label="CRM">
       <svg class="icon"><use href="#i-users"/></svg>
@@ -490,10 +494,9 @@
       <span class="mod-lbl">Preço de Venda</span>
       <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
-    <button class="mod-btn wip" data-mod="manutencao" data-role="all" onclick="switchModule('manutencao',this)">
+    <button class="mod-btn" data-mod="manutencao" data-role="all" onclick="switchModule('manutencao',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
       <span class="mod-lbl">Manutenção</span>
-      <span class="mod-wip-tag">WIP</span>
       <span class="mod-btn-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
     </button>
     <button class="mod-btn" data-mod="crm" data-role="all" onclick="switchModule('crm',this)">
@@ -503,7 +506,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.7.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.8.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -871,19 +874,11 @@
   </div>
 </div>
 
-<!-- ── Manutenção (v3.0.0 WIP) ── -->
+<!-- ── Manutenção (v3.8.0 · iframe do /manutencao/) ── -->
 <div class="panel" id="panel-manutencao">
-<div class="wrap">
-  <div class="sh"><h2>Manutenção</h2><div class="sh-line"></div></div>
-  <div class="wip-placeholder">
-    <div class="wip-ic">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-    </div>
-    <div class="wip-title">Manutenção · em construção</div>
-    <div class="wip-desc">Módulo criado e pronto pra receber o sistema de manutenção preventiva/corretiva das máquinas. Calendário, checklists, registro de paradas e peças.</div>
-    <div class="wip-tag">v3.0.0 · módulo placeholder</div>
+  <div class="subapp-frame-wrap">
+    <iframe id="manutencaoFrame" class="subapp-frame" title="Manutenção"></iframe>
   </div>
-</div>
 </div>
 
 <!-- ── CRM (v3.4.0 · iframe do /crm/) ── -->
@@ -1538,10 +1533,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.7.1';
+const CURRENT_VERSION = '3.8.0';
 const CHANGELOG = [
   {
-    v:'3.7.1', d:'15 abr 2026', current:true,
+    v:'3.8.0', d:'15 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção ativa dentro do HUB.', desc:'Sistema de Manutenção (antes WIP, repo williamscchulz-was/manutencao) agora vive em /manutencao/index.html e é embutido via iframe no panel-manutencao do HUB. Todas as views internas (Dashboard, Kanban, Histórico, Preventivas, Peças, Máquinas) funcionam como o app standalone original. Mesmo Firebase project (fiobras-preco), mesmos paths (manutencao/kanban, manutencao/pecas, manutencao/preventivas, etc.) — zero migração de dados.'},
+      {type:'high', title:'FCM (push notifications) preservado.', desc:'O firebase-messaging-sw.js (service worker pra push) foi copiado pra /manutencao/ junto com o index.html. Quando alguém abre o módulo Manutenção pela primeira vez, o browser pede permissão de notificação e registra o token FCM no path manutencao/fcmTokens. O Cloudflare Worker que dispara as pushes continua funcionando exatamente como antes.'},
+      {type:'high', title:'Shell interno escondido + bootstrap simulando login.', desc:'O .header verde do app standalone fica display:none (HUB já tem topbar). A login-screen é escondida e o bootstrap chama doLogin() programaticamente: seleciona "admin" no dropdown interno do app, preenche a senha "admin" e dispara o fluxo normal — state.user/isAdmin setados, abas filtradas por permissão, FCM inicializado, etc. Resultado: a abertura do módulo é instantânea, sem login extra.'},
+      {type:'note', title:'Mapeamento de usuário simples por enquanto.', desc:'Todos os HUB users que entram em Manutenção viram "Admin" do app interno (acesso total). Manutenção tem 7 usuários internos (admin/joacir/hernandes/vorlei/pedro/ivonei/roland) com permissões diferentes — granularidade HUB→Manutenção pode vir depois (ex: HUB william=joacir admin, demais=hernandes técnico). Por agora, simples e funcional.'}
+    ]
+  },
+  {
+    v:'3.7.1', d:'15 abr 2026',
     items:[
       {type:'feat', title:'CRM: corte temporal — só leads de 2026 em diante.', desc:'Pipeline (kanban) e Dashboard (KPIs/contadores) agora só consideram leads com data >= 01/01/2026. Os antigos continuam intactos no Firebase, mas saem da operação ativa — viram histórico. A Lista de leads mantém o catálogo completo, incluindo pre-2026, pra você poder consultar quando precisar (ex: quem foi cliente em 2025, contato antigo, etc.).'},
       {type:'note', title:'Como funciona internamente.', desc:'Adicionada constante CRM_CUTOFF_TS = 01/01/2026 e helper leadsAtivos() que filtra window._leads pelo campo `data` (timestamp ms). renderPipeline() e renderDashboard() leem do helper; renderLista() lê do raw window._leads. Reversível: se quiser voltar a tratar pre-2026 algum dia, é só mudar a constante.'}
