@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.17 17/04/2026 Timeline: FIX bug crítico — set tava    ║
+  ║    sobrescrevendo o nó. Race condition no boot apagava       ║
+  ║    registros antigos. Agora grava 1 registro por vez.        ║
   ║  v3.21.16 17/04/2026 CRM: fix aba Histórico (regressão).     ║
   ║    logEvento/renderHistoricoGlobal/setLogFiltro sumiram      ║
   ║    numa refactor antiga → aba vivia vazia. Reimplementado.   ║
@@ -433,7 +436,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.21.16">
+<link rel="stylesheet" href="css/hub.css?v=3.21.17">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -670,7 +673,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.16</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.17</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2478,10 +2481,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.16';
+const CURRENT_VERSION = '3.21.17';
 const CHANGELOG = [
   {
-    v:'3.21.16', d:'17 abr 2026', current:true,
+    v:'3.21.17', d:'17 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Timeline: FIX bug crítico que apagava registros antigos.', desc:'Bug grave descoberto: a função _salvarTlFirebase usava set(tlRef, dados) — que SOBRESCREVE o nó inteiro do Firebase. Combinado com race condition no boot (Firebase onValue ainda não retornou + user já abre modal e salva), o tlDados em memória estava {} (vazio), aí o save mandava set(tlRef, {idNovo: evt}) e APAGAVA todos os registros antigos.\n\nFix: criadas duas funções novas — _salvarTlEvento(id, evt) usa update(child(tlRef, id), evt) que grava SÓ aquele registro sem tocar nos outros. _removerTlEvento(id) usa remove(child(tlRef, id)). O tlSave legacy fica como fallback mas não é mais usado.\n\nAtenção: registros antigos que sumiram não voltam (perdidos no Firebase). A partir de agora, novos saves não causam mais isso.'}
+    ]
+  },
+  {
+    v:'3.21.16', d:'17 abr 2026',
     items:[
       {type:'high', title:'CRM: fix aba "Histórico de atividades" (regressão grave).', desc:'A aba Histórico estava aparecendo vazia — nunca salvava nada. Causa: as funções logEvento(), renderHistoricoGlobal() e setLogFiltro() sumiram do código numa refactor antiga, mas as chamadas espalhadas por todo o CRM continuavam ali (novo lead, editar, mover etapa, excluir, importar CSV). Como logEvento nem existia, cada chamada falhava silenciosamente e nada chegava no Firebase.\n\nReimplementado: logEvento grava em crm/log via window._logPush. renderHistoricoGlobal lê o log, filtra (por tipo e busca), agrupa por data (Hoje / Ontem / DD de mês), monta cards com ícone da ação + descrição + detalhe + avatar do usuário + "há X min/h/d". setLogFiltro aplica o chip ativo.'}
     ]
@@ -3202,7 +3211,7 @@ if('serviceWorker' in navigator){
 </script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, onValue, set, update } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getDatabase, ref, child, onValue, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
@@ -3280,7 +3289,12 @@ onValue(tlRef, (snapshot) => {
   }
 });
 
+// LEGACY: salvar tudo de uma vez (perigoso — pode sobrescrever se tlDados não tá populado).
+// Mantido só pra retrocompat. Ver _salvarTlEvento / _removerTlEvento abaixo.
 window._salvarTlFirebase = (d) => set(tlRef, d).catch(e => console.error('Erro ao salvar timeline:', e));
+// SAFE (v3.21.17): grava 1 registro por vez via update — não toca nos outros nós.
+window._salvarTlEvento = (id, evt) => update(child(tlRef, id), evt).catch(e => console.error('Erro ao salvar evento timeline:', e));
+window._removerTlEvento = (id) => remove(child(tlRef, id)).catch(e => console.error('Erro ao remover evento timeline:', e));
 
 // ── Timeline Tags (custom) — Firebase (v2.9.0) ──────────────────────────
 const tlTagsRef = ref(db, 'timeline-tags');
@@ -5699,7 +5713,9 @@ window.salvarTlEvento = () => {
     criadoEm:  existing ? existing.criadoEm : new Date().toISOString()
   };
   tlDados[id] = evt;
-  tlSave(tlDados);
+  // v3.21.17: grava SÓ esse registro (não sobrescreve tudo)
+  if (window._salvarTlEvento) window._salvarTlEvento(id, evt);
+  else tlSave(tlDados); // fallback legacy
   fecharTlModal();
   toast(tlEditId ? 'Registro atualizado' : 'Registro salvo');
   tlEditId = null;
@@ -5710,7 +5726,9 @@ window.salvarTlEvento = () => {
 window.tlExcluir = (id) => {
   if (!confirm('Excluir este registro?')) return;
   delete tlDados[id];
-  tlSave(tlDados);
+  // v3.21.17: remove SÓ esse registro (não sobrescreve tudo)
+  if (window._removerTlEvento) window._removerTlEvento(id);
+  else tlSave(tlDados); // fallback legacy
   fecharTlDet();
   toast('Registro excluído');
   renderTimeline();

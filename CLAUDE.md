@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.10 — 17/04/2026
-> **Versão atual do HUB:** v3.21.16
+> **Versão do doc:** 2.11 — 17/04/2026
+> **Versão atual do HUB:** v3.21.17
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -131,6 +131,7 @@ Cada sub-app:
 - **Sem migrações destrutivas sem aprovação explícita.**
 - **Fallbacks pra schema antigo obrigatórios** — registros antigos continuam funcionando via fallback (ex: `evt.objetivo || evt.desc`).
 - **Backfills one-shot** salvam flag em localStorage pra não rodar duas vezes (ex: `fiobras-backfill-cores-autor-v2`).
+- **NUNCA usar `set(ref, objetoInteiro)` em coleções keyed por ID** (timeline-2026, cores-2026, crm/leads, audit-log, etc). Race condition no boot (Firebase ainda não retornou `onValue` → state em memória vazio → save sobrescreve TUDO no nó). **Padrão correto:** `update(child(ref, id), payload)` pra criar/atualizar 1 registro, `remove(child(ref, id))` pra excluir. Fix histórico v3.21.17 (timeline perdeu registros antigos). Single-doc stores como `metas-2026`/`producao-2026` com chave determinística (mes/dia) ainda podem usar `set` no path completo `set(child(ref, mes), valor)` — risco zero de sobrescrita global.
 
 ### Firebase Rules
 ```json
@@ -218,7 +219,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.21.16` (17/04/2026).
+**Versão atual:** `v3.21.17` (17/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -226,6 +227,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.21.17 | **FIX CRÍTICO** Timeline: `set(tlRef, dados)` sobrescrevia o nó. Agora grava 1 registro por vez via `update(child(tlRef, id), evt)`. |
 | v3.21.16 | CRM: fix aba Histórico de atividades (regressão — funções logEvento/renderHistoricoGlobal tinham sumido). |
 | v3.21.15 | CRM Pipeline: pacote estético (header pill + botão `+` por coluna + bg sage + KPI bar topo + avatar responsável no card). |
 | v3.21.14 | CRM: fix drag HTML5 (a/svg/button arrastáveis + dragleave flicker + drop em filhos). |
@@ -447,6 +449,7 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 - ❌ **Modificar `FIOBRAS_BASE.md`** a partir deste projeto — vive em outro lugar.
 - ❌ **Mexer em `firebase-rules.json` sem testar via aba anônima** depois de aplicar.
 - ❌ **Adicionar Firebase Auth com email/senha.** William escolheu manter login custom user+senha; Anonymous Auth resolve as rules sem mudar UX.
+- ❌ **`set(ref, objetoInteiroDaColecao)`** — sobrescreve o nó. Sempre `update(child(ref, id), payload)` pra coleções keyed por ID. (Bug v3.21.17 que apagou registros da Timeline.)
 
 ---
 
@@ -459,4 +462,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.10 · 17/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.11 · 17/04/2026*
