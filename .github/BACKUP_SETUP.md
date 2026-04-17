@@ -5,7 +5,7 @@
 - Roda **2x por dia** (03h e 15h BRT) via GitHub Actions cron + tem botão pra rodar manual.
 - Baixa o JSON inteiro do RTDB `fiobras-hub`.
 - Comprime com gzip (~85% menor).
-- Sobe como **artifact privado** do workflow (retém **90 dias**).
+- Sobe como **artifact privado** do workflow (retém **15 dias**).
 
 ## Setup inicial (faz 1x só, ~5min)
 
@@ -66,14 +66,14 @@ E gero o HTML/script com `update(child(ref, id), evt)` pra cada registro (métod
 ## Custos
 
 - **GitHub Actions:** workflow roda em ~30s, 2x/dia = ~60s/dia = ~30min/mês. Limite free de minutos = 2.000/mês. **Margem: 60x.**
-- **Artifact storage:** ~150kb por backup × 60 backups (90 dias × 2/dia) = ~9MB. Limite free = 500MB. **Margem: 50x.**
+- **Artifact storage:** ~1MB por backup × 30 backups (15 dias × 2/dia) = ~30MB. Limite free = 500MB. **Margem: 16x.**
 - **Firebase:** read inteiro do DB = 1 op por backup. Free tier sobra pra essa.
 
 **Total: zero custo.**
 
 ## Retenção mais longa (opcional, futuro)
 
-90 dias é o máx que GitHub Actions retém artifacts no plano free. Pra histórico mais longo:
+15 dias é o máx que GitHub Actions retém artifacts no plano free. Pra histórico mais longo:
 
 - **Opção 1:** Criar repo PRIVADO `fiobras-backups` e o workflow commita lá com nome `YYYY-MM-DD-HH.json.gz`. Retenção infinita via Git. Pede pra eu adicionar quando quiser.
 - **Opção 2:** Sobe pro Cloudflare R2 (free até 10GB) ou Backblaze B2. Configuração extra.

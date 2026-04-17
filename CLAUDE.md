@@ -64,7 +64,7 @@ Cada sub-app:
 - **Workflow GitHub Actions** roda 2x/dia (03h e 15h BRT).
 - Path: `.github/workflows/backup-firebase.yml` + `.github/scripts/backup.js`.
 - Usa service account do Firebase (secret `FIREBASE_SERVICE_ACCOUNT`).
-- Salva o JSON inteiro do RTDB comprimido com gzip como **artifact privado** (90 dias retenção).
+- Salva o JSON inteiro do RTDB comprimido com gzip como **artifact privado** (15 dias retenção, definido pelo William).
 - Botão manual disponível em Actions → "Backup Firebase RTDB" → Run workflow.
 - Setup completo documentado em `.github/BACKUP_SETUP.md`.
 - Custo: zero (GitHub Actions free tier sobra 60x).
