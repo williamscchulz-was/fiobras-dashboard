@@ -179,9 +179,9 @@ body{background:var(--bg);font-family:'Poppins',sans-serif;font-weight:400;color
 /* Esconde todas as colunas por padrão, mostra só a ativa */
 .col{display:none!important;width:100%!important;box-sizing:border-box;}
 .col.mobile-ativa{display:flex!important;flex-direction:column!important;}
-.col-head{padding:14px 16px 8px;}
-.col-bar{margin:0 16px 4px;}
-.col-cards{padding:8px;gap:8px;}
+.col{padding:8px;}
+.col-head{padding:4px 4px;}
+.col-cards{padding:0;gap:8px;}
 .card{border-radius:12px;padding:12px;}
 .card-name{font-size:0.88rem;}
 .card-foot{flex-wrap:wrap;gap:8px;}
@@ -312,24 +312,44 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 }
 .psnav:not(.active) .psnav-cnt{background:var(--gray2);color:var(--muted);}
 
+/* KPI bar (v3.21.15) */
+.kpi-bar{display:flex;gap:24px;background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px 20px;margin:16px 20px 0;flex-wrap:wrap;}
+.kpi{display:flex;flex-direction:column;gap:2px;min-width:80px;}
+.kpi-lbl{font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;}
+.kpi-val{font-family:'Outfit',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:-.01em;color:var(--text);}
+.kpi-val.green{color:var(--green);}
+.kpi-val.orange{color:var(--orange);}
+@media(max-width:700px){.kpi-bar{margin:10px 12px 0;padding:12px 14px;gap:14px;}.kpi-val{font-size:0.95rem;}.kpi{min-width:70px;}}
+
 .pipeline-wrap{padding:16px 20px 48px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .pipeline{display:flex;gap:12px;min-width:max-content;align-items:flex-start;}
 
-.col{background:var(--gray);border:1px solid var(--gray2);border-radius:12px;width:260px;flex-shrink:0;display:flex;flex-direction:column;}
-.col-head{padding:14px 16px 8px;display:flex;align-items:center;justify-content:space-between;}
-.col-name{font-size:0.62rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;}
-.col-cnt{font-family:'DM Mono',monospace;font-size:0.68rem;background:rgba(0,0,0,0.07);color:var(--muted);border-radius:20px;padding:2px 9px;}
-.col-bar{height:3px;margin:0 16px 4px;border-radius:3px;}
-.col-cards{padding:8px;min-height:60px;display:flex;flex-direction:column;gap:8px;}
-.empty-col{text-align:center;padding:32px 12px;font-size:0.72rem;color:var(--gray3);}
+/* COLUNA — v3.21.15 (pacote A+B+C) */
+.col{background:#F4F6F0;border:1px solid var(--border);border-radius:16px;width:280px;flex-shrink:0;display:flex;flex-direction:column;padding:10px;gap:8px;}
+[data-theme="dark"] .col{background:#252527;border-color:#3A3A3C;}
 
-.col-novo .col-name{color:#0b4a7a;} .col-novo .col-bar{background:var(--blue);}
-.col-retorno .col-name{color:#6b4a00;} .col-retorno .col-bar{background:var(--yellow);}
-.col-proposta .col-name{color:var(--orange);} .col-proposta .col-bar{background:var(--orange);}
-.col-representante .col-name{color:#0a5a4a;} .col-representante .col-bar{background:#0d8a6c;}
-.col-negoc .col-name{color:#4a1f80;} .col-negoc .col-bar{background:var(--purple);}
-.col-fechado .col-name{color:#0a4a20;} .col-fechado .col-bar{background:var(--green);}
-.col-perdido .col-name{color:var(--muted);} .col-perdido .col-bar{background:var(--gray3);}
+.col-head{padding:4px 6px;display:flex;align-items:center;gap:8px;}
+.col-pill{display:inline-flex;align-items:center;gap:7px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.78rem;letter-spacing:-.005em;color:var(--text);}
+.col-dot{width:8px;height:8px;border-radius:50%;background:var(--lane-color,var(--green));flex:none;}
+.col-name{display:inline;text-transform:none;letter-spacing:0;font-size:inherit;font-weight:inherit;color:inherit;}
+.col-cnt{font-family:'DM Mono',monospace;font-size:0.65rem;background:#fff;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:1px 7px;min-width:22px;text-align:center;line-height:1.5;}
+.col-grow{flex:1;}
+.col-add{width:24px;height:24px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex:none;padding:0;}
+.col-add svg{width:13px;height:13px;}
+.col-add:hover{background:var(--lane-color,var(--green));color:#fff;border-color:var(--lane-color,var(--green));transform:translateY(-1px);}
+
+.col-cards{padding:0;min-height:60px;display:flex;flex-direction:column;gap:8px;}
+.empty-col{text-align:center;padding:28px 12px;font-size:0.66rem;color:var(--muted2);font-style:italic;background:rgba(255,255,255,0.5);border:1px dashed var(--border);border-radius:10px;line-height:1.5;}
+[data-theme="dark"] .empty-col{background:rgba(0,0,0,0.15);}
+
+/* cor por etapa via CSS var (--lane-color) — usado no dot e no botão + */
+.col-novo         {--lane-color:var(--blue);}
+.col-retorno      {--lane-color:#d4a300;}
+.col-proposta     {--lane-color:var(--orange);}
+.col-representante{--lane-color:#0d8a6c;}
+.col-negoc        {--lane-color:var(--purple);}
+.col-fechado      {--lane-color:var(--green);}
+.col-perdido      {--lane-color:var(--gray3);}
 .ep-representante{background:#d6efe7;color:#0a5a4a;}
 
 /* ═══ CARD CLEAN v3.21.8 ═══ */
@@ -344,6 +364,9 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 .card.drag-active{opacity:.5;}
 .col-cards.drag-over{background:rgba(0,136,53,0.10);border-radius:10px;outline:2px dashed var(--green);outline-offset:-4px;}
 .col-cards.drag-over > *{pointer-events:none;}
+
+/* avatar do responsável (footer do card) */
+.card-resp{border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:700;border:2px solid #fff;flex-shrink:0;letter-spacing:.02em;}
 
 /* tempo na etapa — discreto ao lado da empresa */
 .card-age{font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;color:var(--muted2);letter-spacing:.02em;white-space:nowrap;}
@@ -891,6 +914,13 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
 <!-- ═══ PIPELINE ═══ -->
 
 <div class="view" id="view-pipeline">
+  <!-- KPI bar (v3.21.15) — métricas rápidas do pipeline -->
+  <div class="kpi-bar" id="pipelineKpis">
+    <div class="kpi"><span class="kpi-lbl">Em pipeline</span><span class="kpi-val" id="kpi-pipe">0</span></div>
+    <div class="kpi"><span class="kpi-lbl">Em proposta</span><span class="kpi-val orange" id="kpi-prop">0</span></div>
+    <div class="kpi"><span class="kpi-lbl">Fechados no mês</span><span class="kpi-val green" id="kpi-fech">0</span></div>
+    <div class="kpi"><span class="kpi-lbl">Tempo médio</span><span class="kpi-val" id="kpi-tempo">—</span></div>
+  </div>
   <!-- Seletor de etapa mobile — tabs horizontais scrolláveis -->
   <div class="pipeline-stage-nav" id="pipelineStageNav">
     <button class="psnav active" data-etapa="novo"       onclick="setPipelineEtapa('novo',this)">Novo Lead</button>
@@ -1486,10 +1516,14 @@ function renderPipeline(){
     const cards=quentes.filter(([,l])=>mapEtapa(l.etapa)===e.key);
     const isMobileAtiva=e.key===_etapaAtivaMobile;
     html+=`<div class="col ${CCLS[e.key]}${isMobileAtiva?' mobile-ativa':''}" data-etapa="${e.key}">
-      <div class="col-head"><span class="col-name">${e.label}</span><span class="col-cnt">${cards.length}</span></div>
-      <div class="col-bar"></div>
+      <div class="col-head">
+        <div class="col-pill"><span class="col-dot"></span><span class="col-name">${e.label}</span></div>
+        <span class="col-cnt">${cards.length}</span>
+        <div class="col-grow"></div>
+        ${e.key!=='perdido'?`<button type="button" class="col-add" onclick="abrirNovoNaEtapa('${e.key}')" title="+ lead em ${e.label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>`:''}
+      </div>
       <div class="col-cards" data-etapa="${e.key}">`;
-    if(!cards.length) html+=`<div class="empty-col">Nenhum lead nesta etapa</div>`;
+    if(!cards.length) html+=`<div class="empty-col">arraste um lead aqui<br>ou clique no <b>+</b></div>`;
     cards.sort((a,b)=>(b[1].data||0)-(a[1].data||0)).forEach(([id,l])=>{
       const last=l.historico?.length?l.historico[l.historico.length-1].texto:null;
       const ds=l.data?new Date(l.data).toLocaleDateString('pt-BR'):'--';
@@ -1523,6 +1557,7 @@ function renderPipeline(){
         ${followupBadge(l.followup)?`<div class="card-badges">${followupBadge(l.followup)}</div>`:''}
         <div class="card-foot">
           <div class="card-foot-l">
+            ${avatarChip(leadResponsavel(l))}
             ${tel?`<a class="card-iact" href="tel:${tel}" onclick="event.stopPropagation()" title="Ligar ${telFmt}"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>`:''}
             ${wa?`<a class="card-iact" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>`:''}
             ${mail?`<a class="card-iact" href="mailto:${mail}" onclick="event.stopPropagation()" title="Email"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>`:''}
@@ -1553,7 +1588,51 @@ function renderPipeline(){
   });
 
   initDragDrop();
+  renderPipelineKpis();
 }
+
+/* ═══ KPI BAR (v3.21.15) ═══ */
+function renderPipelineKpis(){
+  const leads = leadsAtivos ? leadsAtivos() : (window._leads||{});
+  const arr = Object.values(leads);
+  const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
+  const quentes = arr.filter(l => l.qual==='quente');
+
+  const inPipe = quentes.filter(l => {
+    const e = mapE(l.etapa);
+    return e!=='fechado' && e!=='perdido';
+  }).length;
+
+  const inProp = quentes.filter(l => {
+    const e = mapE(l.etapa);
+    return e==='proposta' || e==='representante' || e==='negociacao';
+  }).length;
+
+  /* Fechados no mês corrente */
+  const now = new Date();
+  const ym = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const fechMes = quentes.filter(l => {
+    if(mapE(l.etapa) !== 'fechado') return false;
+    const ts = l.etapaSince || l.dataFechamento || l.data;
+    if(!ts) return false;
+    const d = new Date(ts);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') === ym;
+  }).length;
+
+  /* Tempo médio na etapa atual (só dos que estão no pipe) */
+  const tempos = quentes.filter(l => {
+    const e = mapE(l.etapa);
+    return e!=='fechado' && e!=='perdido';
+  }).map(l => diasNaEtapa(l)).filter(d => d>=0);
+  const tempoMedio = tempos.length ? Math.round(tempos.reduce((a,b)=>a+b,0)/tempos.length) : null;
+
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('kpi-pipe', inPipe);
+  set('kpi-prop', inProp);
+  set('kpi-fech', fechMes);
+  set('kpi-tempo', tempoMedio===null ? '—' : tempoMedio+'d');
+}
+window.renderPipelineKpis = renderPipelineKpis;
 
 /* ═══════════════════════════════════════════════════════════════
    CRM — INTERAÇÃO DOS CARDS (v3.21.13 · simplificação radical)
@@ -1580,6 +1659,38 @@ function renderPipeline(){
 const IS_TOUCH_DEVICE = window.matchMedia('(pointer:coarse)').matches;
 const ALERTA_DIAS_CARD = 7; // tempo na etapa que vira alerta (antes era 3)
 let _crmPopBtn = null; // botão que abriu o popover ativo
+
+/* Cores de avatar por usuário (gradient) */
+const AVATAR_GRADIENTS = {
+  admin:    'linear-gradient(135deg,#1B1F18,#3A3A3C)',
+  william:  'linear-gradient(135deg,#008835,#00b347)',
+  geovani:  'linear-gradient(135deg,#008835,#00b347)',
+  jacques:  'linear-gradient(135deg,#7C3AED,#a855f7)',
+  suyanne:  'linear-gradient(135deg,#EA580C,#fb923c)',
+  edilson:  'linear-gradient(135deg,#2563EB,#60a5fa)',
+  joacir:   'linear-gradient(135deg,#0d8a6c,#10b981)',
+};
+function avatarFor(name){
+  if(!name) return null;
+  const k = String(name).toLowerCase().trim().split(/\s+/)[0];
+  const grad = AVATAR_GRADIENTS[k] || 'linear-gradient(135deg,#6B7166,#9CA295)';
+  const initials = String(name).trim().split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';
+  return { grad, initials, name };
+}
+function avatarChip(name, size=22){
+  const a = avatarFor(name);
+  if(!a) return '';
+  return `<div class="card-resp" title="${esc(a.name)}" style="background:${a.grad};width:${size}px;height:${size}px;font-size:${Math.round(size*0.42)}px;">${esc(a.initials)}</div>`;
+}
+/* Pega o responsável mais relevante do lead: último autor do histórico ou criador */
+function leadResponsavel(l){
+  if(!l) return null;
+  const h = l.historico||[];
+  for(let i=h.length-1; i>=0; i--){
+    if(h[i].autor) return h[i].autor;
+  }
+  return null;
+}
 
 /* ─── Ações de movimentação ─── */
 function moverDireto(id, etapaDestino){
@@ -1809,18 +1920,31 @@ function renderLista(){
 }
 
 /* ═══ MODAL LEAD ═══ */
-function abrirNovo(){
-  _id=null;_qual='frio';_etapa='contato';
+function abrirNovo(opts){
+  /* opts: {etapa, qual} — opcional, pra criar lead direto numa etapa do pipeline */
+  _id=null;
+  _qual = (opts && opts.qual) || 'frio';
+  _etapa = (opts && opts.etapa) || 'contato';
   resetForm();
   document.getElementById('mTitulo').textContent='Registrar Lead';
-  document.getElementById('mSub').textContent='Preencha os dados do contato recebido';
+  document.getElementById('mSub').textContent= (opts && opts.etapa)
+    ? `Novo lead em ${ELBL[opts.etapa]||opts.etapa}`
+    : 'Preencha os dados do contato recebido';
   document.getElementById('btnDel').style.display='none';
   document.getElementById('mt-pipeline').style.display='none';
   document.getElementById('mt-hist').style.display='none';
   mTab('dados',document.querySelector('.mtab'));
+  /* sincroniza UI dos botões qual/etapa */
+  if(typeof syncQual==='function') syncQual();
+  if(typeof buildGrids==='function') buildGrids();
   document.getElementById('modal').classList.add('open');
   setTimeout(()=>document.getElementById('f-nome').focus(),80);
 }
+/* Cria lead direto numa etapa do pipeline (botão + no header da coluna) */
+function abrirNovoNaEtapa(etapa){
+  abrirNovo({ etapa, qual:'quente' });
+}
+window.abrirNovoNaEtapa = abrirNovoNaEtapa;
 
 function abrirLead(id){
   const l=(window._leads||{})[id];if(!l)return;

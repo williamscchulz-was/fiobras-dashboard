@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.8 — 17/04/2026
-> **Versão atual do HUB:** v3.21.14
+> **Versão do doc:** 2.9 — 17/04/2026
+> **Versão atual do HUB:** v3.21.15
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -165,7 +165,7 @@ HUB e os 3 sub-apps fazem `signInAnonymously` no boot pra passar pelas rules. Lo
 6 abas internas (admin vê todas; demais só Dashboard/Kanban/Histórico): Dashboard, Kanban, Preventiva, Máquinas, Histórico, Relatórios. Push notifications FCM ativas via Cloudflare Worker. Bootstrap autentica como admin interno (`__admin__`).
 
 ### Módulo CRM (sub-app /crm/, todos)
-3 views: Dashboard, Pipeline (kanban), Lista. **Tela inicial = sempre Pipeline** (v3.21.12, todos os usuários). **Corte temporal:** Pipeline e Dashboard só consideram leads com `data >= 01/01/2026` (constante `CRM_CUTOFF_TS`); Lista mostra catálogo completo. **Pipeline com 6 etapas + Perdido:** Novo Lead → Retorno Feito → Proposta Enviada → Encam. p/ Representante (v3.21.6) → Negociação → Fechado. **Cards redesign v3.21.8 (Excermol-style):** borda colorida só no topo + header com logo iniciais + nome Outfit Black 900 + empresa abaixo + tag de fibra (produto) + meta linha única (data + tempo na etapa, vermelho se ≥3d) + footer com avatares de ação direta (📞 tel:, 💬 wa.me, 📧 mailto:) + botão circular paper plane (estilo Telegram) no canto que abre popover com todas as etapas. **Clicar numa etapa no popover MOVE DIRETO** (registra "Movido de X para Y" no histórico + toast). Drag também move direto. Exceção: ir pra "Perdido" abre modal pedindo motivo. **Drag por plataforma** (v3.21.13): desktop usa HTML5 `draggable="true"` nativo (drag/drop padrão tipo Trello). Mobile detecta via `matchMedia('(pointer:coarse)')` e desabilita drag — único caminho pra mover é o botão ✈. Click no card sempre abre o modal. Tempo na etapa virou "·4d" discreto ao lado da empresa, alerta vermelho só ≥7 dias. FAB "Registrar lead" sempre visível (v3.21.5).
+3 views: Dashboard, Pipeline (kanban), Lista. **Tela inicial = sempre Pipeline** (v3.21.12, todos os usuários). **Pipeline visual v3.21.15:** cabeçalho de cada coluna em estilo pill (bullet colorido + nome Outfit 700 + count em chip + botão `+` que cria lead direto naquela etapa); colunas com bg sage `#F4F6F0` (cards continuam brancos); KPI bar no topo (em pipe / em proposta / fechados no mês / tempo médio); avatar do responsável (último autor do histórico) no footer do card com cores dedicadas por user. **Corte temporal:** Pipeline e Dashboard só consideram leads com `data >= 01/01/2026` (constante `CRM_CUTOFF_TS`); Lista mostra catálogo completo. **Pipeline com 6 etapas + Perdido:** Novo Lead → Retorno Feito → Proposta Enviada → Encam. p/ Representante (v3.21.6) → Negociação → Fechado. **Cards redesign v3.21.8 (Excermol-style):** borda colorida só no topo + header com logo iniciais + nome Outfit Black 900 + empresa abaixo + tag de fibra (produto) + meta linha única (data + tempo na etapa, vermelho se ≥3d) + footer com avatares de ação direta (📞 tel:, 💬 wa.me, 📧 mailto:) + botão circular paper plane (estilo Telegram) no canto que abre popover com todas as etapas. **Clicar numa etapa no popover MOVE DIRETO** (registra "Movido de X para Y" no histórico + toast). Drag também move direto. Exceção: ir pra "Perdido" abre modal pedindo motivo. **Drag por plataforma** (v3.21.13): desktop usa HTML5 `draggable="true"` nativo (drag/drop padrão tipo Trello). Mobile detecta via `matchMedia('(pointer:coarse)')` e desabilita drag — único caminho pra mover é o botão ✈. Click no card sempre abre o modal. Tempo na etapa virou "·4d" discreto ao lado da empresa, alerta vermelho só ≥7 dias. FAB "Registrar lead" sempre visível (v3.21.5).
 
 ### Sistema de roles (v3.10.0+, v3.21.0)
 3 níveis hierárquicos:
@@ -218,7 +218,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.21.14` (17/04/2026).
+**Versão atual:** `v3.21.15` (17/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -226,6 +226,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.21.15 | CRM Pipeline: pacote estético (header pill + botão `+` por coluna + bg sage + KPI bar topo + avatar responsável no card). |
 | v3.21.14 | CRM: fix drag HTML5 (a/svg/button arrastáveis + dragleave flicker + drop em filhos). |
 | v3.21.13 | CRM: drag voltou pra HTML5 nativo (desktop). Mobile sem drag (só botão ✈). Tempo "·4d" discreto, alerta a partir de 7d. |
 | v3.21.12 | CRM: sempre abre na aba Pipeline (todos os usuários). |
@@ -457,4 +458,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.8 · 17/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.9 · 17/04/2026*
