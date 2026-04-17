@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.7 16/04/2026  CRM: cards mais clean (linhas alinhadas) ║
+  ║    • Header com nome maior + tag de fibra à direita.         ║
+  ║    • Body em linhas label:valor (Empresa/Entrada/Telefone…). ║
+  ║    • Botões de ação mantidos.                                ║
   ║  v3.21.6 16/04/2026  Fix CRM hist + nova etapa + Preço gate   ║
   ║    • CRM addHist: re-render imediato pós-salvar.             ║
   ║    • Pipeline: nova etapa "Encam. p/ Representante".          ║
@@ -639,7 +643,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.6</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.7</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2447,10 +2451,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.6';
+const CURRENT_VERSION = '3.21.7';
 const CHANGELOG = [
   {
-    v:'3.21.6', d:'16 abr 2026', current:true,
+    v:'3.21.7', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'CRM: cards do pipeline mais clean (linhas alinhadas).', desc:'Inspirado no estilo "Truth" que você mandou: header com nome maior em Outfit Black 900 + tag de fibra (produto) à direita como pill discreto. Body reorganizado em linhas tipo "label: valor" alinhadas (Empresa, Entrada, Telefone, Última interação) — mais arejado e fácil de bater o olho. Tag de tempo na etapa fica embaixo, separada. Botões de avançar etapa + perdido mantidos pra agilidade. Híbrido entre o card antigo cheio e o estilo cartão limpo do mockup.'}
+    ]
+  },
+  {
+    v:'3.21.6', d:'16 abr 2026',
     items:[
       {type:'high', title:'CRM: histórico de atividades não renderizava após salvar.', desc:'O addHist gravava no Firebase corretamente, mas não chamava renderHist após — então o user via o textarea limpar mas a interação não aparecia na lista. Aí parecia que tinha sumido / não salvou. Corrigido: addHist agora atualiza state local + re-renderiza imediato (sem esperar Firebase ecoar). Próxima abertura do lead já mostra o histórico atualizado.'},
       {type:'feat', title:'Nova etapa do pipeline: "Encam. p/ Representante".', desc:'Adicionada entre Proposta Enviada e Negociação. Cor da coluna: verde água (#0d8a6c). Aparece no kanban (desktop + mobile), no select de etapa do form de novo lead, no badge interno do card e no export CSV. PROX_ETAPA atualizado: proposta → representante → negociacao → fechado.'},
