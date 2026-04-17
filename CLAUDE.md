@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.0 — 16/04/2026
-> **Versão atual do HUB:** v3.21.4
+> **Versão do doc:** 2.1 — 16/04/2026
+> **Versão atual do HUB:** v3.21.7
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -109,7 +109,7 @@ Cada sub-app:
 | `timeline-2026` | Timeline (testes, ocorrências). Múltiplas fotos + tag obrigatória. | `{id}/{objetivo,cliente,op,cor,tag,fotos:[{data,desc}],desc,resultado,criadoPor,...}` |
 | `mix-cores-{ano}` | Stats Cor. **Populado 2020-2026.** | `{mes}/{fibra}/{categoria} = kg` |
 | `timeline-tags` | Tags customizadas da Timeline. | `{id}/{nome,cor}` |
-| `users-profile/{user}` | Perfil do usuário (foto, email, senha hash, nome completo, role override). | `{nomeCompleto, email, foto, senhaHash, roleOverride, turnoOverride, modulesAllowedOverride, tabsAllowedOverride}` |
+| `users-profile/{user}` | Perfil do usuário (foto, email, senha hash + plain, nome completo, role override). | `{nomeCompleto, email, foto, senhaHash, senhaPlain, roleOverride, turnoOverride, modulesAllowedOverride, tabsAllowedOverride}` |
 | `users-config/{user}` | Usuários criados via UI (admin). | `{nome, role, senha:null}` |
 | `audit-log/{id}` | Log de ações administrativas. | `{ts, by, action, target, details}` |
 | `active-sessions/{user}` | Heartbeat de sessões ativas. | `{lastSeen, userAgent, startedAt}` |
@@ -165,7 +165,7 @@ HUB e os 3 sub-apps fazem `signInAnonymously` no boot pra passar pelas rules. Lo
 6 abas internas (admin vê todas; demais só Dashboard/Kanban/Histórico): Dashboard, Kanban, Preventiva, Máquinas, Histórico, Relatórios. Push notifications FCM ativas via Cloudflare Worker. Bootstrap autentica como admin interno (`__admin__`).
 
 ### Módulo CRM (sub-app /crm/, todos)
-3 views: Dashboard, Pipeline (kanban), Lista. **Corte temporal:** Pipeline e Dashboard só consideram leads com `data >= 01/01/2026` (constante `CRM_CUTOFF_TS`); Lista mostra catálogo completo.
+3 views: Dashboard, Pipeline (kanban), Lista. **Corte temporal:** Pipeline e Dashboard só consideram leads com `data >= 01/01/2026` (constante `CRM_CUTOFF_TS`); Lista mostra catálogo completo. **Pipeline com 6 etapas + Perdido:** Novo Lead → Retorno Feito → Proposta Enviada → Encam. p/ Representante (v3.21.6) → Negociação → Fechado. Cards estilo "linhas alinhadas" (v3.21.7) com nome em Outfit Black 900 + tag de fibra à direita + linhas label:valor + botões avançar/perdido inline. FAB "Registrar lead" sempre visível (v3.21.5).
 
 ### Sistema de roles (v3.10.0+, v3.21.0)
 3 níveis hierárquicos:
@@ -177,18 +177,20 @@ Hierarquia interna preserva string `producao` pra retrocompat. Labels friendly v
 
 ### Painel admin (v3.9.0+)
 Acessível pelo dropdown do user só pra admin:
-- **Gerenciar usuários** — lista os 17 users (USERS hardcoded + dinâmicos do Firebase). Cada linha: avatar, nome, role/turno, status da senha. Botões: editar (lápis), resetar senha, excluir (só dinâmicos).
+- **Gerenciar usuários** — lista os 17 users (USERS hardcoded + dinâmicos do Firebase). Cada linha: avatar, nome, role/turno, status da senha + chip da senha plain (escondido, revela com botão de olho — v3.21.5). Botões: editar (lápis), definir senha (cadeado, v3.21.5), resetar senha, excluir (só dinâmicos).
 - **+ Novo usuário** — modal pra criar (chave login + nome + role). Salva em `users-config`.
 - **Editar usuário** — role select (Usuário/Gerente/Administrador), turno, módulos liberados (com Marcar todos / Limpar). Seção módulos some quando role=admin/gerente. Mudanças efetivam no próximo login.
 - **Sessões ativas** — lista users com login recente (heartbeat 60s, ativo se < 5 min). Botão "Forçar logout" (marca `force-logout/{user}`).
 - **Histórico de alterações** (audit log) — últimas 100 ações filtráveis por user/ação/período.
 
-### Login + senha (v3.0.1+, v3.9.0)
+### Login + senha (v3.0.1+, v3.9.0, v3.21.5)
 - Login: dropdown dinâmico com todos os users (USERS hardcoded + dinâmicos).
-- Senha: SHA-256 + salt fixo (`fiobras-hub-v3`), gravada em `users-profile/{user}/senhaHash`.
+- Senha: SHA-256 + salt fixo (`fiobras-hub-v3`), gravada em `users-profile/{user}/senhaHash`. Versão plain também salva em `senhaPlain` (v3.21.5) — admin pode revelar no painel.
 - Admin tem senha hardcoded `'admin'` em USERS.
 - Demais entram sem senha; popup obrigatório no primeiro login pede definir.
 - Reset de senha pelo admin → próximo login do user dispara o popup novamente.
+- Admin pode definir senha pra qualquer user diretamente (botão de cadeado no painel).
+- Login abre no primeiro módulo liberado do user (v3.21.5) — não cai mais em tela bloqueada.
 
 ### Avatares (v3.19.0+)
 Helper `userChip(userKey, {size})` central. Usa foto do `users-profile` (Minha Conta) ou iniciais com gradient verde Fiobras (admin gradient preto). Hover desktop = tooltip nativo; tap mobile = toast com nome.
@@ -216,7 +218,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.21.4` (16/04/2026).
+**Versão atual:** `v3.21.7` (16/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -224,6 +226,9 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.21.7 | CRM cards mais clean (linhas alinhadas + header limpo). |
+| v3.21.6 | CRM: fix re-render histórico + nova etapa "Encam. p/ Representante" + Preço libera não-admin. |
+| v3.21.5 | Admin vê/define senha (`senhaPlain` + olho) + abre 1º módulo liberado + CRM FAB sempre. |
 | v3.21.x | Role gerente + tabs sticky/fixed (Preço/CRM/Manutenção). |
 | v3.18-3.20 | Avatares unificados, prioridade Cor, padronização visual sub-apps, fix tabs. |
 | v3.16.0 | **Migração Firebase: fiobras-preco → fiobras-hub.** |
@@ -445,4 +450,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.0 · 16/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.1 · 16/04/2026*
