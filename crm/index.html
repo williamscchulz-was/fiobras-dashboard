@@ -1575,14 +1575,19 @@ function initDragDrop(){
       if(e.button!==0 && e.pointerType==='mouse') return;
       if(e.target.closest('.card-iact, .card-next-pill, .next-pop, a, button')) return;
       const id=card.dataset.id;
-      _crmDrag={id,card,startX:e.clientX,startY:e.clientY,active:false,dropZone:null,timer:null,pid:e.pointerId};
-      _crmDrag.timer=setTimeout(()=>{
-        if(!_crmDrag) return;
-        _crmDrag.active=true;
-        card.classList.add('drag-active');
-        document.body.style.userSelect='none';
-        try{card.setPointerCapture(_crmDrag.pid);}catch(_){}
-      },LONG_PRESS);
+      const isMouse=e.pointerType==='mouse';
+      _crmDrag={id,card,startX:e.clientX,startY:e.clientY,active:false,dropZone:null,timer:null,pid:e.pointerId,isMouse};
+      // Touch/pen: long-press pra ativar (não conflitar com scroll)
+      // Mouse: ativa direto no primeiro movimento (sem espera)
+      if(!isMouse){
+        _crmDrag.timer=setTimeout(()=>{
+          if(!_crmDrag) return;
+          _crmDrag.active=true;
+          card.classList.add('drag-active');
+          document.body.style.userSelect='none';
+          try{card.setPointerCapture(_crmDrag.pid);}catch(_){}
+        },LONG_PRESS);
+      }
     });
   });
 
@@ -1593,8 +1598,18 @@ function initDragDrop(){
       if(!_crmDrag) return;
       const dx=e.clientX-_crmDrag.startX, dy=e.clientY-_crmDrag.startY;
       if(!_crmDrag.active){
-        if(Math.hypot(dx,dy)>MOVE_THRESHOLD){ killDrag(false); }
-        return;
+        // Mouse: ativa no movimento (drag imediato)
+        if(_crmDrag.isMouse && Math.hypot(dx,dy)>MOVE_THRESHOLD){
+          _crmDrag.active=true;
+          _crmDrag.card.classList.add('drag-active');
+          document.body.style.userSelect='none';
+          try{_crmDrag.card.setPointerCapture(_crmDrag.pid);}catch(_){}
+        }
+        // Touch/pen: se moveu antes do long-press, cancela (vira scroll)
+        else if(!_crmDrag.isMouse && Math.hypot(dx,dy)>MOVE_THRESHOLD){
+          killDrag(false);
+        }
+        if(!_crmDrag || !_crmDrag.active) return;
       }
       e.preventDefault();
       _crmDrag.card.style.transform=`scale(0.97) translate(${dx}px, ${dy}px)`;

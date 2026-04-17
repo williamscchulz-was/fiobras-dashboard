@@ -3,6 +3,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.9 17/04/2026  Fix CRM drag com mouse (sem long-press) ║
+  ║    • Mouse arrasta direto (>6px). Touch mantém long-press.   ║
   ║  v3.21.8 17/04/2026  CRM: card clean + drag mobile + pill   ║
   ║    • Card redesign: logo + nome + meta linha + ações ícones. ║
   ║    • Pill "→ próxima etapa" no footer (1 clique avança).     ║
@@ -411,7 +413,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.21.8">
+<link rel="stylesheet" href="css/hub.css?v=3.21.9">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -648,7 +650,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.8</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.9</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2456,10 +2458,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.8';
+const CURRENT_VERSION = '3.21.9';
 const CHANGELOG = [
   {
-    v:'3.21.8', d:'17 abr 2026', current:true,
+    v:'3.21.9', d:'17 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Fix CRM: drag com mouse não funcionava.', desc:'Bug do v3.21.8: o long-press de 280ms valia pra TODOS os tipos de input — incluindo mouse. Mas no desktop ninguém segura o card antes de arrastar, o user clica e move direto. Agora detecta pointerType: mouse arrasta imediato (a partir de 6px de movimento), touch/pen mantém long-press 280ms (necessário pra não conflitar com scroll vertical). Tap rápido continua abrindo o modal do lead.'}
+    ]
+  },
+  {
+    v:'3.21.8', d:'17 abr 2026',
     items:[
       {type:'feat', title:'CRM: card redesign clean + drag funciona em mobile.', desc:'Inspirado no Excermol. Estrutura nova: borda colorida só no topo + header com logo (iniciais) + nome em Outfit Black 900 + empresa abaixo. Tag de fibra (produto) como pill. Meta linha única com data + tempo na etapa (vermelho se >=3 dias parado). Footer com avatares de ação direta: 📞 tel:, 💬 wa.me, 📧 mailto: — clica e abre. Sem mais "label: valor" empilhado.'},
       {type:'feat', title:'Pill "→ próxima etapa" no canto do card.', desc:'Mostra qual é a próxima etapa direto no card (ex: "→ Retorno feito"). 1 clique avança. Clica de novo abre popover com TODAS as etapas + opção "Marcar como perdido". Estilo de tag pill (Poppins 500, soft background da cor da etapa).'},
