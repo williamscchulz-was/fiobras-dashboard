@@ -338,8 +338,12 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 .card[draggable="true"]:active{cursor:grabbing;}
 .card:hover{box-shadow:0 2px 14px rgba(0,100,40,0.10);border-color:var(--green);}
 .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--lane,var(--green));}
-.card.drag-active{opacity:.4;border-color:var(--green);}
-.col-cards.drag-over{background:rgba(0,136,53,0.08);border-radius:10px;outline:2px dashed var(--green);outline-offset:-4px;}
+/* desabilita drag em filhos pra não roubar o drag start do card */
+.card *{-webkit-user-drag:none;user-drag:none;}
+.card a,.card img,.card svg{-webkit-user-drag:none;user-drag:none;}
+.card.drag-active{opacity:.5;}
+.col-cards.drag-over{background:rgba(0,136,53,0.10);border-radius:10px;outline:2px dashed var(--green);outline-offset:-4px;}
+.col-cards.drag-over > *{pointer-events:none;}
 
 /* tempo na etapa — discreto ao lado da empresa */
 .card-age{font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;color:var(--muted2);letter-spacing:.02em;white-space:nowrap;}
@@ -1692,23 +1696,47 @@ function initDragDrop(){
   /* Mobile não tem drag — só click + botão ✈. Sai aqui. */
   if(IS_TOUCH_DEVICE) return;
 
-  /* Desktop: HTML5 drag nativo via delegation */
+  /* Desktop: HTML5 drag nativo via delegation
+     Usa dragenter/dragleave com WeakMap counter pra evitar flicker
+     quando cursor passa sobre cards filhos da zona. */
   let dragId = null;
+  const enterCount = new WeakMap();
+
+  function clearAllDragOver(){
+    document.querySelectorAll('.col-cards.drag-over').forEach(c => {
+      c.classList.remove('drag-over');
+      enterCount.set(c, 0);
+    });
+  }
 
   pipeline.addEventListener('dragstart', e => {
+    /* Só inicia drag se o source é o próprio card (não um <a>/<button> interno) */
+    if(!(e.target instanceof Element)) return;
     const card = e.target.closest('.card');
-    if(!card) return;
+    if(!card || e.target !== card){
+      /* drag iniciou de um filho — cancela */
+      e.preventDefault();
+      return;
+    }
     dragId = card.dataset.id;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', dragId);
-    setTimeout(() => card.classList.add('drag-active'), 0);
+    requestAnimationFrame(() => card.classList.add('drag-active'));
   });
 
   pipeline.addEventListener('dragend', e => {
-    const card = e.target.closest('.card');
+    const card = e.target.closest?.('.card');
     if(card) card.classList.remove('drag-active');
-    document.querySelectorAll('.col-cards.drag-over').forEach(c => c.classList.remove('drag-over'));
+    clearAllDragOver();
     dragId = null;
+  });
+
+  pipeline.addEventListener('dragenter', e => {
+    const zone = e.target.closest('.col-cards');
+    if(!zone) return;
+    const c = (enterCount.get(zone) || 0) + 1;
+    enterCount.set(zone, c);
+    zone.classList.add('drag-over');
   });
 
   pipeline.addEventListener('dragover', e => {
@@ -1716,28 +1744,29 @@ function initDragDrop(){
     if(!zone) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    document.querySelectorAll('.col-cards.drag-over').forEach(c => {
-      if(c !== zone) c.classList.remove('drag-over');
-    });
-    zone.classList.add('drag-over');
   });
 
   pipeline.addEventListener('dragleave', e => {
     const zone = e.target.closest('.col-cards');
     if(!zone) return;
-    if(!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+    const c = (enterCount.get(zone) || 1) - 1;
+    enterCount.set(zone, c);
+    if(c <= 0){
+      zone.classList.remove('drag-over');
+      enterCount.set(zone, 0);
+    }
   });
 
   pipeline.addEventListener('drop', e => {
     const zone = e.target.closest('.col-cards');
     if(!zone) return;
     e.preventDefault();
-    zone.classList.remove('drag-over');
+    clearAllDragOver();
     const id = e.dataTransfer.getData('text/plain') || dragId;
-    if(!id) return;
+    if(!id){ dragId = null; return; }
     const etapa = zone.dataset.etapa;
     const lead = (window._leads||{})[id];
-    const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
+    const mapE = ev => ev==='contato'?'novo' : ev==='ganho'?'fechado' : ev;
     if(lead && mapE(lead.etapa) !== etapa){
       if(etapa === 'perdido') abrirPerdido(id);
       else moverDireto(id, etapa);

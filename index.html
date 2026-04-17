@@ -3,6 +3,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.14 17/04/2026 CRM: fix drag HTML5 (a/svg arrastáveis  ║
+  ║    + dragleave flicker + drop em filhos não detectava).      ║
   ║  v3.21.13 17/04/2026 CRM: drag HTML5 nativo desktop, sem     ║
   ║    drag mobile (só ✈) + tempo virou "·4d" discreto.          ║
   ║  v3.21.12 17/04/2026 CRM: sempre abre na aba Pipeline.       ║
@@ -422,7 +424,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.21.13">
+<link rel="stylesheet" href="css/hub.css?v=3.21.14">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -659,7 +661,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.13</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.14</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2467,10 +2469,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.13';
+const CURRENT_VERSION = '3.21.14';
 const CHANGELOG = [
   {
-    v:'3.21.13', d:'17 abr 2026', current:true,
+    v:'3.21.14', d:'17 abr 2026', current:true,
+    items:[
+      {type:'high', title:'CRM: fix bugs do drag HTML5 nativo (3 de uma vez).', desc:'A v3.21.13 trouxe drag HTML5 mas tinha 3 bugs sutis:\n\n1. Quando user clicava no ícone de telefone/wa/email pra arrastar, o browser iniciava drag do <a> (link), não do card. Isso fazia o drag dar erro ou nem iniciar. Fix: dragstart só aceita se e.target é o próprio card; CSS desabilita drag nos filhos via -webkit-user-drag:none.\n\n2. dragleave disparava toda vez que o cursor passava entre cards filhos da coluna — fazia o highlight verde piscar feio. Fix: usa contador de dragenter/dragleave por zona (WeakMap), só remove highlight quando contador chega a zero.\n\n3. Drop em cima de outro card filho da coluna não era detectado direito porque o card interceptava. Fix: pointer-events:none nos filhos quando a coluna tá em drag-over.\n\nResultado: drag fluido sem flicker, funciona arrastando o card por qualquer área neutra (logo, nome, área central). Não dispara mais quando pega no telefone/wa.'}
+    ]
+  },
+  {
+    v:'3.21.13', d:'17 abr 2026',
     items:[
       {type:'high', title:'CRM: drag voltou a HTML5 nativo (desktop) + sem drag em mobile.', desc:'O sistema com Pointer Events ficou frágil — muito acoplado, edge cases difíceis. Voltei pro padrão do mercado: cada plataforma usa seu mecanismo nativo.\n\nDesktop: card tem draggable="true". Drag/drop tratado por dragstart/dragover/drop nativos via delegation no #pipeline. Click normal abre o modal — o browser distingue sozinho click vs drag, sem código custom. É como Trello/Linear funcionam.\n\nMobile: SEM drag (HTML5 drag não funciona em touch nativo, e Pointer Events virou bug). Tap abre o modal, botão ✈ é o ÚNICO jeito de mover. Detecção via matchMedia("(pointer:coarse)").\n\nResultado: ~70% menos código, zero conflito tap-vs-drag, comportamento previsível.'},
       {type:'feat', title:'CRM: tempo na etapa virou "·4d" discreto ao lado da empresa.', desc:'Antes era pill vermelha "4d na etapa" na meta line — chamava muita atenção. Agora vira só "·4d" em DM Mono cinza ao lado do nome da empresa. Limite de alerta subiu de 3 dias pra 7 dias (mais realista). A partir de 7d fica vermelho/bold pra sinalizar lead parado.'}
