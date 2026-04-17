@@ -2185,10 +2185,8 @@ function aplicarPermissoes(usuario){
   const isAdmin   = usuario==='admin';
   const isJacques = usuario==='jacques';
 
-  /* Tela inicial por usuário */
-  let telaInicial='pipeline'; // Jacques
-  if(isAdmin)    telaInicial='dashboard';
-  if(isSuyanne)  telaInicial='lista';
+  /* Tela inicial — sempre Pipeline (v3.21.12, William) */
+  const telaInicial='pipeline';
 
   /* Ativa a view correta */
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
