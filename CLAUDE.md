@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.4 — 17/04/2026
-> **Versão atual do HUB:** v3.21.10
+> **Versão do doc:** 2.5 — 17/04/2026
+> **Versão atual do HUB:** v3.21.11
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -218,7 +218,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.21.10` (17/04/2026).
+**Versão atual:** `v3.21.11` (17/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -226,6 +226,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.21.11 | CRM: reestruturação interação cards (drag + popover idempotentes via delegation, sem onclick string). |
 | v3.21.10 | CRM popover move direto (sem modal de confirmação) + botão paper plane no card. |
 | v3.21.9 | Fix CRM drag com mouse (arrasta direto, sem long-press). Touch mantém long-press 280ms. |
 | v3.21.8 | CRM card redesign clean (Excermol-style) + drag mobile via Pointer Events + pill "→ próxima etapa" + popover. |
@@ -453,4 +454,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.4 · 17/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.5 · 17/04/2026*

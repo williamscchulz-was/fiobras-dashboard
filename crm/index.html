@@ -379,7 +379,7 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 /* popover de etapas */
 .next-pop{position:absolute;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.10);width:220px;z-index:100;font-family:'Poppins',sans-serif;}
 .next-pop-lbl{font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--gray3);text-transform:uppercase;letter-spacing:.08em;padding:6px 10px 4px;}
-.next-pop-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.74rem;color:var(--text);transition:background .12s;}
+.next-pop-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.74rem;color:var(--text);transition:background .12s;width:100%;background:var(--white);border:0;font-family:'Poppins',sans-serif;text-align:left;}
 .next-pop-item:hover{background:var(--gray);}
 .next-pop-item.danger{color:var(--red);}
 .next-pop-item.danger:hover{background:var(--red-l);}
@@ -1515,7 +1515,7 @@ function renderPipeline(){
             ${wa?`<a class="card-iact" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>`:''}
             ${mail?`<a class="card-iact" href="mailto:${mail}" onclick="event.stopPropagation()" title="Email"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>`:''}
           </div>
-          ${!isFinal?`<button class="card-next-btn" onclick="event.stopPropagation();showNextPop(event,'${id}')" title="${prox?'Mover para '+proxLbl:'Mover lead'}">
+          ${!isFinal?`<button type="button" class="card-next-btn" onclick="event.stopPropagation();showMovePopover(this,'${id}')" title="${prox?'Mover para '+proxLbl:'Mover lead'}">
             <svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
           </button>`:''}
         </div>
@@ -1543,156 +1543,215 @@ function renderPipeline(){
   initDragDrop();
 }
 
-/* ═══ DRAG & DROP via Pointer Events (v3.21.8) ═══
-   Funciona em mouse, touch e pen. Long-press 280ms ativa modo drag.
-   Tap rápido sem mover = abre o modal do lead.
-*/
-let _crmDrag=null;
-function initDragDrop(){
-  const pipeline=document.getElementById('pipeline');
-  const LONG_PRESS=280, MOVE_THRESHOLD=6;
+/* ═══════════════════════════════════════════════════════════════
+   CRM — INTERAÇÃO DOS CARDS (v3.21.11 · reestruturação completa)
+   ═══════════════════════════════════════════════════════════════
+   Resumo dos comportamentos:
 
-  function killDrag(commit){
+   1. Tap rápido em qualquer área neutra do card → abre modal do lead
+   2. Long-press touch (280ms) ou click+drag mouse → ativa modo drag
+   3. Solta o drag sobre uma lane → move direto (popup só pra "Perdido")
+   4. Click no botão ✈ (paper plane) → abre popover de mover
+   5. Click numa etapa do popover → move direto + fecha popover
+   6. Click fora do popover → fecha
+   7. Click nos ícones de ação (📞 💬 📧) → ação direta (não dispara drag)
+
+   Implementação: event delegation no container #pipeline.
+   Estado global: _crmDrag (info do drag em andamento) + _crmPop (popover ativo).
+*/
+
+let _crmDrag = null;
+let _crmPopBtn = null; // botão que abriu o popover ativo
+
+/* ─── Ações de movimentação ─── */
+function moverDireto(id, etapaDestino){
+  const l = (window._leads||{})[id];
+  if(!l) return;
+  const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
+  const etapaOrigem = mapE(l.etapa);
+  if(etapaOrigem === etapaDestino) return;
+  const usuario = window._user?.nome || 'Usuário';
+  const hist = [...(l.historico||[]), {
+    ts: Date.now(), tipo: 'outro', retorno: 'aguardando',
+    texto: `Movido de "${ELBL[etapaOrigem]}" para "${ELBL[etapaDestino]}"`,
+    autor: usuario,
+    etapaMov: { de: etapaOrigem, para: etapaDestino }
+  }];
+  window._update(id, { etapa: etapaDestino, etapaSince: Date.now(), historico: hist });
+  if(typeof logEvento === 'function')
+    logEvento('mover', 'Moveu "'+(l.nome||'lead')+'" de '+ELBL[etapaOrigem]+' para '+ELBL[etapaDestino], '');
+  toast(`Movido para "${ELBL[etapaDestino]}"`, 'ok');
+}
+window.moverDireto = moverDireto;
+
+/* ─── Popover "Mover para" ─── */
+function showMovePopover(button, leadId){
+  closeMovePopover();
+  const lead = (window._leads||{})[leadId];
+  if(!lead) return;
+  const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
+  const cur = mapE(lead.etapa);
+  const cores = { novo:'#1e90c2', retorno:'#d4a300', proposta:'#ea580c', representante:'#0d8a6c', negociacao:'#7c3aed', fechado:'#0a8835', perdido:'#999' };
+
+  const pop = document.createElement('div');
+  pop.className = 'next-pop';
+  pop.id = 'nextPop';
+  pop.dataset.leadId = leadId;
+
+  let items = '<div class="next-pop-lbl">Mover para</div>';
+  ETAPAS_PIPELINE.forEach(e => {
+    if(e.key === cur) return;
+    items += `<button type="button" class="next-pop-item" data-action="move" data-etapa="${e.key}"><span class="pdot" style="background:${cores[e.key]}"></span>${esc(e.label)}</button>`;
+  });
+  if(cur !== 'perdido' && cur !== 'fechado'){
+    items += '<div class="next-pop-sep"></div>';
+    items += '<button type="button" class="next-pop-item danger" data-action="perdido"><span class="pdot" style="background:#dc2626"></span>Marcar como perdido</button>';
+  }
+  pop.innerHTML = items;
+
+  /* Click delegado nos itens — evita strings de onclick (mais robusto) */
+  pop.addEventListener('click', ev => {
+    ev.stopPropagation();
+    const item = ev.target.closest('[data-action]');
+    if(!item) return;
+    const id = pop.dataset.leadId;
+    const action = item.dataset.action;
+    closeMovePopover();
+    if(action === 'move')      moverDireto(id, item.dataset.etapa);
+    else if(action === 'perdido') abrirPerdido(id);
+  });
+
+  /* posiciona depois de injetado (precisa de offsetHeight real) */
+  document.body.appendChild(pop);
+  const r = button.getBoundingClientRect();
+  const popW = 220;
+  let left = r.right - popW;
+  if(left < 8) left = 8;
+  if(left + popW > window.innerWidth - 8) left = window.innerWidth - popW - 8;
+  pop.style.position = 'fixed';
+  pop.style.left = left + 'px';
+  pop.style.top = '0px';
+  pop.style.visibility = 'hidden';
+  const popH = pop.offsetHeight;
+  let top = r.bottom + 6;
+  if(top + popH > window.innerHeight - 8) top = Math.max(8, r.top - popH - 6);
+  pop.style.top = top + 'px';
+  pop.style.visibility = '';
+
+  _crmPopBtn = button;
+  /* listener pra fechar ao clicar fora (próximo tick pra não pegar o clique que abriu) */
+  setTimeout(() => {
+    document.addEventListener('pointerdown', popOutsideClose, true);
+  }, 0);
+}
+function popOutsideClose(ev){
+  if(ev.target.closest('#nextPop')) return;
+  if(ev.target === _crmPopBtn || _crmPopBtn?.contains(ev.target)) return;
+  closeMovePopover();
+}
+function closeMovePopover(){
+  const p = document.getElementById('nextPop');
+  if(p) p.remove();
+  _crmPopBtn = null;
+  document.removeEventListener('pointerdown', popOutsideClose, true);
+}
+window.showMovePopover = showMovePopover;
+window.closeMovePopover = closeMovePopover;
+
+/* ─── Drag & Drop via Pointer Events ─── */
+function initDragDrop(){
+  /* Tudo via event delegation no #pipeline (idempotente) */
+  if(window._crmInteractionInit) return;
+  window._crmInteractionInit = true;
+
+  const pipeline = document.getElementById('pipeline');
+  if(!pipeline) return;
+
+  const LONG_PRESS = 280;
+  const MOVE_THRESHOLD = 6;
+
+  function activateDrag(){
     if(!_crmDrag) return;
-    const d=_crmDrag; _crmDrag=null;
+    _crmDrag.active = true;
+    _crmDrag.card.classList.add('drag-active');
+    document.body.style.userSelect = 'none';
+    try { _crmDrag.card.setPointerCapture(_crmDrag.pid); } catch(_){}
+  }
+  function endDrag(commit){
+    if(!_crmDrag) return;
+    const d = _crmDrag; _crmDrag = null;
     clearTimeout(d.timer);
     d.card.classList.remove('drag-active');
-    d.card.style.transform='';
-    document.querySelectorAll('.col-cards').forEach(c=>c.classList.remove('drag-over'));
-    document.body.style.userSelect='';
+    d.card.style.transform = '';
+    document.body.style.userSelect = '';
+    document.querySelectorAll('.col-cards.drag-over').forEach(c => c.classList.remove('drag-over'));
     if(commit && d.active && d.dropZone){
-      const etapa=d.dropZone.dataset.etapa;
-      const l=(window._leads||{})[d.id];
-      const mapE=e=>e==='contato'?'novo':e==='ganho'?'fechado':e;
-      if(l && mapE(l.etapa)!==etapa){
-        if(etapa==='perdido') abrirPerdido(d.id);
+      const etapa = d.dropZone.dataset.etapa;
+      const lead = (window._leads||{})[d.id];
+      const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
+      if(lead && mapE(lead.etapa) !== etapa){
+        if(etapa === 'perdido') abrirPerdido(d.id);
         else moverDireto(d.id, etapa);
       }
     }
   }
 
-  pipeline.querySelectorAll('.card').forEach(card=>{
-    card.setAttribute('draggable','false');
-    card.addEventListener('pointerdown',e=>{
-      if(e.button!==0 && e.pointerType==='mouse') return;
-      if(e.target.closest('.card-iact, .card-next-pill, .next-pop, a, button')) return;
-      const id=card.dataset.id;
-      const isMouse=e.pointerType==='mouse';
-      _crmDrag={id,card,startX:e.clientX,startY:e.clientY,active:false,dropZone:null,timer:null,pid:e.pointerId,isMouse};
-      // Touch/pen: long-press pra ativar (não conflitar com scroll)
-      // Mouse: ativa direto no primeiro movimento (sem espera)
-      if(!isMouse){
-        _crmDrag.timer=setTimeout(()=>{
-          if(!_crmDrag) return;
-          _crmDrag.active=true;
-          card.classList.add('drag-active');
-          document.body.style.userSelect='none';
-          try{card.setPointerCapture(_crmDrag.pid);}catch(_){}
-        },LONG_PRESS);
-      }
-    });
+  /* pointerdown via delegation */
+  pipeline.addEventListener('pointerdown', e => {
+    const card = e.target.closest('.card');
+    if(!card) return;
+    /* ignora cliques em elementos interativos — fluxo natural de click */
+    if(e.target.closest('button, a, .next-pop')) return;
+    if(e.button !== 0 && e.pointerType === 'mouse') return;
+
+    const isMouse = e.pointerType === 'mouse';
+    _crmDrag = {
+      id: card.dataset.id, card,
+      startX: e.clientX, startY: e.clientY,
+      active: false, dropZone: null, timer: null,
+      pid: e.pointerId, isMouse, moved: false
+    };
+    /* Touch/pen: long-press 280ms (anti-scroll). Mouse: ativa no movimento. */
+    if(!isMouse){
+      _crmDrag.timer = setTimeout(activateDrag, LONG_PRESS);
+    }
   });
 
-  /* listeners globais (idempotentes) */
-  if(!window._crmPointerInit){
-    window._crmPointerInit=true;
-    document.addEventListener('pointermove',e=>{
-      if(!_crmDrag) return;
-      const dx=e.clientX-_crmDrag.startX, dy=e.clientY-_crmDrag.startY;
-      if(!_crmDrag.active){
-        // Mouse: ativa no movimento (drag imediato)
-        if(_crmDrag.isMouse && Math.hypot(dx,dy)>MOVE_THRESHOLD){
-          _crmDrag.active=true;
-          _crmDrag.card.classList.add('drag-active');
-          document.body.style.userSelect='none';
-          try{_crmDrag.card.setPointerCapture(_crmDrag.pid);}catch(_){}
-        }
-        // Touch/pen: se moveu antes do long-press, cancela (vira scroll)
-        else if(!_crmDrag.isMouse && Math.hypot(dx,dy)>MOVE_THRESHOLD){
-          killDrag(false);
-        }
-        if(!_crmDrag || !_crmDrag.active) return;
-      }
-      e.preventDefault();
-      _crmDrag.card.style.transform=`scale(0.97) translate(${dx}px, ${dy}px)`;
-      const el=document.elementFromPoint(e.clientX,e.clientY);
-      const zone=el?el.closest('.col-cards'):null;
-      document.querySelectorAll('.col-cards').forEach(c=>c.classList.remove('drag-over'));
-      if(zone){zone.classList.add('drag-over'); _crmDrag.dropZone=zone;} else {_crmDrag.dropZone=null;}
-    },{passive:false});
-    document.addEventListener('pointerup',()=>{
-      if(!_crmDrag) return;
-      const wasActive=_crmDrag.active;
-      const id=_crmDrag.id;
-      killDrag(true);
-      if(!wasActive) abrirLead(id);
-    });
-    document.addEventListener('pointercancel',()=>killDrag(false));
-  }
+  document.addEventListener('pointermove', e => {
+    if(!_crmDrag) return;
+    const dx = e.clientX - _crmDrag.startX;
+    const dy = e.clientY - _crmDrag.startY;
+    const dist = Math.hypot(dx, dy);
 
-}
+    if(!_crmDrag.active){
+      if(dist > MOVE_THRESHOLD){
+        if(_crmDrag.isMouse) activateDrag();
+        else { endDrag(false); return; } /* touch moveu antes = scroll natural */
+      } else return;
+    }
 
-/* ═══ POPOVER "Mover para" (v3.21.8/v3.21.10) ═══
-   Clicar numa etapa MOVE DIRETO (sem modal de confirmação).
-   Histórico fica "Movido de X para Y" automaticamente.
-*/
-function moverDireto(id, etapaDestino){
-  const l=(window._leads||{})[id];
-  if(!l) return;
-  const mapE=e=>e==='contato'?'novo':e==='ganho'?'fechado':e;
-  const etapaOrigem=mapE(l.etapa);
-  if(etapaOrigem===etapaDestino) return;
-  const usuario=window._user?.nome||'Usuário';
-  const textoHist=`Movido de "${ELBL[etapaOrigem]}" para "${ELBL[etapaDestino]}"`;
-  const hist=[...(l.historico||[]),{
-    ts:Date.now(), tipo:'outro', retorno:'aguardando',
-    texto:textoHist, autor:usuario,
-    etapaMov:{de:etapaOrigem,para:etapaDestino}
-  }];
-  window._update(id,{etapa:etapaDestino,etapaSince:Date.now(),historico:hist});
-  if(typeof logEvento==='function') logEvento('mover','Moveu "'+(l.nome||'lead')+'" de '+ELBL[etapaOrigem]+' para '+ELBL[etapaDestino],'');
-  toast(`Movido para "${ELBL[etapaDestino]}"`,'ok');
-}
-window.moverDireto=moverDireto;
+    e.preventDefault();
+    _crmDrag.moved = true;
+    _crmDrag.card.style.transform = `scale(0.97) translate(${dx}px, ${dy}px)`;
 
-function showNextPop(ev, id){
-  fecharNextPop();
-  const lead=(window._leads||{})[id];
-  if(!lead) return;
-  const mapEtapa=e=>e==='contato'?'novo':e==='ganho'?'fechado':e;
-  const cur=mapEtapa(lead.etapa);
-  const corPorEtapa={novo:'#1e90c2',retorno:'#d4a300',proposta:'#ea580c',representante:'#0d8a6c',negociacao:'#7c3aed',fechado:'#0a8835',perdido:'#999'};
-  let html=`<div class="next-pop-lbl">Mover para</div>`;
-  ETAPAS_PIPELINE.forEach(e=>{
-    if(e.key===cur) return;
-    html+=`<div class="next-pop-item" onclick="event.stopPropagation();fecharNextPop();moverDireto('${id}','${e.key}')"><span class="pdot" style="background:${corPorEtapa[e.key]}"></span>${esc(e.label)}</div>`;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const zone = el ? el.closest('.col-cards') : null;
+    document.querySelectorAll('.col-cards.drag-over').forEach(c => c.classList.remove('drag-over'));
+    if(zone){ zone.classList.add('drag-over'); _crmDrag.dropZone = zone; }
+    else { _crmDrag.dropZone = null; }
+  }, { passive: false });
+
+  document.addEventListener('pointerup', () => {
+    if(!_crmDrag) return;
+    const wasActive = _crmDrag.active;
+    const id = _crmDrag.id;
+    endDrag(true);
+    /* tap rápido sem drag = abre modal do lead */
+    if(!wasActive) abrirLead(id);
   });
-  if(cur!=='perdido' && cur!=='fechado'){
-    html+=`<div class="next-pop-sep"></div><div class="next-pop-item danger" onclick="event.stopPropagation();fecharNextPop();abrirPerdido('${id}')"><span class="pdot" style="background:#dc2626"></span>Marcar como perdido</div>`;
-  }
-  const pop=document.createElement('div');
-  pop.className='next-pop'; pop.id='nextPop'; pop.innerHTML=html;
-  document.body.appendChild(pop);
-  const r=ev.currentTarget.getBoundingClientRect();
-  const popW=220;
-  let left=r.right-popW;
-  if(left<8) left=8;
-  if(left+popW>window.innerWidth-8) left=window.innerWidth-popW-8;
-  let top=r.bottom+6;
-  if(top+260>window.innerHeight) top=Math.max(8, r.top-265);
-  pop.style.left=left+'px'; pop.style.top=top+'px'; pop.style.position='fixed';
-  setTimeout(()=>document.addEventListener('click',fecharNextPopOnce),0);
+
+  document.addEventListener('pointercancel', () => endDrag(false));
 }
-function fecharNextPop(){
-  const p=document.getElementById('nextPop');
-  if(p) p.remove();
-  document.removeEventListener('click',fecharNextPopOnce);
-}
-function fecharNextPopOnce(e){
-  if(!e.target.closest('#nextPop')) fecharNextPop();
-}
-window.showNextPop=showNextPop;
-window.fecharNextPop=fecharNextPop;
 
 /* ═══ LISTA ═══ */
 function renderLista(){

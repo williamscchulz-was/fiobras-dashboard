@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.11 17/04/2026 CRM: reestruturação interação cards     ║
+  ║    • Botão ✈ usa data-action delegado (sem onclick string).  ║
+  ║    • Drag system idempotente via delegation no #pipeline.    ║
+  ║    • Popover fecha via pointerdown capture (mais confiável). ║
   ║  v3.21.10 17/04/2026 CRM: clique no popover move direto +    ║
   ║    botão paper plane no card (estilo Telegram).              ║
   ║  v3.21.9 17/04/2026  Fix CRM drag com mouse (sem long-press) ║
@@ -415,7 +419,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.21.10">
+<link rel="stylesheet" href="css/hub.css?v=3.21.11">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -652,7 +656,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.10</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.11</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2460,10 +2464,16 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.10';
+const CURRENT_VERSION = '3.21.11';
 const CHANGELOG = [
   {
-    v:'3.21.10', d:'17 abr 2026', current:true,
+    v:'3.21.11', d:'17 abr 2026', current:true,
+    items:[
+      {type:'high', title:'CRM: reestruturação completa da interação dos cards.', desc:'Versões anteriores tinham bugs sutis: o popover montava handlers via string de onclick (frágil), o drag system reanexava listeners a cada render (vazamento), e o fecha-popover usava setTimeout no listener de click que conflitava com o pointer system. Resultado: clicar numa etapa no popover às vezes não funcionava.\n\nReescrita: drag e popover agora têm regras claras e isoladas. Drag usa event delegation no container (idempotente — não reanexa). Popover usa data-action delegado dentro do próprio popover (sem onclick string). Fecha via pointerdown na fase de captura. Botão ✈ tem stopPropagation pra não disparar drag. Comportamento: tap rápido = abre lead; long-press touch ou click+drag mouse = drag; click no ✈ = popover; click numa etapa = move direto.'}
+    ]
+  },
+  {
+    v:'3.21.10', d:'17 abr 2026',
     items:[
       {type:'high', title:'CRM: clicar numa etapa no popover move direto.', desc:'Bug v3.21.8/.9: clicar em "Proposta Enviada" no popover abria OUTRO modal pedindo confirmação com observação opcional. User não percebia e achava que não tinha movido. Agora o clique move direto + registra "Movido de X para Y" no histórico automaticamente. Toast confirma. Mesmo comportamento pro drag (arrastar e soltar = move direto, sem modal). Exceção: arrastar pra "Perdido" abre o modal de motivo (necessário pra justificar a perda).'},
       {type:'feat', title:'Botão "mover" virou ícone paper plane (estilo Telegram).', desc:'Antes era pill com texto "→ Retorno feito". Agora é botão circular pequeno com ícone de avião de papel inclinado, na cor da etapa atual. Hover pinta sólido + leve translação. Mais clean, ocupa menos espaço, combina com a estética dos outros ícones de ação (telefone/wa/email).'}
