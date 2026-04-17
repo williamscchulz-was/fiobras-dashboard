@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.9 — 17/04/2026
-> **Versão atual do HUB:** v3.21.15
+> **Versão do doc:** 2.10 — 17/04/2026
+> **Versão atual do HUB:** v3.21.16
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -218,7 +218,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.21.15` (17/04/2026).
+**Versão atual:** `v3.21.16` (17/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -226,6 +226,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.21.16 | CRM: fix aba Histórico de atividades (regressão — funções logEvento/renderHistoricoGlobal tinham sumido). |
 | v3.21.15 | CRM Pipeline: pacote estético (header pill + botão `+` por coluna + bg sage + KPI bar topo + avatar responsável no card). |
 | v3.21.14 | CRM: fix drag HTML5 (a/svg/button arrastáveis + dragleave flicker + drop em filhos). |
 | v3.21.13 | CRM: drag voltou pra HTML5 nativo (desktop). Mobile sem drag (só botão ✈). Tempo "·4d" discreto, alerta a partir de 7d. |
@@ -458,4 +459,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.9 · 17/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.10 · 17/04/2026*

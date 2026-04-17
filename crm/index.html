@@ -1591,6 +1591,134 @@ function renderPipeline(){
   renderPipelineKpis();
 }
 
+/* ═══ HISTÓRICO GLOBAL DE ATIVIDADES (v3.21.16 — regressão fixada) ═══
+   logEvento: grava em crm/log via _logPush (Firebase).
+   renderHistoricoGlobal: lê window._log, filtra, agrupa por data.
+   setLogFiltro: aplica filtro de tipo.
+*/
+let _logFiltroTipo = '';
+
+function logEvento(tipo, desc, detalhe){
+  if(!window._logPush) return;
+  try {
+    window._logPush({
+      ts: Date.now(),
+      usuario: window._user?.nome || window._user?.usuario || 'Sistema',
+      tipo: tipo || 'outro',
+      desc: desc || '',
+      detalhe: detalhe || ''
+    });
+  } catch(e) { console.warn('[logEvento]', e); }
+}
+window.logEvento = logEvento;
+
+const LOG_TIPO_CFG = {
+  novo_frio:   { cls:'novo',     lbl:'Novo frio',   icon:'M12 5v14M5 12h14' },
+  novo_quente: { cls:'quente',   lbl:'Novo quente', icon:'M12 5v14M5 12h14' },
+  mover:       { cls:'mover',    lbl:'Pipeline',    icon:'M5 12h14M13 6l6 6-6 6' },
+  editar:      { cls:'editar',   lbl:'Edição',      icon:'M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z' },
+  excluir:     { cls:'excluir',  lbl:'Exclusão',    icon:'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6' },
+  importar:    { cls:'importar', lbl:'Import',      icon:'M12 15V3M7 8l5-5 5 5M20 21H4' },
+  outro:       { cls:'mover',    lbl:'Atividade',   icon:'M12 8v4l3 2' }
+};
+
+function setLogFiltro(tipo, btn){
+  _logFiltroTipo = tipo || '';
+  document.querySelectorAll('.log-chip').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderHistoricoGlobal();
+}
+window.setLogFiltro = setLogFiltro;
+
+function _logGrupoData(ts){
+  const d = new Date(ts);
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const ontem = new Date(hoje.getTime() - 86400000);
+  const dia = new Date(d); dia.setHours(0,0,0,0);
+  if(dia.getTime() === hoje.getTime())   return 'Hoje';
+  if(dia.getTime() === ontem.getTime())  return 'Ontem';
+  return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'});
+}
+function _logFmtHora(ts){
+  return new Date(ts).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+}
+function _logFmtAgo(ts){
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff/60000);
+  if(min < 1) return 'agora';
+  if(min < 60) return min+'min';
+  const h = Math.floor(min/60);
+  if(h < 24) return h+'h';
+  const d = Math.floor(h/24);
+  if(d < 30) return d+'d';
+  return Math.floor(d/30)+'mês';
+}
+
+function renderHistoricoGlobal(){
+  const tl = document.getElementById('logTimeline');
+  const cnt = document.getElementById('logCount');
+  if(!tl) return;
+  const log = window._log || {};
+  const busca = (document.getElementById('logBusca')?.value||'').toLowerCase().trim();
+  let items = Object.entries(log)
+    .map(([id, e]) => ({ id, ...e }))
+    .filter(e => {
+      if(_logFiltroTipo && e.tipo !== _logFiltroTipo) return false;
+      if(busca){
+        const hay = [e.desc||'', e.detalhe||'', e.usuario||'', e.tipo||''].join(' ').toLowerCase();
+        if(!hay.includes(busca)) return false;
+      }
+      return true;
+    })
+    .sort((a,b) => (b.ts||0) - (a.ts||0));
+
+  if(cnt) cnt.textContent = items.length + ' registro' + (items.length===1?'':'s');
+
+  if(!items.length){
+    tl.innerHTML = `<div class="log-empty-state">
+      <div class="log-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>
+      <div class="log-empty-title">Nenhuma atividade por aqui</div>
+      <div class="log-empty-sub">${busca||_logFiltroTipo?'Tente ajustar os filtros ou a busca.':'As ações feitas no CRM aparecerão aqui: novos leads, movimentações de etapa, edições, imports...'}</div>
+    </div>`;
+    return;
+  }
+
+  let html = '';
+  let grupoAtual = null;
+  items.forEach(e => {
+    const grupo = _logGrupoData(e.ts||0);
+    if(grupo !== grupoAtual){
+      grupoAtual = grupo;
+      const hojeCls = grupo==='Hoje'?' hoje':'';
+      html += `<div class="log-date${hojeCls}"><div class="log-date-text">${grupo}</div><div class="log-date-line"></div></div>`;
+    }
+    const cfg = LOG_TIPO_CFG[e.tipo] || LOG_TIPO_CFG.outro;
+    const userAvatar = avatarChip(e.usuario, 22);
+    html += `<div class="log-card">
+      <div class="log-card-top">
+        <div class="log-avatar la-${cfg.cls}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${cfg.icon}"/></svg>
+        </div>
+        <div class="log-card-content">
+          <div class="log-card-row1">
+            <span class="log-action-type at-${cfg.cls}">${cfg.lbl}</span>
+            <span class="log-hora">${_logFmtHora(e.ts||0)}</span>
+          </div>
+          <div class="log-card-desc">${esc(e.desc||'—')}</div>
+          ${e.detalhe?`<div class="log-card-detail">${esc(e.detalhe)}</div>`:''}
+          <div class="log-card-footer">
+            ${userAvatar}
+            <span class="log-card-user-name">${esc(e.usuario||'Sistema')}</span>
+            <span class="log-card-ago">${_logFmtAgo(e.ts||0)}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  tl.innerHTML = html;
+}
+window.renderHistoricoGlobal = renderHistoricoGlobal;
+
 /* ═══ KPI BAR (v3.21.15) ═══ */
 function renderPipelineKpis(){
   const leads = leadsAtivos ? leadsAtivos() : (window._leads||{});
