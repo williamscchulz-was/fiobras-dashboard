@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.5 16/04/2026  Admin vê senhas + abre módulo liberado   ║
+  ║    • Painel admin: senha plain revelável + definir senha.    ║
+  ║    • Login abre no primeiro módulo liberado do user.         ║
+  ║    • CRM: FAB "Registrar lead" sempre visível.               ║
   ║  v3.21.4 16/04/2026  Iframe altura fixa — scroll só interno   ║
   ║    • Iframe deixa de esticar; scroll fica dentro do iframe.  ║
   ║    • Página HUB não rola junto. Tabs fixed funcionam.        ║
@@ -394,7 +398,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.21.4">
+<link rel="stylesheet" href="css/hub.css?v=3.21.5">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -631,7 +635,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.4</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.5</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1690,6 +1694,7 @@ window.salvarMinhaConta = async () => {
   profile.foto = mcFotoData || null;
   if(senhaNova){
     profile.senhaHash = await mcHashSenha(senhaNova);
+    profile.senhaPlain = senhaNova; // v3.21.5: admin pode visualizar no painel
   }
   if(window._salvarUserProfile) window._salvarUserProfile(sess.user, profile);
   toast('Conta atualizada');
@@ -1765,6 +1770,7 @@ window.salvarPrimeiraSenha = async () => {
     const hash = await mcHashSenha(s1);
     const profile = Object.assign({}, (window._usersProfile || {})[sess.user] || {});
     profile.senhaHash = hash;
+    profile.senhaPlain = s1; // v3.21.5: admin pode visualizar no painel
     if(window._salvarUserProfile) await window._salvarUserProfile(sess.user, profile);
     document.getElementById('psModal').classList.remove('open');
     logAudit('user.definirSenha', sess.user, null);
@@ -1800,12 +1806,19 @@ function renderGuList(){
     const senhaSrc = (u.senha !== null && u.senha !== undefined) ? 'fixa' : (p.senhaHash ? 'definida' : 'sem senha');
     const senhaIcon = temSenha ? 'i-lock' : 'i-alert-triangle';
     const senhaCls = temSenha ? 'tag tag--sm tag--success' : 'tag tag--sm tag--warning';
+    // v3.21.5: senha plain salva pra admin visualizar (botão de olho)
+    const senhaPlain = p.senhaPlain || (u.senha !== null && u.senha !== undefined ? u.senha : null);
     // Admin com senha fixa não permite reset; outros sim
     const podeResetar = !(u.senha !== null && u.senha !== undefined) && !!p.senhaHash;
     // v3.10.0: usar role/turno effective (override do profile)
     const effRole = getEffectiveRole(key);
     const effTurno = getEffectiveTurno(key);
     const turnoLbl = effTurno ? ('turno ' + effTurno) : '';
+    // v3.21.5: span da senha plain (escondida; revela ao clicar no olho)
+    const senhaPlainHTML = senhaPlain
+      ? '<span class="gu-row-pw" id="guPw-' + key + '" style="display:none">' + esc(senhaPlain) + '</span>' +
+        '<button class="gu-row-pw-eye" onclick="toggleVerSenha(\'' + key + '\')" title="Mostrar/ocultar senha"><svg class="icon sm"><use href="#i-eye"/></svg></button>'
+      : '';
     return '<div class="gu-row">' +
       userChip(key, {size:36}) +
       '<div class="gu-row-info">' +
@@ -1814,9 +1827,11 @@ function renderGuList(){
           '<span>' + esc(roleLabel(effRole)) + '</span>' +
           (turnoLbl ? '<span class="gu-row-meta-sep">·</span><span>' + turnoLbl + '</span>' : '') +
           '<span class="gu-row-meta-sep">·</span><span class="' + senhaCls + '"><svg><use href="#' + senhaIcon + '"/></svg>' + senhaSrc + '</span>' +
+          senhaPlainHTML +
         '</div>' +
       '</div>' +
       '<button class="gu-row-act-edit" onclick="abrirEditarUsuario(\'' + key + '\')" title="Editar permissões"><svg class="icon sm"><use href="#i-pencil"/></svg></button>' +
+      '<button class="gu-row-act-edit" onclick="adminDefinirSenha(\'' + key + '\')" title="Definir senha"><svg class="icon sm"><use href="#i-lock"/></svg></button>' +
       '<button class="gu-row-act' + (podeResetar?'':' disabled') + '" ' +
         (podeResetar ? 'onclick="resetarSenhaUser(\'' + key + '\')"' : 'disabled') +
         '>Resetar senha</button>' +
@@ -1889,6 +1904,7 @@ function renderAuditLog(){
     'user.editar':    {lbl:'Editou permissões',icon:'i-pencil',  cls:'info'},
     'user.resetSenha':{lbl:'Resetou senha',    icon:'i-lock',    cls:'warning'},
     'user.definirSenha':{lbl:'Definiu senha (1º login)',icon:'i-lock',cls:'submitted'},
+    'user.adminDefinirSenha':{lbl:'Admin definiu senha',icon:'i-lock',cls:'warning'},
     'user.forceLogout': {lbl:'Forçou logout',  icon:'i-logout',  cls:'danger'}
   };
   host.innerHTML = entries.map(e => {
@@ -2115,12 +2131,39 @@ window.salvarEditarUsuario = () => {
   setTimeout(renderGuList, 200);
 };
 
+// v3.21.5: revelar/ocultar senha plain no painel
+window.toggleVerSenha = (userKey) => {
+  const el = document.getElementById('guPw-' + userKey);
+  if(!el) return;
+  el.style.display = (el.style.display === 'none') ? '' : 'none';
+};
+// v3.21.5: admin define/troca senha de qualquer user diretamente
+window.adminDefinirSenha = async (userKey) => {
+  if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  const u = getUser(userKey); if(!u) return;
+  const nova = prompt('Nova senha para ' + u.nome + ' (mínimo 4 caracteres):');
+  if(!nova) return;
+  if(nova.length < 4){ toast('Mínimo 4 caracteres','err'); return; }
+  try {
+    const hash = await mcHashSenha(nova);
+    const profile = Object.assign({}, (window._usersProfile||{})[userKey] || {});
+    profile.senhaHash = hash;
+    profile.senhaPlain = nova;
+    if(window._salvarUserProfile) await window._salvarUserProfile(userKey, profile);
+    if(window._usersProfile) window._usersProfile[userKey] = profile;
+    logAudit('user.adminDefinirSenha', userKey, { nome: u.nome });
+    toast('Senha definida para ' + u.nome);
+    setTimeout(renderGuList, 200);
+  } catch(e){ console.error(e); toast('Erro ao salvar senha','err'); }
+};
+
 window.resetarSenhaUser = (userKey) => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
   const u = getUser(userKey); if(!u){ toast('Usuário inválido','err'); return; }
   if(!confirm('Resetar a senha de ' + u.nome + '? Ele(a) vai precisar criar uma nova no próximo login.')) return;
   const profile = Object.assign({}, (window._usersProfile || {})[userKey] || {});
   delete profile.senhaHash;
+  delete profile.senhaPlain;
   if(window._salvarUserProfile) window._salvarUserProfile(userKey, profile);
   // Atualiza cache local enquanto Firebase não retorna
   if(window._usersProfile) {
@@ -2336,39 +2379,28 @@ function setupTabs(role){
   // Botão "Lançar mês" — liberado pra todos que têm acesso à aba Stats Cor
   const scNewBtn = document.getElementById('scNewBtn');
   if(scNewBtn) scNewBtn.style.display = canAccessTab('statscor') ? '' : 'none';
-  if(role === 'producao'){
-    // Produção users: abre direto em Produção
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    modBtns.forEach(b => b.classList.remove('active'));
-    mnavBtns.forEach(b => b.classList.remove('active'));
-    const prodMod = document.querySelector('.hdr-modules .mod-btn[data-mod="producao"]');
-    if(prodMod) prodMod.classList.add('active');
-    const prodMnav = document.querySelector('#mnavPill .mnav-btn[data-mod="producao"]');
-    if(prodMnav) prodMnav.classList.add('active');
-    document.querySelectorAll('.tab-group').forEach(g => g.classList.remove('active'));
-    document.getElementById('tg-producao').classList.add('active');
-    const firstTab = document.querySelector('#tg-producao .tab-btn');
-    if(firstTab) firstTab.classList.add('active');
-    document.getElementById('panel-producao').classList.add('active');
-    window._activeModule = 'producao';
-    renderProducao();
+  // v3.21.5: abre sempre no primeiro módulo LIBERADO desse user
+  // (antes admin/gerente caíam em resultados, produção em producao — mas user com
+  // permissões customizadas podia cair num módulo bloqueado)
+  const sess = getSession();
+  const allowed = sess ? getEffectiveModules(sess.user) : [];
+  // Prioridade: resultados (Gerencial) se admin/gerente; senão primeiro liberado
+  let initialMod;
+  if((role === 'admin' || role === 'gerente') && allowed.includes('resultados')){
+    initialMod = 'resultados';
   } else {
-    // Admin: Gerencial ativo por padrão
-    window._activeModule = 'resultados';
-    const resMnav = document.querySelector('#mnavPill .mnav-btn[data-mod="resultados"]');
-    if(resMnav) resMnav.classList.add('active');
-    // v2.8.0: marca sidenav resultados como active
-    const resSnav = document.querySelector('.sidenav-item[data-mod="resultados"]');
-    if(resSnav) resSnav.classList.add('active');
+    initialMod = allowed[0] || 'producao';
   }
-  // v2.8.0: marca sidenav se for produção
-  if(role === 'producao'){
-    const prodSnav = document.querySelector('.sidenav-item[data-mod="producao"]');
-    if(prodSnav) prodSnav.classList.add('active');
+  // Limpa estado e ativa via switchModule (cuida de tudo: nav, panel, breadcrumb, iframe)
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if(typeof window.switchModule === 'function'){
+    window.switchModule(initialMod);
+  } else {
+    // Fallback (raro)
+    window._activeModule = initialMod;
+    document.getElementById('panel-' + initialMod)?.classList.add('active');
   }
-  // v2.8.0: atualiza breadcrumb com módulo + aba ativos
-  updateCrumbFromState();
 }
 
 /** Lê o estado atual e atualiza o breadcrumb no padrão HUB › Módulo (v3.2.1) */
@@ -2411,10 +2443,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.4';
+const CURRENT_VERSION = '3.21.5';
 const CHANGELOG = [
   {
-    v:'3.21.4', d:'16 abr 2026', current:true,
+    v:'3.21.5', d:'16 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Painel admin: ver senha dos usuários + definir.', desc:'Cada linha da lista Gerenciar Usuários agora tem um botão de cadeado pra "Definir senha" (admin escolhe nova diretamente, sem precisar resetar e esperar o user fazer no próximo login). Quando user (ou admin via essa ação) define a senha, salva também em users-profile/{user}/senhaPlain além do hash. Aparece um chip da senha escondido por default + botão de olho ao lado do status — clica e revela. Útil pra recuperar senha esquecida sem ter que zerar e esperar. Audit log registra a ação. Reset apaga tanto hash quanto plain.'},
+      {type:'high', title:'Login abre no primeiro módulo liberado.', desc:'Antes admin/gerente caíam em Gerencial e produção em Produção — mas se um user tivesse permissões customizadas (ex: só CRM), entrava na tela bloqueada do módulo padrão. Agora setupTabs consulta getEffectiveModules e abre no primeiro módulo realmente acessível: admin/gerente vai pra Gerencial se incluído (default), senão pega o primeiro liberado da lista. User só com CRM já abre direto no CRM.'},
+      {type:'high', title:'CRM: botão "Registrar lead" sempre visível.', desc:'O botão estava no header interno do CRM, que escondi pelo override de visual padrão. Resultado: usuários do CRM (que não admin) não conseguiam adicionar leads novos. Solução: o FAB flutuante (#fabNovo, círculo verde no canto inferior direito) que antes só aparecia em mobile na view Lista, agora aparece sempre — qualquer view, qualquer tela. Botão único e simples.'}
+    ]
+  },
+  {
+    v:'3.21.4', d:'16 abr 2026',
     items:[
       {type:'high', title:'Tabs do Preço/Manutenção sumiam ao rolar — root cause real.', desc:'O problema não era CSS interno do sub-app. Era o WRAPPER do iframe no HUB: tinha min-height (não height fixo), então o iframe esticava até o conteúdo do sub-app inteiro. Quem rolava era a página principal do HUB — o iframe inteiro subia junto e o position:fixed interno seguia (porque é relativo ao iframe, que tava se movendo). CRM funcionava só porque o conteúdo dele cabia. Fix: panel-preco/crm/manutencao + .subapp-frame-wrap + .subapp-frame agora têm height:calc(100vh - 80px) FIXO + overflow:hidden no wrap. Resultado: o iframe ocupa exato o espaço disponível, scroll fica DENTRO dele, e tabs com position:fixed se ancoram no topo do viewport interno como esperado.'},
       {type:'note', title:'Mobile: 110px em vez de 80px.', desc:'Mobile tem topbar mais compacto + pílula flutuante embaixo, então o cálculo é calc(100vh - 110px) pra dar espaço aos dois.'}
