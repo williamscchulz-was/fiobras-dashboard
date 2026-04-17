@@ -3,6 +3,11 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.8 17/04/2026  CRM: card clean + drag mobile + pill   ║
+  ║    • Card redesign: logo + nome + meta linha + ações ícones. ║
+  ║    • Pill "→ próxima etapa" no footer (1 clique avança).     ║
+  ║    • Long-press em qualquer card = drag (funciona no mobile).║
+  ║    • Popover de mover (ligações tel:, wa.me, mailto: inline).║
   ║  v3.21.7 16/04/2026  CRM: cards mais clean (linhas alinhadas) ║
   ║    • Header com nome maior + tag de fibra à direita.         ║
   ║    • Body em linhas label:valor (Empresa/Entrada/Telefone…). ║
@@ -406,7 +411,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.21.5">
+<link rel="stylesheet" href="css/hub.css?v=3.21.8">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -643,7 +648,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.7</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.8</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2451,10 +2456,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.7';
+const CURRENT_VERSION = '3.21.8';
 const CHANGELOG = [
   {
-    v:'3.21.7', d:'16 abr 2026', current:true,
+    v:'3.21.8', d:'17 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'CRM: card redesign clean + drag funciona em mobile.', desc:'Inspirado no Excermol. Estrutura nova: borda colorida só no topo + header com logo (iniciais) + nome em Outfit Black 900 + empresa abaixo. Tag de fibra (produto) como pill. Meta linha única com data + tempo na etapa (vermelho se >=3 dias parado). Footer com avatares de ação direta: 📞 tel:, 💬 wa.me, 📧 mailto: — clica e abre. Sem mais "label: valor" empilhado.'},
+      {type:'feat', title:'Pill "→ próxima etapa" no canto do card.', desc:'Mostra qual é a próxima etapa direto no card (ex: "→ Retorno feito"). 1 clique avança. Clica de novo abre popover com TODAS as etapas + opção "Marcar como perdido". Estilo de tag pill (Poppins 500, soft background da cor da etapa).'},
+      {type:'high', title:'Drag manual agora funciona em mobile (touch).', desc:'Antes o drag usava HTML5 drag-and-drop nativo via card-handle, que não funciona em touchscreen — só desktop. Agora usa Pointer Events: long-press 280ms em qualquer lugar do card ativa modo arrastar (visual: scale 0.97 + sombra). Solta sobre uma coluna pra mover. Tap rápido abre o modal do lead. Funciona igual em mouse, touch e pen.'}
+    ]
+  },
+  {
+    v:'3.21.7', d:'16 abr 2026',
     items:[
       {type:'feat', title:'CRM: cards do pipeline mais clean (linhas alinhadas).', desc:'Inspirado no estilo "Truth" que você mandou: header com nome maior em Outfit Black 900 + tag de fibra (produto) à direita como pill discreto. Body reorganizado em linhas tipo "label: valor" alinhadas (Empresa, Entrada, Telefone, Última interação) — mais arejado e fácil de bater o olho. Tag de tempo na etapa fica embaixo, separada. Botões de avançar etapa + perdido mantidos pra agilidade. Híbrido entre o card antigo cheio e o estilo cartão limpo do mockup.'}
     ]
