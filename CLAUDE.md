@@ -2,54 +2,70 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 1.1 — 15/04/2026
-> **Versão atual do HUB:** v2.9.0
+> **Versão do doc:** 2.0 — 16/04/2026
+> **Versão atual do HUB:** v3.21.4
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
+> **Domínio:** `https://hub.fiobras.com.br`
 
 ---
 
 ## 1. O que é o projeto
 
-**Fiobras HUB** é o **mini-ERP interno da Fiobras Fios Tintos** — uma plataforma única, mobile-first, onde toda a operação da empresa converge: resultados gerenciais, produção mensal e diária, desenvolvimento de cor, apontamento de tintoria por turno, timeline de testes/ocorrências e estatística de mix de tingimento.
+**Fiobras HUB** é o **mini-ERP interno da Fiobras Fios Tintos** — uma plataforma única, mobile-first, onde toda a operação da empresa converge: resultados gerenciais, produção mensal, desenvolvimento de cor, apontamento de tintoria por turno, timeline de testes/ocorrências, estatística de mix de tingimento, formação de preço, manutenção preventiva/corretiva e CRM.
 
 **Para que serve:**
 - **Direção** acompanha KPIs do ano (Receita Bruta, LL Ajustado, IPAC, Clientes Novos) e bate metas por nível (Meta / Meta Plus / Super Meta).
 - **Produção** lança produção mensal de fios (CV, CO, PES, PAC), eficiências e reprocesso.
-- **Laboratório** gerencia pipeline de desenvolvimento de cor (entrada → desenvolvida → enviada → em ajuste → aprovada/cancelada) e registra testes/ocorrências na Timeline.
-- **Líderes de turno** (Adelir/Alexander/Djoniffer) apontam produção da tintoria por turno e fibra.
-- **Todos** consultam histórico plurianual e estatística de mix de cor por fibra.
+- **Laboratório** gerencia pipeline de desenvolvimento de cor e registra testes/ocorrências na Timeline.
+- **Líderes de turno** apontam produção da tintoria por turno e fibra.
+- **Comercial** usa CRM (leads, pipeline, clientes).
+- **Manutenção** controla kanban de demandas, preventivas, peças, máquinas (com push notifications via FCM).
+- **Admin** define preços de venda (formação completa por fio/serviço).
 
-**Visão de longo prazo (12-18 meses):** substituir planilhas paralelas, grupos de WhatsApp e comunicação verbal por uma única fonte de verdade, acessível via PWA no celular e no desktop. Próximos módulos no roadmap: **Lançamento de Produção Diária**, **Envio de Relatórios**, **Preço de Venda** (hoje WIP), estoque, manutenção, CRM leve.
-
-**Nome:** "HUB" substituiu "Fiobras Dashboard" na v2.3.0 — reflete o papel real (ponto único de entrada), não só a primeira encarnação (dashboard de metas).
+**Visão de longo prazo:** substituir planilhas paralelas, grupos de WhatsApp e comunicação verbal por uma única fonte de verdade, acessível via PWA no celular e no desktop.
 
 ---
 
 ## 2. Stack tecnológica
 
 ### Frontend
-- **HTML + CSS + Vanilla JS** num único arquivo `index.html` (~6200 linhas em v2.8.1).
+- **HTML + CSS + Vanilla JS** num único arquivo `index.html` (~6800 linhas) + CSS extraído em `css/hub.css` (~1900 linhas).
 - **Sem frameworks.** Zero React/Vue/Svelte/Tailwind compilado. **Zero build step.**
-- **Fontes:** Outfit (display), Poppins (UI), DM Mono (números/IDs) — Google Fonts via CDN.
+- **Fontes:** Outfit (display, incl. weight 900 Black), Poppins (UI), DM Mono (números/IDs) — Google Fonts via CDN. Variable: `wght@300..900` na Outfit.
 - **Charts:** Chart.js 4.x via CDN.
-- **Ícones:** SVG inline. **Zero emoji na UI.** Zero CDN de ícones.
+- **Ícones:** SVG inline com `<symbol>`/`<use>` (biblioteca unificada line stroke 1.5 round). **Zero emoji na UI.** Zero CDN de ícones.
+
+### Sub-apps integrados via iframe (v3.1.0+)
+3 sistemas externos vivem como pastas separadas no repo, embutidos via iframe no HUB:
+- `preco/index.html` — Formação de preço (adaptado de `williamscchulz-was/fiobras-price`)
+- `crm/index.html` — CRM (adaptado de `williamscchulz-was/fiobras-crm`)
+- `manutencao/index.html` + `manutencao/firebase-messaging-sw.js` — Manutenção (adaptado de `williamscchulz-was/manutencao`, com FCM)
+
+Cada sub-app:
+- Compartilha sessão do HUB via `localStorage` (`fiobras-dash-auth`)
+- Sincroniza tema via `localStorage` + `postMessage`
+- Faz `signInAnonymously` no Firebase pra passar pelas rules
+- Tem seu próprio shell visual escondido via override CSS no topo do body
 
 ### Backend
-- **Firebase Realtime Database** — projeto `fiobras-preco`.
-- URL: `https://fiobras-preco-default-rtdb.firebaseio.com`.
+- **Firebase Realtime Database** — projeto **`fiobras-hub`** (renomeado de `fiobras-preco` na v3.16.0).
+- URL: `https://fiobras-hub-default-rtdb.firebaseio.com`.
+- **Firebase Anonymous Auth** ligado (v3.15.0). Rules: `{".read":"auth!=null",".write":"auth!=null"}` — ver `firebase-rules.json`.
 - Sync em tempo real via `onValue`; gravação via `set` / `update`.
-- Cada feature usa um path separado pra isolar dados (ver §4).
 
 ### Hospedagem
 - **GitHub Pages** no repo `williamscchulz-was/fiobras-dashboard`, branch `main`.
-- Deploy via **Fiobras Deployer** (ferramenta interna separada).
+- Custom domain: `hub.fiobras.com.br` (CNAME → `williamscchulz-was.github.io.`).
+- HTTPS via Let's Encrypt (Enforce HTTPS ativo).
+- Deploy via **commit/push direto pro main** (William autorizou; ver §8.5).
 
 ### PWA
 - Instalável em iOS, Android, Windows.
-- Manifest gerado via JS blob (não estático).
-- Ícones programáticos (180/192/512px) — fundo verde Fiobras `#008835` + símbolo branco.
-- Tema verde na barra de status.
+- Manifest gerado em runtime via JS blob.
+- Ícones 192/512 gerados em runtime via canvas a partir do símbolo SVG (v3.14.0).
+- Favicon SVG inline via data URI.
+- Tema verde `#008835` na barra de status.
 
 ---
 
@@ -57,157 +73,196 @@
 
 | Arquivo | Papel |
 |---|---|
-| `index.html` | **Toda a aplicação.** ~6200 linhas: HTML estrutural, CSS em `<style>`, lógica em dois `<script>` (um normal + um `type="module"` pro Firebase SDK). |
-| `README.md` | README curto do repo (GitHub Pages). |
-| `CLAUDE.md` | Este documento. Contexto persistente pro Claude Code. |
-| `FIOBRAS_BASE.md` | Design system universal Fiobras (fora deste repo, em outro projeto). Fonte de verdade pra cores brand, tipografia, componentes base. |
-
-**Ferramentas separadas (não são parte do HUB, mas convivem):**
-- `importar-stats-cor.html` — importador one-shot do histórico de mix de cor (2020-2026). Rodado uma vez, arquivado.
-- **Fiobras Deployer** — ferramenta externa que faz o push pro GitHub Pages (config em `deployer/` no Firebase, separado do HUB).
+| `index.html` | **Shell + 2 módulos nativos** (Gerencial, Produção/Cor/Apontamento/Timeline/Stats Cor). ~6800 linhas. |
+| `css/hub.css` | CSS principal extraído (v3.0.0). Linkado via `<link rel="stylesheet" href="css/hub.css?v=X.X.X">` (cache-buster). |
+| `preco/index.html` | Sub-app Preço (iframe). |
+| `crm/index.html` | Sub-app CRM (iframe). |
+| `manutencao/index.html` | Sub-app Manutenção (iframe). |
+| `manutencao/firebase-messaging-sw.js` | Service worker do FCM (push notifications). |
+| `firebase-rules.json` | Rules pra colar no Firebase Console (auth != null). |
+| `CNAME` | Custom domain GitHub Pages: `hub.fiobras.com.br`. |
+| `README.md` | README curto do repo. |
+| `CLAUDE.md` | Este documento. |
 
 **Dentro do `index.html` há dois blocos `<script>` distintos:**
-- **Script normal** (topo do JS) — lógica da UI, state local, helpers, render.
-- **Script `type="module"`** (final) — importa Firebase SDK, define `db`, `ref`, `onValue`, `set`, `update`, e expõe funções de persistência via `window._salvarXxxFirebase`, `window._mixCoresData`, etc. **Essa separação é importante:** símbolos do module (`db`, `ref`, ...) NÃO são visíveis no script normal. Sempre gravar Firebase a partir do bloco module.
+- **Script normal** — lógica da UI, state local, helpers, render.
+- **Script `type="module"`** (final) — importa Firebase SDK, define `db`, `ref`, `onValue`, `set`, `update`, `getAuth`, `signInAnonymously`, e expõe funções de persistência via `window._salvarXxxFirebase`. **Símbolos do module NÃO vazam pro script normal.** Sempre gravar Firebase a partir do bloco module.
+
+**SVG `<defs>` global** no topo do body com biblioteca de ícones e símbolos da marca:
+- Ícones (line stroke 1.5 round): `i-dashboard`, `i-factory`, `i-dollar`, `i-tool`, `i-users`, `i-lock`, `i-sun`, `i-moon`, `i-logout`, `i-x`, `i-clock`, `i-user`, `i-chevron-down`, `i-plus`, `i-pencil`, `i-trash`, `i-panel-toggle`, `i-alert-triangle`, `i-loader`, `i-paper-plane`, `i-eye`, `i-badge-check`, `i-x-circle`, `i-info`, `i-check`
+- Marca: `i-fiobras-symbol` (verde), `i-fiobras-symbol-inv` (branco), `i-fiobras-mark` (com fundo verde)
 
 ---
 
 ## 4. Estrutura de dados (Firebase Realtime Database)
 
-**Backend único: Firebase Realtime Database** (projeto `fiobras-preco`).
+**Backend único: Firebase Realtime Database** (projeto `fiobras-hub`).
 
-### Paths atuais (v2.8.1)
+### Paths atuais
 
 | Path | Conteúdo | Schema resumido |
 |---|---|---|
-| `metas-2026` | Lançamentos mensais: Receita Bruta, LL Ajustado, IPAC, Clientes Novos. | `{mes}/{metrica} = valor` |
+| `metas-2026` | Lançamentos mensais Gerencial. | `{mes}/{metrica} = valor` |
 | `producao-2026` | Produção mensal de fios. | `{mes}/{cv,co,pes,pac,efTinturaria,efRepasse,diasDesenv,reprocesso}` |
-| `cores-2026` | Desenv. de cor — entrada, status, histórico, obs, fotos. | `{id}/{codigo,cliente,cor,status,historico:[...],foto,obs,...}` |
-| `apontamento-tintoria-2026` | Lançamento diário da tintoria por turno/fibra. | `{mes}/{dia}/{turno}/{fibra} = kg` |
-| `timeline-2026` | Eventos (testes, ocorrências). Desde v2.7.0 suporta múltiplas fotos. | `{id}/{objetivo,cliente,op,cor,fotos:[{data,desc}],desc,resultado,...}` |
-| `mix-cores-{ano}` | Stats Cor — mix de tingimento por fibra/categoria. **Populado 2020-2026.** | `{mes}/{fibra}/{categoria} = kg` · ex: `mix-cores-2026/2/co/branco = 44327.31` |
-| `config/adminPassword` | Senha do admin (não hardcoded no client). | string |
-| `deployer/` | Config do Fiobras Deployer (auth, token, webhook, history). **Separado do HUB.** | — |
+| `cores-2026` | Desenv. de cor. | `{id}/{codigo,cliente,cor,status,prioridade,criadoPor,historico:[{acao,data,by}],foto,obs,...}` |
+| `apontamento-tintoria-2026` | Lançamento diário tintoria. | `{mes}/{dia}/{turno}/{fibra} = kg` |
+| `timeline-2026` | Timeline (testes, ocorrências). Múltiplas fotos + tag obrigatória. | `{id}/{objetivo,cliente,op,cor,tag,fotos:[{data,desc}],desc,resultado,criadoPor,...}` |
+| `mix-cores-{ano}` | Stats Cor. **Populado 2020-2026.** | `{mes}/{fibra}/{categoria} = kg` |
+| `timeline-tags` | Tags customizadas da Timeline. | `{id}/{nome,cor}` |
+| `users-profile/{user}` | Perfil do usuário (foto, email, senha hash, nome completo, role override). | `{nomeCompleto, email, foto, senhaHash, roleOverride, turnoOverride, modulesAllowedOverride, tabsAllowedOverride}` |
+| `users-config/{user}` | Usuários criados via UI (admin). | `{nome, role, senha:null}` |
+| `audit-log/{id}` | Log de ações administrativas. | `{ts, by, action, target, details}` |
+| `active-sessions/{user}` | Heartbeat de sessões ativas. | `{lastSeen, userAgent, startedAt}` |
+| `force-logout/{user}` | Sinaliza logout forçado pelo admin. | `{ts}` |
+| **CRM** (paths não-prefixados) | | |
+| `crm/clientes`, `crm/leads`, `crm/log`, `crm/usuarios` | Dados do CRM (escritos pelo sub-app). | varia |
+| **Manutenção** | | |
+| `manutencao/kanban`, `manutencao/pecas`, `manutencao/preventivas`, `manutencao/maquinas`, `manutencao/historico`, `manutencao/fcmTokens`, `manutencao/fcmPending` | Dados do Manutenção. | varia |
+| **Preço** (paths top-level legacy) | | |
+| `cadastro`, `custoHoraRetorcao`, `custoHoraPreparacao`, `multiplicadores`, `historico-precos` | Dados do Preço. | varia |
 
 ### Fibras e categorias (Stats Cor)
-- **Fibras:** `co` (CO/Algodão), `pac` (PAC/Acrílico), `pes` (PES/Poliéster), `cv` (CV/Viscose). Agregado "total" é soma dinâmica.
+- **Fibras:** `co`, `pac`, `pes`, `cv`. Total = soma dinâmica.
 - **Categorias:** `branco`, `clara`, `media`, `escura`, `intensa`, `preta`.
 
-### Paths futuros (roadmap)
-
-| Path | Conteúdo |
-|---|---|
-| `producao-diaria/{ano}/{mes}/{dia}/{id}` | Lançamentos granulares de produção diária. |
-| `relatorios/templates/{id}` | Templates de relatório. |
-| `relatorios/disparos/{id}` | Histórico de disparos. |
-| `relatorios/destinatarios/{id}` | Lista de destinatários. |
-
 ### Regras de gravação
-- **Sempre passar pelo bloco module.** Funções expostas via `window._salvarTlFirebase`, `window._salvarAptFirebase`, `window._salvarScFirebase`, etc.
-- **Nunca hardcodear credenciais** — senhas vão em `config/{nome}` no Firebase.
+- **Sempre passar pelo bloco module.** Funções expostas via `window._salvarTlFirebase`, `window._salvarAptFirebase`, `window._salvarUserProfile`, `window._gravarAuditLog`, etc.
+- **Nunca hardcodear credenciais** no client.
 - **Sem migrações destrutivas sem aprovação explícita.**
-- **Fallbacks pra schema antigo obrigatórios** — ex: `const titulo = evt.objetivo || evt.desc || '(sem título)';`. Ao editar registro antigo, ele carrega via fallback e ao salvar é gravado com schema novo (migração natural).
+- **Fallbacks pra schema antigo obrigatórios** — registros antigos continuam funcionando via fallback (ex: `evt.objetivo || evt.desc`).
+- **Backfills one-shot** salvam flag em localStorage pra não rodar duas vezes (ex: `fiobras-backfill-cores-autor-v2`).
+
+### Firebase Rules
+```json
+{ "rules": { ".read": "auth != null", ".write": "auth != null" } }
+```
+HUB e os 3 sub-apps fazem `signInAnonymously` no boot pra passar pelas rules. Login user+senha custom é separado (vive em localStorage), independente do Firebase Auth.
 
 ---
 
-## 5. Features implementadas (estado atual — v2.8.1)
+## 5. Features implementadas (estado atual — v3.21.4)
 
-### Shell (v2.8.0+)
-- **Desktop:** sidebar à esquerda com ícones dos módulos, topbar com breadcrumb (módulo › aba) e dropdown de usuário (tema, versão, logout). Token `--bg-deep` pra profundidade em camadas no dark.
-- **Mobile (≤640px):** sidebar some; mantém pílula flutuante estilo Nubank no rodapé (Gerencial/Produção/Preço).
+### Shell (v2.8.0+, v3.7.0)
+- **Desktop:** sidebar à esquerda colapsável (68px ↔ 232px com toggle), topbar com breadcrumb (`HUB › Módulo`), dropdown de usuário (Minha conta, Tema, Versões, Gerenciar usuários se admin, Sair).
+- **Mobile (≤640px):** sidebar some; pílula flutuante estilo Nubank no rodapé com 5 módulos.
+- **Tema:** light (sage clarinho `#EDF1EA` + brancos) ↔ dark (Apple style `#1C1C1E`/`#2C2C2E`/`#3A3A3C`). Toggle no dropdown propaga pra iframes via postMessage.
 
-### Gerencial (admin only)
-- **2026** — KPIs do ano (Receita Bruta, LL Ajustado, IPAC, Clientes Novos), progresso anual por nível (Meta / Meta Plus / Super Meta), lançamento mês a mês, prêmios mensais e anuais.
-- **Histórico** — comparativo plurianual 2020-2026 com gráficos.
+### Módulo Gerencial (admin only)
+- **2026** — KPIs, progresso por nível, lançamento mensal, prêmios.
+- **Histórico** — comparativo plurianual 2020-2026.
 
-### Produção (todos os usuários, com granularidade por aba)
-- **Produção** — produção mensal de fios (CV, CO, PES, PAC), IPAC calculado, eficiência tinturaria/repasse, dias desenvolvimento, reprocesso.
-- **Desenv. Cor** — pipeline de cores: entrada → desenvolvida → enviada → em_ajuste → aprovada/cancelada. Indicador de tempo pausado (só "enviada" pausa, porque depende de cliente externo). Ações inline no card (Aprovar/Enviar/Em ajuste/Cancelar). Modal de detalhe com foto, chips, histórico timeline vertical, ações de admin.
-- **Apontamento** — lançamento diário da tintoria. Calendário mensal → detalhe do dia com 3 turnos (3º → 1º → 2º) e 4 fibras (CO/PAC/PES/CV). Líderes de turno editam só o próprio turno (outros turnos read-only com cadeado + banner amarelo).
-- **Timeline** — feed vertical estilo Nubank. Desde v2.7.0: **até 4 fotos HD** por registro (1200px máx, JPEG 0.82, ~210KB/foto), cada foto com legenda própria. Card mostra 1ª foto + badge +N. Modal detalhe em stack vertical com legenda em itálico. Fallback pra registros com `foto` legacy único.
-- **Stats Cor** *(v2.6.0+, permissão por aba)* — estatística de mix de cor tingida por fibra. Filtro de fibra (Total/CO/PAC/PES/CV) + calendário de meses (com navegação de mês, v2.7.4) + donut SVG do mês selecionado + lista de categorias com barras + KPIs (dominante e vs ano anterior) + histórico plurianual 2020-2026 culminando em barra **TOTAL** destacada em verde com % geral acumulado. Modal "Lançar Mês" (admin) com 4 abas de fibra × 6 inputs cada. **Acesso:** admin + Anderson + Aldo + Geovani + Lucivane.
+### Módulo Produção (5 abas)
+- **Produção** — produção mensal de fios + IPAC + eficiências.
+- **Desenv. Cor** — pipeline. Estrela de prioridade (admin+produção). `criadoPor` rastreado. Avatar do criador no card. Modal detalhe com histórico timeline + avatares. Ações inline.
+- **Apontamento** — calendário tintoria, 3 turnos × 4 fibras. Líderes editam só próprio turno.
+- **Timeline** — feed Nubank, até 4 fotos HD por registro com legendas, tag obrigatória, filtro por tag + contador.
+- **Stats Cor** — mix por fibra/categoria, donut SVG, histórico plurianual com TOTAL acumulado, modal "Lançar Mês".
 
-### Preço de Venda (WIP — em construção)
-Placeholder visível. Admin vê badge "WIP" + toast "em construção"; produção vê cadeado + toast "Sem permissão".
+### Módulo Preço (sub-app /preco/, admin only)
+6 abas internas: Vendas, Tingimento, Preparação/Repasse, Retorção, Custos, Histórico. Tabs internas com `position:fixed` (movidas pro body via JS no bootstrap).
 
-### Sistema de permissões (v2.5.0+ / v2.6.0+)
-- **Módulos:** todos visíveis pra todos. Sem permissão = opacity reduzida + cadeado SVG + toast "Sem permissão".
-- **Abas:** permissão granular via `TAB_PERMS = { statscor: ['admin','anderson','aldo','geovani','lucivane'] }`. Abas sem permissão ficam `display:none` (não mostram cadeado — seria visualmente confuso em sub-abas).
-- **WIP vs Locked:** se usuário não tem permissão E módulo é WIP, **cadeado vence** (permissão tem prioridade).
+### Módulo Manutenção (sub-app /manutencao/, todos)
+6 abas internas (admin vê todas; demais só Dashboard/Kanban/Histórico): Dashboard, Kanban, Preventiva, Máquinas, Histórico, Relatórios. Push notifications FCM ativas via Cloudflare Worker. Bootstrap autentica como admin interno (`__admin__`).
 
-### Usuários (v2.8.1)
+### Módulo CRM (sub-app /crm/, todos)
+3 views: Dashboard, Pipeline (kanban), Lista. **Corte temporal:** Pipeline e Dashboard só consideram leads com `data >= 01/01/2026` (constante `CRM_CUTOFF_TS`); Lista mostra catálogo completo.
 
-| Usuário | Role | Turno | Senha | Observação |
-|---|---|---|---|---|
-| William (admin) | `admin` | — | sim | Acesso total. |
-| Anderson | `producao` | — | não | Produção + Stats Cor. Gerencial/Preço bloqueados. |
-| Aldo | `producao` | — | não | Idem. |
-| Geovani | `producao` | — | não | Idem. |
-| Lucivane | `producao` | — | não | Idem (acesso a Stats Cor). |
-| Adelir | `producao` | 1º | não | **Sem Stats Cor.** Apontamento só edita 1º turno. |
-| Alexander | `producao` | 2º | não | **Sem Stats Cor.** Apontamento só edita 2º turno. |
-| Djoniffer | `producao` | 3º | não | **Sem Stats Cor.** Apontamento só edita 3º turno. |
+### Sistema de roles (v3.10.0+, v3.21.0)
+3 níveis hierárquicos:
+- **`admin`** — controle total, único com acesso ao painel admin (gerenciar usuários, audit log, sessões ativas).
+- **`gerente`** — vê todos os módulos automaticamente, pode mexer em tudo, mas SEM painel admin.
+- **`producao`** (label "Usuário") — configurável por módulo. Default: vê Produção, Manutenção e CRM.
 
-Usuários em `USERS` dentro do `<script>` do `index.html`. Schema:
-```js
-{ nome: 'Nome Display', senha: null|'senha', role: 'admin'|'producao', turno: 1|2|3|undefined }
-```
+Hierarquia interna preserva string `producao` pra retrocompat. Labels friendly via `ROLE_LABELS = { admin:'Administrador', gerente:'Gerente', producao:'Usuário' }`.
+
+### Painel admin (v3.9.0+)
+Acessível pelo dropdown do user só pra admin:
+- **Gerenciar usuários** — lista os 17 users (USERS hardcoded + dinâmicos do Firebase). Cada linha: avatar, nome, role/turno, status da senha. Botões: editar (lápis), resetar senha, excluir (só dinâmicos).
+- **+ Novo usuário** — modal pra criar (chave login + nome + role). Salva em `users-config`.
+- **Editar usuário** — role select (Usuário/Gerente/Administrador), turno, módulos liberados (com Marcar todos / Limpar). Seção módulos some quando role=admin/gerente. Mudanças efetivam no próximo login.
+- **Sessões ativas** — lista users com login recente (heartbeat 60s, ativo se < 5 min). Botão "Forçar logout" (marca `force-logout/{user}`).
+- **Histórico de alterações** (audit log) — últimas 100 ações filtráveis por user/ação/período.
+
+### Login + senha (v3.0.1+, v3.9.0)
+- Login: dropdown dinâmico com todos os users (USERS hardcoded + dinâmicos).
+- Senha: SHA-256 + salt fixo (`fiobras-hub-v3`), gravada em `users-profile/{user}/senhaHash`.
+- Admin tem senha hardcoded `'admin'` em USERS.
+- Demais entram sem senha; popup obrigatório no primeiro login pede definir.
+- Reset de senha pelo admin → próximo login do user dispara o popup novamente.
+
+### Avatares (v3.19.0+)
+Helper `userChip(userKey, {size})` central. Usa foto do `users-profile` (Minha Conta) ou iniciais com gradient verde Fiobras (admin gradient preto). Hover desktop = tooltip nativo; tap mobile = toast com nome.
+
+Aplicado em: cards de Cor (criador), Timeline (autor), modal Cor (histórico interno), audit log, Sessões ativas, Gerenciar usuários.
+
+`_resolveUserKey()` tolera registros legacy que gravaram nome em vez de chave (busca case-insensitive).
+
+### Identidade visual (v3.14.0)
+Marca: letra F com braço do meio = ponto amarelo. SVG `<symbol>` no defs.
+- Sidenav logo: símbolo branco + ponto amarelo dentro do quadrado verde.
+- Splash + login: marca composta (símbolo + Fiobras + HUB).
+- Favicon: SVG inline data URI no `<link rel="icon">`.
+- PWA icons: gerados runtime via canvas.
+
+### Tags semânticas (v3.6.0)
+Componente `.tag` com 8 modificadores: `success`, `warning`, `info`, `submitted`, `review`, `danger`, `neutral`, `brand`. Tokens CSS em `:root` e `[data-theme="dark"]`. Padrão pill, ícone à esquerda, Poppins 500. `.tag--sm` pra densidades.
+
+Status do Cor migrados pra `.tag` + ícone semântico (entrada=warning+alert, desenvolvida=info+loader, enviada=submitted+paper-plane, em_ajuste=review+eye, aprovada=success+badge-check, cancelada=danger+x-circle).
 
 ### Central de Atualizações (v2.2.0+)
-Clique na pílula de versão no header abre modal com histórico (`CHANGELOG` array).
-
-### PWA
-Instalável. Login simples sem cadastro (só seleciona usuário; senha só pro admin).
+Clique na pílula de versão no header → modal com histórico (`CHANGELOG` array).
 
 ---
 
-## 6. Versão atual e changelog
+## 6. Versionamento e changelog
 
-**Versão atual:** `v2.8.1` (14/04/2026).
-
-### Changelog resumido (top-down, mais recente primeiro)
-
-| Versão | Data | Resumo |
-|---|---|---|
-| **v2.8.1** | 14/04/2026 | Fix shell: dropdown cortado + breadcrumb. |
-| **v2.8.0** | 14/04/2026 | Shell novo: sidebar + topbar + user dropdown. Token `--bg-deep`. Mobile mantém pílula flutuante. |
-| v2.7.4 | 14/04/2026 | Stats Cor: navegação de mês + Lucivane. |
-| v2.7.3 | 14/04/2026 | Fix botão Lançar Mês (Stats Cor). |
-| v2.7.2 | 14/04/2026 | Fix texto da tab ativa sumia em mobile. |
-| v2.7.1 | 14/04/2026 | Mobile: fix cadeado (admin) + tabs fixas em grid + labels `data-short`. |
-| **v2.7.0** | 14/04/2026 | Timeline: múltiplas fotos HD + legendas (até 4 fotos, 1200px, JPEG 0.82). |
-| v2.6.3 | 10/04/2026 | Cor: fix botões edit no modal detalhe. |
-| v2.6.2 | 10/04/2026 | Stats Cor: gráfico histórico + botão lançar. |
-| v2.6.1 | 10/04/2026 | **Cor: rollback parcial** — ações voltam pro card (tap-to-detail só quebrou fluxo). Fix boot: subscription Stats Cor no módulo correto. |
-| **v2.6.0** | 09/04/2026 | **Stats Cor** — mix de tingimento por fibra. Paleta mono verde Fiobras. Permissão granular por aba (`TAB_PERMS`). Lucivane adicionada. |
-| **v2.5.0** | 09/04/2026 | **Patch Mobile First** (5 fases bundladas): anti-zoom iOS, nav pílula flutuante, mdet encorpados, tap-to-detail Cor (depois revertido), polish. Rename "Resultados" → "Gerencial". |
-| v2.4.0 | 08/04/2026 | Módulo Apontamento Tintoria. 3 líderes de turno adicionados. |
-| v2.3.0 | 08/04/2026 | Rename "Dashboard" → "HUB". Tema light sage clarinho + dark Apple style. Pill 3D de módulos. Preço de Venda como WIP. |
-| v2.2.x | — | Desenv. Cor: indicador tempo pausado; regra de pausa ("enviada" pausa). |
-| v2.2.0 | — | Header limpo + Central de Atualizações. |
-| v2.1.x | — | Nav modular + Timeline (feed Nubank). |
+**Versão atual:** `v3.21.4` (16/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
+
+### Marcos importantes
+
+| Versão | Marco |
+|---|---|
+| v3.21.x | Role gerente + tabs sticky/fixed (Preço/CRM/Manutenção). |
+| v3.18-3.20 | Avatares unificados, prioridade Cor, padronização visual sub-apps, fix tabs. |
+| v3.16.0 | **Migração Firebase: fiobras-preco → fiobras-hub.** |
+| v3.15.0 | **Firebase Anonymous Auth + rules `auth != null`.** |
+| v3.14.0 | **Nova identidade visual** (símbolo F com ponto amarelo). |
+| v3.13.0 | +7 users (manutenção+CRM), sessões ativas, filtros audit log. |
+| v3.12.0 | CRUD usuários via UI + audit log. |
+| v3.11.0 | Permissões por aba editáveis (depois removido em v3.20.4). |
+| v3.10.0 | Painel admin: editar role/turno/módulos. |
+| v3.9.0 | Edilson + Joacir + popup senha + painel "Gerenciar usuários". |
+| v3.8.0 | Manutenção integrada via /manutencao/ iframe (FCM ativo). |
+| v3.7.0 | Sidebar com toggle expand/collapse. |
+| v3.6.0 | Sistema de tags semânticas (8 variantes). |
+| v3.5.0 | Refinamento visual: Outfit Black 900 + ícones unificados. |
+| v3.4.0 | CRM integrado via /crm/ iframe. |
+| v3.3.0 | Timeline: filtro por tag + contador. |
+| v3.1.0 | **Preço integrado via /preco/ iframe** (primeira integração de sub-app). |
+| v3.0.0 | **CSS split** (`css/hub.css`) + módulos placeholder Manutenção/CRM. |
+| v2.9.0 | Timeline: tags (Desenv/Problemas/Melhorias). |
+| v2.8.0 | Shell novo: sidebar + topbar + user dropdown. |
 
 ---
 
 ## 7. Princípios e práticas não-negociáveis
 
 ### 7.1 Mobile-first obrigatório
-**Regra mais importante do projeto.** Toda feature nasce pensando em **celular ≤375px** e só depois escala pro desktop. **Nenhuma mudança vai pra `main` sem estar adequada mobile E desktop simultaneamente.** Faixa crítica mobile: **320px–480px** (iPhone SE até iPhone 14 Pro).
+**Regra mais importante.** Toda feature funciona em **mobile (320-480px) E desktop**. Nada vai pra `main` sem cobrir os dois.
 
 Zonas de atenção mobile:
-- Inputs: `font-size: 16px` mínimo (senão iOS dá zoom).
+- Inputs: `font-size: 16px` mínimo (anti-zoom iOS).
 - Touch targets: altura ≥44px.
-- Cards densos viram 1-col encorpado com hierarquia vertical.
-- Modais viram bottom-sheet (slide from bottom) com handle de arrastar.
-- Tabelas: evitar. Se inevitável, scroll horizontal explícito.
+- Modais viram bottom-sheet (slide from bottom).
+- Tabelas: evitar; se inevitável, scroll horizontal explícito.
 - Pílula flutuante mobile (`.mnav-pill`): reservar `padding-bottom: 110px` no `.wrap`.
-- Toast: `bottom: 96px + safe-area` em mobile (não colidir com pílula).
+- Toast: `bottom: 96px + safe-area` mobile.
 - `overflow-x: hidden` de proteção.
 
 ### 7.2 Zero atrito
-Login simples (só seleciona usuário). Acesso instantâneo via PWA. Sem cadastro.
+Login simples (dropdown de user + senha quando definida). Acesso instantâneo via PWA. Sem cadastro externo.
 
 ### 7.3 Tempo real
 Firebase sincroniza ao vivo via `onValue`. Sem "salvar e atualizar".
@@ -216,153 +271,178 @@ Firebase sincroniza ao vivo via `onValue`. Sem "salvar e atualizar".
 Dados nunca se perdem. Operações reversíveis quando possível. **Nunca rodar migração destrutiva sem aprovação explícita.**
 
 ### 7.5 Discreto e coeso
-UI minimalista, sem ruído visual. **Zero emoji.** Todo módulo segue `FIOBRAS_BASE.md` — parece um produto único, não 5 ferramentas separadas.
+UI minimalista, sem ruído visual. **Zero emoji.** Todo módulo segue o mesmo design system (sage clarinho/Apple dark, Outfit/Poppins/DM Mono, ícones line stroke 1.5 round).
 
 ### 7.6 Mockup-first pra mudanças estruturais
-Mudanças que envolvem layout, hierarquia visual, navegação ou nova feature visível **começam com mockup** (desktop + mobile lado a lado), com opções e trade-offs, antes de tocar em código. Exceções que vão direto: bug fix isolado, ajuste pequeno de padding/margem, ícone trocado, label corrigido, campo num form existente, lógica de cálculo.
+Mudanças que envolvem layout, hierarquia visual, navegação ou nova feature visível **começam com mockup** (desktop + mobile lado a lado). Exceções diretas: bug fix isolado, ajuste de padding, ícone trocado, label corrigido, lógica.
 
 ### 7.7 Phase-by-phase validation
-Uma mudança por vez. Não bundlar várias coisas no mesmo turn sem aprovação explícita. Bundlar é OK só quando: (a) triviais e fortemente relacionadas, (b) cleanup óbvio que é dependência, (c) usuário pediu explicitamente "faz tudo de uma vez".
+Uma mudança por vez. Bundlar é OK quando: (a) triviais e fortemente relacionadas, (b) cleanup óbvio dependência, (c) usuário pediu "faz tudo".
 
 ### 7.8 Fallbacks pra schema legado
-Toda mudança de schema inclui fallback. Migração natural (carregar via fallback ao editar, gravar com schema novo ao salvar).
+Toda mudança de schema inclui fallback. Migração natural via leitura tolerante. Backfills automáticos com flag em localStorage pra rodar uma vez só.
 
 ### 7.9 Segurança de credenciais
-Nunca hardcodear senhas/tokens/API keys. Senhas em `config/{nome}` no Firebase. Tokens externos idealmente em Cloud Functions (não no client).
+Nunca hardcodar senhas/tokens/API keys do CLIENT. Senhas de user vão como SHA-256 + salt em `users-profile/{user}/senhaHash`. Rules do Firebase exigem `auth != null` (Anonymous Auth resolve transparente).
 
 ### 7.10 Comunicação direta
-Português brasileiro casual. William usa voz-pra-texto — interpretar pelo contexto. Sem floreio. Resposta começa com ação/resultado. Explicar **porquê** quando decisão técnica é tomada (decisões silenciosas viram bugs futuros).
+Português brasileiro casual. William usa voz-pra-texto — interpretar pelo contexto. Sem floreio. Resposta começa com ação/resultado. Explicar **porquê** quando decisão técnica é tomada.
 
 ---
 
 ## 8. Workflow de entrega
 
 ### 8.1 Checklist pra cada nova feature
-
 1. **Entender o intent.** Perguntar se ambíguo. Não inventar.
-2. **Mockup primeiro** se estrutural (§7.6). Desktop **E** mobile.
-3. **Aprovação do mockup** antes de tocar no `index.html`.
-4. **Identificar versão correta** (patch ou minor) e bumpar nos **4 lugares**.
-5. **Implementar phase-by-phase**, validando cada etapa.
-6. **Schema novo?** Adicionar fallback pra dados legados.
+2. **Mockup primeiro** se estrutural (§7.6).
+3. **Aprovação** antes de tocar código.
+4. **Identificar versão** (patch ou minor) e bumpar nos **4 lugares**.
+5. **Implementar phase-by-phase**, validando.
+6. **Schema novo?** Adicionar fallback.
 7. **Path Firebase novo?** Documentar aqui no CLAUDE.md (§4).
-8. **Permissão por role?** Produção vê cadeado (não esconder).
-9. **Mobile-first:** testar em 320-480px. Modal vira bottom-sheet? Inputs ≥16px? Conteúdo não fica atrás da pílula flutuante?
-10. **Desktop:** layout respira em >1024px? Sidebar e topbar seguem funcionando?
-11. **Validar:** sintaxe JS + tags balanceadas + linhas.
-12. **Salvar em outputs**, `present_files`.
-13. **Resumo curto** do que mudou + por quê.
-14. **Atualizar CLAUDE.md** se trouxe novo path, módulo, role ou regra.
+8. **Mobile-first:** testar em 320-480px.
+9. **Validar:** sintaxe JS + tags balanceadas + linhas.
+10. **Commit + push pro main** (ver §8.5).
+11. **Resumo curto** do que mudou.
+12. **Atualizar CLAUDE.md** quando trouxer novo path/módulo/role/regra.
 
 ### 8.2 Versionamento estrito
-
 **Toda alteração no `index.html` bumpa a versão. Sem exceção.**
 
 - **MAJOR** (`X.x.x`) — refatoração grande, mudança de paradigma (raro).
-- **MINOR** (`x.X.x`) — nova feature, novo módulo, mudança visível significativa.
-- **PATCH** (`x.x.X`) — bug fix, ajuste pequeno, refinamento.
+- **MINOR** (`x.X.x`) — nova feature, novo módulo, mudança visível.
+- **PATCH** (`x.x.X`) — bug fix, ajuste, refinamento.
 
-**Os 4 lugares pra atualizar sempre:**
+**Os 4 lugares pra bumpar sempre:**
 1. **Comment block** box-drawing no topo do `index.html`.
-2. **Constante `CURRENT_VERSION`** no JS (usada pela Central de Atualizações).
-3. **Pílula no header** (`<div class="hdr-pill">vX.X.X</div>` — hoje dentro do topbar/dropdown).
-4. **Array `CHANGELOG`** — adicionar entry no topo, mover flag `current:true` pra entry nova.
+2. **Constante `CURRENT_VERSION`** no JS.
+3. **Pílula `.hdr-pill`** no header (`vX.X.X`).
+4. **Array `CHANGELOG`** — entry no topo + mover `current:true` pra entry nova.
+
+**Cache-buster CSS:** ao bumpar o CSS, atualizar também o `?v=X.X.X` no `<link rel="stylesheet" href="css/hub.css?v=...">` pra forçar reload.
+
+**Cache-buster sub-apps (iframe):** já é automático — o `iframe.src = 'preco/?v=' + CURRENT_VERSION` no `loadSubApp()`.
 
 ### 8.3 Validação após cada edição
-
 Trio obrigatório:
 ```bash
 # 1. Sintaxe JS (extrair scripts inline e rodar node --check)
-python3 -c "import re; ... extrair" && node --check /tmp/extracted.js
-# 2. Tags HTML balanceadas (div, button, span, nav, style)
+python -c "import re; ..." && node --check _t.js
+# 2. Tags HTML balanceadas (div, button, span)
 # 3. Total de linhas (sanity check)
 wc -l index.html
 ```
 Pega 95% dos erros antes de chegar no usuário.
 
-### 8.4 Salvar e apresentar
+### 8.4 Testes pré-deploy
+- Hard refresh (`Ctrl+Shift+R`) pra forçar reload.
+- Aba anônima: testa fluxo de login do zero.
+- Console (F12): zero erro `permission_denied` (rules) e zero `ReferenceError`.
 
-1. `cp index.html /mnt/user-data/outputs/index.html` (ou equivalente no ambiente).
-2. `present_files` com o output.
-3. Resumo curto (sem repetir code todo).
+### 8.5 Deploy / Git workflow
+**William autorizou commits e pushes diretos pro `main` sem pedir aprovação a cada ação.** Worktree usa branch `claude/kind-kapitsa` que tracks origin/main; push via:
+```bash
+git push origin HEAD:main
+```
 
-### 8.5 Deploy
+**Operações destrutivas que ainda exigem confirmação explícita:**
+- `git reset --hard`
+- `git push --force` / `--force-with-lease`
+- `git clean -f`, `git restore .`, `git checkout -- .`
+- Deletar branches
+- Qualquer coisa que possa perder trabalho não commitado
 
-Deploy é feito pelo **Fiobras Deployer** (ferramenta externa). Claude **não faz push** nem interage com Git sem pedido explícito.
+GitHub Pages rebuilda automaticamente em 1-2 min após push.
 
 ---
 
 ## 9. Padrões técnicos
 
 ### 9.1 Timezone e datas
-- **Timezone:** America/Sao_Paulo (UTC-3). Toda data exibida é local do Brasil.
-- **Ao salvar datas em memória:** ISO local string ou timestamp UTC consistente. Nunca misturar.
-- **Ao converter relativas em absolutas (memória/contexto):** sempre converter "quinta" → data absoluta no momento da conversa.
+- **Timezone:** America/Sao_Paulo (UTC-3).
+- **Salvar em memória:** ISO local string ou timestamp UTC consistente. Nunca misturar.
+- **Datas relativas em contexto:** sempre converter "quinta" → data absoluta ao gravar.
 
-### 9.2 Escopo do JS
-- Dois blocos `<script>`: normal e `type="module"`.
-- **Símbolos `const`/`let` dentro do module NÃO vazam pro script normal.** `db`, `ref`, `onValue`, `update`, `set` são const de módulo.
-- **Padrão de ponte:** módulo expõe funções via `window._salvarXxxFirebase`, `window._xxxData`. Script normal chama `window._salvarTlFirebase(...)` etc.
-- **Lição v2.6.1:** pôr subscription Firebase no script normal quebra todo o boot com `ReferenceError`. Sempre no bloco module.
+### 9.2 Escopo do JS (dois `<script>`)
+- **Símbolos `const`/`let` dentro do module NÃO vazam pro script normal.** `db`, `ref`, `onValue`, `update`, `set`, `getAuth` são const de módulo.
+- **Padrão de ponte:** módulo expõe via `window._salvarXxxFirebase` / `window._xxxData`. Script normal chama via `window.`.
+- **Lição v2.6.1:** subscription Firebase no script normal quebra boot com `ReferenceError`. Sempre no bloco module.
 
 ### 9.3 Babel-safe / browser-native
-- **Sem transpilação.** Todo JS tem que rodar nativo em browsers modernos (Chromium recente, Safari iOS 15+, Firefox recente).
-- **OK usar:** arrow functions, async/await, optional chaining (`?.`), nullish coalescing (`??`), template literals, destructuring, spread/rest, `for...of`, modules ES nativo.
-- **Evitar:** decorators, private class fields (`#foo`) se duvidoso, top-level await, features stage < 4.
-- **CSS:** `color-mix()` ok (fallback quando crítico), `:has()` ok, custom properties, container queries ok.
+- **Sem transpilação.** JS roda nativo em browsers modernos (Chromium, Safari iOS 15+, Firefox).
+- **OK usar:** arrow functions, async/await, optional chaining (`?.`), nullish coalescing (`??`), template literals, destructuring, spread, modules ES nativo.
+- **Evitar:** decorators, top-level await, features stage < 4.
+- **CSS:** `color-mix()` ok, `:has()` ok, custom properties, container queries ok.
 
 ### 9.4 Permissões
-- **Checar permissão ANTES de renderizar ações destrutivas.** Botão de excluir não existe pra produção.
-- **Toda exclusão é gated por role** — checar `USERS[currentUser].role === 'admin'` (ou equivalente).
-- **Permissão granular por aba:** `canAccessTab(tab)` consulta `TAB_PERMS[tab]`. Abas não listadas herdam do módulo.
+- `getEffectiveRole(userKey)` / `getEffectiveTurno(userKey)` / `getEffectiveModules(userKey)` retornam o efetivo (override do profile > USERS hardcoded > default por role).
+- **Admin/gerente sempre veem todos os módulos** (ALL_MODULES) — overrides são ignorados pra eles.
+- `canAccessModule(mod)` checa user logado contra `getEffectiveModules`.
+- `canAccessTab(tab)` consulta `TAB_PERMS[tab]` (hoje vazio) + override do profile + admin tem bypass.
+- **Toda exclusão/operação destrutiva é gated por role.** Botão de excluir não existe pra produção. Painel admin checa `window._userRole === 'admin'` em cada handler sensível.
 
 ### 9.5 Fotos e assets
 - **Compressão no client** antes de gravar em Firebase.
-- **Timeline (v2.7.0):** 1200px máx, JPEG qualidade 0.82 (~210KB/foto). Até 4 fotos por registro, cada uma com legenda. Schema: `fotos: [{data, desc}]`. Fallback pra `foto` legacy único.
+- **Timeline:** 1200px máx, JPEG 0.82 (~210KB/foto). Até 4 fotos por registro com legenda. Schema `fotos:[{data,desc}]`.
+- **Avatar (Minha Conta):** crop quadrado 400px, JPEG 0.82.
 
 ### 9.6 Ícones e tipografia
-- **Ícones: SVG inline sempre.** Zero emoji, zero CDN.
-- **Tipografia:** Outfit (display), Poppins (UI), DM Mono (números/IDs). Labels em **sentence case** (não all-caps).
+- **Ícones: SVG `<symbol>` no defs global, usar via `<svg class="icon"><use href="#i-..."/></svg>`.** Stroke 1.5 round, fill none, currentColor.
+- **Tipografia:**
+  - Outfit (display, weights 300-900) — Outfit Black 900 em hero/KPI/brand/dropdown name.
+  - Poppins (UI, body, tags).
+  - DM Mono (números, IDs, eyebrows uppercase, audit log timestamps).
+- Labels em **sentence case**, eyebrows em DM Mono UPPERCASE.
 
 ### 9.7 Tema (light/dark)
-- Tokens CSS: `--bg`, `--bg-deep` (v2.8.0+), `--surface`, `--surface2`, `--border`, `--border2`, `--text`, `--muted`, `--muted2`.
-- **Light:** sage clarinho bg + cards brancos puros (v2.3.0+).
-- **Dark:** Apple style — camadas de cinza `#1C1C1E` / `#2C2C2E` / `#3A3A3C`, nunca preto puro.
+Tokens CSS em `:root` e `[data-theme="dark"]`:
+- `--bg`, `--bg-deep`, `--surface`, `--surface2`, `--border`, `--border2`, `--text`, `--muted`, `--muted2`.
+- 8 pares de tokens de tag (`--tag-success-bg/fg`, etc.).
+- **Light:** sage clarinho `#EDF1EA` + brancos puros.
+- **Dark:** Apple style — `#1C1C1E` / `#2C2C2E` / `#3A3A3C`, nunca preto puro.
+
+### 9.8 Sub-apps (iframes)
+- 3 sistemas (`preco/`, `crm/`, `manutencao/`) vivem como pastas separadas, embutidos via iframe.
+- **Iframe altura fixa** (v3.21.4): `.subapp-frame-wrap`, `.subapp-frame` e o `.panel#panel-{mod}.active` têm `height:calc(100vh - 80px)` (110px mobile) com `overflow:hidden` no wrap. Garante scroll só dentro do iframe — caso contrário, position:fixed das tabs internas falha.
+- **Sticky → fixed**: tabs internas dos sub-apps são movidas pro `<body>` via JS no bootstrap + `position:fixed;top:0` inline.
+- **Cache-buster** automático via `?v=CURRENT_VERSION` no `iframe.src`.
+- Cada sub-app tem override CSS no topo do body (esconde header/login/splash internos, aplica tokens do HUB, ajusta tabs).
+- Cada sub-app faz `signInAnonymously` no boot.
 
 ---
 
 ## 10. Coisas que NÃO devem acontecer
 
-- ❌ **Deploy desktop-only.** Se mobile 320-480px não foi testado/adaptado, não é pronto.
-- ❌ **Bumpar versão em um só lugar.** Sempre os 4 lugares (comment block, `CURRENT_VERSION`, pílula, `CHANGELOG`).
-- ❌ **Esquecer de bumpar versão** quando edita `index.html`.
+- ❌ **Deploy desktop-only.** Mobile 320-480px sempre testado.
+- ❌ **Bumpar versão em um só lugar.** Sempre os 4 (comment block, `CURRENT_VERSION`, `.hdr-pill`, `CHANGELOG`).
+- ❌ **Esquecer cache-buster CSS** ao mexer no `hub.css`.
 - ❌ **Emoji na UI.** Zero.
-- ❌ **Framework/build step.** Nada de React/Vue/Tailwind compilado/webpack. Vanilla JS num único HTML.
-- ❌ **Hardcodar senhas/tokens/API keys** no `index.html`.
-- ❌ **Migração destrutiva sem aprovação explícita.**
+- ❌ **Framework/build step.** Vanilla JS num único HTML.
+- ❌ **Hardcodar senhas/tokens/API keys** no client.
+- ❌ **Migração destrutiva sem aprovação explícita.** Backfills sempre com flag em localStorage pra rodar uma vez.
 - ❌ **Mudança de schema sem fallback** pra dados legados.
 - ❌ **Gravar Firebase a partir do script normal.** Sempre pelo bloco module.
 - ❌ **Inputs com `font-size < 16px` em mobile** (iOS dá zoom).
 - ❌ **Esconder módulos sem permissão.** Mostrar com cadeado SVG + toast.
-- ❌ **Esconder abas com cadeado** — abas sem permissão ficam `display:none` (diferente de módulos). Cadeado em sub-aba polui visualmente.
-- ❌ **Tap-to-detail em listas com ações frequentes.** Aprendido na v2.6.1 — Desenv. Cor precisa das ações inline no card. Tap-to-detail só pra **listas de leitura** (Timeline, históricos).
-- ❌ **Bundlar múltiplas mudanças** num turn sem pedido explícito do William.
+- ❌ **Tap-to-detail em listas com ações frequentes.** Aprendido na v2.6.1.
+- ❌ **Bundlar múltiplas mudanças** num turn sem pedido explícito.
 - ❌ **Mockup só desktop** pra mudança estrutural.
-- ❌ **Implementar feature estrutural** sem aprovação do mockup.
-- ❌ **Floreio na resposta.** Sem "Ótima ideia!". Começa com ação/resultado.
-- ❌ **Fazer push pro GitHub ou rodar destrutivo (git reset --hard, force push, rm -rf)** sem pedido explícito.
-- ❌ **Criar arquivos `.md` de planejamento/análise** sem o William pedir. Trabalhar do contexto da conversa.
-- ❌ **Modificar `FIOBRAS_BASE.md`** a partir deste projeto — ele é fonte universal, vive em outro lugar.
+- ❌ **Floreio na resposta.** Sem "Ótima ideia!".
+- ❌ **`git reset --hard`, `--force`, `rm -rf`** sem pedido explícito.
+- ❌ **Criar arquivos `.md` de planejamento/análise** sem o William pedir.
+- ❌ **Modificar `FIOBRAS_BASE.md`** a partir deste projeto — vive em outro lugar.
+- ❌ **Mexer em `firebase-rules.json` sem testar via aba anônima** depois de aplicar.
+- ❌ **Adicionar Firebase Auth com email/senha.** William escolheu manter login custom user+senha; Anonymous Auth resolve as rules sem mudar UX.
 
 ---
 
 ## 11. Notas finais
 
-- **Este documento é vivo.** Atualizar quando paths Firebase mudarem, módulos forem adicionados, roles forem redefinidas, regras forem estabelecidas.
-- **Em caso de conflito entre este `CLAUDE.md` e `FIOBRAS_BASE.md`:** BASE vence em design system universal; este vence em decisões específicas do HUB.
-- **Em caso de conflito entre este doc e instruções verbais do William:** as instruções verbais vencem, e este doc deve ser atualizado pra refletir a nova regra.
-- **A regra §7.1 (mobile-first obrigatório)** é a mais importante. Foi estabelecida na v2.5.0 porque o HUB até então era "desktop-first com remendos mobile". Não deixe isso voltar a acontecer.
+- **Documento vivo.** Atualizar quando paths Firebase mudarem, módulos forem adicionados, roles redefinidas, regras estabelecidas. Última grande revisão: 16/04/2026 (v2.0 do doc, refletindo HUB v3.21.4).
+- **Em conflito entre este `CLAUDE.md` e instruções verbais:** as instruções vencem; doc é atualizado.
+- **Memória persistente** do William em `C:/Users/willi/.claude/projects/.../memory/MEMORY.md` — autoriza commits/pushes diretos em main.
+- **Regra §7.1 (mobile-first obrigatório)** é a mais importante. Estabelecida na v2.5.0.
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v1.0 · 15/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.0 · 16/04/2026*
