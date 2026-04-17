@@ -60,6 +60,15 @@ Cada sub-app:
 - HTTPS via Let's Encrypt (Enforce HTTPS ativo).
 - Deploy via **commit/push direto pro main** (William autorizou; ver §8.5).
 
+### Backup automático (v3.21.17)
+- **Workflow GitHub Actions** roda 2x/dia (03h e 15h BRT).
+- Path: `.github/workflows/backup-firebase.yml` + `.github/scripts/backup.js`.
+- Usa service account do Firebase (secret `FIREBASE_SERVICE_ACCOUNT`).
+- Salva o JSON inteiro do RTDB comprimido com gzip como **artifact privado** (90 dias retenção).
+- Botão manual disponível em Actions → "Backup Firebase RTDB" → Run workflow.
+- Setup completo documentado em `.github/BACKUP_SETUP.md`.
+- Custo: zero (GitHub Actions free tier sobra 60x).
+
 ### PWA
 - Instalável em iOS, Android, Windows.
 - Manifest gerado em runtime via JS blob.

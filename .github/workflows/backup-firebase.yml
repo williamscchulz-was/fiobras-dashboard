@@ -1,0 +1,45 @@
+name: Backup Firebase RTDB
+
+# Roda 2x por dia + manualmente quando precisar.
+# Horários: 06:00 e 18:00 UTC = 03:00 e 15:00 BRT.
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 03h BRT
+    - cron: '0 18 * * *'  # 15h BRT
+  workflow_dispatch:       # botão "Run workflow" no GitHub Actions
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install firebase-admin
+        run: npm install firebase-admin@12
+
+      - name: Run backup
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_DB_URL: https://fiobras-hub-default-rtdb.firebaseio.com
+        run: node .github/scripts/backup.js
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fiobras-hub-backup-${{ github.run_id }}
+          path: backup-*.json.gz
+          retention-days: 90    # mantém 90 dias (limite máx pra free GH Actions)
+          if-no-files-found: error
+
+      - name: Resumo
+        if: always()
+        run: |
+          echo "## Backup status" >> $GITHUB_STEP_SUMMARY
+          ls -la backup-*.json.gz 2>/dev/null | awk '{print "- "$NF" ("$5" bytes)"}' >> $GITHUB_STEP_SUMMARY || echo "- Nenhum arquivo gerado" >> $GITHUB_STEP_SUMMARY
