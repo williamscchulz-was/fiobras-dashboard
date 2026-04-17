@@ -333,11 +333,17 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 .ep-representante{background:#d6efe7;color:#0a5a4a;}
 
 /* ═══ CARD CLEAN v3.21.8 ═══ */
-.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px;transition:box-shadow .18s,border-color .18s,transform .12s;position:relative;cursor:grab;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px;transition:box-shadow .18s,border-color .18s;position:relative;cursor:pointer;overflow:hidden;}
+.card[draggable="true"]{cursor:grab;}
+.card[draggable="true"]:active{cursor:grabbing;}
 .card:hover{box-shadow:0 2px 14px rgba(0,100,40,0.10);border-color:var(--green);}
 .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--lane,var(--green));}
-.card.drag-active{opacity:.55;transform:scale(0.97);box-shadow:0 12px 32px rgba(0,0,0,.18);cursor:grabbing;border-color:var(--green);z-index:10;}
+.card.drag-active{opacity:.4;border-color:var(--green);}
 .col-cards.drag-over{background:rgba(0,136,53,0.08);border-radius:10px;outline:2px dashed var(--green);outline-offset:-4px;}
+
+/* tempo na etapa — discreto ao lado da empresa */
+.card-age{font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;color:var(--muted2);letter-spacing:.02em;white-space:nowrap;}
+.card-age.old{color:var(--red);font-weight:600;}
 
 /* lane colors via CSS var */
 .col-novo .col-cards .card{--lane:var(--blue);}
@@ -1488,25 +1494,27 @@ function renderPipeline(){
       const proxLbl=prox?ELBL[prox]:'';
       const isFinal=curEtapa==='fechado'||curEtapa==='perdido';
       const dEtapa=diasNaEtapa(l);
-      const alerta=dEtapa>=ALERTA_DIAS;
-      const tempoLbl=dEtapa>0?`${dEtapa}d na etapa`:'hoje';
+      const alerta=dEtapa>=ALERTA_DIAS_CARD;
       const initials=(l.nome||'?').trim().split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';
       const tel=(l.tel||'').replace(/\D/g,'');
       const telFmt=esc(l.tel||'');
       const wa=tel?(tel.startsWith('55')?tel:'55'+tel):'';
       const mail=esc(l.email||'');
-      html+=`<div class="card" data-id="${id}">
+      /* "4d" discreto ao lado da empresa (ou sozinho se não há empresa) */
+      const ageHtml=(!isFinal && dEtapa>0)?`<span class="card-age${alerta?' old':''}" title="${dEtapa} dias nesta etapa">· ${dEtapa}d</span>`:'';
+      const empresaLine=l.empresa?`${esc(l.empresa)} ${ageHtml}`:ageHtml;
+      const dragAttr=IS_TOUCH_DEVICE?'':' draggable="true"';
+      html+=`<div class="card" data-id="${id}"${dragAttr}>
         <div class="card-head">
           <div class="card-logo">${esc(initials)}</div>
           <div class="card-id">
             <div class="card-name">${esc(l.nome)}</div>
-            ${l.empresa?`<div class="card-empresa-line">${esc(l.empresa)}</div>`:''}
+            ${empresaLine?`<div class="card-empresa-line">${empresaLine}</div>`:''}
           </div>
         </div>
         ${l.produto?`<span class="card-produto">${esc(l.produto)}</span>`:''}
         <div class="card-metaline">
           <span class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg> ${ds}</span>
-          ${!isFinal?`<span class="mi${alerta?' alerta':''}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> ${tempoLbl}</span>`:''}
         </div>
         ${followupBadge(l.followup)?`<div class="card-badges">${followupBadge(l.followup)}</div>`:''}
         <div class="card-foot">
@@ -1544,23 +1552,29 @@ function renderPipeline(){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   CRM — INTERAÇÃO DOS CARDS (v3.21.11 · reestruturação completa)
+   CRM — INTERAÇÃO DOS CARDS (v3.21.13 · simplificação radical)
    ═══════════════════════════════════════════════════════════════
-   Resumo dos comportamentos:
 
-   1. Tap rápido em qualquer área neutra do card → abre modal do lead
-   2. Long-press touch (280ms) ou click+drag mouse → ativa modo drag
-   3. Solta o drag sobre uma lane → move direto (popup só pra "Perdido")
-   4. Click no botão ✈ (paper plane) → abre popover de mover
-   5. Click numa etapa do popover → move direto + fecha popover
-   6. Click fora do popover → fecha
-   7. Click nos ícones de ação (📞 💬 📧) → ação direta (não dispara drag)
+   Estratégia: cada plataforma usa seu mecanismo NATIVO.
 
-   Implementação: event delegation no container #pipeline.
-   Estado global: _crmDrag (info do drag em andamento) + _crmPop (popover ativo).
+   Desktop (pointer:fine):
+     - draggable="true" HTML5 nativo no card
+     - dragstart / dragover / drop tratados via delegation
+     - Click normal no card → abre modal (HTML5 distingue sozinho)
+
+   Mobile (pointer:coarse):
+     - SEM drag. Tap no card abre modal. Botão ✈ é o único caminho
+       pra mover (abre popover com lista de etapas).
+
+   Outros comportamentos (os dois):
+     - Click em botão/link interno → ação direta (não abre modal)
+     - Click no ✈ → popover de mover
+     - Click numa etapa do popover → move direto
+     - Click fora do popover → fecha
 */
 
-let _crmDrag = null;
+const IS_TOUCH_DEVICE = window.matchMedia('(pointer:coarse)').matches;
+const ALERTA_DIAS_CARD = 7; // tempo na etapa que vira alerta (antes era 3)
 let _crmPopBtn = null; // botão que abriu o popover ativo
 
 /* ─── Ações de movimentação ─── */
@@ -1658,99 +1672,78 @@ function closeMovePopover(){
 window.showMovePopover = showMovePopover;
 window.closeMovePopover = closeMovePopover;
 
-/* ─── Drag & Drop via Pointer Events ─── */
+/* ─── Drag & Drop HTML5 nativo (desktop only) + Click pra abrir lead ─── */
 function initDragDrop(){
-  /* Tudo via event delegation no #pipeline (idempotente) */
+  /* Idempotente — delegation no #pipeline */
   if(window._crmInteractionInit) return;
   window._crmInteractionInit = true;
 
   const pipeline = document.getElementById('pipeline');
   if(!pipeline) return;
 
-  const LONG_PRESS = 280;
-  const MOVE_THRESHOLD = 6;
-
-  function activateDrag(){
-    if(!_crmDrag) return;
-    _crmDrag.active = true;
-    _crmDrag.card.classList.add('drag-active');
-    document.body.style.userSelect = 'none';
-    try { _crmDrag.card.setPointerCapture(_crmDrag.pid); } catch(_){}
-  }
-  function endDrag(commit){
-    if(!_crmDrag) return;
-    const d = _crmDrag; _crmDrag = null;
-    clearTimeout(d.timer);
-    d.card.classList.remove('drag-active');
-    d.card.style.transform = '';
-    document.body.style.userSelect = '';
-    document.querySelectorAll('.col-cards.drag-over').forEach(c => c.classList.remove('drag-over'));
-    if(commit && d.active && d.dropZone){
-      const etapa = d.dropZone.dataset.etapa;
-      const lead = (window._leads||{})[d.id];
-      const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
-      if(lead && mapE(lead.etapa) !== etapa){
-        if(etapa === 'perdido') abrirPerdido(d.id);
-        else moverDireto(d.id, etapa);
-      }
-    }
-  }
-
-  /* pointerdown via delegation */
-  pipeline.addEventListener('pointerdown', e => {
+  /* Click em área neutra do card → abre modal (desktop + mobile) */
+  pipeline.addEventListener('click', e => {
     const card = e.target.closest('.card');
     if(!card) return;
-    /* ignora cliques em elementos interativos — fluxo natural de click */
     if(e.target.closest('button, a, .next-pop')) return;
-    if(e.button !== 0 && e.pointerType === 'mouse') return;
-
-    const isMouse = e.pointerType === 'mouse';
-    _crmDrag = {
-      id: card.dataset.id, card,
-      startX: e.clientX, startY: e.clientY,
-      active: false, dropZone: null, timer: null,
-      pid: e.pointerId, isMouse, moved: false
-    };
-    /* Touch/pen: long-press 280ms (anti-scroll). Mouse: ativa no movimento. */
-    if(!isMouse){
-      _crmDrag.timer = setTimeout(activateDrag, LONG_PRESS);
-    }
+    abrirLead(card.dataset.id);
   });
 
-  document.addEventListener('pointermove', e => {
-    if(!_crmDrag) return;
-    const dx = e.clientX - _crmDrag.startX;
-    const dy = e.clientY - _crmDrag.startY;
-    const dist = Math.hypot(dx, dy);
+  /* Mobile não tem drag — só click + botão ✈. Sai aqui. */
+  if(IS_TOUCH_DEVICE) return;
 
-    if(!_crmDrag.active){
-      if(dist > MOVE_THRESHOLD){
-        if(_crmDrag.isMouse) activateDrag();
-        else { endDrag(false); return; } /* touch moveu antes = scroll natural */
-      } else return;
-    }
+  /* Desktop: HTML5 drag nativo via delegation */
+  let dragId = null;
 
-    e.preventDefault();
-    _crmDrag.moved = true;
-    _crmDrag.card.style.transform = `scale(0.97) translate(${dx}px, ${dy}px)`;
+  pipeline.addEventListener('dragstart', e => {
+    const card = e.target.closest('.card');
+    if(!card) return;
+    dragId = card.dataset.id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragId);
+    setTimeout(() => card.classList.add('drag-active'), 0);
+  });
 
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    const zone = el ? el.closest('.col-cards') : null;
+  pipeline.addEventListener('dragend', e => {
+    const card = e.target.closest('.card');
+    if(card) card.classList.remove('drag-active');
     document.querySelectorAll('.col-cards.drag-over').forEach(c => c.classList.remove('drag-over'));
-    if(zone){ zone.classList.add('drag-over'); _crmDrag.dropZone = zone; }
-    else { _crmDrag.dropZone = null; }
-  }, { passive: false });
-
-  document.addEventListener('pointerup', () => {
-    if(!_crmDrag) return;
-    const wasActive = _crmDrag.active;
-    const id = _crmDrag.id;
-    endDrag(true);
-    /* tap rápido sem drag = abre modal do lead */
-    if(!wasActive) abrirLead(id);
+    dragId = null;
   });
 
-  document.addEventListener('pointercancel', () => endDrag(false));
+  pipeline.addEventListener('dragover', e => {
+    const zone = e.target.closest('.col-cards');
+    if(!zone) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.col-cards.drag-over').forEach(c => {
+      if(c !== zone) c.classList.remove('drag-over');
+    });
+    zone.classList.add('drag-over');
+  });
+
+  pipeline.addEventListener('dragleave', e => {
+    const zone = e.target.closest('.col-cards');
+    if(!zone) return;
+    if(!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+  });
+
+  pipeline.addEventListener('drop', e => {
+    const zone = e.target.closest('.col-cards');
+    if(!zone) return;
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const id = e.dataTransfer.getData('text/plain') || dragId;
+    if(!id) return;
+    const etapa = zone.dataset.etapa;
+    const lead = (window._leads||{})[id];
+    const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
+    if(lead && mapE(lead.etapa) !== etapa){
+      if(etapa === 'perdido') abrirPerdido(id);
+      else moverDireto(id, etapa);
+    }
+    dragId = null;
+  });
 }
 
 /* ═══ LISTA ═══ */
