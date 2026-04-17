@@ -321,12 +321,14 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 .col-cards{padding:8px;min-height:60px;display:flex;flex-direction:column;gap:8px;}
 .empty-col{text-align:center;padding:32px 12px;font-size:0.72rem;color:var(--gray3);}
 
-.col-novo     .col-name{color:#0b4a7a;}.col-novo     .col-bar{background:var(--blue);}
-.col-retorno  .col-name{color:#6b4a00;}.col-retorno  .col-bar{background:var(--yellow);}
-.col-proposta .col-name{color:var(--orange);}.col-proposta .col-bar{background:var(--orange);}
-.col-negoc    .col-name{color:#4a1f80;}.col-negoc    .col-bar{background:var(--purple);}
-.col-fechado  .col-name{color:#0a4a20;}.col-fechado  .col-bar{background:var(--green);}
-.col-perdido  .col-name{color:var(--muted);}.col-perdido .col-bar{background:var(--gray3);}
+.col-novo .col-name{color:#0b4a7a;} .col-novo .col-bar{background:var(--blue);}
+.col-retorno .col-name{color:#6b4a00;} .col-retorno .col-bar{background:var(--yellow);}
+.col-proposta .col-name{color:var(--orange);} .col-proposta .col-bar{background:var(--orange);}
+.col-representante .col-name{color:#0a5a4a;} .col-representante .col-bar{background:#0d8a6c;}
+.col-negoc .col-name{color:#4a1f80;} .col-negoc .col-bar{background:var(--purple);}
+.col-fechado .col-name{color:#0a4a20;} .col-fechado .col-bar{background:var(--green);}
+.col-perdido .col-name{color:var(--muted);} .col-perdido .col-bar{background:var(--gray3);}
+.ep-representante{background:#d6efe7;color:#0a5a4a;}
 
 /* CARD ACTION BUTTONS */
 .card-actions{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--gray2);}
@@ -846,6 +848,7 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
     <button class="psnav active" data-etapa="novo"       onclick="setPipelineEtapa('novo',this)">Novo Lead</button>
     <button class="psnav"        data-etapa="retorno"    onclick="setPipelineEtapa('retorno',this)">Retorno</button>
     <button class="psnav"        data-etapa="proposta"   onclick="setPipelineEtapa('proposta',this)">Proposta</button>
+    <button class="psnav"        data-etapa="representante" onclick="setPipelineEtapa('representante',this)">Representante</button>
     <button class="psnav"        data-etapa="negociacao" onclick="setPipelineEtapa('negociacao',this)">Negociação</button>
     <button class="psnav"        data-etapa="fechado"    onclick="setPipelineEtapa('fechado',this)">Fechados</button>
     <button class="psnav"        data-etapa="perdido"    onclick="setPipelineEtapa('perdido',this)">Perdidos</button>
@@ -865,6 +868,7 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
         <option value="novo">Novo Lead</option>
         <option value="retorno">Retorno Feito</option>
         <option value="proposta">Proposta Enviada</option>
+        <option value="representante">Encam. p/ Representante</option>
         <option value="negociacao">Negociação</option>
         <option value="fechado">Fechado</option>
         <option value="perdido">Perdido</option>
@@ -1239,18 +1243,20 @@ onValue(ur,s=>{
 let _id=null,_qual='frio',_etapa='novo';
 let _importData=[];
 
+// v3.21.6: nova etapa "Encaminhado p/ representante" entre proposta e negociacao
 const ETAPAS_PIPELINE=[
-  {key:'novo',      label:'Novo Lead'},
-  {key:'retorno',   label:'Retorno Feito'},
-  {key:'proposta',  label:'Proposta Enviada'},
-  {key:'negociacao',label:'Negociação'},
-  {key:'fechado',   label:'Fechado'},
+  {key:'novo',         label:'Novo Lead'},
+  {key:'retorno',      label:'Retorno Feito'},
+  {key:'proposta',     label:'Proposta Enviada'},
+  {key:'representante',label:'Encam. p/ Representante'},
+  {key:'negociacao',   label:'Negociação'},
+  {key:'fechado',      label:'Fechado'},
 ];
 const ETAPAS=[...ETAPAS_PIPELINE,{key:'perdido',label:'Perdido'}];
-const PROX_ETAPA={novo:'retorno',retorno:'proposta',proposta:'negociacao',negociacao:'fechado'};
-const ECLS={novo:'ep-novo',retorno:'ep-retorno',proposta:'ep-proposta',negociacao:'ep-negoc',fechado:'ep-fechado',perdido:'ep-perdido',contato:'ep-novo',ganho:'ep-fechado'};
-const ELBL={novo:'Novo Lead',retorno:'Retorno Feito',proposta:'Proposta Enviada',negociacao:'Negociação',fechado:'Fechado',perdido:'Perdido',contato:'Novo Lead',ganho:'Fechado'};
-const CCLS={novo:'col-novo',retorno:'col-retorno',proposta:'col-proposta',negociacao:'col-negoc',fechado:'col-fechado',perdido:'col-perdido',contato:'col-novo',ganho:'col-fechado'};
+const PROX_ETAPA={novo:'retorno',retorno:'proposta',proposta:'representante',representante:'negociacao',negociacao:'fechado'};
+const ECLS={novo:'ep-novo',retorno:'ep-retorno',proposta:'ep-proposta',representante:'ep-representante',negociacao:'ep-negoc',fechado:'ep-fechado',perdido:'ep-perdido',contato:'ep-novo',ganho:'ep-fechado'};
+const ELBL={novo:'Novo Lead',retorno:'Retorno Feito',proposta:'Proposta Enviada',representante:'Encam. p/ Representante',negociacao:'Negociação',fechado:'Fechado',perdido:'Perdido',contato:'Novo Lead',ganho:'Fechado'};
+const CCLS={novo:'col-novo',retorno:'col-retorno',proposta:'col-proposta',representante:'col-representante',negociacao:'col-negoc',fechado:'col-fechado',perdido:'col-perdido',contato:'col-novo',ganho:'col-fechado'};
 const MOTIVOS_PERDIDO=['Sem retorno após tentativas','Cliente escolheu concorrente','Preço fora do orçamento','Projeto cancelado pelo cliente','Produto não atende necessidade','Prazo incompatível'];
 const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
@@ -1737,11 +1743,14 @@ function addHist(){
   const txt=document.getElementById('histInput').value.trim();
   if(!_id){toast('Salve o lead primeiro.');return;}
   const l=(window._leads||{})[_id];
+  if(!l){toast('Lead não encontrado.','err');return;}
   const entrada={ts:Date.now(),tipo:_hTipo,retorno:_hRet,texto:txt};
   const hist=[...(l.historico||[]),entrada];
   window._update(_id,{historico:hist});
+  // v3.21.6: atualiza estado local + re-renderiza imediatamente (sem esperar Firebase)
+  l.historico=hist;
+  renderHist(hist);
   document.getElementById('histInput').value='';
-  // reset retorno para aguardando
   setHRet('aguardando');
   toast('Interação registrada.','ok');
 }
@@ -2569,7 +2578,7 @@ window.migrarParaCliente=migrarParaCliente;
 function exportarLeads(){
   const leads=Object.values(window._leads||{});
   if(!leads.length){toast('Nenhum lead para exportar');return;}
-  const ETAPA_LBL={novo:'Novo Lead',retorno:'Retorno Feito',proposta:'Proposta Enviada',negociacao:'Negociação',fechado:'Fechado',perdido:'Perdido',frio:'Banco de leads',contato:'Novo Lead',ganho:'Fechado'};
+  const ETAPA_LBL={novo:'Novo Lead',retorno:'Retorno Feito',proposta:'Proposta Enviada',representante:'Encam. p/ Representante',negociacao:'Negociação',fechado:'Fechado',perdido:'Perdido',frio:'Banco de leads',contato:'Novo Lead',ganho:'Fechado'};
   const sorted=[...leads].sort((a,b)=>(b.data||0)-(a.data||0));
 
   /* CSV com BOM para Excel reconhecer UTF-8 */

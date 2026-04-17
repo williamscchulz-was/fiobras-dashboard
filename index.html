@@ -3,6 +3,10 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.21.6 16/04/2026  Fix CRM hist + nova etapa + Preço gate   ║
+  ║    • CRM addHist: re-render imediato pós-salvar.             ║
+  ║    • Pipeline: nova etapa "Encam. p/ Representante".          ║
+  ║    • Preço: gate de sessão deixa qualquer user logado.       ║
   ║  v3.21.5 16/04/2026  Admin vê senhas + abre módulo liberado   ║
   ║    • Painel admin: senha plain revelável + definir senha.    ║
   ║    • Login abre no primeiro módulo liberado do user.         ║
@@ -635,7 +639,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.5</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.6</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2443,10 +2447,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.5';
+const CURRENT_VERSION = '3.21.6';
 const CHANGELOG = [
   {
-    v:'3.21.5', d:'16 abr 2026', current:true,
+    v:'3.21.6', d:'16 abr 2026', current:true,
+    items:[
+      {type:'high', title:'CRM: histórico de atividades não renderizava após salvar.', desc:'O addHist gravava no Firebase corretamente, mas não chamava renderHist após — então o user via o textarea limpar mas a interação não aparecia na lista. Aí parecia que tinha sumido / não salvou. Corrigido: addHist agora atualiza state local + re-renderiza imediato (sem esperar Firebase ecoar). Próxima abertura do lead já mostra o histórico atualizado.'},
+      {type:'feat', title:'Nova etapa do pipeline: "Encam. p/ Representante".', desc:'Adicionada entre Proposta Enviada e Negociação. Cor da coluna: verde água (#0d8a6c). Aparece no kanban (desktop + mobile), no select de etapa do form de novo lead, no badge interno do card e no export CSV. PROX_ETAPA atualizado: proposta → representante → negociacao → fechado.'},
+      {type:'high', title:'Preço de Venda: gate hardcoded admin-only.', desc:'O hubIntegration do /preco/index.html tinha if(sess.user !== "admin") que bloqueava qualquer user não-admin (incluindo Jacques que tinha permissão configurada no painel HUB). Corrigido — agora o gate só verifica se há sessão válida; quem chega no /preco/ já passou pelo canAccessModule do HUB que faz o controle granular.'}
+    ]
+  },
+  {
+    v:'3.21.5', d:'16 abr 2026',
     items:[
       {type:'feat', title:'Painel admin: ver senha dos usuários + definir.', desc:'Cada linha da lista Gerenciar Usuários agora tem um botão de cadeado pra "Definir senha" (admin escolhe nova diretamente, sem precisar resetar e esperar o user fazer no próximo login). Quando user (ou admin via essa ação) define a senha, salva também em users-profile/{user}/senhaPlain além do hash. Aparece um chip da senha escondido por default + botão de olho ao lado do status — clica e revela. Útil pra recuperar senha esquecida sem ter que zerar e esperar. Audit log registra a ação. Reset apaga tanto hash quanto plain.'},
       {type:'high', title:'Login abre no primeiro módulo liberado.', desc:'Antes admin/gerente caíam em Gerencial e produção em Produção — mas se um user tivesse permissões customizadas (ex: só CRM), entrava na tela bloqueada do módulo padrão. Agora setupTabs consulta getEffectiveModules e abre no primeiro módulo realmente acessível: admin/gerente vai pra Gerencial se incluído (default), senão pega o primeiro liberado da lista. User só com CRM já abre direto no CRM.'},

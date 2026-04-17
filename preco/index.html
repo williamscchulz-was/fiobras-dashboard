@@ -683,7 +683,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
   });
   let sess = null;
   try { sess = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null'); } catch(e){}
-  if(!sess || sess.user !== 'admin'){
+  // v3.21.6: gate só verifica sessão válida — quem chega aqui já passou pelo
+  // canAccessModule do HUB (que faz o controle granular por user)
+  if(!sess){
     document.getElementById('noSessionGate').style.display = 'flex';
     window.__hubBlocked = true;
   } else {
