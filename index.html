@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.23.0  18/04/2026 Breakpoints unificados no hub.css       ║
+  ║    (7 valores → 5: 360/480/640/768/1024). Vars no :root.    ║
+  ║    Sub-apps em v3.23.1 (split pra testar isolado).           ║
   ║  v3.22.2  18/04/2026 A11y: role=dialog auto + aria-label    ║
   ║    auto + trapFocus + prefers-reduced-motion global.         ║
   ║  v3.22.1  18/04/2026 Chart.js lazy-loaded sob demanda        ║
@@ -444,7 +447,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.22.2">
+<link rel="stylesheet" href="css/hub.css?v=3.23.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -681,7 +684,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.22.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.23.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2508,11 +2511,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.22.2';
+const CURRENT_VERSION = '3.23.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 const CHANGELOG = [
   {
-    v:'3.22.2', d:'18 abr 2026', current:true,
+    v:'3.23.0', d:'18 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Breakpoints unificados no css/hub.css (7 → 5 valores).', desc:'Antes o projeto tinha 13 breakpoints diferentes em 4 arquivos (hub.css + 3 sub-apps): 360, 380, 480, 500, 520, 600, 640, 680, 700, 768, 860, 900, 1200. Manutenção difícil.\n\nAgora escala universal de 5 valores: 360 (Galaxy A10/Android low-end) · 480 (mobile padrão) · 640 (phablet/landscape) · 768 (tablet portrait) · 1024 (desktop). Documentada em :root como CSS vars (--bp-xs/sm/md/lg/xl).\n\nMigração no hub.css:\n• 600 → 640 (40px pra cima — phablet)\n• 700 → 640 (60px — semantically MD)\n• 860 → 1024 (esconder pílula 3D ainda funciona)\n\nSub-apps (CRM/Preço/Manutenção) ficam pra v3.23.1 — split intencional pra você testar o HUB isolado primeiro. Pode ser que regras se ativem 40-60px antes/depois do que ativavam.'}
+    ]
+  },
+  {
+    v:'3.22.2', d:'18 abr 2026',
     items:[
       {type:'feat', title:'A11y: 16 modais agora têm role/aria/trapFocus + buttons icon-only ganham aria-label automaticamente.', desc:'Patch invisível pra quem usa mouse mas crítico pra quem usa screen reader (VoiceOver iOS / TalkBack Android / NVDA). 4 melhorias num init JS auto:\n\n1) initA11y() percorre todos .modal-bg e adiciona role="dialog" + aria-modal="true" + aria-labelledby (achando o título dentro). Aplica em runtime — não precisa editar 16 modais 1 por 1.\n\n2) Mesma função copia title="..." → aria-label="..." em todos os buttons icon-only sem aria. Re-roda a cada 3s pra capturar UI dinâmica (cards renderizados, popovers).\n\n3) Trap focus via MutationObserver: quando .modal-bg ganha .open ou display!=none, foca no 1º elemento interativo + trava Tab dentro do modal (Shift+Tab cicla). Quando fecha, libera.\n\n4) Bloco @media (prefers-reduced-motion: reduce) global em hub.css + 3 sub-apps. Animations e transitions viram instantâneas pra quem ativou "Reduzir movimento" no SO. Não desliga estados visuais (hover/focus continuam).'}
     ]

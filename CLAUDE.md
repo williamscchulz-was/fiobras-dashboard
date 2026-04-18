@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.14 — 18/04/2026
-> **Versão atual do HUB:** v3.22.2
+> **Versão do doc:** 2.15 — 18/04/2026
+> **Versão atual do HUB:** v3.23.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -229,7 +229,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.22.2` (18/04/2026).
+**Versão atual:** `v3.23.0` (18/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -237,6 +237,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.23.0 | Breakpoints unificados no `hub.css` — escala universal `360/480/640/768/1024` (era 7 valores, agora 5). CSS vars em `:root`. Sub-apps em v3.23.1. |
 | v3.22.2 | A11y: init JS auto aplica `role=dialog`/`aria-modal`/`aria-labelledby` em todos `.modal-bg` + copia `title`→`aria-label` em buttons icon-only + trapFocus via MutationObserver + `prefers-reduced-motion` global. |
 | v3.22.1 | Chart.js lazy-load via `loadChartJs()` (Promise cached). `renderCharts`/`renderProducao` viram async. -220ms FCP boot inicial. |
 | v3.22.0 | PWA: Service Worker cache-first/SWR/network-first (FCP -65% em retorno) + inputs 16px global (anti-zoom iOS) + toast online/offline + toast "Nova versão". `/sw.js` arquivo físico. |
@@ -387,6 +388,16 @@ GitHub Pages rebuilda automaticamente em 1-2 min após push.
 
 ## 9. Padrões técnicos
 
+### 9.0 Breakpoints (v3.23.0)
+Escala universal de 5 valores. **Todo novo `@media` deve usar exclusivamente esses números:**
+- `360px` (--bp-xs) — Galaxy A10, Android low-end
+- `480px` (--bp-sm) — mobile padrão
+- `640px` (--bp-md) — phablet, mobile landscape
+- `768px` (--bp-lg) — tablet portrait
+- `1024px` (--bp-xl) — desktop pequeno
+
+CSS vars documentadas no `:root` do `hub.css`. Não usar valores intermediários (520, 680, 700, 860, etc) — consolida pra cima ou pra baixo na escala.
+
 ### 9.1 Timezone e datas
 - **Timezone:** America/Sao_Paulo (UTC-3).
 - **Salvar em memória:** ISO local string ou timestamp UTC consistente. Nunca misturar.
@@ -475,4 +486,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.14 · 18/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.15 · 18/04/2026*
