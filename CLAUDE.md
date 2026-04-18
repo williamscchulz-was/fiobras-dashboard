@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.13 — 18/04/2026
-> **Versão atual do HUB:** v3.22.1
+> **Versão do doc:** 2.14 — 18/04/2026
+> **Versão atual do HUB:** v3.22.2
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -229,7 +229,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.22.1` (18/04/2026).
+**Versão atual:** `v3.22.2` (18/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -237,6 +237,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.22.2 | A11y: init JS auto aplica `role=dialog`/`aria-modal`/`aria-labelledby` em todos `.modal-bg` + copia `title`→`aria-label` em buttons icon-only + trapFocus via MutationObserver + `prefers-reduced-motion` global. |
 | v3.22.1 | Chart.js lazy-load via `loadChartJs()` (Promise cached). `renderCharts`/`renderProducao` viram async. -220ms FCP boot inicial. |
 | v3.22.0 | PWA: Service Worker cache-first/SWR/network-first (FCP -65% em retorno) + inputs 16px global (anti-zoom iOS) + toast online/offline + toast "Nova versão". `/sw.js` arquivo físico. |
 | v3.21.17 | **FIX CRÍTICO** Timeline: `set(tlRef, dados)` sobrescrevia o nó. Agora grava 1 registro por vez via `update(child(tlRef, id), evt)`. |
@@ -474,4 +475,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.13 · 18/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.14 · 18/04/2026*

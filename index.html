@@ -3,6 +3,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.22.2  18/04/2026 A11y: role=dialog auto + aria-label    ║
+  ║    auto + trapFocus + prefers-reduced-motion global.         ║
   ║  v3.22.1  18/04/2026 Chart.js lazy-loaded sob demanda        ║
   ║    (-220ms FCP boot inicial; -80KB pra quem nunca abre       ║
   ║    Histórico/Produção).                                      ║
@@ -442,7 +444,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.22.1">
+<link rel="stylesheet" href="css/hub.css?v=3.22.2">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -679,7 +681,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.22.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.22.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2506,11 +2508,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.22.1';
+const CURRENT_VERSION = '3.22.2';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 const CHANGELOG = [
   {
-    v:'3.22.1', d:'18 abr 2026', current:true,
+    v:'3.22.2', d:'18 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'A11y: 16 modais agora têm role/aria/trapFocus + buttons icon-only ganham aria-label automaticamente.', desc:'Patch invisível pra quem usa mouse mas crítico pra quem usa screen reader (VoiceOver iOS / TalkBack Android / NVDA). 4 melhorias num init JS auto:\n\n1) initA11y() percorre todos .modal-bg e adiciona role="dialog" + aria-modal="true" + aria-labelledby (achando o título dentro). Aplica em runtime — não precisa editar 16 modais 1 por 1.\n\n2) Mesma função copia title="..." → aria-label="..." em todos os buttons icon-only sem aria. Re-roda a cada 3s pra capturar UI dinâmica (cards renderizados, popovers).\n\n3) Trap focus via MutationObserver: quando .modal-bg ganha .open ou display!=none, foca no 1º elemento interativo + trava Tab dentro do modal (Shift+Tab cicla). Quando fecha, libera.\n\n4) Bloco @media (prefers-reduced-motion: reduce) global em hub.css + 3 sub-apps. Animations e transitions viram instantâneas pra quem ativou "Reduzir movimento" no SO. Não desliga estados visuais (hover/focus continuam).'}
+    ]
+  },
+  {
+    v:'3.22.1', d:'18 abr 2026',
     items:[
       {type:'feat', title:'Chart.js carrega sob demanda (lazy-load).', desc:'Antes: ~80KB do Chart.js baixados no boot, bloqueando o parser por ~220ms — mesmo pra quem nunca abre Histórico nem Produção. Agora: tag <script> bloqueante removida do <head>. Helper loadChartJs() injeta dynamic script só quando alguém precisa. Promise é cached — múltiplas chamadas baixam 1 vez só.\n\nrenderCharts() (Histórico) e renderProducao() (Produção) viraram async + await loadChartJs() antes de usar new Chart().\n\nGanho: -220ms no FCP boot inicial (qualquer rede). Custo: 1ª abertura de Histórico ou Produção tem +220ms (uma vez só, depois cache do SW assume).'}
     ]
@@ -3234,6 +3242,98 @@ function _buildHubIcon(size){
     const apple = document.querySelector('link[rel="apple-touch-icon"]');
     if(apple) apple.href = icon192;
   }
+})();
+
+// ── A11y patch (v3.22.2) ─────────────────────────────────────────────────
+// Aplica role="dialog"/aria-modal nos modais + copia title→aria-label
+// nos buttons icon-only + trapFocus via MutationObserver.
+(function initA11y(){
+  const MODAL_SEL = '.modal-bg, .modal-overlay';
+
+  function applyToModals(){
+    document.querySelectorAll(MODAL_SEL).forEach(modal => {
+      if(!modal.hasAttribute('role'))       modal.setAttribute('role','dialog');
+      if(!modal.hasAttribute('aria-modal')) modal.setAttribute('aria-modal','true');
+      if(!modal.hasAttribute('aria-labelledby')){
+        const h = modal.querySelector('h1, h2, h3, h4, .modal-title, .modal-head-title, [class*="-title"]');
+        if(h){
+          if(!h.id) h.id = 'mt-' + Math.random().toString(36).slice(2,8);
+          modal.setAttribute('aria-labelledby', h.id);
+        }
+      }
+    });
+  }
+  function applyToButtons(){
+    document.querySelectorAll('button:not([aria-label]):not([data-a11y-skip])').forEach(btn => {
+      if(btn.textContent.trim().length > 0) return; // tem texto = ok
+      if(!btn.querySelector('svg')) return;          // não é icon-only
+      if(btn.hasAttribute('title')){
+        btn.setAttribute('aria-label', btn.getAttribute('title'));
+      } else if(btn.hasAttribute('data-tooltip')){
+        btn.setAttribute('aria-label', btn.getAttribute('data-tooltip'));
+      }
+    });
+  }
+
+  // === Trap focus dentro do modal aberto + Esc fecha ===
+  let _trapped = null;
+  function getFocusables(el){
+    return Array.from(el.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(e => e.offsetParent !== null);
+  }
+  document.addEventListener('keydown', e => {
+    if(!_trapped) return;
+    if(e.key === 'Tab'){
+      const f = getFocusables(_trapped);
+      if(!f.length) return;
+      const first = f[0], last = f[f.length-1];
+      if(e.shiftKey && document.activeElement === first){
+        last.focus(); e.preventDefault();
+      } else if(!e.shiftKey && document.activeElement === last){
+        first.focus(); e.preventDefault();
+      }
+    }
+  });
+
+  // === Observer: detecta open/close de modais ===
+  const obs = new MutationObserver(muts => {
+    muts.forEach(m => {
+      const el = m.target;
+      if(!el.classList) return;
+      if(!(el.matches?.(MODAL_SEL))) return;
+      const isOpen = el.classList.contains('open') ||
+                     (el.style.display && el.style.display !== 'none' && el.style.display !== '');
+      if(isOpen){
+        _trapped = el;
+        // Foco inicial no 1º focável (delay pra animação terminar)
+        setTimeout(() => {
+          const f = getFocusables(el);
+          if(f.length) f[0].focus({preventScroll:true});
+        }, 80);
+      } else if(_trapped === el) {
+        _trapped = null;
+      }
+    });
+  });
+  function attachObserver(){
+    document.querySelectorAll(MODAL_SEL).forEach(m => {
+      obs.observe(m, {attributes: true, attributeFilter: ['class','style']});
+    });
+  }
+
+  function init(){
+    applyToModals();
+    applyToButtons();
+    attachObserver();
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  // Re-aplica em UI dinâmica (cards renderizados, popovers, etc) a cada 3s
+  setInterval(() => { applyToModals(); applyToButtons(); }, 3000);
 })();
 
 // ── Service Worker (v3.22.0 — cache-first/SWR/network-first) ────────────

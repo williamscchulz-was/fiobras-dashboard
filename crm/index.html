@@ -69,6 +69,15 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+/* v3.22.2 — reduced motion (vestibular/epilepsia) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 /* v3.22.0 — anti-zoom iOS: inputs >= 16px em mobile/touch */
 input, select, textarea { font-size: 16px; }
 @media (pointer: fine) and (min-width: 768px) {

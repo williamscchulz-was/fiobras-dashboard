@@ -2,6 +2,19 @@
    v3.0.0 · split extraído de index.html
    Futuro: dividir em base.css / shell.css / <módulo>.css por módulo. */
 
+/* ═══ Reduced motion · v3.22.2 ═══════════════════════════════════════════
+   Usuários com vestibular/epilepsia/sensibilidade têm "Reduzir movimento"
+   ativado no SO. Honra essa preferência: animations e transitions viram
+   instantâneas (não desliga estados visuais como hover/focus). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ═══ Anti-zoom iOS · v3.22.0 ═══════════════════════════════════════════
    Inputs/select/textarea precisam de font-size >= 16px em mobile pra iOS
    não dar zoom ao focar. Override só em desktop com mouse, onde 13/14px
