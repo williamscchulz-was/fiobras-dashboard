@@ -69,6 +69,14 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+/* v3.22.0 — anti-zoom iOS: inputs >= 16px em mobile/touch */
+input, select, textarea { font-size: 16px; }
+@media (pointer: fine) and (min-width: 768px) {
+  .fi, .fld input, .fld select, .fld textarea,
+  .cli-search, .log-search, .lg-search,
+  .cli-form-row input, .cli-form-row textarea { font-size: 0.82rem; }
+}
+
 :root{
   /* ── Brand ── */
   --green:#008835;--green2:#006828;--green-l:#e8f5ed;--green-ll:#f2faf5;

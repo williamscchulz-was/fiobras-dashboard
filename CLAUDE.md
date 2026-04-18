@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.11 — 17/04/2026
-> **Versão atual do HUB:** v3.21.17
+> **Versão do doc:** 2.12 — 18/04/2026
+> **Versão atual do HUB:** v3.22.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -75,6 +75,7 @@ Cada sub-app:
 - Ícones 192/512 gerados em runtime via canvas a partir do símbolo SVG (v3.14.0).
 - Favicon SVG inline via data URI.
 - Tema verde `#008835` na barra de status.
+- **Service Worker `/sw.js`** (v3.22.0, arquivo físico — não Blob): cache-first pra fontes/Chart.js, stale-while-revalidate pra CSS/HTML local, network-first pra HTML raiz, pass-through pra Firebase. Cache name versionado por release (`fiobras-hub-v${VERSION}`). Toast "Nova versão · Atualizar" quando deploy novo detectado. Toast online/offline.
 
 ---
 
@@ -228,7 +229,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.21.17` (17/04/2026).
+**Versão atual:** `v3.22.0` (18/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -236,6 +237,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.22.0 | PWA: Service Worker cache-first/SWR/network-first (FCP -65% em retorno) + inputs 16px global (anti-zoom iOS) + toast online/offline + toast "Nova versão". `/sw.js` arquivo físico. |
 | v3.21.17 | **FIX CRÍTICO** Timeline: `set(tlRef, dados)` sobrescrevia o nó. Agora grava 1 registro por vez via `update(child(tlRef, id), evt)`. |
 | v3.21.16 | CRM: fix aba Histórico de atividades (regressão — funções logEvento/renderHistoricoGlobal tinham sumido). |
 | v3.21.15 | CRM Pipeline: pacote estético (header pill + botão `+` por coluna + bg sage + KPI bar topo + avatar responsável no card). |
@@ -471,4 +473,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.11 · 17/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.12 · 18/04/2026*

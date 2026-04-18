@@ -2,6 +2,24 @@
    v3.0.0 · split extraído de index.html
    Futuro: dividir em base.css / shell.css / <módulo>.css por módulo. */
 
+/* ═══ Anti-zoom iOS · v3.22.0 ═══════════════════════════════════════════
+   Inputs/select/textarea precisam de font-size >= 16px em mobile pra iOS
+   não dar zoom ao focar. Override só em desktop com mouse, onde 13/14px
+   faz sentido visual em densidades altas. */
+input, select, textarea {
+  font-size: 16px;
+}
+@media (pointer: fine) and (min-width: 768px) {
+  .mf-wrap input,
+  .tl-form-field input,
+  .tl-form-field textarea,
+  .apt-tp-fibra-input,
+  .sc-lanc-row-input-wrap input,
+  .sc-lanc-row-input-wrap .unit {
+    font-size: 0.84rem;
+  }
+}
+
 /* ── Gerenciar usuários (v3.9.0) ───────────────────────────────────── */
 .gu-list{display:flex;flex-direction:column;gap:8px;}
 .gu-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:11px;}

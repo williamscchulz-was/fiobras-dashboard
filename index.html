@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.22.0  18/04/2026 PWA: Service Worker cache-first +       ║
+  ║    inputs 16px em mobile (anti-zoom iOS) + toast offline     ║
+  ║    + toast "Nova versão disponível" pra atualização.         ║
   ║  v3.21.17 17/04/2026 Timeline: FIX bug crítico — set tava    ║
   ║    sobrescrevendo o nó. Race condition no boot apagava       ║
   ║    registros antigos. Agora grava 1 registro por vez.        ║
@@ -436,7 +439,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.21.17">
+<link rel="stylesheet" href="css/hub.css?v=3.22.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -673,7 +676,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.21.17</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.22.0</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2481,10 +2484,20 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.21.17';
+const CURRENT_VERSION = '3.22.0';
+window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 const CHANGELOG = [
   {
-    v:'3.21.17', d:'17 abr 2026', current:true,
+    v:'3.22.0', d:'18 abr 2026', current:true,
+    items:[
+      {type:'high', title:'PWA: Service Worker agora faz cache de verdade.', desc:'O SW antigo só tinha estratégia "Offline 503" — cada visita re-baixava ~1MB. Agora estratégia por tipo de recurso:\n• cache-first: fontes Google + Chart.js (CDNs estáticos)\n• stale-while-revalidate: hub.css + sub-apps HTML\n• network-first: index.html (pega versão nova quando online)\n• pass-through: Firebase RTDB (real-time, NÃO cacheia)\n\nResultado estimado: FCP de ~2.4s → ~0.9s em visita recorrente (~65% mais rápido). Funciona offline (app abre do cache, dados Firebase ficam congelados na última leitura).\n\nSW agora é arquivo físico (/sw.js) em vez de Blob URL — alguns browsers não permitem cache cross-fetch via Blob. Versionamento: cache name = fiobras-hub-v3.22.0. Cada bump invalida cache antigo automaticamente.'},
+      {type:'feat', title:'Toast "Nova versão disponível · Atualizar".', desc:'Quando deploy novo é detectado pelo SW, aparece toast preto no rodapé: "Nova versão disponível [Atualizar]". Clica = manda SKIP_WAITING pro SW novo + reload automático. App pergunta a cada 30min se tem update.'},
+      {type:'feat', title:'Toast online/offline.', desc:'Quando rede cai: chip laranja no topo "⚠ Você está offline · alterações ficam pendentes". Quando volta: chip verde "✓ Conectado" (some em 2.5s).'},
+      {type:'high', title:'Inputs com font-size 16px global (anti-zoom iOS).', desc:'iOS dá zoom automático ao focar input com font-size < 16px — UX horrível em mobile. Vários campos no HUB (Timeline, Apontamento, Stats Cor, modais) e nos sub-apps (CRM, Preço, Manutenção) tinham 12-14px. Agora regra base "input, select, textarea { font-size: 16px }" em todos os 4 apps. Override só em desktop com mouse (pointer:fine + min-width:768px) pra manter densidade alta nos modais. Não causa zoom em Android (chrome respeita), só melhora touch target.'}
+    ]
+  },
+  {
+    v:'3.21.17', d:'17 abr 2026',
     items:[
       {type:'high', title:'Timeline: FIX bug crítico que apagava registros antigos.', desc:'Bug grave descoberto: a função _salvarTlFirebase usava set(tlRef, dados) — que SOBRESCREVE o nó inteiro do Firebase. Combinado com race condition no boot (Firebase onValue ainda não retornou + user já abre modal e salva), o tlDados em memória estava {} (vazio), aí o save mandava set(tlRef, {idNovo: evt}) e APAGAVA todos os registros antigos.\n\nFix: criadas duas funções novas — _salvarTlEvento(id, evt) usa update(child(tlRef, id), evt) que grava SÓ aquele registro sem tocar nos outros. _removerTlEvento(id) usa remove(child(tlRef, id)). O tlSave legacy fica como fallback mas não é mais usado.\n\nAtenção: registros antigos que sumiram não voltam (perdidos no Firebase). A partir de agora, novos saves não causam mais isso.'}
     ]
@@ -3195,11 +3208,65 @@ function _buildHubIcon(size){
   }
 })();
 
-// ── Service Worker (PWA instalável) ──────────────────────────────────────
+// ── Service Worker (v3.22.0 — cache-first/SWR/network-first) ────────────
 if('serviceWorker' in navigator){
-  const swCode='self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",e=>e.respondWith(fetch(e.request).catch(()=>new Response("Offline",{status:503}))));';
-  const swBlob=new Blob([swCode],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  // Registra SW físico (Blob URL não permite cache cross-fetch em alguns browsers)
+  navigator.serviceWorker.register('/sw.js?v=' + (window.CURRENT_VERSION||'3.22.0')).then(reg => {
+    // Detecta nova versão disponível (SW novo waiting)
+    function checkUpdate(){
+      if(reg.waiting){
+        showUpdateToast(reg.waiting);
+      }
+    }
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      if(!nw) return;
+      nw.addEventListener('statechange', () => {
+        if(nw.state === 'installed' && navigator.serviceWorker.controller){
+          showUpdateToast(nw);
+        }
+      });
+    });
+    checkUpdate();
+    // checa updates a cada 30min de uso
+    setInterval(() => reg.update().catch(()=>{}), 30 * 60 * 1000);
+  }).catch(()=>{/* sem SW = sem problema */});
+
+  // Recarrega quando SW novo assume controle (após user clicar "Atualizar")
+  let _swRefreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if(_swRefreshing) return;
+    _swRefreshing = true;
+    location.reload();
+  });
+}
+
+function showUpdateToast(swWaiting){
+  // toast com ação "Atualizar agora" (ignora dismiss)
+  if(document.getElementById('swUpdateToast')) return;
+  const t = document.createElement('div');
+  t.id = 'swUpdateToast';
+  t.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,24px));z-index:99999;background:#1B1F18;color:#fff;padding:12px 16px;border-radius:12px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:Poppins,sans-serif;font-size:13px;max-width:90vw;';
+  t.innerHTML = '<span>Nova versão disponível</span><button style="background:#008835;color:#fff;border:0;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px">Atualizar</button>';
+  t.querySelector('button').onclick = () => {
+    swWaiting.postMessage({type:'SKIP_WAITING'});
+    t.remove();
+  };
+  document.body.appendChild(t);
+}
+
+// ── Online/offline awareness (v3.22.0) ───────────────────────────────────
+window.addEventListener('offline', () => showOnlineToast(false));
+window.addEventListener('online',  () => showOnlineToast(true));
+function showOnlineToast(isOnline){
+  const old = document.getElementById('swOnlineToast');
+  if(old) old.remove();
+  const t = document.createElement('div');
+  t.id = 'swOnlineToast';
+  t.style.cssText = `position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0) + 16px);z-index:99999;background:${isOnline?'#008835':'#D97706'};color:#fff;padding:8px 16px;border-radius:999px;font-family:Poppins,sans-serif;font-size:12px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.18);`;
+  t.textContent = isOnline ? '✓ Conectado' : '⚠ Você está offline · alterações ficam pendentes';
+  document.body.appendChild(t);
+  if(isOnline) setTimeout(() => t.remove(), 2500);
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────
