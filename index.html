@@ -3,6 +3,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.23.2  18/04/2026 audit-log + active-sessions viraram     ║
+  ║    listeners lazy (ativam quando admin abre painel).         ║
   ║  v3.23.1  18/04/2026 Breakpoints unificados nos sub-apps     ║
   ║    (CRM, Preço, Manutenção). Projeto inteiro = 5 valores.    ║
   ║  v3.23.0  18/04/2026 Breakpoints unificados no hub.css       ║
@@ -449,7 +451,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.23.1">
+<link rel="stylesheet" href="css/hub.css?v=3.23.2">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -686,7 +688,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.23.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.23.2</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -1925,13 +1927,13 @@ function logAudit(action, target, details){
 }
 window.abrirAuditLog = () => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
-  // Fecha modal de usuários se aberto (sobreposto)
-  // mas preferimos manter o gu aberto atrás
+  window._activateAuditLog && window._activateAuditLog(); // v3.23.2: ativa listener sob demanda
   renderAuditLog();
   document.getElementById('alModal').classList.add('open');
 };
 window.fecharAuditLog = () => {
   document.getElementById('alModal').classList.remove('open');
+  window._deactivateAuditLog && window._deactivateAuditLog(); // libera conexão
 };
 function renderAuditLog(){
   const host = document.getElementById('alList');
@@ -1994,11 +1996,13 @@ function renderAuditLog(){
 // ── v3.13.0: Sessões ativas (admin only) ────────────────────────────
 window.abrirSessoesAtivas = () => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
+  window._activateActiveSessions && window._activateActiveSessions(); // v3.23.2
   renderActiveSessions();
   document.getElementById('asModal').classList.add('open');
 };
 window.fecharSessoesAtivas = () => {
   document.getElementById('asModal').classList.remove('open');
+  window._deactivateActiveSessions && window._deactivateActiveSessions();
 };
 function renderActiveSessions(){
   const host = document.getElementById('asList');
@@ -2513,11 +2517,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.23.1';
+const CURRENT_VERSION = '3.23.2';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 const CHANGELOG = [
   {
-    v:'3.23.1', d:'18 abr 2026', current:true,
+    v:'3.23.2', d:'18 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'audit-log + active-sessions viraram listeners lazy.', desc:'Antes esses 2 listeners do Firebase eram ativados no boot pra TODOS os usuários — mas só admin abre os painéis correspondentes. Desperdício de conexão WebSocket + bytes transferidos.\n\nAgora seguem padrão activate/deactivate:\n• abrirAuditLog() → window._activateAuditLog() → conecta\n• fecharAuditLog() → window._deactivateAuditLog() → desconecta\n• Mesmo padrão pro asModal (sessões ativas).\n\nGanho: -2 conexões WebSocket no boot, -7KB iniciais, -200ms em 4G ruim. Importante: audit-log cresce com o tempo (1 entry por ação) — adiar evita que esse peso encha pra usuários não-admin.\n\nNo total: dos 12 listeners do HUB, 10 ficam eager (justificados) e 2 ficam lazy.'}
+    ]
+  },
+  {
+    v:'3.23.1', d:'18 abr 2026',
     items:[
       {type:'feat', title:'Breakpoints unificados nos sub-apps (CRM, Preço, Manutenção).', desc:'Conclusão da migração iniciada em v3.23.0. Aplicada a mesma escala (360/480/640/768/1024) em CRM, Preço e Manutenção.\n\nMigrações:\n• CRM: 4 valores → 2 (520→480, 700→640) — 8 linhas alteradas\n• Preço: 5 valores → 2 (500→480, 600→640, 700→640, 900→1024, 1200→1024) — 8 linhas\n• Manutenção: 6 valores → 4 (380→360, 680→640, 700→640) — 3 linhas\n\nProjeto inteiro: 13 valores únicos → 5 valores. Manutenção muito mais simples agora.'}
     ]
@@ -3545,25 +3555,41 @@ onValue(usersConfigRef, (snapshot) => {
 window._criarUsuarioConfig = (key, data) => update(ref(db, 'users-config/' + key), data).catch(e => console.error('Erro ao criar user:', e));
 window._excluirUsuarioConfig = (key) => set(ref(db, 'users-config/' + key), null).catch(e => console.error('Erro ao excluir user:', e));
 
-// ── Audit log — Firebase (v3.12.0) ─────────────────────────────────────
+// ── Audit log — Firebase (v3.12.0; lazy v3.23.2) ───────────────────────
+// Listener só ativa quando admin abre o painel (alModal). Fechar libera conexão.
 const auditLogRef = ref(db, 'audit-log');
 window._auditLog = window._auditLog || {};
-onValue(auditLogRef, (snapshot) => {
-  window._auditLog = snapshot.val() || {};
-  if (document.getElementById('alModal')?.classList.contains('open') && typeof renderAuditLog === 'function') renderAuditLog();
-});
+let _auditLogUnsub = null;
+window._activateAuditLog = () => {
+  if (_auditLogUnsub) return;
+  _auditLogUnsub = onValue(auditLogRef, (snapshot) => {
+    window._auditLog = snapshot.val() || {};
+    if (document.getElementById('alModal')?.classList.contains('open') && typeof renderAuditLog === 'function') renderAuditLog();
+  });
+};
+window._deactivateAuditLog = () => {
+  if (_auditLogUnsub) { _auditLogUnsub(); _auditLogUnsub = null; }
+};
 window._gravarAuditLog = (entry) => {
   const id = 'al_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   return update(ref(db, 'audit-log/' + id), entry).catch(e => console.error('Erro ao gravar audit:', e));
 };
 
-// ── Sessões ativas — Firebase (v3.13.0) ─────────────────────────────────
+// ── Sessões ativas — Firebase (v3.13.0; lazy v3.23.2) ───────────────────
+// Listener só ativa quando admin abre o painel (asModal).
 const activeSessionsRef = ref(db, 'active-sessions');
 window._activeSessions = window._activeSessions || {};
-onValue(activeSessionsRef, (snapshot) => {
-  window._activeSessions = snapshot.val() || {};
-  if (document.getElementById('asModal')?.classList.contains('open') && typeof renderActiveSessions === 'function') renderActiveSessions();
-});
+let _activeSessionsUnsub = null;
+window._activateActiveSessions = () => {
+  if (_activeSessionsUnsub) return;
+  _activeSessionsUnsub = onValue(activeSessionsRef, (snapshot) => {
+    window._activeSessions = snapshot.val() || {};
+    if (document.getElementById('asModal')?.classList.contains('open') && typeof renderActiveSessions === 'function') renderActiveSessions();
+  });
+};
+window._deactivateActiveSessions = () => {
+  if (_activeSessionsUnsub) { _activeSessionsUnsub(); _activeSessionsUnsub = null; }
+};
 window._gravarSessao = (user, data) => update(ref(db, 'active-sessions/' + user), data).catch(e => console.error('Erro sessão:', e));
 window._removerSessao = (user) => set(ref(db, 'active-sessions/' + user), null).catch(e => console.error('Erro remover sessão:', e));
 
