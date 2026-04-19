@@ -3,6 +3,9 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.24.0  18/04/2026 PWA polish: botão "Instalar app"        ║
+  ║    no header (Chrome/Edge/Android) + tooltip iOS Safari +    ║
+  ║    dark mode auto via prefers-color-scheme.                  ║
   ║  v3.23.2  18/04/2026 audit-log + active-sessions viraram     ║
   ║    listeners lazy (ativam quando admin abre painel).         ║
   ║  v3.23.1  18/04/2026 Breakpoints unificados nos sub-apps     ║
@@ -451,7 +454,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.23.2">
+<link rel="stylesheet" href="css/hub.css?v=3.24.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -688,8 +691,13 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.23.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.24.0</div>
     <div class="hdr-divider"></div>
+    <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
+    <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      <span class="hdr-install-lbl">Instalar app</span>
+    </button>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -2517,11 +2525,18 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.23.2';
+const CURRENT_VERSION = '3.24.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 const CHANGELOG = [
   {
-    v:'3.23.2', d:'18 abr 2026', current:true,
+    v:'3.24.0', d:'18 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Botão "Instalar app" no header (Chrome/Edge/Android).', desc:'Quando o app atende critérios PWA (já atende: SW + manifest + HTTPS), o navegador dispara beforeinstallprompt. Capturamos esse evento e revelamos botão verde "↓ Instalar app" no canto direito do header. Click → diálogo nativo de instalação. Aceita = botão some.\n\nMobile: botão vira ícone só (sem o texto), pra não competir com a pílula de versão.\n\niOS Safari: o evento beforeinstallprompt NÃO é disparado lá. Quando detecta Safari iOS + não-instalado, mostra botão que ao clicar abre tooltip educativo: "Toque em Compartilhar → Adicionar à Tela de Início". Tooltip mostra uma vez (flag em localStorage); usuário marca "Entendi" e some pra sempre.'},
+      {type:'feat', title:'Dark mode automático respeita SO.', desc:'Antes: app sempre abria em light, exceto se user clicasse no toggle "Tema escuro". Agora respeita prefers-color-scheme do SO no boot — mas SÓ se user nunca tiver escolhido manualmente.\n\nLógica:\n• Tem fiobras-dash-theme no localStorage? Usa essa preferência (mantém comportamento atual pra usuários antigos).\n• Não tem? Usa prefers-color-scheme do SO como default.\n\nBonus: listener pra mudanças do SO em tempo real — se você muda o tema do macOS/Windows, o HUB acompanha (só se nunca escolheu manual). Toggle continua funcionando e vira fonte da verdade quando clicado.'}
+    ]
+  },
+  {
+    v:'3.23.2', d:'18 abr 2026',
     items:[
       {type:'feat', title:'audit-log + active-sessions viraram listeners lazy.', desc:'Antes esses 2 listeners do Firebase eram ativados no boot pra TODOS os usuários — mas só admin abre os painéis correspondentes. Desperdício de conexão WebSocket + bytes transferidos.\n\nAgora seguem padrão activate/deactivate:\n• abrirAuditLog() → window._activateAuditLog() → conecta\n• fecharAuditLog() → window._deactivateAuditLog() → desconecta\n• Mesmo padrão pro asModal (sessões ativas).\n\nGanho: -2 conexões WebSocket no boot, -7KB iniciais, -200ms em 4G ruim. Importante: audit-log cresce com o tempo (1 entry por ação) — adiar evita que esse peso encha pra usuários não-admin.\n\nNo total: dos 12 listeners do HUB, 10 ficam eager (justificados) e 2 ficam lazy.'}
     ]
@@ -3410,6 +3425,82 @@ function showUpdateToast(swWaiting){
   document.body.appendChild(t);
 }
 
+// ── PWA install (v3.24.0) ────────────────────────────────────────────────
+// Chrome/Edge/Android: captura beforeinstallprompt → revela botão.
+// iOS Safari: detecta + mostra tooltip educativo uma vez.
+let _installPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _installPrompt = e;
+  const btn = document.getElementById('btnInstallPwa');
+  if(btn) btn.style.display = 'inline-flex';
+});
+
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('btnInstallPwa');
+  if(btn) btn.style.display = 'none';
+  _installPrompt = null;
+  localStorage.setItem('fiobras-pwa-installed', '1');
+});
+
+window.triggerPwaInstall = async () => {
+  if(_installPrompt){
+    _installPrompt.prompt();
+    try {
+      const { outcome } = await _installPrompt.userChoice;
+      if(outcome === 'accepted'){
+        const btn = document.getElementById('btnInstallPwa');
+        if(btn) btn.style.display = 'none';
+      }
+    } catch(e){}
+    _installPrompt = null;
+  } else if(isIosSafari()){
+    showIosInstallToast();
+  }
+};
+
+function isIosSafari(){
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+  const safari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+  return ios && safari;
+}
+
+// Detecta se já tá rodando como PWA instalado (standalone)
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.navigator.standalone === true;
+}
+
+// iOS: mostra botão (que dispara tooltip) só se não tá instalado E nunca foi mostrado
+function maybeShowIosInstallButton(){
+  if(isStandalone()) return;
+  if(!isIosSafari()) return;
+  if(localStorage.getItem('fiobras-ios-install-shown')) return; // já mostrou tooltip
+  const btn = document.getElementById('btnInstallPwa');
+  if(btn) btn.style.display = 'inline-flex';
+}
+
+function showIosInstallToast(){
+  if(document.getElementById('iosInstallToast')) return;
+  const t = document.createElement('div');
+  t.id = 'iosInstallToast';
+  t.className = 'ios-install-toast';
+  t.innerHTML = `
+    <div>Pra instalar o HUB no seu iPhone, toque no botão de <b>Compartilhar</b> abaixo e escolha <b>"Adicionar à Tela de Início"</b>.</div>
+    <button onclick="document.getElementById('iosInstallToast').remove();localStorage.setItem('fiobras-ios-install-shown','1');document.getElementById('btnInstallPwa').style.display='none';">Entendi</button>
+  `;
+  document.body.appendChild(t);
+}
+
+// Inicializa após DOM ready
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', maybeShowIosInstallButton);
+} else {
+  maybeShowIosInstallButton();
+}
+
 // ── Online/offline awareness (v3.22.0) ───────────────────────────────────
 window.addEventListener('offline', () => showOnlineToast(false));
 window.addEventListener('online',  () => showOnlineToast(true));
@@ -3426,7 +3517,26 @@ function showOnlineToast(isOnline){
 
 // ── Init ─────────────────────────────────────────────────────────────────
 (function(){
-  applyTheme(localStorage.getItem('fiobras-dash-theme')==='dark');
+  // v3.24.0 — dark mode auto: respeita SO se user nunca escolheu
+  const saved = localStorage.getItem('fiobras-dash-theme');
+  let dark;
+  if(saved === 'dark' || saved === 'light'){
+    dark = (saved === 'dark');
+  } else {
+    dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  applyTheme(dark);
+
+  // Reage a mudanças do SO em tempo real (só se nunca escolheu manual)
+  if(window.matchMedia){
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    mq.addEventListener?.('change', e => {
+      if(!localStorage.getItem('fiobras-dash-theme')){
+        applyTheme(e.matches);
+      }
+    });
+  }
+
   checkAuth();
 })();
 

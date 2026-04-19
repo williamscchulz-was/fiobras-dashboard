@@ -2,6 +2,38 @@
    v3.0.0 · split extraído de index.html
    Futuro: dividir em base.css / shell.css / <módulo>.css por módulo. */
 
+/* ═══ Botão "Instalar app" · v3.24.0 ════════════════════════════════════ */
+.hdr-install-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;
+  background:var(--green,#008835);color:#fff;
+  border:0;border-radius:8px;padding:6px 12px;cursor:pointer;
+  transition:background .15s, transform .12s;
+  box-shadow:0 2px 6px rgba(0,136,53,.25);
+}
+.hdr-install-btn:hover{background:#006B2A;transform:translateY(-1px);}
+.hdr-install-btn svg{flex:none;}
+@media (max-width: 640px){
+  .hdr-install-btn{padding:6px 9px;}
+  .hdr-install-lbl{display:none;} /* só ícone em mobile */
+}
+
+/* Tooltip educativo iOS (mostrado uma vez) */
+.ios-install-toast{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(96px + env(safe-area-inset-bottom,24px));
+  z-index:99998;background:#1B1F18;color:#fff;
+  padding:14px 18px;border-radius:12px;font-family:'Poppins',sans-serif;
+  font-size:12.5px;line-height:1.5;max-width:320px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+  display:flex;flex-direction:column;gap:8px;
+}
+.ios-install-toast b{color:var(--green,#008835);}
+.ios-install-toast button{
+  align-self:flex-end;background:transparent;color:#A8A8AC;border:0;
+  font-size:11px;cursor:pointer;padding:4px 8px;font-family:'Poppins';
+}
+
 /* ═══ Breakpoints · v3.23.0 ══════════════════════════════════════════════
    Escala universal usada em TODOS os @media do projeto. CSS vars não
    funcionam dentro de @media, mas servem como documentação + uso em JS
