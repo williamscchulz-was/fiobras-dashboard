@@ -177,7 +177,7 @@ body{background:var(--bg);font-family:'Poppins',sans-serif;font-weight:400;color
 .header-icon-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.18);border-radius:50%;cursor:pointer;color:rgba(255,255,255,.7);transition:all .2s;}
 .header-icon-btn:hover{background:rgba(255,255,255,.22);color:#fff;}
 
-@media(max-width:700px){
+@media(max-width:640px){
 /* HEADER — mobile */
 .header{padding:0 14px;height:52px;}
 .logo-crm,.version-badge{display:none;}
@@ -266,7 +266,7 @@ table th:nth-child(7),table td:nth-child(7){display:none;}
 /* DASH GRID */
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 .dash-grid.wide{grid-template-columns:1fr;}
-@media(max-width:700px){.dash-grid{grid-template-columns:1fr;}}
+@media(max-width:640px){.dash-grid{grid-template-columns:1fr;}}
 
 .dash-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
 .dash-card-title{font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
@@ -336,7 +336,7 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 .kpi-val{font-family:'Outfit',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:-.01em;color:var(--text);}
 .kpi-val.green{color:var(--green);}
 .kpi-val.orange{color:var(--orange);}
-@media(max-width:700px){.kpi-bar{margin:10px 12px 0;padding:12px 14px;gap:14px;}.kpi-val{font-size:0.95rem;}.kpi{min-width:70px;}}
+@media(max-width:640px){.kpi-bar{margin:10px 12px 0;padding:12px 14px;gap:14px;}.kpi-val{font-size:0.95rem;}.kpi{min-width:70px;}}
 
 .pipeline-wrap{padding:16px 20px 48px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .pipeline{display:flex;gap:12px;min-width:max-content;align-items:flex-start;}
@@ -486,7 +486,7 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
 .mpanel.active{display:block;}
 .fg2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
 .fg1{display:grid;grid-template-columns:1fr;gap:13px;}
-@media(max-width:520px){.fg2{grid-template-columns:1fr;}}
+@media(max-width:480px){.fg2{grid-template-columns:1fr;}}
 .fld{display:flex;flex-direction:column;gap:5px;}
 .fld label{font-size:0.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
 .fld input,.fld select,.fld textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.82rem;color:var(--text);background:var(--white);outline:none;transition:border-color 0.18s;}
@@ -696,7 +696,7 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
 .log-load-more{text-align:center;padding:20px 0 32px;}
 .log-load-more button{padding:10px 32px;border-radius:24px;border:1.5px solid var(--border);background:var(--white);font-family:'Poppins',sans-serif;font-size:0.75rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.2s;}
 .log-load-more button:hover{border-color:var(--green);color:var(--green);box-shadow:0 2px 12px rgba(0,136,53,0.1);}
-@media(max-width:700px){.log-wrap{padding:0 0 100px!important;}.log-header{padding:14px 16px 0;top:0;}.log-tl{padding:0 16px;}.log-card{padding:14px 15px;border-radius:12px;}.log-avatar{width:34px;height:34px;border-radius:10px;font-size:0.9rem;}}
+@media(max-width:640px){.log-wrap{padding:0 0 100px!important;}.log-header{padding:14px 16px 0;top:0;}.log-tl{padding:0 16px;}.log-card{padding:14px 15px;border-radius:12px;}.log-avatar{width:34px;height:34px;border-radius:10px;font-size:0.9rem;}}
 
 
 /* ═══ CLIENTES ═══ */
@@ -767,7 +767,7 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
 .cli-valor-field.show{display:flex;gap:8px;align-items:center;}
 .cli-valor-field label{font-size:0.58rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;}
 .cli-valor-field input{width:140px;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--green);outline:none;background:var(--surface);}
-@media(max-width:700px){.cli-wrap{padding:10px 12px 100px!important;}.cli-card-head{padding:14px 14px 10px;}}
+@media(max-width:640px){.cli-wrap{padding:10px 12px 100px!important;}.cli-card-head{padding:14px 14px 10px;}}
 
 /* ── Splash animation ── */
 @keyframes splashLoad{0%{width:0}60%{width:75%}100%{width:100%}}
@@ -782,7 +782,7 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
   .header { display: none !important; }
   #splash, #loginScreen { display: none !important; }
   .tabs { top: 0 !important; }
-  @media(max-width:700px){
+  @media(max-width:640px){
     .tabs { overflow-x: auto !important; scrollbar-width: none; }
     .tabs::-webkit-scrollbar { display: none; }
   }
@@ -809,7 +809,7 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
     z-index: 50 !important;
   }
   body { padding-top: 46px !important; }
-  @media(max-width:700px){ body { padding-top: 44px !important; } }
+  @media(max-width:640px){ body { padding-top: 44px !important; } }
   /* v3.21.5: FAB "Registrar lead" sempre visível (botão do header foi escondido pelo override) */
   #fabNovo { display: flex !important; }
   .tabs button, .tabs .tab {

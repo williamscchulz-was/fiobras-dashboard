@@ -3,6 +3,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.23.1  18/04/2026 Breakpoints unificados nos sub-apps     ║
+  ║    (CRM, Preço, Manutenção). Projeto inteiro = 5 valores.    ║
   ║  v3.23.0  18/04/2026 Breakpoints unificados no hub.css       ║
   ║    (7 valores → 5: 360/480/640/768/1024). Vars no :root.    ║
   ║    Sub-apps em v3.23.1 (split pra testar isolado).           ║
@@ -447,7 +449,7 @@
 <meta name="msapplication-TileImage" content="./icon-192.png">
 <meta name="theme-color" content="#008835">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.23.0">
+<link rel="stylesheet" href="css/hub.css?v=3.23.1">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -684,7 +686,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.23.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.23.1</div>
     <div class="hdr-divider"></div>
     <button class="hdr-icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
       <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -2511,11 +2513,17 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.23.0';
+const CURRENT_VERSION = '3.23.1';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 const CHANGELOG = [
   {
-    v:'3.23.0', d:'18 abr 2026', current:true,
+    v:'3.23.1', d:'18 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Breakpoints unificados nos sub-apps (CRM, Preço, Manutenção).', desc:'Conclusão da migração iniciada em v3.23.0. Aplicada a mesma escala (360/480/640/768/1024) em CRM, Preço e Manutenção.\n\nMigrações:\n• CRM: 4 valores → 2 (520→480, 700→640) — 8 linhas alteradas\n• Preço: 5 valores → 2 (500→480, 600→640, 700→640, 900→1024, 1200→1024) — 8 linhas\n• Manutenção: 6 valores → 4 (380→360, 680→640, 700→640) — 3 linhas\n\nProjeto inteiro: 13 valores únicos → 5 valores. Manutenção muito mais simples agora.'}
+    ]
+  },
+  {
+    v:'3.23.0', d:'18 abr 2026',
     items:[
       {type:'feat', title:'Breakpoints unificados no css/hub.css (7 → 5 valores).', desc:'Antes o projeto tinha 13 breakpoints diferentes em 4 arquivos (hub.css + 3 sub-apps): 360, 380, 480, 500, 520, 600, 640, 680, 700, 768, 860, 900, 1200. Manutenção difícil.\n\nAgora escala universal de 5 valores: 360 (Galaxy A10/Android low-end) · 480 (mobile padrão) · 640 (phablet/landscape) · 768 (tablet portrait) · 1024 (desktop). Documentada em :root como CSS vars (--bp-xs/sm/md/lg/xl).\n\nMigração no hub.css:\n• 600 → 640 (40px pra cima — phablet)\n• 700 → 640 (60px — semantically MD)\n• 860 → 1024 (esconder pílula 3D ainda funciona)\n\nSub-apps (CRM/Preço/Manutenção) ficam pra v3.23.1 — split intencional pra você testar o HUB isolado primeiro. Pode ser que regras se ativem 40-60px antes/depois do que ativavam.'}
     ]

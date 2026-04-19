@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.15 — 18/04/2026
-> **Versão atual do HUB:** v3.23.0
+> **Versão do doc:** 2.16 — 18/04/2026
+> **Versão atual do HUB:** v3.23.1
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -229,7 +229,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.23.0` (18/04/2026).
+**Versão atual:** `v3.23.1` (18/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -237,6 +237,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.23.1 | Breakpoints unificados nos sub-apps (CRM/Preço/Manutenção). Projeto inteiro: 13 valores → 5. |
 | v3.23.0 | Breakpoints unificados no `hub.css` — escala universal `360/480/640/768/1024` (era 7 valores, agora 5). CSS vars em `:root`. Sub-apps em v3.23.1. |
 | v3.22.2 | A11y: init JS auto aplica `role=dialog`/`aria-modal`/`aria-labelledby` em todos `.modal-bg` + copia `title`→`aria-label` em buttons icon-only + trapFocus via MutationObserver + `prefers-reduced-motion` global. |
 | v3.22.1 | Chart.js lazy-load via `loadChartJs()` (Promise cached). `renderCharts`/`renderProducao` viram async. -220ms FCP boot inicial. |
@@ -486,4 +487,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.15 · 18/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.16 · 18/04/2026*
