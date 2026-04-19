@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.18 — 18/04/2026
-> **Versão atual do HUB:** v3.24.0
+> **Versão do doc:** 2.19 — 18/04/2026
+> **Versão atual do HUB:** v3.25.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -210,12 +210,12 @@ Aplicado em: cards de Cor (criador), Timeline (autor), modal Cor (histórico int
 
 `_resolveUserKey()` tolera registros legacy que gravaram nome em vez de chave (busca case-insensitive).
 
-### Identidade visual (v3.14.0)
+### Identidade visual (v3.14.0 + Aurora v3.25.0)
 Marca: letra F com braço do meio = ponto amarelo. SVG `<symbol>` no defs.
-- Sidenav logo: símbolo branco + ponto amarelo dentro do quadrado verde.
-- Splash + login: marca composta (símbolo + Fiobras + HUB).
-- Favicon: SVG inline data URI no `<link rel="icon">`.
-- PWA icons: gerados runtime via canvas.
+- **Ícone Aurora (v3.25.0):** caixa dark com glow verde emergente da base + símbolo F branco preservado por cima. Componente CSS `.aurora-icon` com 5 tamanhos (xs/sm/md/lg/xl). Usado em PWA icons (Canvas runtime), splash 120px, login brand block 44px, sidenav logo 34px.
+- **Login Glass (v3.25.0):** dark forçado + bg gradient com aurora verde + card backdrop-filter blur + brand block "Fiobras **HUB**" + dropdown user + CTA verde gradient. Sempre dark independente do tema escolhido pós-login.
+- Favicon: SVG inline data URI (mantém símbolo verde simples — aurora não rende em 16px).
+- PWA icons (192/512): gerados runtime via canvas com gradient + 4 radial gradients + símbolo F.
 
 ### Tags semânticas (v3.6.0)
 Componente `.tag` com 8 modificadores: `success`, `warning`, `info`, `submitted`, `review`, `danger`, `neutral`, `brand`. Tokens CSS em `:root` e `[data-theme="dark"]`. Padrão pill, ícone à esquerda, Poppins 500. `.tag--sm` pra densidades.
@@ -229,7 +229,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.24.0` (18/04/2026).
+**Versão atual:** `v3.25.0` (18/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -237,6 +237,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.25.0 | **Modernização visual** — ícone Aurora (PWA + splash + sidenav + login brand) + login glass (backdrop-filter blur, dark forçado, brand block, dropdown user, CTA gradient). Símbolo F atual preservado. |
 | v3.24.0 | PWA polish: botão "Instalar app" no header (Chrome/Edge/Android via `beforeinstallprompt`) + tooltip educativo iOS Safari + dark mode auto via `prefers-color-scheme` (respeita SO se nunca escolheu manual). |
 | v3.23.2 | `audit-log` e `active-sessions` viraram listeners lazy (ativam quando admin abre painel via `_activateXxx`/`_deactivateXxx`). -2 conexões WebSocket no boot. |
 | v3.23.1 | Breakpoints unificados nos sub-apps (CRM/Preço/Manutenção). Projeto inteiro: 13 valores → 5. |
@@ -489,4 +490,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.18 · 18/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.19 · 18/04/2026*

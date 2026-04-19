@@ -3,6 +3,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS HUB — CHANGELOG                                     ║
   ╠═══════════════════════════════════════════════════════════════╣
+  ║  v3.25.0  18/04/2026 Modernização visual: ícone Aurora       ║
+  ║    (PWA + splash + sidenav + login brand) + login glass.     ║
   ║  v3.24.0  18/04/2026 PWA polish: botão "Instalar app"        ║
   ║    no header (Chrome/Edge/Android) + tooltip iOS Safari +    ║
   ║    dark mode auto via prefers-color-scheme.                  ║
@@ -452,9 +454,10 @@
 <!-- Windows -->
 <meta name="msapplication-TileColor" content="#008835">
 <meta name="msapplication-TileImage" content="./icon-192.png">
-<meta name="theme-color" content="#008835">
+<meta name="theme-color" content="#0a100c"><!-- v3.25.0: dark inicial pro login glass -->
+<meta name="theme-color" content="#008835" media="(prefers-color-scheme: light)"><!-- atualizado por applyTheme após login -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/hub.css?v=3.24.0">
+<link rel="stylesheet" href="css/hub.css?v=3.25.0">
 </head>
 <body>
 <!-- v3.5.0: Biblioteca de ícones SVG (line stroke 1.5 round) — usar via <svg class="icon"><use href="#i-..."/></svg> -->
@@ -509,38 +512,40 @@
   </defs>
 </svg>
 
-<!-- ── Login ── -->
+<!-- ── Login (v3.25.0 — Glass + Aurora) ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-mark">
-      <svg class="login-mark-svg" viewBox="0 0 60 68" aria-hidden="true"><use href="#i-fiobras-symbol"/></svg>
-      <div class="login-mark-text">
-        <div class="login-logo">Fiobras</div>
-        <div class="login-sub">H U B</div>
+      <div class="aurora-icon aurora-sm" aria-hidden="true">
+        <svg viewBox="0 0 60 68"><use href="#i-fiobras-symbol-inv"/></svg>
       </div>
+      <div class="brand-name">Fiobras <b>HUB</b></div>
     </div>
-    <div class="login-line"></div>
+    <h2 class="login-title">Entrar na sua conta</h2>
+    <p class="login-subtitle">Acesso restrito · Fiobras Fios Tintos</p>
     <div class="login-field">
-      <label class="login-label">Usuário</label>
+      <label class="login-label" for="loginUser">Usuário</label>
       <select class="login-select" id="loginUser" onchange="onUserChange()">
         <option value="">Selecione...</option>
-        <!-- Opções dinâmicas adicionadas via _refreshLoginUserOptions() (v3.12.0) -->
+        <!-- Opções dinâmicas via _refreshLoginUserOptions() -->
       </select>
     </div>
     <div class="login-pass-wrap" id="loginPassWrap">
-      <label class="login-label">Senha</label>
-      <input class="login-input" type="password" id="loginPass" placeholder="Digite a senha" onkeydown="if(event.key==='Enter')doLogin()">
+      <label class="login-label" for="loginPass">Senha</label>
+      <input class="login-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
+    <div class="login-foot">Sistema interno · v3.25.0</div>
   </div>
 </div>
 
-<!-- ── Splash ── -->
+<!-- ── Splash (v3.25.0 — Aurora) ── -->
 <div class="splash hide" id="splash">
-  <svg class="splash-mark" viewBox="0 0 60 68" aria-hidden="true"><use href="#i-fiobras-symbol-inv"/></svg>
-  <div class="splash-brand">Fiobras</div>
-  <div class="splash-sub">H U B</div>
+  <div class="aurora-icon aurora-lg" aria-hidden="true">
+    <svg viewBox="0 0 60 68"><use href="#i-fiobras-symbol-inv"/></svg>
+  </div>
+  <div class="splash-name">Fiobras <b>HUB</b></div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
   <div class="splash-version" id="splashVersion">v2.8.1</div>
@@ -691,7 +696,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.24.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.25.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -2525,11 +2530,19 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.24.0';
+const CURRENT_VERSION = '3.25.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 const CHANGELOG = [
   {
-    v:'3.24.0', d:'18 abr 2026', current:true,
+    v:'3.25.0', d:'18 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Modernização visual: ícone Aurora aplicado em todos os pontos da marca.', desc:'Substitui o fundo verde sólido por uma "aurora" — base dark com glow verde emergindo da parte de baixo do ícone. Símbolo Fiobras (F branco com ponto amarelo, introduzido v3.14.0) preservado em 100% dos lugares.\n\nOnde aparece:\n• Ícones PWA (192px e 512px) — função _buildHubIcon refatorada pra desenhar gradient + 3 radial gradients (glow verde principal, glow secundário, highlight branco) + símbolo F em cima\n• Splash screen do HUB (120px)\n• Brand block do login (44px)\n• Logo da sidenav desktop (34px com box-shadow simulando aurora)\n• Apple touch icon (mesmo manifest icon de 512px)\n\nFavicon (32px) mantém o símbolo verde original — em pixels tão pequenos o aurora não rende bem.\n\nReceita CSS reutilizável: .aurora-icon com 5 tamanhos (.aurora-xs/sm/md/lg/xl).'},
+      {type:'feat', title:'Login Glass — tela de entrada redesenhada.', desc:'Background dark com aurora verde emergente da base. Card centralizado com backdrop-filter blur(24px) + saturate. Brand block "Fiobras HUB" com ícone aurora 44px ao lado.\n\nHierarquia interna:\n• Brand block (centralizado, ícone + nome)\n• Título "Entrar na sua conta" (Outfit 400 1.5rem)\n• Subtítulo "Acesso restrito · Fiobras Fios Tintos" (Poppins 300, muted)\n• Campo Usuário (dropdown estilo glass)\n• Campo Senha (slide-down condicional)\n• CTA "ENTRAR" verde com gradient + glow + uppercase letterspacing\n• Footer "Sistema interno · v3.25.0"\n\nLogin sempre dark independente do tema escolhido pelo user pós-login. Animações de boot (bg fade-in 0.4s + card slide-up 0.5s) respeitam prefers-reduced-motion.\n\nLógica de auth (SHA-256 + salt + Anonymous Auth + senha condicional + força-logout) intacta. Mudança 100% visual.'},
+      {type:'feat', title:'Splash redesenhada com aurora 120px.', desc:'Mesma identidade do login: bg dark com glow + ícone aurora central + nome "Fiobras HUB" abaixo + barra de progresso minimalista verde animada.'}
+    ]
+  },
+  {
+    v:'3.24.0', d:'18 abr 2026',
     items:[
       {type:'feat', title:'Botão "Instalar app" no header (Chrome/Edge/Android).', desc:'Quando o app atende critérios PWA (já atende: SW + manifest + HTTPS), o navegador dispara beforeinstallprompt. Capturamos esse evento e revelamos botão verde "↓ Instalar app" no canto direito do header. Click → diálogo nativo de instalação. Aceita = botão some.\n\nMobile: botão vira ícone só (sem o texto), pra não competir com a pílula de versão.\n\niOS Safari: o evento beforeinstallprompt NÃO é disparado lá. Quando detecta Safari iOS + não-instalado, mostra botão que ao clicar abre tooltip educativo: "Toque em Compartilhar → Adicionar à Tela de Início". Tooltip mostra uma vez (flag em localStorage); usuário marca "Entendi" e some pra sempre.'},
       {type:'feat', title:'Dark mode automático respeita SO.', desc:'Antes: app sempre abria em light, exceto se user clicasse no toggle "Tema escuro". Agora respeita prefers-color-scheme do SO no boot — mas SÓ se user nunca tiver escolhido manualmente.\n\nLógica:\n• Tem fiobras-dash-theme no localStorage? Usa essa preferência (mantém comportamento atual pra usuários antigos).\n• Não tem? Usa prefers-color-scheme do SO como default.\n\nBonus: listener pra mudanças do SO em tempo real — se você muda o tema do macOS/Windows, o HUB acompanha (só se nunca escolheu manual). Toggle continua funcionando e vira fonte da verdade quando clicado.'}
@@ -3221,23 +3234,62 @@ function checkChangelog(){
 // ── PWA Manifest ─────────────────────────────────────────────────────────
 // v3.14.0: ícones gerados em runtime via canvas a partir do símbolo SVG novo
 function _buildHubIcon(size){
+  // v3.25.0 — Aurora: fundo dark com glow verde emergente da base + F branco preservado
   const c = document.createElement('canvas');
   c.width = size; c.height = size;
   const ctx = c.getContext('2d');
-  // Fundo verde com cantos arredondados (rx ≈ 22% do tamanho)
   const rx = Math.round(size * 0.22);
-  ctx.fillStyle = '#008835';
-  // Path arredondado
-  ctx.beginPath();
-  ctx.moveTo(rx, 0); ctx.lineTo(size - rx, 0); ctx.quadraticCurveTo(size, 0, size, rx);
-  ctx.lineTo(size, size - rx); ctx.quadraticCurveTo(size, size, size - rx, size);
-  ctx.lineTo(rx, size); ctx.quadraticCurveTo(0, size, 0, size - rx);
-  ctx.lineTo(0, rx); ctx.quadraticCurveTo(0, 0, rx, 0); ctx.closePath();
-  ctx.fill();
-  // F branco — proporções do símbolo 60×68 escaladas pra 200×200
-  // rect vertical: x=70 y=52 w=20 h=96 (no 200×200), em proporção: x=0.35 y=0.26 w=0.10 h=0.48
-  // rect horizontal: x=70 y=52 w=68 h=20 (no 200×200), em proporção: x=0.35 y=0.26 w=0.34 h=0.10
-  // circle: cx=130 cy=110 r=14 (no 200×200), em proporção: cx=0.65 cy=0.55 r=0.07
+
+  // Path arredondado pra clipping (todo o desenho fica dentro da forma)
+  function roundedPath(){
+    ctx.beginPath();
+    ctx.moveTo(rx, 0); ctx.lineTo(size - rx, 0); ctx.quadraticCurveTo(size, 0, size, rx);
+    ctx.lineTo(size, size - rx); ctx.quadraticCurveTo(size, size, size - rx, size);
+    ctx.lineTo(rx, size); ctx.quadraticCurveTo(0, size, 0, size - rx);
+    ctx.lineTo(0, rx); ctx.quadraticCurveTo(0, 0, rx, 0); ctx.closePath();
+  }
+  ctx.save();
+  roundedPath(); ctx.clip();
+
+  // 1) Base dark (gradient linear topo→base)
+  const baseGrad = ctx.createLinearGradient(0, 0, 0, size);
+  baseGrad.addColorStop(0, '#0A0F0A');
+  baseGrad.addColorStop(1, '#091A0F');
+  ctx.fillStyle = baseGrad;
+  ctx.fillRect(0, 0, size, size);
+
+  // 2) Glow verde emergente da base (radial gradient centrado abaixo)
+  const glow1 = ctx.createRadialGradient(size/2, size*1.05, size*0.05, size/2, size*1.05, size*0.85);
+  glow1.addColorStop(0, 'rgba(0,136,53,0.95)');
+  glow1.addColorStop(0.5, 'rgba(0,136,53,0.45)');
+  glow1.addColorStop(1, 'rgba(0,136,53,0)');
+  ctx.fillStyle = glow1;
+  ctx.fillRect(0, 0, size, size);
+
+  // 3) Glow secundário verde claro (mais concentrado na base)
+  const glow2 = ctx.createRadialGradient(size/2, size*0.98, size*0.02, size/2, size*0.98, size*0.45);
+  glow2.addColorStop(0, 'rgba(76,185,112,0.55)');
+  glow2.addColorStop(1, 'rgba(76,185,112,0)');
+  ctx.fillStyle = glow2;
+  ctx.fillRect(0, 0, size, size);
+
+  // 4) Highlight branco translúcido (linha brilhante na base)
+  const hl = ctx.createRadialGradient(size/2, size*0.95, size*0.01, size/2, size*0.95, size*0.30);
+  hl.addColorStop(0, 'rgba(255,255,255,0.38)');
+  hl.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = hl;
+  ctx.fillRect(0, 0, size, size);
+
+  // 5) Highlight verde sutil no topo
+  const topHl = ctx.createLinearGradient(0, 0, 0, size*0.15);
+  topHl.addColorStop(0, 'rgba(0,136,53,0.18)');
+  topHl.addColorStop(1, 'rgba(0,136,53,0)');
+  ctx.fillStyle = topHl;
+  ctx.fillRect(0, 0, size, size*0.15);
+
+  ctx.restore();
+
+  // 6) Símbolo F branco preservado (mesmas proporções da v3.14.0)
   ctx.fillStyle = '#FFFFFF';
   const fx = Math.round(size * 0.35);
   const fy = Math.round(size * 0.26);
@@ -3247,7 +3299,7 @@ function _buildHubIcon(size){
   const hh = Math.round(size * 0.10);
   ctx.fillRect(fx, fy, vw, vh);
   ctx.fillRect(fx, fy, hw, hh);
-  // Ponto amarelo
+  // Ponto amarelo (braço do meio do F)
   ctx.fillStyle = '#FFCB00';
   const cx = Math.round(size * 0.65);
   const cy = Math.round(size * 0.55);
@@ -3255,6 +3307,7 @@ function _buildHubIcon(size){
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fill();
+
   return c.toDataURL('image/png');
 }
 (function(){

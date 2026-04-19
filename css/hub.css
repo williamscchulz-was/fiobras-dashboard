@@ -2,6 +2,132 @@
    v3.0.0 · split extraído de index.html
    Futuro: dividir em base.css / shell.css / <módulo>.css por módulo. */
 
+/* ═══ Aurora icon · v3.25.0 ══════════════════════════════════════════════
+   Componente reutilizável: caixa dark com glow verde emergente da base +
+   símbolo Fiobras (F + ponto amarelo) preservado por cima. Aplicado em
+   PWA icons (Canvas), splash, login brand block, header logo. */
+.aurora-icon{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#0A0F0A 0%,#091A0F 100%);
+  box-shadow:
+    inset 0 -80px 60px -30px rgba(0,136,53,0.95),
+    inset 0 -40px 30px -8px rgba(76,185,112,0.55),
+    inset 0 -20px 20px -6px rgba(255,255,255,0.38),
+    inset 0 6px 6px -2px rgba(0,136,53,0.18),
+    0 12px 30px -10px rgba(0,0,0,.5);
+  overflow:hidden;
+  flex-shrink:0;
+}
+.aurora-icon > svg{position:relative;z-index:1;width:62%;height:62%;}
+/* Tamanhos (raio = 22% do lado) */
+.aurora-xs{width:32px;height:32px;border-radius:7px;}
+.aurora-sm{width:44px;height:44px;border-radius:10px;}
+.aurora-md{width:80px;height:80px;border-radius:18px;}
+.aurora-lg{width:120px;height:120px;border-radius:26px;}
+.aurora-xl{width:200px;height:200px;border-radius:44px;}
+
+/* Splash + login brand + reset shell */
+.brand-block{display:inline-flex;align-items:center;gap:10px}
+.brand-name{font-family:'Outfit',sans-serif;font-weight:500;font-size:1.1rem;letter-spacing:-.01em;color:inherit;opacity:.9}
+.brand-name b{font-weight:900;letter-spacing:-.02em}
+
+/* ═══ Login Glass · v3.25.0 ══════════════════════════════════════════════
+   Tela de login redesenhada: dark forçado + aurora bg + card glass. */
+.login-screen{
+  position:fixed;inset:0;z-index:9000;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(0,136,53,0.40) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(0,211,95,0.25) 0%, transparent 45%),
+    linear-gradient(180deg, #0a100c 0%, #050906 100%);
+  color:#fff;
+  animation:lg-bg-in .4s ease-out;
+}
+.login-screen.hide{display:none;}
+.login-card{
+  width:min(440px,88%);
+  background:rgba(12,18,14,0.55);
+  backdrop-filter:blur(24px) saturate(1.2);
+  -webkit-backdrop-filter:blur(24px) saturate(1.2);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:28px;
+  padding:40px 36px 28px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,0.06);
+  color:#fff;
+  animation:lg-card-in .5s cubic-bezier(.2,.8,.2,1);
+}
+.login-mark{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;flex-direction:row;}
+.login-mark-svg{display:none;} /* hide legacy mark — substituído pelo aurora */
+.login-mark-text{display:none;} /* hide legacy text */
+.login-mark .login-logo{display:none;}
+.login-mark .login-sub{display:none;}
+.login-mark > .brand-name{font-family:'Outfit',sans-serif;font-weight:500;font-size:1.15rem;letter-spacing:-.01em;color:#fff;opacity:.92;}
+.login-mark > .brand-name b{font-weight:900;letter-spacing:-.02em;}
+.login-line{display:none;}
+.login-title{font-family:'Outfit',sans-serif;font-weight:400;font-size:1.5rem;text-align:center;color:#fff;margin:0 0 4px;letter-spacing:-.01em;}
+.login-subtitle{font-family:'Poppins';font-weight:300;font-size:.78rem;color:rgba(255,255,255,.55);text-align:center;margin:0 0 28px;}
+.login-field{margin-bottom:16px;}
+.login-label{font-family:'Poppins';font-weight:500;font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.55);margin-bottom:6px;display:block;}
+.login-select,.login-input{
+  width:100%;height:48px;background:rgba(0,0,0,0.28);border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;padding:0 16px;font-family:'Poppins',sans-serif;font-weight:500;font-size:16px;color:#fff;outline:none;
+  transition:border-color .15s,background .15s,box-shadow .15s;
+  appearance:none;-webkit-appearance:none;
+}
+.login-input::placeholder{color:rgba(255,255,255,.3);}
+.login-select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff66' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:calc(100% - 14px) center;padding-right:38px;
+  cursor:pointer;
+}
+.login-select option{background:#0a100c;color:#fff;}
+.login-input:focus,.login-select:focus{border-color:rgba(0,211,95,0.6);background:rgba(0,0,0,0.38);box-shadow:0 0 0 3px rgba(0,211,95,0.12);}
+.login-pass-wrap{margin-bottom:16px;}
+.login-btn{
+  width:100%;height:52px;background:linear-gradient(180deg,#00a241 0%,#007a2e 100%);
+  color:#fff;border:0;border-radius:14px;
+  font-family:'Poppins',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,136,53,.35),inset 0 1px 0 rgba(255,255,255,0.18);
+  transition:all .15s;
+  margin-top:8px;
+}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,136,53,.5),inset 0 1px 0 rgba(255,255,255,0.22);}
+.login-btn:active{transform:translateY(0);}
+.login-err{font-family:'Poppins';font-size:.72rem;color:#FCA5A5;text-align:center;margin-top:10px;min-height:1.2em;}
+.login-foot{font-family:'DM Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.3);text-align:center;margin-top:24px;}
+@keyframes lg-bg-in{from{opacity:0}to{opacity:1}}
+@keyframes lg-card-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+@media (max-width: 480px){
+  .login-card{padding:30px 24px 22px;border-radius:24px;}
+  .login-title{font-size:1.2rem;}
+  .login-subtitle{font-size:.72rem;margin-bottom:20px;}
+  .login-select,.login-input{height:46px;}
+  .login-btn{height:50px;}
+}
+
+/* ═══ Splash redesenhada · v3.25.0 ═════════════════════════════════════ */
+.splash{
+  position:fixed;inset:0;z-index:9001;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(0,136,53,0.40) 0%, transparent 55%),
+    linear-gradient(180deg, #0a100c 0%, #050906 100%);
+  color:#fff;
+  animation:lg-bg-in .35s ease-out;
+}
+.splash.hide{display:none;}
+.splash-mark{display:none;} /* hide legacy SVG, substituído pelo aurora */
+.splash-brand,.splash-sub{display:none;} /* hide legacy text */
+.splash-bar-wrap{width:200px;height:2px;background:rgba(255,255,255,0.08);border-radius:1px;overflow:hidden;}
+.splash-bar{height:100%;background:linear-gradient(90deg,transparent,#00b347,transparent);animation:splashBar 1.4s linear infinite;width:60%;}
+.splash-user{font-family:'Poppins';font-size:.78rem;color:rgba(255,255,255,.65);}
+.splash-name{font-family:'Outfit',sans-serif;font-weight:300;font-size:1.5rem;color:rgba(255,255,255,.85);letter-spacing:-.01em;}
+.splash-name b{font-weight:900;letter-spacing:-.02em;}
+.splash-version{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1.5px;}
+@keyframes splashBar{from{transform:translateX(-100%)}to{transform:translateX(200%)}}
+
 /* ═══ Botão "Instalar app" · v3.24.0 ════════════════════════════════════ */
 .hdr-install-btn{
   display:inline-flex;align-items:center;gap:6px;
@@ -333,14 +459,22 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   height:60px;padding:0 16px;gap:10px;margin-bottom:14px;
   flex-shrink:0;
 }
+/* v3.25.0: sidenav-logo agora usa o aurora-icon (mantém tamanho/transição) */
 .sidenav-logo{
   width:34px;height:34px;border-radius:11px;
-  background:linear-gradient(135deg,#00A040,#006B2A);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 18px rgba(0,136,53,.28);
   flex-shrink:0;cursor:pointer;
   opacity:0;transform:scale(.7);pointer-events:none;
   transition:opacity .22s ease,transform .22s ease;
+  /* Aurora background (mesma receita do .aurora-icon) */
+  background:linear-gradient(180deg,#0A0F0A 0%,#091A0F 100%);
+  box-shadow:
+    inset 0 -28px 22px -10px rgba(0,136,53,0.95),
+    inset 0 -14px 12px -3px rgba(76,185,112,0.55),
+    inset 0 -6px 6px -2px rgba(255,255,255,0.32),
+    inset 0 2px 2px -1px rgba(0,136,53,0.18),
+    0 4px 12px -4px rgba(0,0,0,.5);
+  overflow:hidden;
 }
 .sidenav.expanded .sidenav-logo{opacity:1;transform:scale(1);pointer-events:auto;}
 .sidenav-logo-txt{font-family:'Outfit',sans-serif;font-size:15px;font-weight:900;color:#fff;letter-spacing:-.5px;}
