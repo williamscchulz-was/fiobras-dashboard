@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.26.0', d:'19 abr 2026', current:true,
+    v:'3.27.0', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Design tokens compartilhados (/css/tokens.css).', desc:'Antes: cada sub-app tinha :root próprio com vars duplicadas (--green declarado 4 vezes em 4 arquivos). Mudar uma cor exigia editar 4 lugares.\n\nAgora: novo arquivo /css/tokens.css com 30+ tokens semânticos:\n• Surfaces: --t-bg, --t-surface, --t-surface-2/-3, --t-bg-deep\n• Borders: --t-border, --t-border-2/-3\n• Text: --t-text, --t-text-2, --t-muted, --t-muted-2\n• Brand: --t-brand, --t-brand-hover, --t-brand-soft\n• Status: --t-info/success/warn/danger (com variantes -soft)\n• Radius: --t-radius-xs/sm/md/lg/xl/pill (importado do v3.26.0)\n• Tipografia: --t-font-display/body/mono\n• Sombras: --t-shadow-sm/md/lg/xl\n• Dark mode: variantes em [data-theme="dark"]\n\n4 apps linkam o tokens.css antes do CSS interno. Aliases retrocompat (--green, --red, etc.) garantem que CSS antigo continua funcionando enquanto migra naturalmente.\n\nAdicionado ao PRECACHE do SW. Cache hit instantâneo na 2ª visita.\n\nGanho: single source of truth. Mudou cor brand uma vez = 4 apps mudam juntos.'}
+    ]
+  },
+  {
+    v:'3.26.0', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Border-radius padronizado em escala universal.', desc:'Antes: cada arquivo usava raios diferentes (HUB 12px, CRM 8px, Preço 8/14/16, Manutenção 8/10/12). Sem consistência visual entre HUB e sub-apps.\n\nAgora escala universal de 6 valores no :root do hub.css:\n• --t-radius-xs: 4px (badges, micro-tags, progress bars)\n• --t-radius-sm: 8px (inputs, buttons, chips)\n• --t-radius-md: 12px (cards, painéis pequenos)\n• --t-radius-lg: 16px (modais, painéis grandes)\n• --t-radius-xl: 20px (pills arredondadas grandes)\n• --t-radius-pill: 999px (pílulas totais)\n\nMigração: 212 substituições em 4 arquivos (hub.css 85, CRM 37, Preço 29, Manutenção 61). Mass replace conservador via regex específica em border-radius:Npx — round to nearest scale value.\n\nGanho: UI mais coerente entre os 4 apps. Manutenção futura mais fácil (vars semânticas em vez de magic numbers).'}
     ]

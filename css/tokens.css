@@ -1,0 +1,130 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Fiobras HUB — DESIGN TOKENS (v3.27.0)
+   ═══════════════════════════════════════════════════════════════════════
+   Single source of truth pra cores, raios, breakpoints e tipografia.
+   Compartilhado entre HUB (index.html) e os 3 sub-apps via:
+       <link rel="stylesheet" href="/css/tokens.css?v=X.Y.Z">
+
+   Light mode é default (data-theme="light" no <html>).
+   Dark mode aplica via [data-theme="dark"] no final do arquivo.
+
+   IMPORTANTE: vars antigas dos sub-apps (--green, --red, etc) ficam
+   como ALIASES dos tokens novos pra não quebrar CSS existente.
+*/
+
+:root {
+  /* ─── Surfaces ─────────────────────────────────────────────────────── */
+  --t-bg:           #EDF1EA;   /* fundo do app */
+  --t-bg-deep:      #E3E7DE;   /* fundo mais escuro (sidenav, áreas embutidas) */
+  --t-surface:      #FFFFFF;   /* superfície de cards/modais */
+  --t-surface-2:    #F4F6F0;   /* superfície secundária (hover, sub-painéis) */
+  --t-surface-3:    #EAEEE3;   /* superfície terciária */
+
+  /* ─── Borders ──────────────────────────────────────────────────────── */
+  --t-border:       #E3E7DE;   /* borda padrão */
+  --t-border-2:     #D4DAC9;   /* borda média (separadores) */
+  --t-border-3:     #C5CDB8;   /* borda forte (focus, hover) */
+
+  /* ─── Text ─────────────────────────────────────────────────────────── */
+  --t-text:         #1B1F18;   /* texto principal */
+  --t-text-2:       #3D4337;   /* texto secundário (subtitles) */
+  --t-muted:        #6B7166;   /* texto muted (labels, captions) */
+  --t-muted-2:      #9CA295;   /* texto muito muted (placeholders, eyebrows) */
+
+  /* ─── Brand (Fiobras) ──────────────────────────────────────────────── */
+  --t-brand:        #008835;   /* verde Fiobras principal */
+  --t-brand-hover:  #006B2A;   /* hover/pressed */
+  --t-brand-soft:   #E6F4EC;   /* fundo brand suave */
+  --t-brand-soft-2: #C7E5D2;   /* fundo brand médio */
+  --t-brand-2:      #00A040;   /* verde claro (gradient stops) */
+  --t-brand-3:      #00B347;   /* verde mais claro (highlights) */
+
+  /* ─── Accent (amarelo) ─────────────────────────────────────────────── */
+  --t-accent:       #FFCB00;   /* amarelo Fiobras (ponto do F) */
+  --t-accent-soft:  #FFF8D6;   /* fundo amarelo suave */
+
+  /* ─── Status semânticos ────────────────────────────────────────────── */
+  --t-info:         #2563EB;   /* azul info */
+  --t-info-soft:    #DBEAFE;
+  --t-success:      #10B981;   /* verde sucesso (não brand) */
+  --t-success-soft: #D1FAE5;
+  --t-warn:         #EA580C;   /* laranja warning */
+  --t-warn-soft:    #FFEDD5;
+  --t-warn-2:       #D97706;   /* amarelo escuro alerta */
+  --t-danger:       #DC2626;   /* vermelho perigo */
+  --t-danger-soft:  #FEE2E2;
+  --t-purple:       #7C3AED;   /* roxo (Jacques avatar, etc) */
+  --t-purple-soft:  #EDE9FE;
+
+  /* ─── Border radius (v3.26.0) ─────────────────────────────────────── */
+  --t-radius-xs:    4px;
+  --t-radius-sm:    8px;
+  --t-radius-md:    12px;
+  --t-radius-lg:    16px;
+  --t-radius-xl:    20px;
+  --t-radius-pill:  999px;
+
+  /* ─── Breakpoints (v3.23.0) — só documentação, não funcionam em @media */
+  --bp-xs:   360px;
+  --bp-sm:   480px;
+  --bp-md:   640px;
+  --bp-lg:   768px;
+  --bp-xl:   1024px;
+
+  /* ─── Tipografia ───────────────────────────────────────────────────── */
+  --t-font-display: 'Outfit', sans-serif;
+  --t-font-body:    'Poppins', sans-serif;
+  --t-font-mono:    'DM Mono', monospace;
+
+  /* ─── Shadows ──────────────────────────────────────────────────────── */
+  --t-shadow-sm:    0 1px 2px rgba(0,0,0,.04);
+  --t-shadow-md:    0 2px 8px rgba(0,0,0,.06);
+  --t-shadow-lg:    0 8px 24px rgba(0,0,0,.10);
+  --t-shadow-xl:    0 16px 40px rgba(0,0,0,.14);
+
+  /* ─── Aliases pra retrocompat com CSS antigo ──────────────────────── */
+  /* Sub-apps usam --green, --red, etc. Mapeamento direto pros tokens. */
+  --green:    var(--t-brand);
+  --green2:   var(--t-brand-hover);
+  --green-l:  var(--t-brand-soft-2);
+  --green-ll: var(--t-brand-soft);
+  --blue:     var(--t-info);
+  --blue-l:   var(--t-info-soft);
+  --yellow:   var(--t-accent);
+  --yellow-l: var(--t-accent-soft);
+  --red:      var(--t-danger);
+  --red-l:    var(--t-danger-soft);
+  --orange:   var(--t-warn);
+  --orange-l: var(--t-warn-soft);
+  --purple:   var(--t-purple);
+  --purple-l: var(--t-purple-soft);
+}
+
+/* ─── Dark mode ──────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --t-bg:           #1C1C1E;
+  --t-bg-deep:      #0A0A0A;
+  --t-surface:      #2C2C2E;
+  --t-surface-2:    #252527;
+  --t-surface-3:    #1F1F21;
+
+  --t-border:       #3A3A3C;
+  --t-border-2:     #4A4A4C;
+  --t-border-3:     #5A5A5C;
+
+  --t-text:         #F5F5F7;
+  --t-text-2:       #C7C7CC;
+  --t-muted:        #8E8E93;
+  --t-muted-2:      #6E6E72;
+
+  /* Brand fica igual no dark (verde funciona bem em ambos) */
+  --t-brand-soft:   #1A2E1F;
+  --t-brand-soft-2: #2A4030;
+
+  /* Status soft mais escuros */
+  --t-info-soft:    #1A2E45;
+  --t-success-soft: #1A3A28;
+  --t-warn-soft:    #3A2410;
+  --t-danger-soft:  #3A1818;
+  --t-purple-soft:  #2A1F45;
+}
