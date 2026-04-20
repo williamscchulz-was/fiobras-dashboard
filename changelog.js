@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.28.0', d:'19 abr 2026', current:true,
+    v:'3.29.0', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Imagens com loading="lazy" + decoding="async".', desc:'Todas as 12 tags <img> nos templates do HUB e Manutenção (Timeline fotos, Cor detalhe, Minha Conta avatar, modal lightbox, preview de upload) agora têm loading="lazy" + decoding="async".\n\nGanho:\n• Browser só baixa a imagem quando ela tá perto de aparecer no viewport\n• decoding="async" libera o main thread durante decode\n• Timeline com 4+ registros: economiza ~200KB no boot inicial\n• Cor detalhe: foto só baixa quando user abre o modal\n\nNão afeta imagens base64 inline (já estão no DOM).'}
+    ]
+  },
+  {
+    v:'3.28.0', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Modais viraram bottom-sheet em mobile.', desc:'Antes: em mobile, modais apareciam como caixinhas pequenas centralizadas no meio da tela — difícil ler em iPhone Pro Max, fora do padrão moderno.\n\nAgora: em telas ≤640px, modais com classe .modal-bg viram slide-up cobrindo a base com:\n• Drag handle (barra cinza) no topo, indicando que pode arrastar\n• Border-radius 20px nos cantos superiores (Apple-like)\n• Animação slide-up 280ms cubic-bezier (suave)\n• Padding-bottom respeita safe-area-inset (notch/home bar)\n• max-height 90vh + scroll interno se conteúdo grande\n• Largura cheia da tela (mais espaço pra ler)\n\nRegra UNIVERSAL no /css/tokens.css — aplica nos 4 apps (HUB, CRM, Preço, Manutenção) automaticamente. Desktop não muda (modal continua centralizado).\n\nRespeita prefers-reduced-motion (animação instantânea — já coberto pelo bloco global v3.22.2).'}
     ]
