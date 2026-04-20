@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.27.0', d:'19 abr 2026', current:true,
+    v:'3.28.0', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Modais viraram bottom-sheet em mobile.', desc:'Antes: em mobile, modais apareciam como caixinhas pequenas centralizadas no meio da tela — difícil ler em iPhone Pro Max, fora do padrão moderno.\n\nAgora: em telas ≤640px, modais com classe .modal-bg viram slide-up cobrindo a base com:\n• Drag handle (barra cinza) no topo, indicando que pode arrastar\n• Border-radius 20px nos cantos superiores (Apple-like)\n• Animação slide-up 280ms cubic-bezier (suave)\n• Padding-bottom respeita safe-area-inset (notch/home bar)\n• max-height 90vh + scroll interno se conteúdo grande\n• Largura cheia da tela (mais espaço pra ler)\n\nRegra UNIVERSAL no /css/tokens.css — aplica nos 4 apps (HUB, CRM, Preço, Manutenção) automaticamente. Desktop não muda (modal continua centralizado).\n\nRespeita prefers-reduced-motion (animação instantânea — já coberto pelo bloco global v3.22.2).'}
+    ]
+  },
+  {
+    v:'3.27.0', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Design tokens compartilhados (/css/tokens.css).', desc:'Antes: cada sub-app tinha :root próprio com vars duplicadas (--green declarado 4 vezes em 4 arquivos). Mudar uma cor exigia editar 4 lugares.\n\nAgora: novo arquivo /css/tokens.css com 30+ tokens semânticos:\n• Surfaces: --t-bg, --t-surface, --t-surface-2/-3, --t-bg-deep\n• Borders: --t-border, --t-border-2/-3\n• Text: --t-text, --t-text-2, --t-muted, --t-muted-2\n• Brand: --t-brand, --t-brand-hover, --t-brand-soft\n• Status: --t-info/success/warn/danger (com variantes -soft)\n• Radius: --t-radius-xs/sm/md/lg/xl/pill (importado do v3.26.0)\n• Tipografia: --t-font-display/body/mono\n• Sombras: --t-shadow-sm/md/lg/xl\n• Dark mode: variantes em [data-theme="dark"]\n\n4 apps linkam o tokens.css antes do CSS interno. Aliases retrocompat (--green, --red, etc.) garantem que CSS antigo continua funcionando enquanto migra naturalmente.\n\nAdicionado ao PRECACHE do SW. Cache hit instantâneo na 2ª visita.\n\nGanho: single source of truth. Mudou cor brand uma vez = 4 apps mudam juntos.'}
     ]

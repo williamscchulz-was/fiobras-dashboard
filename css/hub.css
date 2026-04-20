@@ -1580,11 +1580,9 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   .prazo-mes-val{font-size:.85rem;}
 }
 
-/* ── Modals ── */
-@media(max-width:480px){
-  .modal{padding:20px 16px !important;width:100% !important;max-width:100vw !important;border-radius:16px 14px 0 0 !important;max-height:90vh !important;}
-  .modal-bg.open{align-items:flex-end !important;}
-  /* Anti-zoom iOS (v2.5.0) — inputs devem ter ≥16px pra Safari não dar zoom on focus */
+/* ── Modals — regra bottom-sheet vive em /css/tokens.css (v3.28.0) ── */
+@media(max-width:640px){
+  /* Anti-zoom iOS — inputs ≥16px (mantido v2.5.0). Bottom-sheet em tokens.css */
   input[type="text"],input[type="number"],input[type="password"],input[type="email"],input[type="tel"],input[type="search"],select,textarea{font-size:16px !important;}
   .modal .mf input,.modal .mf select,.modal .mf textarea{padding:12px !important;min-height:44px;}
   .login-select,.login-input{font-size:16px !important;min-height:44px;}

@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.22 — 19/04/2026
-> **Versão atual do HUB:** v3.27.0
+> **Versão do doc:** 2.23 — 19/04/2026
+> **Versão atual do HUB:** v3.28.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -231,7 +231,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.27.0` (19/04/2026).
+**Versão atual:** `v3.28.0` (19/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -239,6 +239,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.28.0 | Modais bottom-sheet em mobile (≤640px) — slide-up, drag handle, safe-area-inset, animação 280ms. Regra universal em `tokens.css`. |
 | v3.27.0 | Design tokens compartilhados em `/css/tokens.css`. 30+ vars semânticas (--t-bg/surface/text/brand/etc + dark mode + radius + breakpoints + fontes + sombras). Linkado pelos 4 apps. Aliases retrocompat. |
 | v3.26.0 | Border-radius padronizado em escala universal (4/8/12/16/20/999). Vars `--t-radius-*` no `:root`. 212 substituições em 4 arquivos. |
 | v3.25.1 | Logo Aurora revertido pro original (verde sólido). CHANGELOG extraído pra `/changelog.js` (lazy-load, -95KB). Comments box-drawing → `/CHANGELOG.md` (-28KB). `index.html` 432→308KB. |
@@ -506,4 +507,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.22 · 19/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.23 · 19/04/2026*
