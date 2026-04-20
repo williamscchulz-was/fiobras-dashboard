@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.20 — 19/04/2026
-> **Versão atual do HUB:** v3.25.1
+> **Versão do doc:** 2.21 — 19/04/2026
+> **Versão atual do HUB:** v3.26.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -229,7 +229,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.25.1` (19/04/2026).
+**Versão atual:** `v3.26.0` (19/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -237,6 +237,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.26.0 | Border-radius padronizado em escala universal (4/8/12/16/20/999). Vars `--t-radius-*` no `:root`. 212 substituições em 4 arquivos. |
 | v3.25.1 | Logo Aurora revertido pro original (verde sólido). CHANGELOG extraído pra `/changelog.js` (lazy-load, -95KB). Comments box-drawing → `/CHANGELOG.md` (-28KB). `index.html` 432→308KB. |
 | v3.25.0 | **Modernização visual** — ícone Aurora (PWA + splash + sidenav + login brand) + login glass (backdrop-filter blur, dark forçado, brand block, dropdown user, CTA gradient). Símbolo F atual preservado. |
 | v3.24.0 | PWA polish: botão "Instalar app" no header (Chrome/Edge/Android via `beforeinstallprompt`) + tooltip educativo iOS Safari + dark mode auto via `prefers-color-scheme` (respeita SO se nunca escolheu manual). |
@@ -393,6 +394,17 @@ GitHub Pages rebuilda automaticamente em 1-2 min após push.
 
 ## 9. Padrões técnicos
 
+### 9.0.1 Border-radius (v3.26.0)
+Escala universal de 6 valores. **Todo novo `border-radius` deve usar a escala:**
+- `4px` (`--t-radius-xs`) — badges, micro-tags, progress bars
+- `8px` (`--t-radius-sm`) — inputs, buttons, chips
+- `12px` (`--t-radius-md`) — cards, painéis pequenos
+- `16px` (`--t-radius-lg`) — modais, painéis grandes
+- `20px` (`--t-radius-xl`) — pills arredondadas grandes
+- `999px` (`--t-radius-pill`) — pílulas totais
+
+CSS vars no `:root` do `hub.css`. Não usar valores intermediários (5, 7, 10, 14 etc).
+
 ### 9.0 Breakpoints (v3.23.0)
 Escala universal de 5 valores. **Todo novo `@media` deve usar exclusivamente esses números:**
 - `360px` (--bp-xs) — Galaxy A10, Android low-end
@@ -491,4 +503,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.20 · 19/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.21 · 19/04/2026*

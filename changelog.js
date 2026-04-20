@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.25.1', d:'19 abr 2026', current:true,
+    v:'3.26.0', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Border-radius padronizado em escala universal.', desc:'Antes: cada arquivo usava raios diferentes (HUB 12px, CRM 8px, Preço 8/14/16, Manutenção 8/10/12). Sem consistência visual entre HUB e sub-apps.\n\nAgora escala universal de 6 valores no :root do hub.css:\n• --t-radius-xs: 4px (badges, micro-tags, progress bars)\n• --t-radius-sm: 8px (inputs, buttons, chips)\n• --t-radius-md: 12px (cards, painéis pequenos)\n• --t-radius-lg: 16px (modais, painéis grandes)\n• --t-radius-xl: 20px (pills arredondadas grandes)\n• --t-radius-pill: 999px (pílulas totais)\n\nMigração: 212 substituições em 4 arquivos (hub.css 85, CRM 37, Preço 29, Manutenção 61). Mass replace conservador via regex específica em border-radius:Npx — round to nearest scale value.\n\nGanho: UI mais coerente entre os 4 apps. Manutenção futura mais fácil (vars semânticas em vez de magic numbers).'}
+    ]
+  },
+  {
+    v:'3.25.1', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Logo Aurora revertido pro original (verde sólido).', desc:'A v3.25.0 trouxe o ícone "aurora" (dark com glow verde emergindo da base). Decisão revisada: voltar pro ícone original — quadrado verde Brand com símbolo F branco + ponto amarelo (v3.14.0). Mais leve visualmente, mais reconhecível, mais coerente com o resto da identidade Fiobras (minimalista verde+amarelo).\n\nReverteu:\n• PWA icons (192/512) — função _buildHubIcon volta pra versão simples (1 fillStyle)\n• Splash 120px, login brand 44px, sidenav logo 34px — quadrado verde sólido\n• Componente .aurora-icon mantido como classe (compat) mas estilo agora é verde sólido\n\nMantido:\n• Login glass (bg dark + card backdrop-filter) — fica\n• Splash bg dark — fica\n• Símbolo F + ponto amarelo intacto'},
       {type:'high', title:'CHANGELOG extraído pra changelog.js (lazy-loaded).', desc:'Antes: array CHANGELOG de ~95KB carregado em runtime no boot, mesmo pra quem nunca abre a Central de Atualizações. Agora: vive em /changelog.js separado, carregado via dynamic script tag SÓ quando user clica na pílula de versão. Promise cached. Cache do SW (v3.22.0) garante 2ª visita instantânea.\n\nGanho: -95KB do bundle JS principal (-50ms parse em mobile fraco).'},
