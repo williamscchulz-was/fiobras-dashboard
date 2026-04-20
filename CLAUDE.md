@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.19 — 18/04/2026
-> **Versão atual do HUB:** v3.25.0
+> **Versão do doc:** 2.20 — 19/04/2026
+> **Versão atual do HUB:** v3.25.1
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -229,7 +229,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.25.0` (18/04/2026).
+**Versão atual:** `v3.25.1` (19/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -237,6 +237,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.25.1 | Logo Aurora revertido pro original (verde sólido). CHANGELOG extraído pra `/changelog.js` (lazy-load, -95KB). Comments box-drawing → `/CHANGELOG.md` (-28KB). `index.html` 432→308KB. |
 | v3.25.0 | **Modernização visual** — ícone Aurora (PWA + splash + sidenav + login brand) + login glass (backdrop-filter blur, dark forçado, brand block, dropdown user, CTA gradient). Símbolo F atual preservado. |
 | v3.24.0 | PWA polish: botão "Instalar app" no header (Chrome/Edge/Android via `beforeinstallprompt`) + tooltip educativo iOS Safari + dark mode auto via `prefers-color-scheme` (respeita SO se nunca escolheu manual). |
 | v3.23.2 | `audit-log` e `active-sessions` viraram listeners lazy (ativam quando admin abre painel via `_activateXxx`/`_deactivateXxx`). -2 conexões WebSocket no boot. |
@@ -490,4 +491,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.19 · 18/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.20 · 19/04/2026*
