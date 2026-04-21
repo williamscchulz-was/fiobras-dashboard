@@ -21,7 +21,7 @@
 <!-- Windows -->
 <meta name="msapplication-TileColor" content="#008835">
 <meta name="msapplication-TileImage" content="./icon-192.png">
-<meta name="theme-color" content="#008835"><!-- v3.36.0: fix calendário supressão -->
+<meta name="theme-color" content="#008835"><!-- v3.37.0: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
 <link rel="stylesheet" href="css/hub.css?v=3.33.0">
@@ -112,7 +112,7 @@
     </div>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.36.0</div>
+    <div class="login-foot">Sistema interno · v3.37.0</div>
   </div>
 </div>
 
@@ -272,7 +272,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.36.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.37.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -954,7 +954,7 @@
       <div id="geuTabs" class="geu-mods"></div>
       <div class="mc-hint" style="margin-top:6px">Abas com acesso limitado. Marque as que esse usuário pode ver.</div>
     </div>
-    <!-- v3.36.0 — Poderes (REGRA GERAL · permissões granulares) -->
+    <!-- v3.37.0 — Poderes (REGRA GERAL · permissões granulares) -->
     <div class="tl-form-field" id="geuPowersField">
       <label>⚡ Poderes</label>
       <div class="mc-hint" style="margin:0 0 8px">Permissões granulares por ação. Admins/Gerentes têm tudo automático — toggles aplicam só pra usuários comuns.</div>
@@ -1451,7 +1451,7 @@ window.abrirGerenciarUsuarios = () => {
   // Fecha dropdown
   const dd = document.getElementById('userDd'), user = document.getElementById('topbarUser');
   if(dd) dd.classList.remove('open'); if(user) user.classList.remove('open');
-  // v3.36.0: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
+  // v3.37.0: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
   if(typeof window.aplicarPowersSeed === 'function') window.aplicarPowersSeed();
   renderGuList();
   document.getElementById('guModal').classList.add('open');
@@ -1742,13 +1742,13 @@ window.abrirEditarUsuario = (userKey) => {
       return '<label class="geu-mod"><input type="checkbox" data-tab="' + tab + '" ' + (isOn?'checked':'') + '><span>' + lbl + '</span></label>';
     }).join('');
   }
-  // v3.36.0: render seção de poderes
+  // v3.37.0: render seção de poderes
   geuRenderPowers(userKey);
   // v3.21.0: aplica visibilidade da seção de módulos baseado no role
   geuOnRoleChange();
   document.getElementById('geuModal').classList.add('open');
 };
-// v3.36.0 — render dos toggles de poderes
+// v3.37.0 — render dos toggles de poderes
 window.geuRenderPowers = (userKey) => {
   const host = document.getElementById('geuPowers'); if(!host) return;
   const role = document.getElementById('geuRole').value || getEffectiveRole(userKey);
@@ -1805,7 +1805,7 @@ window.geuOnRoleChange = () => {
     if(modField) modField.style.display = '';
     if(hint) hint.style.display = 'none';
   }
-  // v3.36.0: re-render dos poderes (admin/gerente desabilita toggles)
+  // v3.37.0: re-render dos poderes (admin/gerente desabilita toggles)
   if(geuEditingKey && typeof geuRenderPowers === 'function') geuRenderPowers(geuEditingKey);
 };
 window.salvarEditarUsuario = () => {
@@ -1829,7 +1829,7 @@ window.salvarEditarUsuario = () => {
   // v3.21.0: limpa modulesAllowedOverride se for admin/gerente (eles vêem tudo automático)
   profile.modulesAllowedOverride = isFullAccess ? null : modulesAllowed;
   profile.tabsAllowedOverride = tabsOverride;
-  // v3.36.0: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
+  // v3.37.0: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
   if(!isFullAccess){
     const powers = {};
     document.querySelectorAll('#geuPowers input[data-power]').forEach(i => {
@@ -2051,7 +2051,7 @@ function getEffectiveModules(userKey){
   return DEFAULT_MODULES_BY_ROLE[role] || DEFAULT_MODULES_BY_ROLE.producao;
 }
 
-// v3.36.0 — Sistema de poderes (REGRA GERAL · auditoria v3.32+)
+// v3.37.0 — Sistema de poderes (REGRA GERAL · auditoria v3.32+)
 // Toda regra de permissão "X pode Y" é configurável por user no painel admin.
 // Helper canUser() lê de users-profile/{user}/powers/{poder}, com defaults por role.
 const POWER_DEFS = [
@@ -2084,7 +2084,7 @@ window.canUser = function(userKey, poder){
   if(!def) return false;
   return !!def[role];
 };
-// Aplica seed 1x (admin abrindo painel pela 1ª vez após v3.36.0).
+// Aplica seed 1x (admin abrindo painel pela 1ª vez após v3.37.0).
 // Cria nó powers/* pra cada user com defaults da role + overrides do POWER_SEED_OVERRIDES.
 window.aplicarPowersSeed = function(){
   if(localStorage.getItem('fiobras-powers-seed-v1')) return;
@@ -2213,7 +2213,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.36.0';
+const CURRENT_VERSION = '3.37.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.

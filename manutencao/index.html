@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.36.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.37.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -555,6 +555,23 @@ cursor: default;
   background: radial-gradient(circle, rgba(0,200,80,.09), transparent 70%);
   pointer-events: none;
 }
+/* v3.37.0 — Preventiva: toolbar (busca + count) + paginação */
+.prev-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+.prev-search-wrap { flex:1; min-width:220px; position:relative; }
+.prev-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--muted); }
+.prev-search { width:100%; padding:9px 12px 9px 36px; border:1.5px solid var(--border2); border-radius:8px; font-family:'Poppins',sans-serif; font-size:.8rem; color:var(--text); background:var(--surface); outline:none; transition:border-color .15s; }
+.prev-search:focus { border-color:var(--green); }
+.prev-count { font-family:'DM Mono',monospace; font-size:.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; white-space:nowrap; }
+.prev-pagination { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:14px; flex-wrap:wrap; }
+.prev-page-btn { min-width:32px; height:32px; padding:0 10px; border:1.5px solid var(--border2); background:var(--surface); color:var(--text); font-family:'Poppins',sans-serif; font-size:.7rem; font-weight:600; border-radius:6px; cursor:pointer; transition:.15s; display:inline-flex; align-items:center; justify-content:center; }
+.prev-page-btn:hover:not(:disabled) { border-color:var(--green); color:var(--green); }
+.prev-page-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
+.prev-page-btn:disabled { opacity:.35; cursor:not-allowed; }
+.prev-page-info { font-family:'DM Mono',monospace; font-size:.62rem; color:var(--muted); margin:0 8px; }
+[data-theme="dark"] .prev-search { background:#2C2C2E; border-color:#3A3A3C; color:#fff; }
+[data-theme="dark"] .prev-page-btn { background:#2C2C2E; border-color:#3A3A3C; color:#fff; }
+[data-theme="dark"] .prev-page-btn:hover:not(:disabled) { border-color:var(--green); }
+
 /* v3.36.0 — Kanban redesign (Ajuste 4) · board dark sempre · cards premium */
 .kanban-board.board-v2 {
   background: #0F1114;
@@ -2274,8 +2291,8 @@ display: none;
   </div>
 
   <div class="tabs" id="main-tabs">
-    <button class="tab-btn active" onclick="switchTab('dashboard',this)" id="tab-dashboard">Dashboard</button>
-    <button class="tab-btn" onclick="switchTab('kanban',this)" id="tab-kanban">Kanban</button>
+    <button class="tab-btn" onclick="switchTab('dashboard',this)" id="tab-dashboard">Dashboard</button>
+    <button class="tab-btn active" onclick="switchTab('kanban',this)" id="tab-kanban">Kanban</button>
     <button class="tab-btn admin-only" onclick="switchTab('preventiva',this)">Preventiva</button>
     <button class="tab-btn admin-only" onclick="switchTab('maquinas',this)">Máquinas</button>
     <button class="tab-btn admin-only" onclick="switchTab('historico',this)">Histórico</button>
@@ -2283,7 +2300,7 @@ display: none;
   </div>
 
   <!-- ── DASHBOARD PANEL ── -->
-  <div class="panel active" id="panel-dashboard">
+  <div class="panel" id="panel-dashboard">
     <div class="dash-wrap">
       <!-- KPIs -->
       <div class="dash-kpi-grid" id="dash-kpi-grid"></div>
@@ -2308,42 +2325,11 @@ display: none;
 
   <!-- ── KANBAN PANEL ── -->
 
-  <div class="panel" id="panel-kanban">
+  <div class="panel active" id="panel-kanban">
     <div class="kanban-wrap">
       <div id="kanban-banner" style="display:none;background:#fdeaea;border:1.5px solid #f0b0b0;border-radius:8px;padding:14px 16px;margin-bottom:14px"></div>
-      <div class="kanban-toolbar">
-        <div style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap">
-          <!-- Filtros avançados: chips colapsáveis -->
-          <div class="kfilter-bar" id="kfilter-bar">
-            <!-- Chip setor -->
-            <div class="kfilter-section" id="kchips-setor">
-              <button class="kfilter-chip" id="kchip-mecanica" onclick="toggleKChip('setor','mecanica',this)">Mecânica</button>
-              <button class="kfilter-chip" id="kchip-eletrica" onclick="toggleKChip('setor','eletrica',this)">Elétrica</button>
-            </div>
-            <div class="kfilter-divider"></div>
-            <!-- Chip tipo -->
-            <div class="kfilter-section">
-              <button class="kfilter-chip" id="kchip-preventiva" onclick="toggleKChip('tipo','preventiva',this)">Preventiva</button>
-              <button class="kfilter-chip" id="kchip-demanda"    onclick="toggleKChip('tipo','demanda',this)">Demanda</button>
-            </div>
-            <div class="kfilter-divider"></div>
-            <!-- Chip urgência -->
-            <div class="kfilter-section">
-              <button class="kfilter-chip" id="kchip-urg-alta"  onclick="toggleKChip('urg','alta',this)">Alta</button>
-              <button class="kfilter-chip" id="kchip-urg-media" onclick="toggleKChip('urg','media',this)">Média</button>
-              <button class="kfilter-chip" id="kchip-urg-baixa" onclick="toggleKChip('urg','baixa',this)">Baixa</button>
-            </div>
-            <!-- Filtro responsável (admin) -->
-            <div class="kfilter-divider" id="kf-div-resp" style="display:none"></div>
-            <div class="kfilter-section" id="kchips-resp" style="display:none"></div>
-            <!-- Limpar -->
-            <span class="kfilter-clear" id="kfilter-clear" onclick="limparKFiltros()" style="display:none">Limpar filtros</span>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;flex-shrink:0">
-          <button class="btn-primary" onclick="abrirModalDemanda()">+ Demanda</button>
-        </div>
-      </div>
+      <!-- v3.37.0: toolbar de pills removida (Ajuste auditoria 21/04/2026) · botão + Demanda agora fica na coluna A Fazer do board -->
+      <div class="kanban-toolbar" style="display:none"></div>
 
   <!-- v3.36.0 — Kanban redesign (Ajuste 4): board-v2 dark sempre -->
   <div class="kanban-board board-v2" id="kanban-board">
@@ -2378,6 +2364,14 @@ display: none;
       <div class="sec-title">Plano Preventivo</div>
       <button class="btn-primary" onclick="abrirModalPreventiva()">+ Preventiva</button>
     </div>
+    <!-- v3.37.0 — busca + paginação (5 por página) -->
+    <div class="prev-toolbar">
+      <div class="prev-search-wrap">
+        <svg class="prev-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="prev-search" class="prev-search" placeholder="Buscar por tarefa, equipamento, responsável..." oninput="_prevOnSearch(this.value)">
+      </div>
+      <div class="prev-count" id="prev-count">—</div>
+    </div>
     <!-- Desktop: tabela. Mobile (≤640px): cards via @media (v3.31.0) -->
     <div class="table-wrap prev-table-wrap">
       <table class="data-table">
@@ -2389,6 +2383,8 @@ display: none;
       </table>
     </div>
     <div class="prev-cards-mobile" id="prev-cards-mobile" aria-label="Lista de preventivas (mobile)"></div>
+    <!-- v3.37.0 — paginação -->
+    <div class="prev-pagination" id="prev-pagination" style="display:none"></div>
     <!-- CALENDÁRIO APRIMORADO -->
     <div class="cal-wrap" style="margin-top:28px">
       <!-- Header: nav + view tabs + legenda -->
@@ -2584,7 +2580,7 @@ display: none;
 <!-- Bottom nav flutuante mobile -->
 
 <nav class="bottom-nav" id="bottom-nav" style="display:none">
-  <button class="bnav-btn active" id="bnav-dashboard" onclick="switchTabMobile('dashboard',this)">
+  <button class="bnav-btn" id="bnav-dashboard" onclick="switchTabMobile('dashboard',this)">
     <div class="bnav-pill">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
@@ -2592,7 +2588,7 @@ display: none;
     </div>
     <span class="bnav-label">Dashboard</span>
   </button>
-  <button class="bnav-btn" id="bnav-kanban" onclick="switchTabMobile('kanban',this)">
+  <button class="bnav-btn active" id="bnav-kanban" onclick="switchTabMobile('kanban',this)">
     <div class="bnav-pill">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="7" height="18" rx="2"/><rect x="14" y="3" width="7" height="11" rx="2"/><rect x="14" y="17" width="7" height="4" rx="2"/>
@@ -3183,10 +3179,20 @@ function _resolveUserKey(nomeOuKey) {
   const nk = String(nomeOuKey).toLowerCase().trim();
   if (window.USERS && window.USERS[nk]) return nk;
   if (typeof USERS !== 'undefined' && USERS[nk]) return nk;
-  // Busca por nome (case-insensitive)
+  // Busca por nome em USERS (case-insensitive)
   const src = (typeof USERS !== 'undefined') ? USERS : (window.USERS||{});
   for (const k in src) {
     if ((src[k].nome||'').toLowerCase() === nk) return k;
+  }
+  // v3.37.0 — fallback: procura em state.userProfiles (users do HUB que não
+  // estão no USERS local do sub-app, ex: William). Matcha por chave ou nome.
+  if (state && state.userProfiles) {
+    if (state.userProfiles[nk]) return nk;
+    for (const k in state.userProfiles) {
+      const p = state.userProfiles[k] || {};
+      const pName = (p.nomeCompleto || p.nome || '').toLowerCase();
+      if (pName === nk || pName.startsWith(nk + ' ')) return k;
+    }
   }
   return null;
 }
@@ -4497,27 +4503,96 @@ function salvarCardAdmin() {
 }
 
 // ── PREVENTIVA ────────────────────────────────────────
+// v3.37.0 — state da tabela (busca + paginação)
+const PREV_PAGE_SIZE = 5;
+let _prevSearch = '';
+let _prevPage = 1;
+window._prevOnSearch = function(val) {
+  _prevSearch = String(val || '').toLowerCase().trim();
+  _prevPage = 1;
+  renderPreventiva();
+};
+window._prevGoPage = function(p) {
+  _prevPage = p;
+  renderPreventiva();
+};
+
 function renderPreventiva() {
   renderCalendario();
   const tbody = document.getElementById('prev-tbody') || document.getElementById('preventivas-tbody');
   const cardsHost = document.getElementById('prev-cards-mobile');
+  const pagEl = document.getElementById('prev-pagination');
+  const countEl = document.getElementById('prev-count');
   if (!tbody) return;
   // v3.31.1 — fix defensivo: aceita array, object, null ou undefined
-  let all;
+  let allRaw;
   if (Array.isArray(state.preventivas)) {
-    all = state.preventivas;
+    allRaw = state.preventivas;
   } else if (state.preventivas && typeof state.preventivas === 'object') {
-    // virou Object (Firebase às vezes retorna assim quando tem chaves não numéricas)
-    all = Object.entries(state.preventivas).map(([k, v]) => ({ ...v, _key: v._key || k }));
-    console.warn('[renderPreventiva] state.preventivas era object, convertido pra array (', all.length, 'items)');
+    allRaw = Object.entries(state.preventivas).map(([k, v]) => ({ ...v, _key: v._key || k }));
+    console.warn('[renderPreventiva] state.preventivas era object, convertido pra array (', allRaw.length, 'items)');
   } else {
-    all = [];
+    allRaw = [];
+  }
+  // v3.37.0 — filtro de busca
+  let all = allRaw;
+  if (_prevSearch) {
+    all = allRaw.filter(p => {
+      const maq = state.maquinas.find(m => m._key === (p.maqKey || p.maquinaKey));
+      const maqNome = maq ? (maq.tag + ' ' + maq.nome) : (p.equip || '');
+      const hay = ((p.tarefa||'') + ' ' + maqNome + ' ' + (p.resp||'') + ' ' + (p.setor||'') + ' ' + (p.obs||'')).toLowerCase();
+      return hay.includes(_prevSearch);
+    });
+  }
+  // Atualiza count
+  if (countEl) {
+    if (_prevSearch) countEl.textContent = all.length + ' de ' + allRaw.length + ' resultados';
+    else countEl.textContent = allRaw.length + ' preventiva' + (allRaw.length===1?'':'s');
   }
   if (!all.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhuma preventiva cadastrada.</td></tr>';
-    if (cardsHost) cardsHost.innerHTML = '<div class="empty-state" style="padding:32px 12px;text-align:center;color:var(--muted);font-size:0.78rem">Nenhuma preventiva cadastrada.</div>';
+    const msg = _prevSearch
+      ? 'Nenhuma preventiva encontrada pra "' + _prevSearch + '"'
+      : 'Nenhuma preventiva cadastrada.';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">' + msg + '</td></tr>';
+    if (cardsHost) cardsHost.innerHTML = '<div class="empty-state" style="padding:32px 12px;text-align:center;color:var(--muted);font-size:0.78rem">' + msg + '</div>';
+    if (pagEl) pagEl.style.display = 'none';
     return;
   }
+  // v3.37.0 — paginação
+  const totalPages = Math.ceil(all.length / PREV_PAGE_SIZE);
+  if (_prevPage > totalPages) _prevPage = 1;
+  const start = (_prevPage - 1) * PREV_PAGE_SIZE;
+  const pageItems = all.slice(start, start + PREV_PAGE_SIZE);
+  // Render paginação
+  if (pagEl) {
+    if (totalPages <= 1) {
+      pagEl.style.display = 'none';
+    } else {
+      pagEl.style.display = 'flex';
+      const btns = [];
+      btns.push('<button class="prev-page-btn" onclick="_prevGoPage(' + Math.max(1, _prevPage-1) + ')"' + (_prevPage === 1 ? ' disabled' : '') + '>‹</button>');
+      // Mostra todas as páginas se ≤7, senão usa janela com reticências
+      const pagesToShow = [];
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pagesToShow.push(i);
+      } else {
+        pagesToShow.push(1);
+        if (_prevPage > 3) pagesToShow.push('...');
+        for (let i = Math.max(2, _prevPage-1); i <= Math.min(totalPages-1, _prevPage+1); i++) pagesToShow.push(i);
+        if (_prevPage < totalPages - 2) pagesToShow.push('...');
+        pagesToShow.push(totalPages);
+      }
+      pagesToShow.forEach(p => {
+        if (p === '...') btns.push('<span class="prev-page-info">…</span>');
+        else btns.push('<button class="prev-page-btn' + (p === _prevPage ? ' active' : '') + '" onclick="_prevGoPage(' + p + ')">' + p + '</button>');
+      });
+      btns.push('<button class="prev-page-btn" onclick="_prevGoPage(' + Math.min(totalPages, _prevPage+1) + ')"' + (_prevPage === totalPages ? ' disabled' : '') + '>›</button>');
+      btns.push('<span class="prev-page-info">' + _prevPage + ' / ' + totalPages + '</span>');
+      pagEl.innerHTML = btns.join('');
+    }
+  }
+  // Renderiza só os items da página atual
+  all = pageItems;
   // v3.31.0: render duplo — tabela (desktop) + cards (mobile via @media)
   tbody.innerHTML = all.map(p => {
     const maq = state.maquinas.find(m => m._key === (p.maqKey || p.maquinaKey));
