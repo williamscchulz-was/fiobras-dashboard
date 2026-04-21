@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup v3.34 · Card de Máquina (Ajuste 1)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDF1EA;--surface:#fff;--surface2:#F4F6F0;--border:#E3E7DE;--border2:#CFD6C6;--text:#1B1F18;--muted:#6B7166;--muted2:#9CA295;
+    --green:#008835;--green-soft:#E6F4EC;--red:#DC2626;--blue:#2563EB;--amber:#D97706;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:'Poppins',sans-serif;color:var(--text);padding:32px 24px}
+  .wrap{max-width:1280px;margin:0 auto}
+  h1{font-family:'Outfit';font-weight:900;font-size:30px;margin:0 0 6px;letter-spacing:-.02em}
+  h1 .v{font-family:'DM Mono';font-size:12px;background:var(--green);color:#fff;padding:3px 8px;border-radius:6px;vertical-align:middle;margin-left:8px;font-weight:500}
+  .lead{color:var(--muted);font-size:14px;max-width:780px;margin-bottom:28px;line-height:1.55}
+  h2{font-family:'Outfit';font-weight:700;font-size:18px;margin:36px 0 12px;padding-top:18px;border-top:2px solid var(--border)}
+  h2:first-of-type{border-top:0;padding-top:0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+  .col-label{font-family:'DM Mono';font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;font-weight:500}
+
+  /* ══════════ ANTES / DEPOIS ══════════ */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+  @media(max-width:880px){.compare{grid-template-columns:1fr}}
+
+  /* ── ANTES (atual v3.32) ── */
+  .old-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .old-top{display:flex;justify-content:space-between;gap:12px}
+  .old-codigo{display:inline-block;background:var(--green-soft);color:var(--green);font-family:'DM Mono';font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;margin-bottom:6px}
+  .old-nome{font-family:'Outfit';font-weight:700;font-size:16px;margin-bottom:4px}
+  .old-meta{display:flex;gap:10px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+  .old-meta b{color:var(--text);font-weight:600}
+  .old-bugtext{color:var(--green);font-size:11px;margin-top:8px;background:linear-gradient(to right, transparent 60%, rgba(220,38,38,.15));padding:3px 6px;border-radius:4px}
+  .old-actions{display:flex;gap:4px}
+  .old-btn{padding:5px 9px;border:1px solid var(--border);background:transparent;border-radius:6px;color:var(--muted);cursor:pointer;font-size:11px}
+  .old-bug-tag{display:inline-block;background:rgba(220,38,38,.1);color:var(--red);font-family:'DM Mono';font-size:9.5px;padding:2px 6px;border-radius:3px;margin-left:6px;letter-spacing:.5px;text-transform:uppercase}
+
+  /* ── DEPOIS (novo design estilo Bank Account) ── */
+  .new-card{
+    background:linear-gradient(145deg, #1F2420 0%, #15181C 100%);
+    border:1px solid #2A2F2B;
+    border-radius:18px;
+    padding:22px 22px 20px;
+    color:#fff;
+    box-shadow:0 10px 30px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.08);
+    position:relative;
+    overflow:hidden;
+  }
+  /* glow sutil no canto */
+  .new-card:before{
+    content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;
+    background:radial-gradient(circle, rgba(0,200,80,.09), transparent 70%);
+    pointer-events:none;
+  }
+  .new-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;position:relative;z-index:1}
+  .new-eyebrow{font-family:'DM Mono';font-size:9.5px;color:#8E9490;text-transform:uppercase;letter-spacing:2px;font-weight:500}
+  .new-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(0,200,80,.12);color:#4ADE80;font-family:'Outfit';font-weight:700;font-size:9.5px;padding:4px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:1.2px;border:1px solid rgba(0,200,80,.25)}
+  .new-badge-dot{width:6px;height:6px;background:#4ADE80;border-radius:50%;box-shadow:0 0 6px #4ADE80}
+  .new-badge.parado{background:rgba(220,38,38,.12);color:#FCA5A5;border-color:rgba(220,38,38,.25)}
+  .new-badge.parado .new-badge-dot{background:#FCA5A5;box-shadow:0 0 6px #FCA5A5}
+  .new-badge.manut{background:rgba(217,119,6,.15);color:#FDBA74;border-color:rgba(217,119,6,.3)}
+  .new-badge.manut .new-badge-dot{background:#FDBA74;box-shadow:0 0 6px #FDBA74}
+
+  .new-nome{font-family:'Outfit';font-weight:900;font-size:22px;line-height:1.2;letter-spacing:-.015em;margin-bottom:14px;padding-right:8px;position:relative;z-index:1}
+
+  .new-tag-line{display:flex;align-items:center;gap:10px;margin-bottom:22px;position:relative;z-index:1}
+  .new-tag-mask{color:#4B5048;font-family:'DM Mono';font-size:15px;letter-spacing:4px;user-select:none}
+  .new-tag-code{font-family:'DM Mono';font-size:15px;color:#fff;font-weight:500;letter-spacing:1.5px}
+
+  .new-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px;border-top:1px solid #2A2F2B;position:relative;z-index:1}
+  .new-zelador{display:flex;align-items:center;gap:10px;min-width:0}
+  .new-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#FF6B35,#F7931E);display:flex;align-items:center;justify-content:center;font-family:'Outfit';font-weight:900;font-size:11px;color:#fff;flex-shrink:0}
+  .new-zel-info{min-width:0}
+  .new-zel-label{font-family:'DM Mono';font-size:8.5px;color:#6B7166;text-transform:uppercase;letter-spacing:1.2px}
+  .new-zel-nome{font-family:'Poppins';font-weight:600;font-size:12.5px;color:#E8EBE5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .new-local{text-align:right;min-width:0;flex-shrink:0}
+  .new-local-label{font-family:'DM Mono';font-size:8.5px;color:#6B7166;text-transform:uppercase;letter-spacing:1.2px}
+  .new-local-val{font-family:'Poppins';font-weight:500;font-size:11.5px;color:#C4C8C1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .new-actions{position:absolute;top:16px;right:86px;display:flex;gap:4px;z-index:2}
+  .new-ab{width:28px;height:28px;border-radius:8px;border:1px solid #2A2F2B;background:rgba(255,255,255,.03);color:#8E9490;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+  .new-ab:hover{background:rgba(255,255,255,.08);color:#fff;border-color:#3A3F3B}
+  .new-ab.danger:hover{color:#FCA5A5;border-color:rgba(220,38,38,.4)}
+
+  /* ══════════ GRID PREVIEW (card in context) ══════════ */
+  .grid-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:980px){.grid-preview{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:640px){.grid-preview{grid-template-columns:1fr}}
+
+  /* ══════════ MOBILE ══════════ */
+  .mobile-frame{background:#0A0A0A;border-radius:24px;padding:12px 10px 18px;max-width:340px;margin:0 auto;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  .mobile-notch{width:60px;height:4px;background:#3A3A3C;border-radius:2px;margin:0 auto 12px}
+
+  /* ══════════ Modal cadastro (campos novos) ══════════ */
+  .modal-mock{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;max-width:560px;margin:0 auto;box-shadow:0 12px 30px rgba(0,0,0,.08)}
+  .mf-title{font-family:'Outfit';font-weight:900;font-size:18px;margin-bottom:18px}
+  .mf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .mf-field{margin-bottom:12px}
+  .mf-label{font-family:'Poppins';font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:block;margin-bottom:5px}
+  .mf-label .new{display:inline-block;background:var(--green);color:#fff;font-size:8.5px;padding:1px 5px;border-radius:3px;margin-left:5px;letter-spacing:.5px;font-weight:700}
+  .mf-input,.mf-select{width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins';font-size:13px;color:var(--text);background:#fff;outline:none}
+  .mf-input:focus, .mf-select:focus{border-color:var(--green)}
+  .mf-input.new-field{border-color:rgba(0,136,53,.4);background:rgba(0,136,53,.02)}
+
+  .notes{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:22px}
+  .notes h3{font-family:'Outfit';font-weight:700;font-size:14px;margin:0 0 10px}
+  .notes ul{margin:0;padding-left:18px;font-size:13px;line-height:1.7}
+  .notes code{background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-family:'DM Mono';font-size:11px;color:var(--green)}
+  .kbd{display:inline-block;padding:1px 6px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;font-family:'DM Mono';font-size:11px;margin:0 2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Card de Máquina · Ajuste 1 <span class="v">v3.34 mockup</span></h1>
+  <p class="lead">Redesign inspirado no card "Bank Account · Chase Bank" que você mandou. Card dark, eyebrow DM Mono, nome grande, identificação tipo <code style="font-family:'DM Mono';background:#fff;padding:1px 5px;border-radius:3px;font-size:12px">•••••• 6789</code>, zelador + localização no footer. Também fixa o bug de texto cortado das "24 preventivas · ver no detalhe".</p>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>1 · Antes vs. Depois</h2>
+
+  <div class="compare">
+    <div>
+      <div class="col-label">❌ Hoje (v3.32) · bug texto + layout fraco</div>
+      <div class="old-card">
+        <div class="old-top">
+          <div style="flex:1">
+            <span class="old-codigo">RET-01</span>
+            <div class="old-nome">Retorcedeira VTS 07 2001</div>
+            <div class="old-meta">
+              <span>Modelo <b>Saurer Allma CC3</b></span>
+              <span>Ano <b>2020</b></span>
+              <span>· Mecânica</span>
+            </div>
+          </div>
+          <div class="old-actions">
+            <button class="old-btn">📱</button>
+            <button class="old-btn">✏</button>
+            <button class="old-btn" style="color:var(--red)">🗑</button>
+          </div>
+        </div>
+        <div class="old-bugtext">24 preventivas cadastradas · ver no detalhe <span class="old-bug-tag">bug render</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="col-label">✅ Novo · estilo Bank Account</div>
+      <div class="new-card">
+        <div class="new-actions">
+          <button class="new-ab" title="QR Code"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+          <button class="new-ab" title="Editar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+        <div class="new-head">
+          <div class="new-eyebrow">MÁQUINA · MECÂNICA</div>
+          <div class="new-badge">
+            <span class="new-badge-dot"></span>ATIVA
+          </div>
+        </div>
+        <div class="new-nome">Retorcedeira VTS 07 2001</div>
+        <div class="new-tag-line">
+          <span class="new-tag-mask">••••••</span>
+          <span class="new-tag-code">RET-01</span>
+        </div>
+        <div class="new-foot">
+          <div class="new-zelador">
+            <div class="new-av" style="background:linear-gradient(135deg,#16A34A,#065F46)">VP</div>
+            <div class="new-zel-info">
+              <div class="new-zel-label">ZELADOR</div>
+              <div class="new-zel-nome">Vorlei Pacheco</div>
+            </div>
+          </div>
+          <div class="new-local">
+            <div class="new-local-label">LOCALIZAÇÃO</div>
+            <div class="new-local-val">Setor 3 · Linha B · 12</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>2 · Variações de status</h2>
+  <p class="sub">O badge muda cor conforme <code style="font-family:'DM Mono';background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:11.5px">m.status</code>. Usa o mesmo sistema de tags semânticas existente (verde/âmbar/vermelho).</p>
+
+  <div class="grid-preview">
+    <div class="new-card">
+      <div class="new-actions">
+        <button class="new-ab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+        <button class="new-ab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>
+      </div>
+      <div class="new-head">
+        <div class="new-eyebrow">MÁQUINA · MECÂNICA</div>
+        <div class="new-badge"><span class="new-badge-dot"></span>ATIVA</div>
+      </div>
+      <div class="new-nome">Retorcedeira VTS 07 2001</div>
+      <div class="new-tag-line"><span class="new-tag-mask">••••••</span><span class="new-tag-code">RET-01</span></div>
+      <div class="new-foot">
+        <div class="new-zelador">
+          <div class="new-av" style="background:linear-gradient(135deg,#16A34A,#065F46)">VP</div>
+          <div class="new-zel-info"><div class="new-zel-label">ZELADOR</div><div class="new-zel-nome">Vorlei Pacheco</div></div>
+        </div>
+        <div class="new-local"><div class="new-local-label">LOCAL</div><div class="new-local-val">S3 · L-B · 12</div></div>
+      </div>
+    </div>
+
+    <div class="new-card">
+      <div class="new-actions">
+        <button class="new-ab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+        <button class="new-ab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>
+      </div>
+      <div class="new-head">
+        <div class="new-eyebrow">MÁQUINA · ELÉTRICA</div>
+        <div class="new-badge manut"><span class="new-badge-dot"></span>EM MANUT.</div>
+      </div>
+      <div class="new-nome">Tinturaria HT 200</div>
+      <div class="new-tag-line"><span class="new-tag-mask">••••••</span><span class="new-tag-code">TIN-04</span></div>
+      <div class="new-foot">
+        <div class="new-zelador">
+          <div class="new-av" style="background:linear-gradient(135deg,#2563EB,#1E3A8A)">HT</div>
+          <div class="new-zel-info"><div class="new-zel-label">ZELADOR</div><div class="new-zel-nome">Hernandes T.</div></div>
+        </div>
+        <div class="new-local"><div class="new-local-label">LOCAL</div><div class="new-local-val">Pav. 2 · L-A</div></div>
+      </div>
+    </div>
+
+    <div class="new-card">
+      <div class="new-actions">
+        <button class="new-ab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+        <button class="new-ab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>
+      </div>
+      <div class="new-head">
+        <div class="new-eyebrow">MÁQUINA · MECÂNICA</div>
+        <div class="new-badge parado"><span class="new-badge-dot"></span>PARADA</div>
+      </div>
+      <div class="new-nome">Bobinadeira Autoconer 5</div>
+      <div class="new-tag-line"><span class="new-tag-mask">••••••</span><span class="new-tag-code">BOB-02</span></div>
+      <div class="new-foot">
+        <div class="new-zelador">
+          <div class="new-av" style="background:linear-gradient(135deg,#DC2626,#7F1D1D)">—</div>
+          <div class="new-zel-info"><div class="new-zel-label">ZELADOR</div><div class="new-zel-nome" style="color:#6B7166;font-style:italic">Não definido</div></div>
+        </div>
+        <div class="new-local"><div class="new-local-label">LOCAL</div><div class="new-local-val">Pav. 1 · L-D</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>3 · Mobile (≤640px)</h2>
+  <p class="sub">Card em coluna única, padding menor, elementos reorganizados. Ações principais viram um menu <span class="kbd">⋯</span> pra liberar espaço.</p>
+
+  <div class="mobile-frame">
+    <div class="mobile-notch"></div>
+    <div style="background:#EDF1EA;border-radius:12px;padding:14px 12px">
+      <div style="font-family:'Outfit';font-weight:900;font-size:18px;margin-bottom:4px">Máquinas</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">32 cadastradas · 3 em manutenção</div>
+      <div class="new-card" style="padding:18px 16px 16px">
+        <div class="new-head" style="margin-bottom:10px">
+          <div class="new-eyebrow" style="font-size:9px">MÁQUINA · MECÂNICA</div>
+          <div class="new-badge" style="font-size:9px;padding:3px 8px"><span class="new-badge-dot"></span>ATIVA</div>
+        </div>
+        <div class="new-nome" style="font-size:18px;margin-bottom:10px">Retorcedeira VTS 07 2001</div>
+        <div class="new-tag-line" style="margin-bottom:16px">
+          <span class="new-tag-mask" style="font-size:13px">••••••</span>
+          <span class="new-tag-code" style="font-size:13px">RET-01</span>
+        </div>
+        <div class="new-foot" style="padding-top:10px">
+          <div class="new-zelador">
+            <div class="new-av" style="width:28px;height:28px;font-size:10px;background:linear-gradient(135deg,#16A34A,#065F46)">VP</div>
+            <div class="new-zel-info">
+              <div class="new-zel-label" style="font-size:8px">ZELADOR</div>
+              <div class="new-zel-nome" style="font-size:11.5px">Vorlei P.</div>
+            </div>
+          </div>
+          <div class="new-local">
+            <div class="new-local-label" style="font-size:8px">LOCAL</div>
+            <div class="new-local-val" style="font-size:10.5px">S3·L-B·12</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>4 · Modal cadastro · 3 campos novos</h2>
+  <p class="sub">Pra dar suporte ao novo design, o modal "Nova/Editar Máquina" precisa ganhar 3 campos.</p>
+
+  <div class="modal-mock">
+    <div class="mf-title">Editar Máquina · RET-01</div>
+
+    <div class="mf-row">
+      <div class="mf-field"><label class="mf-label">Nome da máquina</label><input class="mf-input" value="Retorcedeira VTS 07 2001"></div>
+      <div class="mf-field"><label class="mf-label">Código / Tag</label><input class="mf-input" value="RET-01"></div>
+    </div>
+
+    <div class="mf-row">
+      <div class="mf-field"><label class="mf-label">Setor</label><select class="mf-select"><option>Mecânica</option><option>Elétrica</option></select></div>
+      <div class="mf-field"><label class="mf-label">Status <span class="new">NOVO</span></label>
+        <select class="mf-select new-field"><option>Ativa</option><option>Em manutenção</option><option>Parada</option></select>
+      </div>
+    </div>
+
+    <div class="mf-row">
+      <div class="mf-field"><label class="mf-label">Zelador responsável <span class="new">NOVO</span></label>
+        <select class="mf-select new-field"><option>Vorlei Pacheco</option><option>Hernandes Teixeira</option><option>Pedro L.</option><option>— sem responsável</option></select>
+      </div>
+      <div class="mf-field"><label class="mf-label">Localização física <span class="new">NOVO</span></label>
+        <input class="mf-input new-field" placeholder="Ex: Setor 3 · Linha B · Pos. 12" value="Setor 3 · Linha B · 12">
+      </div>
+    </div>
+
+    <div class="mf-row">
+      <div class="mf-field"><label class="mf-label">Fabricante / Modelo</label><input class="mf-input" value="Saurer Allma CC3"></div>
+      <div class="mf-field"><label class="mf-label">Ano</label><input class="mf-input" value="2020"></div>
+    </div>
+
+    <div class="mf-field"><label class="mf-label">Preventivas padrão (uma por linha)</label>
+      <textarea class="mf-input" style="min-height:80px">Troca de óleo
+Limpeza geral
+Verificação de correias</textarea>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>5 · Schema e implementação</h2>
+
+  <div class="notes">
+    <h3>Campos novos em <code>manutencao/maquinas/{id}</code></h3>
+    <ul>
+      <li><code>responsavel</code>: chave do user (ex: <code>vorlei</code>) — mesmo pool usado no campo "resp" das preventivas</li>
+      <li><code>localizacao</code>: string livre (texto curto ~30 chars max)</li>
+      <li><code>status</code>: <code>'ativa' | 'manutencao' | 'parada'</code> — default <code>ativa</code> quando não setado</li>
+    </ul>
+    <h3 style="margin-top:14px">Fallbacks pra dados antigos</h3>
+    <ul>
+      <li>Sem <code>responsavel</code> → mostra "Não definido" em itálico cinza + avatar "—"</li>
+      <li>Sem <code>localizacao</code> → esconde o bloco direito do footer (só zelador ocupa largura)</li>
+      <li>Sem <code>status</code> → assume <code>ativa</code> (badge verde)</li>
+    </ul>
+    <h3 style="margin-top:14px">Fix do bug de texto</h3>
+    <ul>
+      <li>Linha "24 preventivas cadastradas · ver no detalhe" <b>removida do card</b> — a contagem fica no modal de edição</li>
+      <li>Count pode virar um pequeno chip no eyebrow: <code>MÁQUINA · MECÂNICA · 24 PREV.</code></li>
+    </ul>
+    <h3 style="margin-top:14px">Cor do card</h3>
+    <ul>
+      <li>Sempre dark independente do tema do HUB (Bank Account é dark glass, e combina com a identidade de "ativo industrial")</li>
+      <li>Adapta-se no dark mode do HUB sem mudar nada (já é dark)</li>
+      <li>No light mode, destaca ainda mais — card vira "objeto premium" no grid sage clarinho</li>
+    </ul>
+  </div>
+
+  <p style="margin-top:36px;color:var(--muted);font-size:12px;text-align:center;font-family:'DM Mono'">v3.34 mockup · aguardando aprovação do William</p>
+</div>
+</body>
+</html>
