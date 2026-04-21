@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.31.0', d:'19 abr 2026', current:true,
+    v:'3.31.1', d:'19 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Fix Manutenção · tabela de Preventivas dizia "Nenhuma" mesmo tendo cadastro.', desc:'Bug reportado pelo William: havia 5 preventivas cadastradas (apareciam no calendário dia 23/abril) mas a tabela "Plano Preventivo" mostrava "Nenhuma preventiva cadastrada".\n\nCausa: em certos cenários (provavelmente cache local restaurando state como Object em vez de Array, ou edge case de hydration), state.preventivas virava Object ao invés de Array. O check "if (!all.length)" dava true em Object (que não tem .length), caindo na empty state.\n\nFix defensivo em renderPreventiva:\n• Se Array.isArray(state.preventivas) → usa direto\n• Se for Object (bug de hydration) → converte via Object.entries().map()\n• Se null/undefined → vazio\n\nConsole.warn se conversão acontecer pra captura de telemetria.'}
+    ]
+  },
+  {
+    v:'3.31.0', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · Preventivas viram cards em mobile.', desc:'Antes: tabela com 8 colunas (Tarefa/Equipamento/Setor/Freq/Última/Próxima/Status/Ações) com scroll horizontal em mobile. Difícil de usar na fábrica (com luva). Texto comprimido, font 9-11px, scroll-x desorientador.\n\nAgora em telas ≤640px a tabela some e cards verticais aparecem:\n• Border lateral colorida (verde OK / amarelo Próxima / vermelho Atrasada)\n• Chip de status no canto superior direito (ex: "Atrasada 5d", "Em 3d", "Hoje")\n• Meta line com Freq/Última/Próxima em DM Mono\n• 3 ações inline: botão "✓ Concluir" (verde, 2/3 da largura) + Editar + Deletar\n• Todos touch-friendly (44px+ min-height)\n\nDesktop não muda (tabela continua igual). Duplicação minima (mesmo dataset, 2 renders).'},
       {type:'feat', title:'firebase-messaging-sw.js no PRECACHE.', desc:'O service worker do FCM (notificações push do Manutenção) agora é pré-cacheado pelo SW principal na instalação. Notificações recebem tratamento mesmo no 1º boot offline. Adicionado em /sw.js PRECACHE.'},
