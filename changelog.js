@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.32.4', d:'19 abr 2026', current:true,
+    v:'3.32.5', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · cadastro em massa de preventivas (Item 4 do ciclo v3.10).',
+        desc:'Novo botão "+ Em massa" ao lado do "+ Preventiva" abre modal pra cadastrar a mesma preventiva em várias máquinas de uma vez.\n\nCampos únicos (aplicados em todas):\n• Tarefa (select com todas as tarefas padrão de todas as máquinas + "Outra")\n• Frequência\n• Setor\n• Última execução\n• Responsável\n\nLista de máquinas com checkbox (multi-select):\n• Busca por código/nome em tempo real\n• Botões "Marcar todas" / "Limpar"\n• Resumo verde: "N máquinas selecionadas · serão cadastradas N preventivas"\n\nAo confirmar: loop de _fbPushPrev N vezes. Toast final confirma. Cada preventiva criada vem com obs "[lote] cadastrada via cadastro em massa" pra rastrear origem.'}
+    ]
+  },
+  {
+    v:'3.32.4', d:'19 abr 2026',
     items:[
       {type:'high', title:'Manutenção · hierarquia de preventivas (cascata) + supressão visual (Itens 1+2+3).',
         desc:'Maior mudança lógica do ciclo v3.10.\n\n' +

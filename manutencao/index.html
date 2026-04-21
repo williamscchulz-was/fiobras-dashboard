@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.32.4">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.32.5">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2173,6 +2173,7 @@ display: none;
     <div class="sec-header">
       <div class="sec-title">Plano Preventivo</div>
       <button class="btn-primary" onclick="abrirModalPreventiva()">+ Preventiva</button>
+      <button class="btn-secondary" onclick="abrirModalMassa()" style="margin-left:6px" title="Cadastrar em lote pra várias máquinas">+ Em massa</button>
     </div>
     <!-- Desktop: tabela. Mobile (≤640px): cards via @media (v3.31.0) -->
     <div class="table-wrap prev-table-wrap">
@@ -2772,6 +2773,69 @@ display: none;
     <div class="modal-actions">
       <button class="modal-btn cancel" onclick="fecharModal('modal-preventiva')">Cancelar</button>
       <button class="modal-btn confirm" onclick="salvarPreventiva()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- v3.32.5 — Cadastro em massa -->
+<div class="modal-bg" id="modal-massa">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Cadastrar preventivas em massa</div>
+      <div class="modal-sub">Mesma tarefa, frequência e responsável em múltiplas máquinas</div>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Tarefa</label>
+        <select id="mass-tarefa-sel" onchange="_massaOnTarefaChange()"></select>
+        <input id="mass-tarefa-custom" placeholder="Digite a tarefa..." style="display:none;margin-top:6px">
+      </div>
+      <div class="modal-grid">
+        <div class="field">
+          <label>Frequência</label>
+          <select id="mass-freq">
+            <option value="7">Semanal (7d)</option>
+            <option value="15">Quinzenal (15d)</option>
+            <option value="30" selected>Mensal (30d)</option>
+            <option value="90">Trimestral (90d)</option>
+            <option value="180">Semestral (180d)</option>
+            <option value="365">Anual (365d)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Setor</label>
+          <select id="mass-setor">
+            <option value="mecanica">Mecânica</option>
+            <option value="eletrica">Elétrica</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="field">
+          <label>Última execução</label>
+          <input type="date" id="mass-ultima">
+        </div>
+        <div class="field">
+          <label>Responsável</label>
+          <select id="mass-resp"></select>
+        </div>
+      </div>
+      <div class="field">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
+          <label style="margin:0">Máquinas alvo</label>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="btn-secondary" style="padding:3px 10px;font-size:.6rem" onclick="_massaMarcarTodas()">Marcar todas</button>
+            <button type="button" class="btn-secondary" style="padding:3px 10px;font-size:.6rem" onclick="_massaLimpar()">Limpar</button>
+          </div>
+        </div>
+        <input id="mass-busca" placeholder="🔍 filtrar por código ou nome..." oninput="_massaFiltrar(this.value)" style="margin-bottom:6px">
+        <div id="mass-maq-list" style="background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;max-height:220px;overflow-y:auto;padding:4px"></div>
+        <div id="mass-summary" style="margin-top:8px;padding:8px 12px;background:var(--green-lt);border:1px solid var(--green-md);border-radius:8px;font-size:12.5px;color:var(--green);font-weight:500"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="fecharModal('modal-massa')">Cancelar</button>
+      <button class="modal-btn confirm" id="mass-btn-lancar" onclick="confirmarMassa()" style="background:var(--green)">Lançar preventivas</button>
     </div>
   </div>
 </div>
@@ -4335,6 +4399,145 @@ function deletarPreventiva(key) {
     .filter(c => c.prevId === key)
     .forEach(c => { if (window._fbRemoveCard) window._fbRemoveCard(c._key); });
 }
+
+// ═══ CADASTRO EM MASSA (v3.32.5) ═══════════════════════════════════════
+let _massaMaqKeys = new Set();
+
+function abrirModalMassa() {
+  _massaMaqKeys.clear();
+  // Popula select de responsável
+  const respSel = document.getElementById('mass-resp');
+  respSel.innerHTML = STANDARD_USERS.map(n => '<option value="' + n + '">' + n + '</option>').join('');
+  // Popula select de tarefa (união das tarefas padrão de todas as máquinas)
+  const allTarefas = new Set();
+  state.maquinas.forEach(m => {
+    const prevs = Array.isArray(m.prevs) ? m.prevs : (m.prevs ? m.prevs.split('\n').filter(Boolean) : []);
+    prevs.forEach(t => allTarefas.add(t));
+  });
+  const tSel = document.getElementById('mass-tarefa-sel');
+  tSel.innerHTML = '<option value="">Selecionar tarefa...</option>' +
+    [...allTarefas].sort().map(t => '<option value="' + t + '">' + t + '</option>').join('') +
+    '<option value="__outro__">+ Outra tarefa...</option>';
+  document.getElementById('mass-tarefa-custom').value = '';
+  document.getElementById('mass-tarefa-custom').style.display = 'none';
+  // Data padrão = hoje
+  document.getElementById('mass-ultima').value = todayStr();
+  document.getElementById('mass-busca').value = '';
+  _massaRenderList('');
+  _massaAtualizarSummary();
+  document.getElementById('modal-massa').classList.add('open');
+}
+window.abrirModalMassa = abrirModalMassa;
+
+function _massaOnTarefaChange() {
+  const v = document.getElementById('mass-tarefa-sel').value;
+  const custom = document.getElementById('mass-tarefa-custom');
+  if (v === '__outro__') { custom.style.display = ''; custom.focus(); }
+  else custom.style.display = 'none';
+}
+window._massaOnTarefaChange = _massaOnTarefaChange;
+
+function _massaRenderList(filtro) {
+  const list = document.getElementById('mass-maq-list');
+  if (!list) return;
+  const f = (filtro || '').toLowerCase().trim();
+  const html = state.maquinas
+    .filter(m => !f || (m.nome||'').toLowerCase().includes(f) || (m.tag||'').toLowerCase().includes(f))
+    .map(m => {
+      const checked = _massaMaqKeys.has(m._key) ? 'checked' : '';
+      const setor = m.setor === 'eletrica' ? 'Elétrica' : 'Mecânica';
+      return '<label class="mass-maq-row" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'">'
+        + '<input type="checkbox" data-maqkey="' + m._key + '" ' + checked + ' onchange="_massaToggle(this)" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer">'
+        + '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--green);background:var(--green-lt);padding:2px 6px;border-radius:4px">' + (m.tag || '—') + '</span>'
+        + '<span style="font-size:13px;flex:1">' + (m.nome || '—') + '</span>'
+        + '<span style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace">' + setor + '</span>'
+      + '</label>';
+    }).join('');
+  list.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Nenhuma máquina encontrada</div>';
+}
+function _massaFiltrar(val) { _massaRenderList(val); }
+window._massaFiltrar = _massaFiltrar;
+
+function _massaToggle(cb) {
+  const k = cb.dataset.maqkey;
+  if (cb.checked) _massaMaqKeys.add(k);
+  else _massaMaqKeys.delete(k);
+  _massaAtualizarSummary();
+}
+window._massaToggle = _massaToggle;
+
+function _massaMarcarTodas() {
+  state.maquinas.forEach(m => _massaMaqKeys.add(m._key));
+  _massaRenderList(document.getElementById('mass-busca').value);
+  _massaAtualizarSummary();
+}
+window._massaMarcarTodas = _massaMarcarTodas;
+
+function _massaLimpar() {
+  _massaMaqKeys.clear();
+  _massaRenderList(document.getElementById('mass-busca').value);
+  _massaAtualizarSummary();
+}
+window._massaLimpar = _massaLimpar;
+
+function _massaAtualizarSummary() {
+  const n = _massaMaqKeys.size;
+  const sum = document.getElementById('mass-summary');
+  const btn = document.getElementById('mass-btn-lancar');
+  if (!sum || !btn) return;
+  if (n === 0) {
+    sum.textContent = 'Nenhuma máquina selecionada';
+    sum.style.background = 'var(--surface2)';
+    sum.style.color = 'var(--muted)';
+    sum.style.borderColor = 'var(--border)';
+    btn.textContent = 'Lançar preventivas';
+    btn.disabled = true;
+    btn.style.opacity = '.5';
+    btn.style.cursor = 'not-allowed';
+  } else {
+    sum.textContent = n + ' máquina' + (n===1?'':'s') + ' selecionada' + (n===1?'':'s') + ' · serão cadastradas ' + n + ' preventiva' + (n===1?'':'s');
+    sum.style.background = 'var(--green-lt)';
+    sum.style.color = 'var(--green)';
+    sum.style.borderColor = 'var(--green-md)';
+    btn.textContent = '✓ Lançar ' + n + ' preventiva' + (n===1?'':'s');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  }
+}
+
+async function confirmarMassa() {
+  if (_massaMaqKeys.size === 0) return;
+  if (!window._fbPushPrev) { toast('Firebase não pronto', 'err'); return; }
+  // Coleta base
+  const tarefaSel = document.getElementById('mass-tarefa-sel').value;
+  const tarefaCustom = document.getElementById('mass-tarefa-custom').value.trim();
+  const tarefa = tarefaSel === '__outro__' ? tarefaCustom : tarefaSel;
+  if (!tarefa) { toast('Informe a tarefa', 'err'); return; }
+  const freq = parseInt(document.getElementById('mass-freq').value);
+  const setor = document.getElementById('mass-setor').value;
+  const ultima = document.getElementById('mass-ultima').value;
+  const resp = document.getElementById('mass-resp').value;
+  if (!ultima) { toast('Informe a data da última execução', 'err'); return; }
+
+  const maqKeys = [...(_massaMaqKeys)];
+  for (const maqKey of maqKeys) {
+    const maq = state.maquinas.find(m => m._key === maqKey);
+    const equip = maq ? (maq.tag ? maq.tag + ' · ' + maq.nome : maq.nome) : '';
+    await window._fbPushPrev({
+      tarefa, freq, setor, ultima, resp,
+      maqKey, equip,
+      obs: '[lote] cadastrada via cadastro em massa',
+      criadoPor: state.user || '—',
+      criadoTs: nowStr(),
+    });
+  }
+
+  toast(maqKeys.length + ' preventiva' + (maqKeys.length===1?'':'s') + ' lançada' + (maqKeys.length===1?'':'s'), 'ok');
+  fecharModal('modal-massa');
+}
+window.confirmarMassa = confirmarMassa;
+// ═══ FIM CADASTRO EM MASSA ═══════════════════════════════════════
 function executarPreventiva(key) {
   // Intercepta com modal de assinatura
   const pv = state.preventivas.find(p => (p._key || p.id) === key);
