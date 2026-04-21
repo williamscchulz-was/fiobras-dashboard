@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.43 — 21/04/2026
-> **Versão atual do HUB:** v3.37.0
+> **Versão do doc:** 2.44 — 21/04/2026
+> **Versão atual do HUB:** v3.38.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -239,6 +239,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.38.0 | Manutenção + HUB · 8 ajustes: (1) data do card Kanban move pro footer + vermelho se age>7d; (2) light mode no Kanban; (3+4) modais Preventiva/Máquina maiores; (5) demanda com select de users; (6) dias estimados em vez de horas (compat com horasEstimadas); (7) título separado do equipamento + select de máquinas no modal de demanda; (8) HUB painel "Editar Usuário" ganhou upload de foto/avatar (admin edita qualquer user). |
 | v3.37.0 | Manutenção · 4 ajustes de polish: (1) toolbar de pills do Kanban removida; (2) Tabela Preventiva com busca + paginação (5/pág); (3) aba padrão = Kanban (não Dashboard); (4) `_resolveUserKey` ganha fallback em `state.userProfiles` → avatares do William e outros users do HUB puxam foto. |
 | v3.36.0 | Manutenção · **Kanban redesign** (Ajuste 4 auditoria): board dark sempre, cards estilo Linear/Trello com tags coloridas topo, data relativa/timer ativo vermelho canto direito, título Outfit 700, linha eq com tag verde, footer com avatar stack + comentários (contador) + peças + horas estimadas, barra de progresso na base. Campos novos opcionais em `manutencao/kanban/{id}`: `horasEstimadas` (number), `progresso` (0-100, auto por col). **Fixes urgentes**: modal +Preventiva multi-tarefa com width fluida + flex-wrap no header; card de Máquina botões saem do topo e vão pro footer (badge ATIVA não sobrepõe mais). |
 | v3.35.0 | Manutenção · **+Preventiva multi-tarefa** (Ajuste 2): 1 máquina + N tarefas com checkboxes (do `m.prevs`) + input pra adicionar custom. Loop de `_fbPushPrev`. Edição vira single-task (campo texto). Removido botão/modal/funções de "+ Em massa" (introduzidos v3.32.5). Polish do card de Máquina: "ZELADOR" → "RESPONSÁVEL", light mode coerente (branco no tema light), auto-fill do `pv-resp` puxando `m.responsavel` ao trocar máquina. |

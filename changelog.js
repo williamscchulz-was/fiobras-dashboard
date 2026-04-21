@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.37.0', d:'21 abr 2026', current:true,
+    v:'3.38.0', d:'21 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção + HUB · 8 ajustes da auditoria noturna (21/04).',
+        desc:'1) Card Kanban: data saiu do canto superior (sobrepunha botões de ação) e foi pro footer junto com estimativa. Cor vermelha + ícone ⚠ quando age > 7 dias (em qualquer coluna ≠ done). Card "doing" continua vermelho com dot pulsante.\n\n2) Light mode no Kanban: quando o HUB está em tema light, o board ganha fundo sage claro, cards brancos, tags pastel, mantendo toda a hierarquia visual do dark.\n\n3+4) Modal Nova/Editar Preventiva aumentado (540 → 640px), modal de Máquina também (520 → 620px) com max-width:94vw. Não corta mais em viewports apertados.\n\n5) Nova Solicitação: campo "Seu nome" virou SELECT dos usuários do sistema (merge USERS local + users do HUB via userProfiles). Ninguém de fora solicita.\n\n6) Estimativa vira DIAS em vez de horas. Chip no card mostra "Nd" (ex: "3d"). Retrocompat: cards antigos com horasEstimadas continuam mostrando "Nh".\n\n7) Título separado do equipamento: modal de demanda ganhou campo "Título" obrigatório + select de máquinas cadastradas. Antes o título era auto-gerado concatenando equip+desc, ficava redundante. Agora título = o problema ("Vazamento no hidráulico"), equip = a máquina (RET-01).\n\n8) HUB: admin pode editar foto/avatar de qualquer user no painel "Editar Usuário". Avatar preview + botão Escolher imagem + Remover. Crop quadrado automático 400px JPEG 0.82 (mesmo pipeline do mcFotoChange). Salva em users-profile/{user}/foto.'}
+    ]
+  },
+  {
+    v:'3.37.0', d:'21 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · 4 ajustes de polish (auditoria 21/04 noite).',
         desc:'1) Toolbar de pills de filtro do Kanban REMOVIDA (Mecânica/Elétrica/Preventiva/Demanda/Alta/Média/Baixa/nomes). Estava poluindo o topo do board. Botão "+ Demanda" agora vive dentro da coluna "A Fazer" do novo Kanban (v3.36.0).\n\n2) Tabela de Preventivas ganhou busca + paginação (5 por página). Busca filtra por tarefa, equipamento, responsável, setor e observações em tempo real. Paginação mostra "‹ 1 2 3 … N ›" com janela responsiva + chip "X / N" no final. Contador "N de M resultados" no topo quando filtra.\n\n3) Aba padrão ao abrir Manutenção agora é **Kanban** (antes abria em Dashboard). Mais direto pra quem usa o sistema no dia-a-dia.\n\n4) Foto do William (e outros users do HUB que não estão no USERS local do sub-app) agora puxa correto no avatar stack. Fix: `_resolveUserKey` ganha fallback pra `state.userProfiles` (onde estão todos os users do HUB), matchando por chave OU por nomeCompleto/nome.'}

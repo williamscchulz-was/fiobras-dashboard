@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.37.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.38.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -634,9 +634,11 @@ cursor: default;
 .kc2-tag.s-mec { background: rgba(148,163,184,.12); color: #CBD5E1; }
 .kc2-tag.s-ele { background: rgba(234,179,8,.12); color: #FDE047; }
 
-.kc2-date { position: absolute; top: 14px; right: 14px; font-family: 'DM Mono', monospace; font-size: 10px; color: #6B7166; }
-.kc2-date.timer-active { color: #F87171; font-weight: 600; }
+/* v3.38.0 — data sai do canto superior (conflitava com botões de ação) e vai pro footer */
+.kc2-date { font-family: 'DM Mono', monospace; font-size: 10px; color: #6B7166; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.kc2-date.timer-active, .kc2-date.overdue { color: #F87171; font-weight: 600; }
 .kc2-date.timer-active::before { content: '● '; color: #F87171; }
+.kc2-date.overdue::before { content: '⚠ '; color: #F87171; }
 
 .kc2-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .88rem; color: #fff; line-height: 1.3; margin: 4px 0 8px; }
 .kc2-desc { font-size: .72rem; color: #9CA295; line-height: 1.45; margin-bottom: 10px; }
@@ -692,6 +694,47 @@ cursor: default;
   .kanban-board.board-v2 .kanban-card { padding: 12px; }
   .kanban-board.board-v2 .kc2-title { font-size: .84rem; }
 }
+
+/* v3.38.0 — Kanban LIGHT MODE (board adapta quando HUB tá em light) */
+[data-theme="light"] .kanban-board.board-v2 {
+  background: #F4F6F0;
+  box-shadow: 0 2px 10px rgba(27,31,24,.04);
+}
+[data-theme="light"] .kanban-board.board-v2 .col-title { color: var(--text); }
+[data-theme="light"] .kanban-board.board-v2 .col-count { color: var(--muted); background: rgba(27,31,24,.05); }
+[data-theme="light"] .kanban-board.board-v2 .col-add { color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .col-add:hover { background: rgba(27,31,24,.05); color: var(--text); }
+[data-theme="light"] .kanban-board.board-v2 .kanban-card {
+  background: #fff; border: 1px solid var(--border); color: var(--text);
+  box-shadow: 0 1px 3px rgba(27,31,24,.04);
+}
+[data-theme="light"] .kanban-board.board-v2 .kanban-card:hover { border-color: var(--border2); box-shadow: 0 6px 16px rgba(27,31,24,.08); }
+[data-theme="light"] .kanban-board.board-v2 .kanban-card.kc-doing { border-color: rgba(245,158,11,.4); box-shadow: 0 0 0 1px rgba(245,158,11,.15); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-title { color: var(--text); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-desc { color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-eq { color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-eq-tag { color: #065F46; background: rgba(0,136,53,.1); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-foot { border-top-color: rgba(27,31,24,.06); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-date { color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-est { color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-comments { color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-actions button { background: rgba(27,31,24,.04); color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-actions button:hover { background: rgba(27,31,24,.08); color: var(--text); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-actions button.danger:hover { color: #DC2626; }
+[data-theme="light"] .kanban-board.board-v2 .kc2-actions button.ok:hover { background: rgba(16,185,129,.12); color: #059669; }
+[data-theme="light"] .kanban-board.board-v2 .av { border-color: #fff !important; }
+[data-theme="light"] .kanban-board.board-v2 .kc2-progress { background: rgba(27,31,24,.05); }
+/* Tags light: pastel com texto escuro */
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.t-preventiva { background: rgba(37,99,235,.1); color: #1E40AF; }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.t-corretiva { background: rgba(220,38,38,.1); color: #991B1B; }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.t-melhoria { background: rgba(124,58,237,.1); color: #5B21B6; }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.t-demanda { background: rgba(100,116,139,.15); color: #334155; }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.t-instalacao { background: rgba(8,145,178,.1); color: #155E75; }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.u-alta { background: rgba(220,38,38,.08); color: #991B1B; border-color: rgba(220,38,38,.2); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.u-media { background: rgba(245,158,11,.1); color: #92400E; border-color: rgba(245,158,11,.25); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.u-baixa { background: rgba(16,185,129,.1); color: #065F46; border-color: rgba(16,185,129,.25); }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.s-mec { background: rgba(100,116,139,.12); color: #334155; }
+[data-theme="light"] .kanban-board.board-v2 .kc2-tag.s-ele { background: rgba(202,138,4,.12); color: #713F12; }
 
 /* v3.35.0 — multi-select de tarefas no modal +Preventiva (Ajuste 2) */
 .label-chip-new { display:inline-block; background:var(--green); color:#fff; font-size:8.5px; padding:1px 5px; border-radius:3px; margin-left:5px; letter-spacing:.5px; font-weight:700; vertical-align:middle; }
@@ -2522,7 +2565,7 @@ display: none;
 <!-- MÁQUINA -->
 
 <div class="modal-bg" id="modal-maquina">
-  <div class="modal" style="width:520px">
+  <div class="modal" style="width:620px;max-width:94vw">
     <div class="modal-title" id="maq-modal-title">Nova Máquina</div>
     <div class="modal-grid">
       <div class="modal-row">
@@ -2811,12 +2854,15 @@ display: none;
 <!-- DEMANDA (qualquer usuário) -->
 
 <div class="modal-bg" id="modal-demanda">
-  <div class="modal" style="width:500px">
+  <div class="modal" style="width:580px;max-width:94vw">
     <div class="modal-title">Nova Solicitação de Manutenção</div>
     <div id="demanda-form">
       <div class="modal-grid">
         <div class="modal-row">
-          <div class="field"><label>Seu nome</label><input id="dem-nome" placeholder="Nome do solicitante"></div>
+          <!-- v3.38.0 — Ajuste 5: seletor de users (não input livre) -->
+          <div class="field"><label>Solicitante</label>
+            <select id="dem-nome"></select>
+          </div>
           <div class="field"><label>Tipo de serviço</label>
             <select id="dem-tipo">
               <option value="demanda">Manutenção / Problema</option>
@@ -2825,7 +2871,14 @@ display: none;
             </select>
           </div>
         </div>
-        <div class="field"><label>Equipamento / Local</label><input id="dem-equip" placeholder="Ex: Retorcedeira #3, Compressor..."></div>
+        <!-- v3.38.0 — Ajuste 7: título separado do equipamento -->
+        <div class="field"><label>Título da demanda</label><input id="dem-titulo" placeholder="Ex: Vazamento no hidráulico, Troca de correia..."></div>
+        <div class="field"><label>Equipamento <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(seleciona ou digita um novo)</span></label>
+          <select id="dem-equip-sel" onchange="_demOnEquipChange()">
+            <option value="">— Selecionar máquina cadastrada —</option>
+          </select>
+          <input id="dem-equip" placeholder="Ou digite: Compressor, Bomba hidráulica..." style="margin-top:6px">
+        </div>
         <div class="modal-row">
           <div class="field"><label>Setor</label>
             <select id="dem-setor" onchange="atualizarRespDemanda()">
@@ -2846,6 +2899,9 @@ display: none;
           </div>
         </div>
         <div class="field"><label>Descrição</label><textarea id="dem-desc" placeholder="Descreva o que precisa ser feito..."></textarea></div>
+        <!-- v3.38.0 — Ajuste 6: dias estimados em vez de horas -->
+        <div class="field"><label>Prazo estimado <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(dias · opcional)</span></label>
+          <input id="dem-dias" type="number" min="0" step="1" placeholder="3"></div>
         <div class="field">
           <label>Foto <span style="font-weight:300;text-transform:none;letter-spacing:0">(opcional)</span></label>
           <div id="foto-wrap" style="border:2px dashed var(--border2);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:border-color 0.2s" onclick="document.getElementById('dem-foto-input').click()">
@@ -2922,9 +2978,9 @@ display: none;
             <option value="prev">Preventiva</option>
           </select>
         </div>
-        <!-- v3.36.0 — Ajuste 4: horas estimadas (opcional) -->
-        <div class="field"><label>Horas estimadas <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(opcional)</span></label>
-          <input id="ca-horas" type="number" step="0.5" min="0" placeholder="2">
+        <!-- v3.36.0 — Ajuste 4: estimativa (dias · v3.38.0) -->
+        <div class="field"><label>Prazo estimado <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(dias · opcional)</span></label>
+          <input id="ca-horas" type="number" step="1" min="0" placeholder="3">
         </div>
       </div>
     </div>
@@ -2938,7 +2994,7 @@ display: none;
 <!-- PREVENTIVA -->
 
 <div class="modal-bg" id="modal-preventiva">
-  <div class="modal" style="width:540px;max-width:94vw">
+  <div class="modal" style="width:640px;max-width:94vw">
     <div class="modal-title" id="pv-modal-title">Nova Preventiva</div>
     <div class="modal-grid">
       <!-- v3.35.0 — Ajuste 2: máquina single + multi-select de tarefas -->
@@ -3824,17 +3880,20 @@ function _tickTimers() {
     el.style.background = cor + '12';
   });
   // v3.36.0 — novo seletor: .kc2-date em cards em "doing" mostra tempo ativo
+  // v3.38.0 — cards em "todo" com age > 7d ganham classe .overdue (vermelho)
   document.querySelectorAll('.kc2-date[data-ts]').forEach(el => {
     const ts = parseInt(el.dataset.ts);
     const col = el.dataset.col;
     if (!ts) return;
+    el.classList.remove('timer-active', 'overdue');
     if (col === 'doing') {
       const { txt } = _tempoDecorrido(ts);
       el.textContent = txt;
       el.classList.add('timer-active');
     } else {
       el.textContent = _relativeDate(ts);
-      el.classList.remove('timer-active');
+      const ageDays = Math.floor((Date.now() - ts) / 86400000);
+      if (col !== 'done' && ageDays > 7) el.classList.add('overdue');
     }
   });
 }
@@ -3861,15 +3920,18 @@ function buildCard(c) {
         return null;
       })() : null);
 
-  // Data relativa pro canto direito (quando doing: vira timer ativo em vermelho)
+  // v3.38.0 — Data vai pro footer (antes sobrepunha os botões de ação).
+  // Cor vermelha quando: col=doing (timer ativo) OU passou 7d desde criação (overdue).
   let dateTxt = '';
   let dateCls = '';
   if (ts) {
+    const ageDays = Math.floor((Date.now() - ts) / 86400000);
     if (c.col === 'doing') {
       const { txt } = _tempoDecorrido(ts);
       dateTxt = txt; dateCls = 'timer-active';
     } else {
       dateTxt = _relativeDate(ts);
+      if (c.col !== 'done' && ageDays > 7) dateCls = 'overdue';
     }
   }
   const dateHtml = dateTxt ? `<span class="kc2-date ${dateCls}" data-ts="${ts}" data-col="${c.col}">${dateTxt}</span>` : '';
@@ -3912,10 +3974,13 @@ function buildCard(c) {
     ${commentsCount || ''}
   </span>`;
 
-  // Est horas (chip)
-  const estHtml = c.horasEstimadas
-    ? `<span class="kc2-est"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${c.horasEstimadas}h</span>`
-    : (c.col === 'done' ? '' : '');
+  // v3.38.0 — Estimativa: aceita diasEstimados (prioridade) OU horasEstimadas (legado)
+  let estHtml = '';
+  if (c.diasEstimados) {
+    estHtml = `<span class="kc2-est"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${c.diasEstimados}d</span>`;
+  } else if (c.horasEstimadas) {
+    estHtml = `<span class="kc2-est"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${c.horasEstimadas}h</span>`;
+  }
 
   // Peças badge (só pra admin)
   const pecas = Array.isArray(c.pecas) ? c.pecas : (c.pecas && typeof c.pecas === 'object' ? Object.values(c.pecas) : []);
@@ -3971,7 +4036,6 @@ function buildCard(c) {
     ${photoHtml ? `<div class="kc2-thumb" style="background-image:url('${c.foto}')"></div>` : ''}
     ${actionsHtml}
     <div class="kc2-tags">${tagTipo}${tagUrg}${tagSetor}</div>
-    ${dateHtml}
     <div class="kc2-title">${c.titulo||''}</div>
     ${c.desc ? `<div class="kc2-desc">${c.desc}</div>` : ''}
     ${eqHtml}
@@ -3981,7 +4045,10 @@ function buildCard(c) {
         ${commentsToggle}
         ${pecasHtml}
       </div>
-      ${estHtml}
+      <div style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        ${dateHtml}
+        ${estHtml}
+      </div>
     </div>
     ${commentsInline}
     ${progressHtml}
@@ -4383,14 +4450,61 @@ function deletarCard(key) {
 }
 
 // ── MODAL: DEMANDA ────────────────────────────────────
+// v3.38.0 — popula select de solicitantes (usuários do sistema)
+function _populateDemSolicitantes() {
+  const sel = document.getElementById('dem-nome');
+  if (!sel) return;
+  const src = (typeof USERS !== 'undefined') ? USERS : (window.USERS||{});
+  // Junta USERS locais + users do HUB via state.userProfiles (por nomeCompleto)
+  const opts = [];
+  Object.entries(src).forEach(([k, u]) => {
+    if (u.isAdmin && k === 'admin') return; // esconde chave genérica admin
+    opts.push({ key: k, nome: u.nome });
+  });
+  // Inclui users do HUB não listados no USERS local
+  if (state.userProfiles) {
+    Object.entries(state.userProfiles).forEach(([k, p]) => {
+      if (src[k]) return; // já listado
+      if (k === 'admin') return;
+      const nome = p.nomeCompleto || p.nome || k;
+      opts.push({ key: k, nome });
+    });
+  }
+  opts.sort((a, b) => a.nome.localeCompare(b.nome));
+  sel.innerHTML = '<option value="">Selecionar...</option>' +
+    opts.map(o => '<option value="' + o.nome + '">' + o.nome + '</option>').join('');
+}
+// v3.38.0 — popula select de máquinas
+function _populateDemEquip() {
+  const sel = document.getElementById('dem-equip-sel');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Selecionar máquina cadastrada —</option>' +
+    state.maquinas.map(m => {
+      const label = (m.tag ? m.tag + ' · ' : '') + m.nome;
+      return '<option value="' + label.replace(/"/g, '&quot;') + '">' + label + '</option>';
+    }).join('');
+}
+window._demOnEquipChange = function() {
+  const v = document.getElementById('dem-equip-sel').value;
+  const input = document.getElementById('dem-equip');
+  if (v) { input.value = v; input.readOnly = true; input.style.opacity = '.7'; }
+  else { input.value = ''; input.readOnly = false; input.style.opacity = '1'; }
+};
 function abrirModalDemanda() {
   selUrg('media');
   document.getElementById('dem-data').value = nowStr();
   document.getElementById('demanda-form').style.display = '';
   document.getElementById('dem-success').style.display = 'none';
-  if (!state.isAdmin) {
-    document.getElementById('dem-nome').value = state.user;
-  }
+  // v3.38.0 — popula selects
+  _populateDemSolicitantes();
+  _populateDemEquip();
+  document.getElementById('dem-nome').value = state.user || '';
+  document.getElementById('dem-titulo').value = '';
+  document.getElementById('dem-equip').value = '';
+  document.getElementById('dem-equip-sel').value = '';
+  document.getElementById('dem-equip').readOnly = false;
+  document.getElementById('dem-equip').style.opacity = '1';
+  document.getElementById('dem-dias').value = '';
   document.getElementById('modal-demanda').classList.add('open');
 }
 function selUrg(u) {
@@ -4405,15 +4519,19 @@ function atualizarRespDemanda() {
 }
 
 function enviarDemanda() {
-  const nome  = document.getElementById('dem-nome').value.trim();
-  const equip = document.getElementById('dem-equip').value.trim();
-  const desc  = document.getElementById('dem-desc').value.trim();
-  const tipo  = document.getElementById('dem-tipo') ? document.getElementById('dem-tipo').value : 'demanda';
-  const resp  = document.getElementById('dem-resp') ? document.getElementById('dem-resp').value : '';
-  if (!nome || !desc) { alert('Preencha seu nome e a descrição.'); return; }
-  const tipoLabels = { demanda:'Manutenção', instalacao:'Instalação', corretiva:'Corretiva' };
+  const nome   = document.getElementById('dem-nome').value.trim();
+  const titulo = document.getElementById('dem-titulo').value.trim();
+  const equip  = document.getElementById('dem-equip').value.trim();
+  const desc   = document.getElementById('dem-desc').value.trim();
+  const tipo   = document.getElementById('dem-tipo') ? document.getElementById('dem-tipo').value : 'demanda';
+  const resp   = document.getElementById('dem-resp') ? document.getElementById('dem-resp').value : '';
+  const dias   = parseInt(document.getElementById('dem-dias').value) || 0;
+  if (!nome)   { alert('Selecione o solicitante.'); return; }
+  if (!titulo) { alert('Digite um título pra demanda.'); return; }
+  if (!desc)   { alert('Preencha a descrição.'); return; }
   const card = {
-    titulo: equip ? (equip + ' — ' + desc.substring(0,40) + (desc.length>40?'...':'')) : desc.substring(0,60),
+    // v3.38.0 — título separado do equipamento
+    titulo,
     desc,
     equip,
     setor:  document.getElementById('dem-setor').value,
@@ -4424,6 +4542,7 @@ function enviarDemanda() {
     ts:     Date.now(),
     autor:  nome,
     resp:   resp || '',
+    ...(dias > 0 ? { diasEstimados: dias } : {}),
     ...(fotoBase64 ? { foto: fotoBase64 } : {}),
   };
   fotoBase64 = null;
@@ -4432,6 +4551,7 @@ function enviarDemanda() {
   document.getElementById('foto-placeholder').style.display  = '';
   document.getElementById('foto-wrap').style.borderColor = '';
   window._fbPushCard(card);
+  const tipoLabels = { demanda:'Manutenção', instalacao:'Instalação', corretiva:'Corretiva' };
   if (card.urg === 'alta' && window._fbPushFCMPending) {
     window._fbPushFCMPending({
       titulo: (tipoLabels[tipo]||tipo) + ' urgente: ' + (card.equip || 'Sem equipamento'),
@@ -4466,7 +4586,7 @@ function editarCard(key) {
   document.getElementById('ca-tipo').value   = card.tipo   || 'demanda';
   document.getElementById('ca-urg').value    = card.urg    || 'media';
   const horasEl = document.getElementById('ca-horas');
-  if (horasEl) horasEl.value = card.horasEstimadas || '';
+  if (horasEl) horasEl.value = card.diasEstimados || card.horasEstimadas || '';
   const respEl = document.getElementById('ca-resp');
   if (respEl) respEl.value = card.resp || '';
   document.getElementById('modal-card-admin').classList.add('open');
@@ -4483,6 +4603,8 @@ function abrirModalCardAdmin() {
 function salvarCardAdmin() {
   const titulo = document.getElementById('ca-titulo').value.trim();
   if (!titulo) return;
+  const horasEl = document.getElementById('ca-horas');
+  const diasVal = horasEl ? parseInt(horasEl.value) : 0;
   const data = {
     titulo,
     desc:  document.getElementById('ca-desc').value.trim(),
@@ -4491,6 +4613,8 @@ function salvarCardAdmin() {
     tipo:  document.getElementById('ca-tipo').value,
     urg:   document.getElementById('ca-urg').value,
     resp:  document.getElementById('ca-resp') ? document.getElementById('ca-resp').value : '',
+    // v3.38.0: dias estimados (antes era horas)
+    diasEstimados: diasVal > 0 ? diasVal : null,
   };
   if (_editCardKey) {
     window._fbUpdateCard(_editCardKey, data);

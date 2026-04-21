@@ -21,7 +21,7 @@
 <!-- Windows -->
 <meta name="msapplication-TileColor" content="#008835">
 <meta name="msapplication-TileImage" content="./icon-192.png">
-<meta name="theme-color" content="#008835"><!-- v3.37.0: fix calendário supressão -->
+<meta name="theme-color" content="#008835"><!-- v3.38.0: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
 <link rel="stylesheet" href="css/hub.css?v=3.33.0">
@@ -112,7 +112,7 @@
     </div>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.37.0</div>
+    <div class="login-foot">Sistema interno · v3.38.0</div>
   </div>
 </div>
 
@@ -272,7 +272,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.37.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.38.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -920,6 +920,19 @@
         <svg class="icon sm"><use href="#i-x"/></svg>
       </button>
     </div>
+    <!-- v3.38.0 — Foto do usuário (admin pode editar avatar de qualquer user) -->
+    <div class="tl-form-field" id="geuFotoField">
+      <label>Foto / Avatar</label>
+      <div style="display:flex;align-items:center;gap:14px;background:var(--surface2);border:1.5px dashed var(--border2);border-radius:10px;padding:12px">
+        <div id="geuFotoPreview" style="width:56px;height:56px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit',sans-serif;font-weight:900;font-size:20px;flex-shrink:0;background-size:cover;background-position:center">?</div>
+        <div style="flex:1">
+          <button type="button" class="geu-mod-act" style="padding:6px 12px;font-size:.65rem" onclick="document.getElementById('geuFotoInput').click()">Escolher imagem</button>
+          <button type="button" class="geu-mod-act" style="padding:6px 12px;font-size:.65rem;margin-left:6px;color:var(--red);border-color:var(--red-md)" id="geuFotoRemoveBtn" onclick="geuRemoverFoto()" style="display:none">Remover</button>
+          <input type="file" id="geuFotoInput" accept="image/*" style="display:none" onchange="geuOnFotoChange(this)">
+          <div class="mc-hint" style="margin-top:6px">Quadrada, máx 400px. Comprimida automaticamente.</div>
+        </div>
+      </div>
+    </div>
     <div class="tl-form-field">
       <label>Tipo de acesso (role)</label>
       <select id="geuRole" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg);" onchange="geuOnRoleChange()">
@@ -954,7 +967,7 @@
       <div id="geuTabs" class="geu-mods"></div>
       <div class="mc-hint" style="margin-top:6px">Abas com acesso limitado. Marque as que esse usuário pode ver.</div>
     </div>
-    <!-- v3.37.0 — Poderes (REGRA GERAL · permissões granulares) -->
+    <!-- v3.38.0 — Poderes (REGRA GERAL · permissões granulares) -->
     <div class="tl-form-field" id="geuPowersField">
       <label>⚡ Poderes</label>
       <div class="mc-hint" style="margin:0 0 8px">Permissões granulares por ação. Admins/Gerentes têm tudo automático — toggles aplicam só pra usuários comuns.</div>
@@ -1451,7 +1464,7 @@ window.abrirGerenciarUsuarios = () => {
   // Fecha dropdown
   const dd = document.getElementById('userDd'), user = document.getElementById('topbarUser');
   if(dd) dd.classList.remove('open'); if(user) user.classList.remove('open');
-  // v3.37.0: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
+  // v3.38.0: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
   if(typeof window.aplicarPowersSeed === 'function') window.aplicarPowersSeed();
   renderGuList();
   document.getElementById('guModal').classList.add('open');
@@ -1742,13 +1755,74 @@ window.abrirEditarUsuario = (userKey) => {
       return '<label class="geu-mod"><input type="checkbox" data-tab="' + tab + '" ' + (isOn?'checked':'') + '><span>' + lbl + '</span></label>';
     }).join('');
   }
-  // v3.37.0: render seção de poderes
+  // v3.38.0: render seção de poderes
   geuRenderPowers(userKey);
+  // v3.38.0: reset state da foto + render preview
+  geuFotoData = null;
+  geuRenderFotoPreview();
   // v3.21.0: aplica visibilidade da seção de módulos baseado no role
   geuOnRoleChange();
   document.getElementById('geuModal').classList.add('open');
 };
-// v3.37.0 — render dos toggles de poderes
+// v3.38.0 — Ajuste 8: admin edita avatar de qualquer user pelo painel
+let geuFotoData = null; // null = manter atual, '' = remover, data:... = nova
+window.geuOnFotoChange = (input) => {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 400;
+      const size = Math.min(img.width, img.height);
+      const sx = (img.width - size) / 2, sy = (img.height - size) / 2;
+      const c = document.createElement('canvas');
+      c.width = MAX; c.height = MAX;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, MAX, MAX);
+      geuFotoData = c.toDataURL('image/jpeg', 0.82);
+      geuRenderFotoPreview();
+      input.value = '';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+window.geuRemoverFoto = () => {
+  geuFotoData = '';
+  geuRenderFotoPreview();
+};
+function geuRenderFotoPreview() {
+  const av = document.getElementById('geuFotoPreview');
+  const rm = document.getElementById('geuFotoRemoveBtn');
+  if(!av || !geuEditingKey) return;
+  let fotoUrl;
+  if (geuFotoData === null) {
+    const p = (window._usersProfile || {})[geuEditingKey] || {};
+    fotoUrl = p.foto || '';
+  } else if (geuFotoData === '') {
+    fotoUrl = '';
+  } else {
+    fotoUrl = geuFotoData;
+  }
+  if (fotoUrl) {
+    av.style.backgroundImage = "url('" + fotoUrl.replace(/'/g, "%27") + "')";
+    av.style.color = 'transparent';
+    av.textContent = '';
+    if(rm) rm.style.display = '';
+  } else {
+    av.style.backgroundImage = '';
+    av.style.color = '#fff';
+    const u = getUser(geuEditingKey);
+    const nome = (((window._usersProfile||{})[geuEditingKey])?.nomeCompleto) || (u?.nome) || geuEditingKey || '?';
+    av.textContent = userInitials(nome);
+    if(rm) rm.style.display = 'none';
+  }
+}
+
+// v3.38.0 — render dos toggles de poderes
 window.geuRenderPowers = (userKey) => {
   const host = document.getElementById('geuPowers'); if(!host) return;
   const role = document.getElementById('geuRole').value || getEffectiveRole(userKey);
@@ -1805,7 +1879,7 @@ window.geuOnRoleChange = () => {
     if(modField) modField.style.display = '';
     if(hint) hint.style.display = 'none';
   }
-  // v3.37.0: re-render dos poderes (admin/gerente desabilita toggles)
+  // v3.38.0: re-render dos poderes (admin/gerente desabilita toggles)
   if(geuEditingKey && typeof geuRenderPowers === 'function') geuRenderPowers(geuEditingKey);
 };
 window.salvarEditarUsuario = () => {
@@ -1829,13 +1903,17 @@ window.salvarEditarUsuario = () => {
   // v3.21.0: limpa modulesAllowedOverride se for admin/gerente (eles vêem tudo automático)
   profile.modulesAllowedOverride = isFullAccess ? null : modulesAllowed;
   profile.tabsAllowedOverride = tabsOverride;
-  // v3.37.0: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
+  // v3.38.0: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
   if(!isFullAccess){
     const powers = {};
     document.querySelectorAll('#geuPowers input[data-power]').forEach(i => {
       powers[i.dataset.power] = !!i.checked;
     });
     profile.powers = powers;
+  }
+  // v3.38.0 — Ajuste 8: persiste foto (null = manter, '' = remover, data:... = nova)
+  if (geuFotoData !== null) {
+    profile.foto = geuFotoData || null;
   }
   if(window._salvarUserProfile) window._salvarUserProfile(geuEditingKey, profile);
   if(window._usersProfile) window._usersProfile[geuEditingKey] = profile;
@@ -2051,7 +2129,7 @@ function getEffectiveModules(userKey){
   return DEFAULT_MODULES_BY_ROLE[role] || DEFAULT_MODULES_BY_ROLE.producao;
 }
 
-// v3.37.0 — Sistema de poderes (REGRA GERAL · auditoria v3.32+)
+// v3.38.0 — Sistema de poderes (REGRA GERAL · auditoria v3.32+)
 // Toda regra de permissão "X pode Y" é configurável por user no painel admin.
 // Helper canUser() lê de users-profile/{user}/powers/{poder}, com defaults por role.
 const POWER_DEFS = [
@@ -2084,7 +2162,7 @@ window.canUser = function(userKey, poder){
   if(!def) return false;
   return !!def[role];
 };
-// Aplica seed 1x (admin abrindo painel pela 1ª vez após v3.37.0).
+// Aplica seed 1x (admin abrindo painel pela 1ª vez após v3.38.0).
 // Cria nó powers/* pra cada user com defaults da role + overrides do POWER_SEED_OVERRIDES.
 window.aplicarPowersSeed = function(){
   if(localStorage.getItem('fiobras-powers-seed-v1')) return;
@@ -2213,7 +2291,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.37.0';
+const CURRENT_VERSION = '3.38.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
