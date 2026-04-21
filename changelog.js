@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.31.2', d:'19 abr 2026', current:true,
+    v:'3.31.3', d:'19 abr 2026', current:true,
+    items:[
+      {type:'high', title:'FIX REAL Manutenção · tabela de Preventivas vazia (ReferenceError silencioso).', desc:'Causa raiz real: CHECK_SVG_STR, EDIT_SVG_STR, DEL_SVG_STR eram usadas no renderPreventiva mas NUNCA foram definidas em lugar nenhum do código.\n\nComo renderMaquinas usa EDIT_SVG e DEL_SVG (sem _STR) LOCAIS, provavelmente era um typo antigo no renderPreventiva. Porém como William nunca teve preventivas cadastradas com dados válidos, nunca caiu no branch do render → ReferenceError nunca disparou → bug dormiu por meses.\n\nAgora com 5 preventivas, o render entra no loop, tenta referenciar CHECK_SVG_STR, dá ReferenceError, o JS interrompe mid-render → tbody fica vazio.\n\nFix: constantes globais CHECK_SVG_STR, EDIT_SVG_STR, DEL_SVG_STR definidas no topo do script (junto com VERSION/USERS). Agora renderPreventiva executa sem erro.'},
+      {type:'feat', title:'Resumo de notificações "Enquanto você estava fora" não repete.', desc:'Antes: toda vez que o app carregava, mostrava o mesmo resumo de "X notificações não vistas" mesmo se já tinha mostrado minutos antes. Bug irritante.\n\nAgora: quando o resumo é mostrado, o timestamp atual é salvo em localStorage (fio_resumo_last_ts_<user>). Na próxima verificação, filtra pendentes com ts > last-seen → só mostra notificações REALMENTE novas desde a última visualização.\n\nPor usuário: se admin e Jacques usam o mesmo navegador/dispositivo, cada um tem seu last-seen separado.'}
+    ]
+  },
+  {
+    v:'3.31.2', d:'19 abr 2026',
     items:[
       {type:'high', title:'Fix REAL Manutenção · switchTab não re-renderizava ao trocar de aba.', desc:'A causa raiz do bug reportado. switchTab() só tinha re-render pra dashboard e relatórios — outros 4 tabs (preventiva, maquinas, historico, kanban) mantinham o último render.\n\nCenário: user abre Manutenção → tab Dashboard ativo. Firebase onValue dispara e chama renderPreventiva (state correto). MAS o tbody tá num painel inativo. Quando user clica em "Preventiva", switchTab só mudava display — tbody continua com o que foi renderizado antes.\n\nSe o cache local (localStorage) tinha state.preventivas vazio/antigo, o primeiro render do boot escrevia "Nenhuma" no tbody, e esse HTML ficava até o user recarregar a página. Mesmo com dados novos do Firebase, o tbody não era atualizado pra quem estava vendo outra aba.\n\nFix: switchTab e switchTabMobile agora re-renderizam quando o user troca pra qualquer aba (preventiva/maquinas/historico/kanban/relatorios).\n\nCombina com fix defensivo v3.31.1 (array ou object) — 2 camadas de segurança.'}
     ]

@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.31.2">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.31.3">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2908,6 +2908,13 @@ window._resetHistorico = () => {
 
 <script>
 const VERSION    = 'v3.9.2';
+
+// v3.31.3 — SVG icons inline (eram referenciados como CHECK_SVG_STR/EDIT_SVG_STR/DEL_SVG_STR
+// em renderPreventiva mas nunca foram definidos → ReferenceError silencioso quebrava
+// o render quando havia preventivas cadastradas. Agora definidos globalmente.)
+const CHECK_SVG_STR = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const EDIT_SVG_STR  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+const DEL_SVG_STR   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
 // Usuários do sistema
 const USERS = {
   'admin':     { senha: 'admin',  isAdmin: true,  nome: 'Admin'     },
@@ -5265,19 +5272,25 @@ function fecharInAppNotif() {
 
 // ── NOTIFICAÇÕES PERDIDAS ──────────────────────────────────
 // Quando o app abre, verifica notificações não vistas dos últimos 7 dias
+// v3.31.3 — filtra pelo último "visto" salvo em localStorage, e mostra
+// no máx 1x por dia por usuário (flag fio_resumo_last_ts)
 async function verificarNotificacoesPerdidas() {
   if (!state.user) return;
   try {
-    // Busca pending dos últimos 7 dias no Firebase
     const agora = Date.now();
     const sete_dias = 7 * 24 * 60 * 60 * 1000;
     const pending = state._lastFcmPending || {};
     const perdidas = [];
 
+    // v3.31.3 — last-seen do usuário atual (por usuário, separadamente)
+    const lastSeenKey = 'fio_resumo_last_ts_' + (state.user || '').replace(/\s+/g, '_');
+    const lastSeenTs  = parseInt(localStorage.getItem(lastSeenKey) || '0') || 0;
+
     Object.entries(pending).forEach(([key, payload]) => {
       if (!payload.ts) return;
       if ((agora - payload.ts) > sete_dias) return; // muito antiga
-      if (payload.fcmSent && sessionStorage.getItem('fcm_' + key)) return; // já viu
+      if (payload.ts <= lastSeenTs) return;          // já vista (antes do último resumo)
+      if (payload.fcmSent && sessionStorage.getItem('fcm_' + key)) return; // já viu na sessão
 
       // Verifica se é para este usuário
       const dest = payload.dest || 'todos';
@@ -5297,6 +5310,9 @@ async function verificarNotificacoesPerdidas() {
     const titulo = qtd === 1 ? '1 notificação não vista' : (qtd + ' notificações não vistas');
     const corpo  = perdidas.slice(0,2).map(p => p.titulo + (p.corpo ? ': ' + p.corpo.substring(0,40) : '')).join(' | ');
     exibirInAppNotif(titulo, corpo, 'Enquanto você estava fora');
+
+    // v3.31.3 — marca esse momento como "visto" (próximo boot não mostra de novo)
+    try { localStorage.setItem(lastSeenKey, String(agora)); } catch(e){}
   } catch(e) {
     console.warn('Notif perdidas:', e);
   }
