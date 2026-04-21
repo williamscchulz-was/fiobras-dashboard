@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.32.6', d:'19 abr 2026', current:true,
+    v:'3.32.7', d:'21 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · calendário + Kanban mostravam só 1 preventiva quando várias da mesma máquina venciam no mesmo dia (Ajuste 5 auditoria v3.32+).',
+        desc:'Bug da supressão visual introduzida na v3.32.4: agrupava por (semana, máquina) e mantinha só a de MAIOR freq. Quando TODAS tinham a mesma freq (ex: 5 tarefas Semanais distintas da RET-01 vencendo no mesmo dia), só uma aparecia — as outras 4 sumiam.\n\nRegra corrigida:\n• Freqs DIFERENTES na mesma semana+máquina → só a maior aparece (cascata preservada: Anual absorve Semanal)\n• MESMA freq (tarefas distintas) → TODAS aparecem\n\nFix em _buildEventMap (calendário) e gerarCardsPreventivas (Kanban): agrupa por (semana, máquina), descobre freq máxima e mantém TODAS as preventivas daquela freq máxima.'}
+    ]
+  },
+  {
+    v:'3.32.6', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Notificação diária de preventivas via Cloudflare Worker (Item 8 — último do ciclo v3.10).',
         desc:'Novo Worker Cloudflare "fiobras-digest-diario" em /workers/digest-diario-preventivas/. Cron 08:30 BRT (seg-sex) lê preventivas diárias (freq=1), agrupa por responsável, ignora admin/gerentes, e empilha payload em manutencao/fcmPending — o Worker FCM existente entrega o push.\n\nArquitetura desacoplada: este Worker NÃO envia FCM diretamente, só publica. O Worker FCM atual (que já funciona) cuida da entrega. Isso permite testar/trocar cron sem mexer no pipeline de notificações.\n\nAuth: usa a MESMA service account do backup GitHub Actions (FIREBASE_SERVICE_ACCOUNT já existe). Gera OAuth token via JWT RS256 no próprio Worker usando Web Crypto API.\n\nSetup pro William (5 passos, ~10min):\n1. npm install -g wrangler@latest\n2. wrangler login\n3. cd workers/digest-diario-preventivas\n4. wrangler secret put FIREBASE_SERVICE_ACCOUNT (cola JSON)\n   wrangler secret put FIREBASE_DB_URL (cola URL)\n5. wrangler deploy\n\nBonus: endpoint GET /run pra disparar manualmente (teste sem esperar 24h). README detalhado em /workers/digest-diario-preventivas/README.md.\n\nCiclo v3.10 COMPLETO (10/10 itens) — fim.'}

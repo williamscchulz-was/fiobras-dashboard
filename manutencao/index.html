@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.32.6">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.32.7">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3304,10 +3304,10 @@ function limparCardsOrfaos() {
 function gerarCardsPreventivas() {
   if (!window._fbReady) return;
 
-  // v3.32.4 — Supressão visual no Kanban: só gera card da MAIOR hierarquia da
-  // semana por máquina. Menores são absorvidas pela cascata ao executar a maior.
-  // Passada 1: calcula qual preventiva "vence" em cada (semana, máquina).
-  const vencedores = {}; // gkey: { prevKey, freq }
+  // v3.32.7 — Supressão visual no Kanban: só gera card da MAIOR hierarquia da
+  // semana por máquina, mas MANTÉM TODAS as preventivas daquela freq máxima
+  // (tarefas distintas com mesma freq devem gerar cards separados).
+  const grupos = {}; // gkey: { maxFreq, prevKeys:Set }
   state.preventivas.forEach(p => {
     if (!p.ultima || !p.freq) return;
     if (parseInt(p.freq) === 1) return; // diária fora
@@ -3315,11 +3315,13 @@ function gerarCardsPreventivas() {
     const maq = p.maqKey || p.maquinaKey || '__sem_maq__';
     const gkey = _weekKey(prox) + '|' + maq;
     const freq = parseInt(p.freq);
-    if (!vencedores[gkey] || freq > vencedores[gkey].freq) {
-      vencedores[gkey] = { prevKey: p._key || p.id, freq };
-    }
+    const pk = p._key || p.id;
+    if (!grupos[gkey]) grupos[gkey] = { maxFreq: freq, prevKeys: new Set([pk]) };
+    else if (freq > grupos[gkey].maxFreq) grupos[gkey] = { maxFreq: freq, prevKeys: new Set([pk]) };
+    else if (freq === grupos[gkey].maxFreq) grupos[gkey].prevKeys.add(pk);
   });
-  const prevIdsQueGeraCard = new Set(Object.values(vencedores).map(v => v.prevKey));
+  const prevIdsQueGeraCard = new Set();
+  Object.values(grupos).forEach(g => g.prevKeys.forEach(k => prevIdsQueGeraCard.add(k)));
 
   state.preventivas.forEach(p => {
     if (!p.ultima) return;
@@ -4931,22 +4933,26 @@ function _buildEventMap() {
     todos.push({ p, status, prox, freq: parseInt(p.freq), maq: p.maqKey || p.maquinaKey || '__sem_maq__' });
   });
 
-  // v3.32.4 — Supressão visual: agrupa por (semana, máquina) e mantém só a de MAIOR freq.
-  // Ex: se na semana X tem Anual + Semestral + Trimestral + Semanal pra mesma máquina,
-  // só a Anual aparece (as menores estão implícitas pela cascata de execução).
-  const grupos = {}; // key: semana|maq, val: evento de maior freq
+  // v3.32.7 — Supressão visual refinada: agrupa por (semana, máquina), descobre a MAIOR freq
+  // do grupo e mantém TODAS as preventivas daquele freq máximo.
+  // Regra:
+  //  - Freqs DIFERENTES na mesma (semana+máquina) → só a maior aparece (cascata de hierarquia)
+  //  - Mesma freq (tarefas distintas ex: 5 semanais) → TODAS aparecem
+  const grupos = {}; // key: semana|maq, val: { maxFreq, eventos:[] }
   todos.forEach(ev => {
     const gkey = _weekKey(ev.prox) + '|' + ev.maq;
-    if (!grupos[gkey] || ev.freq > grupos[gkey].freq) {
-      grupos[gkey] = ev;
-    }
+    if (!grupos[gkey]) grupos[gkey] = { maxFreq: ev.freq, eventos: [ev] };
+    else if (ev.freq > grupos[gkey].maxFreq) grupos[gkey] = { maxFreq: ev.freq, eventos: [ev] };
+    else if (ev.freq === grupos[gkey].maxFreq) grupos[gkey].eventos.push(ev);
   });
 
-  // 2ª passada: popula o map só com os vencedores
-  Object.values(grupos).forEach(ev => {
-    const key = ev.prox.toISOString().split('T')[0];
-    if (!map[key]) map[key] = [];
-    map[key].push({ p: ev.p, status: ev.status, prox: ev.prox });
+  // 2ª passada: popula o map com todos os eventos dos vencedores
+  Object.values(grupos).forEach(g => {
+    g.eventos.forEach(ev => {
+      const key = ev.prox.toISOString().split('T')[0];
+      if (!map[key]) map[key] = [];
+      map[key].push({ p: ev.p, status: ev.status, prox: ev.prox });
+    });
   });
   return map;
 }
