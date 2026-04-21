@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.30.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.31.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -358,6 +358,33 @@ white-space: nowrap;
 .btn-secondary:hover { border-color: var(--blue); color: var(--blue); }
 
 /* ── TABLES ── */
+/* v3.31.0 — Cards mobile pra Preventivas (substitui tabela em ≤640px) */
+.prev-cards-mobile { display: none; }
+@media (max-width: 640px) {
+  .prev-table-wrap { display: none; }
+  .prev-cards-mobile { display: flex; flex-direction: column; gap: 10px; }
+}
+.prev-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
+.prev-card::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; background: var(--green); border-radius: 0 3px 3px 0; }
+.prev-card-atrasada::before { background: var(--red); }
+.prev-card-proxima::before { background: #D97706; }
+.prev-card-sem::before { background: var(--muted2); }
+.prev-card-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.prev-card-t { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 14px; line-height: 1.2; color: var(--text); }
+.prev-card-eq { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.prev-card-status { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 600; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0; white-space: nowrap; }
+.prev-card-status-ok { background: var(--green-lt); color: var(--green); }
+.prev-card-status-atrasada { background: #FEE2E2; color: var(--red); }
+.prev-card-status-proxima { background: #FEF3C7; color: #D97706; }
+.prev-card-status-sem { background: var(--gray); color: var(--muted); }
+.prev-card-meta { display: flex; flex-wrap: wrap; gap: 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.prev-card-meta b { color: var(--text); font-weight: 500; }
+.prev-card-actions { display: flex; gap: 6px; margin-top: 4px; }
+.prev-card-btn { flex: 1; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 36px; }
+.prev-card-btn.primary { background: var(--green); color: #fff; border-color: var(--green); flex: 2; }
+.prev-card-btn.danger { color: var(--red); border-color: var(--red-md, #fecaca); }
+.prev-card-btn svg { width: 12px; height: 12px; }
+
 .table-wrap { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th { background: var(--blue-lt); font-size: 0.57rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); padding: 11px 16px; text-align: left; border-bottom: 1.5px solid var(--green-md); }
@@ -2137,7 +2164,8 @@ display: none;
       <div class="sec-title">Plano Preventivo</div>
       <button class="btn-primary" onclick="abrirModalPreventiva()">+ Preventiva</button>
     </div>
-    <div class="table-wrap">
+    <!-- Desktop: tabela. Mobile (≤640px): cards via @media (v3.31.0) -->
+    <div class="table-wrap prev-table-wrap">
       <table class="data-table">
         <thead><tr>
           <th>Tarefa</th><th>Equipamento</th><th>Setor</th>
@@ -2146,6 +2174,7 @@ display: none;
         <tbody id="prev-tbody"></tbody>
       </table>
     </div>
+    <div class="prev-cards-mobile" id="prev-cards-mobile" aria-label="Lista de preventivas (mobile)"></div>
     <!-- CALENDÁRIO APRIMORADO -->
     <div class="cal-wrap" style="margin-top:28px">
       <!-- Header: nav + view tabs + legenda -->
@@ -3993,12 +4022,15 @@ function salvarCardAdmin() {
 function renderPreventiva() {
   renderCalendario();
   const tbody = document.getElementById('prev-tbody') || document.getElementById('preventivas-tbody');
+  const cardsHost = document.getElementById('prev-cards-mobile');
   if (!tbody) return;
   const all = state.preventivas || [];
   if (!all.length) {
     tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhuma preventiva cadastrada.</td></tr>';
+    if (cardsHost) cardsHost.innerHTML = '<div class="empty-state" style="padding:32px 12px;text-align:center;color:var(--muted);font-size:0.78rem">Nenhuma preventiva cadastrada.</div>';
     return;
   }
+  // v3.31.0: render duplo — tabela (desktop) + cards (mobile via @media)
   tbody.innerHTML = all.map(p => {
     const maq = state.maquinas.find(m => m._key === (p.maqKey || p.maquinaKey));
     const maqNome = maq ? (maq.tag ? maq.tag + ' · ' + maq.nome : maq.nome) : (p.equip || '—');
@@ -4035,6 +4067,46 @@ function renderPreventiva() {
       '</td>' +
     '</tr>';
   }).join('');
+
+  // v3.31.0 — render mobile cards (mesmo dataset, layout vertical pra mobile)
+  if (cardsHost) {
+    cardsHost.innerHTML = all.map(p => {
+      const maq = state.maquinas.find(m => m._key === (p.maqKey || p.maquinaKey));
+      const maqNome = maq ? (maq.tag ? maq.tag + ' · ' + maq.nome : maq.nome) : (p.equip || '—');
+      const key = p._key || p.id || '';
+      const setorLabel = p.setor === 'eletrica' ? 'Elétrica' : 'Mecânica';
+      const freqLabel = p.freq ? p.freq + 'd' : '—';
+      const ultimaFmt = p.ultima ? fmtDt(p.ultima) : '—';
+      let proxFmt = '—', statusKey = 'sem', statusLabel = 'Sem data';
+      if (p.ultima && p.freq) {
+        const prox = addDays(parseDt(p.ultima), parseInt(p.freq));
+        proxFmt = prox.toLocaleDateString('pt-BR');
+        const dr = diffDays(today(), prox);
+        if (dr < 0) { statusKey = 'atrasada'; statusLabel = 'Atrasada ' + Math.abs(dr) + 'd'; }
+        else if (dr <= 7) { statusKey = 'proxima'; statusLabel = dr === 0 ? 'Hoje' : 'Em ' + dr + 'd'; }
+        else { statusKey = 'ok'; statusLabel = 'OK'; }
+      }
+      return '<div class="prev-card prev-card-' + statusKey + '">' +
+        '<div class="prev-card-h">' +
+          '<div class="prev-card-id">' +
+            '<div class="prev-card-t">' + (p.tarefa||'—') + '</div>' +
+            '<div class="prev-card-eq">' + maqNome + ' · ' + setorLabel + '</div>' +
+          '</div>' +
+          '<span class="prev-card-status prev-card-status-' + statusKey + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="prev-card-meta">' +
+          '<span>Freq <b>' + freqLabel + '</b></span>' +
+          '<span>Última <b>' + ultimaFmt + '</b></span>' +
+          '<span>Próxima <b>' + proxFmt + '</b></span>' +
+        '</div>' +
+        '<div class="prev-card-actions">' +
+          '<button class="prev-card-btn primary" onclick="executarPreventiva(\x27' + key + '\x27)">' + CHECK_SVG_STR + ' Concluir</button>' +
+          '<button class="prev-card-btn" onclick="abrirModalPreventiva(\x27' + key + '\x27)" aria-label="Editar">' + EDIT_SVG_STR + '</button>' +
+          '<button class="prev-card-btn danger" onclick="deletarPreventiva(\x27' + key + '\x27)" aria-label="Deletar">' + DEL_SVG_STR + '</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
 }
 
 let editandoPrevKey = null;

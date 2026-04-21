@@ -11,7 +11,7 @@
  * Cliente detecta nova versão via 'controllerchange' e mostra toast "Atualizar".
  */
 
-const VERSION = '3.30.0';
+const VERSION = '3.31.0';
 const CACHE_NAME = `fiobras-hub-v${VERSION}`;
 
 const PRECACHE = [
@@ -19,6 +19,7 @@ const PRECACHE = [
   '/index.html',
   '/css/hub.css',
   '/css/tokens.css',  // v3.27.0
+  '/manutencao/firebase-messaging-sw.js',  // v3.31.0 — FCM offline-first
 ];
 
 // ─── Install: pré-cacheia essenciais + skipWaiting ────────────────────────
