@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.32.7', d:'21 abr 2026', current:true,
+    v:'3.32.8', d:'21 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · botões Editar/Deletar da tabela Preventiva não funcionavam + remove botão Executar da tabela (Ajuste 3a auditoria v3.32+).',
+        desc:'Bug: os onclick da tabela desktop usavam \\\\x27 (duas barras) em vez de \\\\x27 (uma), fazendo o HTML renderizar literalmente \\\\x27 em vez de aspa simples. Clique não fazia nada (erro silencioso no attr).\n\nFix: \\\\x27 → \\\\x27 nos 3 botões. Cards mobile já estavam corretos.\n\nAlém disso, botão Executar (✓) removido da tabela desktop — execução passa pelo fluxo do Kanban, não direto da tabela. Botão Concluir continua nos cards mobile.\n\nDeletar ainda aberto pra todos (gated virá após implementação do sistema de powers — Ajuste 3b).'}
+    ]
+  },
+  {
+    v:'3.32.7', d:'21 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · calendário + Kanban mostravam só 1 preventiva quando várias da mesma máquina venciam no mesmo dia (Ajuste 5 auditoria v3.32+).',
         desc:'Bug da supressão visual introduzida na v3.32.4: agrupava por (semana, máquina) e mantinha só a de MAIOR freq. Quando TODAS tinham a mesma freq (ex: 5 tarefas Semanais distintas da RET-01 vencendo no mesmo dia), só uma aparecia — as outras 4 sumiam.\n\nRegra corrigida:\n• Freqs DIFERENTES na mesma semana+máquina → só a maior aparece (cascata preservada: Anual absorve Semanal)\n• MESMA freq (tarefas distintas) → TODAS aparecem\n\nFix em _buildEventMap (calendário) e gerarCardsPreventivas (Kanban): agrupa por (semana, máquina), descobre freq máxima e mantém TODAS as preventivas daquela freq máxima.'}

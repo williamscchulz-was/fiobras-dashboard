@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.32.7">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.32.8">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -4269,9 +4269,10 @@ function renderPreventiva() {
       '<td>' + proxFmt + '</td>' +
       '<td>' + statusHtml + '</td>' +
       '<td style="white-space:nowrap">' +
-        '<button class="btn-secondary" style="padding:5px 10px;font-size:0.6rem;margin-right:3px" title="Executar" onclick="executarPreventiva(\\x27' + key + '\\x27)">' + CHECK_SVG_STR + '</button>' +
-        '<button class="btn-secondary" style="padding:5px 10px;font-size:0.6rem;margin-right:3px" title="Editar" onclick="abrirModalPreventiva(\\x27' + key + '\\x27)">' + EDIT_SVG_STR + '</button>' +
-        '<button class="btn-secondary" style="padding:5px 10px;font-size:0.6rem;color:var(--red);border-color:var(--red-md)" title="Deletar" onclick="deletarPreventiva(\\x27' + key + '\\x27)">' + DEL_SVG_STR + '</button>' +
+        // v3.32.8 — Ajuste 3a: bug \\x27 → \x27 (HTML não interpretava a barra dupla,
+        // quebrava onclick). Execução removida da tabela (passa pelo Kanban).
+        '<button class="btn-secondary" style="padding:5px 10px;font-size:0.6rem;margin-right:3px" title="Editar" onclick="abrirModalPreventiva(\x27' + key + '\x27)">' + EDIT_SVG_STR + '</button>' +
+        '<button class="btn-secondary btn-del-prev" style="padding:5px 10px;font-size:0.6rem;color:var(--red);border-color:var(--red-md)" title="Deletar" onclick="deletarPreventiva(\x27' + key + '\x27)">' + DEL_SVG_STR + '</button>' +
       '</td>' +
     '</tr>';
   }).join('');
