@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.34.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.35.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -534,9 +534,11 @@ cursor: default;
 .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.62rem; color: var(--muted); }
 .cal-legend-dot { width: 10px; height: 10px; border-radius: 4px; }
 
-/* ── MÁQUINAS (v3.34.0 · card redesign Bank Account · Ajuste 1) ── */
+/* ── MÁQUINAS (v3.34.0 · card redesign Bank Account · Ajuste 1) ──
+   v3.35.0 — light mode coerente (fundo branco com mesma estrutura/hierarquia) */
 .maquinas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px; }
 .maquina-card {
+  /* Dark por default; light mode override abaixo */
   background: linear-gradient(145deg, #1F2420 0%, #15181C 100%);
   border: 1px solid #2A2F2B;
   border-radius: 18px;
@@ -553,6 +555,66 @@ cursor: default;
   background: radial-gradient(circle, rgba(0,200,80,.09), transparent 70%);
   pointer-events: none;
 }
+/* v3.35.0 — multi-select de tarefas no modal +Preventiva (Ajuste 2) */
+.label-chip-new { display:inline-block; background:var(--green); color:#fff; font-size:8.5px; padding:1px 5px; border-radius:3px; margin-left:5px; letter-spacing:.5px; font-weight:700; vertical-align:middle; }
+.ts-wrap { border:1.5px solid var(--border2); border-radius:10px; background:var(--surface2); }
+.ts-head { display:flex; align-items:center; gap:8px; padding:9px 11px; border-bottom:1px solid var(--border); }
+.ts-head-title { font-size:11px; color:var(--muted); font-family:'DM Mono', monospace; text-transform:uppercase; letter-spacing:1px; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ts-head-btn { padding:4px 10px; font-size:10.5px; font-family:'Poppins',sans-serif; font-weight:600; background:transparent; border:1px solid var(--border2); border-radius:5px; color:var(--muted); cursor:pointer; text-transform:uppercase; letter-spacing:.5px; }
+.ts-head-btn:hover { border-color:var(--green); color:var(--green); }
+.ts-list { max-height:220px; overflow-y:auto; padding:4px; }
+.ts-row { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:6px; cursor:pointer; transition:background .12s; }
+.ts-row:hover { background:rgba(0,0,0,.03); }
+.ts-row.sel { background:rgba(0,136,53,.08); }
+.ts-row input { width:16px; height:16px; accent-color:var(--green); cursor:pointer; margin:0; flex-shrink:0; }
+.ts-name { font-size:13px; flex:1; min-width:0; color:var(--text); }
+.ts-badge { font-family:'DM Mono', monospace; font-size:9px; background:var(--border); color:var(--muted); padding:2px 6px; border-radius:3px; text-transform:uppercase; letter-spacing:.4px; flex-shrink:0; }
+.ts-badge.custom { background:rgba(0,136,53,.12); color:var(--green); }
+.ts-empty { padding:22px 14px; text-align:center; color:var(--muted); font-size:12.5px; font-style:italic; }
+.ts-add { display:flex; gap:8px; padding:8px 10px; border-top:1px dashed var(--border); }
+.ts-add input { flex:1; border:1.5px solid var(--border); border-radius:6px; padding:6px 10px; font-size:12.5px; font-family:'Poppins', sans-serif; outline:none; background:#fff; color:var(--text); }
+.ts-add input:focus { border-color:var(--green); }
+.ts-add button { padding:6px 12px; background:var(--green); color:#fff; border:0; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Poppins', sans-serif; white-space:nowrap; }
+.ts-add button:hover { background:#00a040; }
+.ts-summary { margin-top:9px; padding:9px 12px; border-radius:8px; font-size:12.5px; background:rgba(0,136,53,.06); border:1px solid rgba(0,136,53,.18); color:var(--green); font-weight:500; }
+.ts-summary.zero { background:rgba(220,38,38,.06); border-color:rgba(220,38,38,.2); color:var(--red); }
+[data-theme="dark"] .ts-wrap { background:rgba(255,255,255,.02); border-color:rgba(255,255,255,.08); }
+[data-theme="dark"] .ts-head { border-bottom-color:rgba(255,255,255,.06); }
+[data-theme="dark"] .ts-row:hover { background:rgba(255,255,255,.03); }
+[data-theme="dark"] .ts-row.sel { background:rgba(0,200,80,.1); }
+[data-theme="dark"] .ts-add { border-top-color:rgba(255,255,255,.06); }
+[data-theme="dark"] .ts-add input { background:rgba(255,255,255,.03); border-color:rgba(255,255,255,.08); color:#fff; }
+[data-theme="dark"] .ts-badge { background:rgba(255,255,255,.06); color:#9CA295; }
+
+/* Light mode: fundo branco, mantém a hierarquia visual */
+[data-theme="light"] .maquina-card {
+  background: linear-gradient(145deg, #FFFFFF 0%, #F8FAF5 100%);
+  border: 1px solid #E3E7DE;
+  color: #1B1F18;
+  box-shadow: 0 2px 8px rgba(27,31,24,.05), 0 1px 3px rgba(27,31,24,.04);
+}
+[data-theme="light"] .maquina-card:hover { box-shadow: 0 8px 24px rgba(0,136,53,.12), 0 2px 6px rgba(27,31,24,.06); }
+[data-theme="light"] .maquina-card:before { background: radial-gradient(circle, rgba(0,136,53,.08), transparent 70%); }
+[data-theme="light"] .maquina-eyebrow { color:#9CA295; }
+[data-theme="light"] .maquina-nome { color:#1B1F18; }
+[data-theme="light"] .maquina-tag-mask { color:#CFD6C6; }
+[data-theme="light"] .maquina-tag-code { color:#1B1F18; }
+[data-theme="light"] .maquina-foot { border-top-color:#E3E7DE; }
+[data-theme="light"] .maquina-zel-label,
+[data-theme="light"] .maquina-local-label { color:#9CA295; }
+[data-theme="light"] .maquina-zel-nome { color:#1B1F18; }
+[data-theme="light"] .maquina-zel-nome.empty { color:#9CA295; }
+[data-theme="light"] .maquina-local-val { color:#6B7166; }
+[data-theme="light"] .maquina-ab { border-color:#E3E7DE; background:rgba(27,31,24,.02); color:#6B7166; }
+[data-theme="light"] .maquina-ab:hover { background:rgba(27,31,24,.05); color:#1B1F18; border-color:#CFD6C6; }
+[data-theme="light"] .maquina-ab.danger:hover { color:#DC2626; border-color:rgba(220,38,38,.4); }
+/* Badges light — tons mais claros pra contrastar com fundo branco */
+[data-theme="light"] .maquina-badge { background:rgba(0,136,53,.1); color:#008835; border-color:rgba(0,136,53,.2); }
+[data-theme="light"] .maquina-badge-dot { background:#008835; box-shadow:0 0 6px rgba(0,136,53,.4); }
+[data-theme="light"] .maquina-badge.parado { background:rgba(220,38,38,.08); color:#B91C1C; border-color:rgba(220,38,38,.2); }
+[data-theme="light"] .maquina-badge.parado .maquina-badge-dot { background:#B91C1C; box-shadow:0 0 6px rgba(185,28,28,.4); }
+[data-theme="light"] .maquina-badge.manut { background:rgba(217,119,6,.1); color:#B45309; border-color:rgba(217,119,6,.25); }
+[data-theme="light"] .maquina-badge.manut .maquina-badge-dot { background:#B45309; box-shadow:0 0 6px rgba(180,83,9,.4); }
 .maquina-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; position:relative; z-index:1; gap:10px; }
 .maquina-eyebrow { font-family:'DM Mono', monospace; font-size:.56rem; color:#8E9490; text-transform:uppercase; letter-spacing:2px; font-weight:500; }
 .maquina-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(0,200,80,.12); color:#4ADE80; font-family:'Outfit', sans-serif; font-weight:700; font-size:.56rem; padding:4px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:1.2px; border:1px solid rgba(0,200,80,.25); white-space:nowrap; flex-shrink:0; }
@@ -2194,7 +2256,6 @@ display: none;
     <div class="sec-header">
       <div class="sec-title">Plano Preventivo</div>
       <button class="btn-primary" onclick="abrirModalPreventiva()">+ Preventiva</button>
-      <button class="btn-secondary" onclick="abrirModalMassa()" style="margin-left:6px" title="Cadastrar em lote pra várias máquinas">+ Em massa</button>
     </div>
     <!-- Desktop: tabela. Mobile (≤640px): cards via @media (v3.31.0) -->
     <div class="table-wrap prev-table-wrap">
@@ -2368,8 +2429,8 @@ display: none;
         </div>
       </div>
       <div class="modal-row">
-        <!-- v3.34.0 — Ajuste 1: campo novo "zelador responsável" -->
-        <div class="field"><label>Zelador responsável</label>
+        <!-- v3.34.0 — Ajuste 1: campo novo "responsável" (v3.35.0: renomeado de "Zelador") -->
+        <div class="field"><label>Responsável</label>
           <select id="maq-responsavel"></select>
         </div>
         <!-- v3.34.0 — Ajuste 1: campo novo "localização física" -->
@@ -2754,26 +2815,41 @@ display: none;
 <!-- PREVENTIVA -->
 
 <div class="modal-bg" id="modal-preventiva">
-  <div class="modal" style="width:520px">
+  <div class="modal" style="width:540px">
     <div class="modal-title" id="pv-modal-title">Nova Preventiva</div>
     <div class="modal-grid">
-      <div class="modal-row">
-        <div class="field">
-          <label>Máquina</label>
-          <select id="pv-maquina" onchange="onPvMaquinaChange()">
-            <option value="">Selecionar máquina...</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Tarefa preventiva</label>
-          <select id="pv-tarefa-sel" onchange="onPvTarefaChange()">
-            <option value="">Selecionar tarefa...</option>
-          </select>
-        </div>
+      <!-- v3.35.0 — Ajuste 2: máquina single + multi-select de tarefas -->
+      <div class="field">
+        <label>Máquina</label>
+        <select id="pv-maquina" onchange="onPvMaquinaChange()">
+          <option value="">Selecionar máquina...</option>
+        </select>
       </div>
-      <div class="field" id="pv-tarefa-custom-wrap" style="display:none">
-        <label>Descrição da tarefa</label>
-        <input id="pv-tarefa" placeholder="Ex: Troca de óleo">
+
+      <!-- Modo CRIAÇÃO · multi-select de tarefas -->
+      <div class="field" id="pv-tarefas-wrap">
+        <label>Tarefas <span class="label-chip-new">MULTI</span></label>
+        <div class="ts-wrap">
+          <div class="ts-head">
+            <div class="ts-head-title" id="pv-ts-count">Selecione uma máquina primeiro</div>
+            <button type="button" class="ts-head-btn" onclick="_pvTarefasMarcarTodas()">Todas</button>
+            <button type="button" class="ts-head-btn" onclick="_pvTarefasLimpar()">Limpar</button>
+          </div>
+          <div class="ts-list" id="pv-ts-list">
+            <div class="ts-empty">Selecione uma máquina pra ver as tarefas padrão cadastradas.</div>
+          </div>
+          <div class="ts-add">
+            <input id="pv-ts-add-input" placeholder="Adicionar outra tarefa (livre)..." onkeydown="if(event.key==='Enter'){event.preventDefault();_pvTarefaAdd();}">
+            <button type="button" onclick="_pvTarefaAdd()">+ Adicionar</button>
+          </div>
+        </div>
+        <div class="ts-summary" id="pv-ts-summary">Nenhuma tarefa selecionada</div>
+      </div>
+
+      <!-- Modo EDIÇÃO · campo texto simples (single) -->
+      <div class="field" id="pv-tarefa-edit-wrap" style="display:none">
+        <label>Tarefa</label>
+        <input id="pv-tarefa-edit" placeholder="Ex: Troca de óleo">
       </div>
       <div class="modal-row">
         <div class="field"><label>Setor</label>
@@ -2813,73 +2889,12 @@ display: none;
     </div>
     <div class="modal-actions">
       <button class="modal-btn cancel" onclick="fecharModal('modal-preventiva')">Cancelar</button>
-      <button class="modal-btn confirm" onclick="salvarPreventiva()">Salvar</button>
+      <button class="modal-btn confirm" id="pv-save-btn" onclick="salvarPreventiva()">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- v3.32.5 — Cadastro em massa -->
-<div class="modal-bg" id="modal-massa">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">Cadastrar preventivas em massa</div>
-      <div class="modal-sub">Mesma tarefa, frequência e responsável em múltiplas máquinas</div>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label>Tarefa</label>
-        <select id="mass-tarefa-sel" onchange="_massaOnTarefaChange()"></select>
-        <input id="mass-tarefa-custom" placeholder="Digite a tarefa..." style="display:none;margin-top:6px">
-      </div>
-      <div class="modal-grid">
-        <div class="field">
-          <label>Frequência</label>
-          <select id="mass-freq">
-            <option value="7">Semanal (7d)</option>
-            <option value="15">Quinzenal (15d)</option>
-            <option value="30" selected>Mensal (30d)</option>
-            <option value="90">Trimestral (90d)</option>
-            <option value="180">Semestral (180d)</option>
-            <option value="365">Anual (365d)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Setor</label>
-          <select id="mass-setor">
-            <option value="mecanica">Mecânica</option>
-            <option value="eletrica">Elétrica</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-grid">
-        <div class="field">
-          <label>Última execução</label>
-          <input type="date" id="mass-ultima">
-        </div>
-        <div class="field">
-          <label>Responsável</label>
-          <select id="mass-resp"></select>
-        </div>
-      </div>
-      <div class="field">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
-          <label style="margin:0">Máquinas alvo</label>
-          <div style="display:flex;gap:6px">
-            <button type="button" class="btn-secondary" style="padding:3px 10px;font-size:.6rem" onclick="_massaMarcarTodas()">Marcar todas</button>
-            <button type="button" class="btn-secondary" style="padding:3px 10px;font-size:.6rem" onclick="_massaLimpar()">Limpar</button>
-          </div>
-        </div>
-        <input id="mass-busca" placeholder="🔍 filtrar por código ou nome..." oninput="_massaFiltrar(this.value)" style="margin-bottom:6px">
-        <div id="mass-maq-list" style="background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;max-height:220px;overflow-y:auto;padding:4px"></div>
-        <div id="mass-summary" style="margin-top:8px;padding:8px 12px;background:var(--green-lt);border:1px solid var(--green-md);border-radius:8px;font-size:12.5px;color:var(--green);font-weight:500"></div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn cancel" onclick="fecharModal('modal-massa')">Cancelar</button>
-      <button class="modal-btn confirm" id="mass-btn-lancar" onclick="confirmarMassa()" style="background:var(--green)">Lançar preventivas</button>
-    </div>
-  </div>
-</div>
+<!-- v3.32.5 modal-massa removido na v3.35.0 (Ajuste 2: unificado no +Preventiva) -->
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -4400,75 +4415,196 @@ function renderPreventiva() {
 
 let editandoPrevKey = null;
 
+// v3.35.0 — Ajuste 2: multi-tarefa na criação; single texto na edição
+// State do modal: set de tarefas marcadas + array de tarefas custom adicionadas
+let _pvTarefasMarcadas = new Set();
+let _pvTarefasCustom = []; // tarefas livres adicionadas via input
+
 function abrirModalPreventiva(key) {
   editandoPrevKey = key || null;
   populatePvMaquinaSelect();
   const modal = document.getElementById('modal-preventiva');
   const titulo = document.getElementById('pv-modal-title');
-  document.getElementById('pv-tarefa-custom-wrap').style.display = 'none';
+  const tarefasWrap = document.getElementById('pv-tarefas-wrap');
+  const tarefaEditWrap = document.getElementById('pv-tarefa-edit-wrap');
+
+  _pvTarefasMarcadas.clear();
+  _pvTarefasCustom = [];
+  const addInput = document.getElementById('pv-ts-add-input');
+  if (addInput) addInput.value = '';
 
   if (key) {
+    // ── MODO EDIÇÃO: single-task via campo texto ──
     const p = state.preventivas.find(x => (x._key || x.id) === key);
     if (!p) return;
     titulo.textContent = 'Editar Preventiva';
-    // Seleciona máquina pelo maqKey salvo ou pela correspondência de nome
+    tarefasWrap.style.display = 'none';
+    tarefaEditWrap.style.display = '';
     document.getElementById('pv-maquina').value = p.maqKey || '';
-    if (p.maqKey) onPvMaquinaChange();
-    // Preenche tarefa
-    const tarefaSel = document.getElementById('pv-tarefa-sel');
-    // Tenta selecionar a tarefa na lista
-    let found = false;
-    for (let opt of tarefaSel.options) {
-      if (opt.value === p.tarefa) { tarefaSel.value = p.tarefa; found = true; break; }
-    }
-    if (!found) {
-      tarefaSel.value = '__outro__';
-      document.getElementById('pv-tarefa-custom-wrap').style.display = '';
-    }
-    document.getElementById('pv-tarefa').value = p.tarefa || '';
+    document.getElementById('pv-tarefa-edit').value = p.tarefa || '';
     document.getElementById('pv-setor').value  = p.setor  || 'mecanica';
     document.getElementById('pv-freq').value   = p.freq   || 30;
     document.getElementById('pv-ultima').value = p.ultima || todayStr();
     document.getElementById('pv-resp').value   = p.resp   || '';
     document.getElementById('pv-obs').value    = p.obs    || '';
+    document.getElementById('pv-save-btn').textContent = 'Salvar alterações';
   } else {
+    // ── MODO CRIAÇÃO: multi-task via checkboxes ──
     titulo.textContent = 'Nova Preventiva';
+    tarefasWrap.style.display = '';
+    tarefaEditWrap.style.display = 'none';
     document.getElementById('pv-maquina').value = '';
-    document.getElementById('pv-tarefa-sel').innerHTML = '<option value="">Selecionar tarefa...</option>';
-    document.getElementById('pv-tarefa').value  = '';
     document.getElementById('pv-setor').value   = 'mecanica';
     document.getElementById('pv-freq').value    = 30;
     document.getElementById('pv-ultima').value  = todayStr();
     document.getElementById('pv-resp').value    = '';
     document.getElementById('pv-obs').value     = '';
+    _pvRenderTarefas();
+    _pvAtualizarSummary();
   }
   modal.classList.add('open');
 }
-function salvarPreventiva() {
-  const tarefaSel = document.getElementById('pv-tarefa-sel').value;
-  const tarefaCustom = document.getElementById('pv-tarefa').value.trim();
-  const tarefa = (tarefaSel === '__outro__' || !tarefaSel) ? tarefaCustom : tarefaSel;
-  if (!tarefa) { alert('Selecione ou descreva uma tarefa.'); return; }
 
+// Render da lista de tarefas (prevs padrão da máquina + customs adicionadas)
+function _pvRenderTarefas() {
+  const list = document.getElementById('pv-ts-list');
+  const count = document.getElementById('pv-ts-count');
+  if (!list) return;
   const maqKey = document.getElementById('pv-maquina').value;
+  if (!maqKey) {
+    list.innerHTML = '<div class="ts-empty">Selecione uma máquina pra ver as tarefas padrão cadastradas.</div>';
+    if (count) count.textContent = 'Selecione uma máquina primeiro';
+    return;
+  }
+  const m = state.maquinas.find(x => x._key === maqKey);
+  if (!m) { list.innerHTML = ''; return; }
+  const prevs = Array.isArray(m.prevs) ? m.prevs : (m.prevs ? m.prevs.split('\n').filter(Boolean) : []);
+  const all = [
+    ...prevs.map(t => ({ t, kind: 'padrao' })),
+    ..._pvTarefasCustom.map(t => ({ t, kind: 'custom' })),
+  ];
+  if (count) count.textContent = prevs.length
+    ? (prevs.length + ' tarefa' + (prevs.length===1?'':'s') + ' cadastrada' + (prevs.length===1?'':'s') + ' pra essa máquina' + (_pvTarefasCustom.length ? ' · +' + _pvTarefasCustom.length + ' custom' : ''))
+    : 'Nenhuma tarefa padrão · adicione uma abaixo';
+  if (!all.length) {
+    list.innerHTML = '<div class="ts-empty">Nenhuma tarefa padrão pra essa máquina. Use "Adicionar outra tarefa" abaixo.</div>';
+    return;
+  }
+  list.innerHTML = all.map((item, i) => {
+    const checked = _pvTarefasMarcadas.has(item.t) ? 'checked' : '';
+    const rowCls = checked ? 'ts-row sel' : 'ts-row';
+    const badgeCls = item.kind === 'custom' ? 'ts-badge custom' : 'ts-badge';
+    const badgeTxt = item.kind === 'custom' ? '+ADIC.' : 'PADRÃO';
+    return '<label class="' + rowCls + '">' +
+      '<input type="checkbox" ' + checked + ' data-tarefa="' + item.t.replace(/"/g, '&quot;') + '" onchange="_pvTarefaToggle(this)">' +
+      '<span class="ts-name">' + item.t + '</span>' +
+      '<span class="' + badgeCls + '">' + badgeTxt + '</span>' +
+    '</label>';
+  }).join('');
+}
+window._pvTarefaToggle = function(cb) {
+  const t = cb.dataset.tarefa;
+  if (cb.checked) _pvTarefasMarcadas.add(t);
+  else _pvTarefasMarcadas.delete(t);
+  // toggle classe sel no label pai
+  const row = cb.closest('.ts-row');
+  if (row) row.classList.toggle('sel', cb.checked);
+  _pvAtualizarSummary();
+};
+window._pvTarefasMarcarTodas = function() {
+  document.querySelectorAll('#pv-ts-list input[type="checkbox"]').forEach(cb => {
+    cb.checked = true;
+    _pvTarefasMarcadas.add(cb.dataset.tarefa);
+    const row = cb.closest('.ts-row'); if (row) row.classList.add('sel');
+  });
+  _pvAtualizarSummary();
+};
+window._pvTarefasLimpar = function() {
+  _pvTarefasMarcadas.clear();
+  document.querySelectorAll('#pv-ts-list input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+    const row = cb.closest('.ts-row'); if (row) row.classList.remove('sel');
+  });
+  _pvAtualizarSummary();
+};
+window._pvTarefaAdd = function() {
+  const input = document.getElementById('pv-ts-add-input');
+  if (!input) return;
+  const txt = input.value.trim();
+  if (!txt) return;
+  const maqKey = document.getElementById('pv-maquina').value;
+  if (!maqKey) { toast('Selecione uma máquina primeiro', 'err'); return; }
+  // Evita duplicar
+  const m = state.maquinas.find(x => x._key === maqKey);
+  const prevsPadrao = m ? (Array.isArray(m.prevs) ? m.prevs : (m.prevs ? m.prevs.split('\n').filter(Boolean) : [])) : [];
+  if (prevsPadrao.includes(txt) || _pvTarefasCustom.includes(txt)) {
+    // Já existe → só marca
+    _pvTarefasMarcadas.add(txt);
+  } else {
+    _pvTarefasCustom.push(txt);
+    _pvTarefasMarcadas.add(txt);
+  }
+  input.value = '';
+  _pvRenderTarefas();
+  _pvAtualizarSummary();
+};
+function _pvAtualizarSummary() {
+  const n = _pvTarefasMarcadas.size;
+  const sum = document.getElementById('pv-ts-summary');
+  const btn = document.getElementById('pv-save-btn');
+  if (!sum) return;
+  if (n === 0) {
+    sum.textContent = 'Nenhuma tarefa selecionada';
+    sum.classList.add('zero');
+  } else if (n === 1) {
+    sum.innerHTML = '<b>1 tarefa selecionada</b> · cadastra 1 preventiva';
+    sum.classList.remove('zero');
+  } else {
+    sum.innerHTML = '<b>' + n + ' tarefas selecionadas</b> · cadastra ' + n + ' preventivas (mesma máquina, freq, data e resp)';
+    sum.classList.remove('zero');
+  }
+  if (btn && !editandoPrevKey) {
+    btn.textContent = n === 0 ? 'Salvar' : (n === 1 ? 'Salvar preventiva' : 'Salvar ' + n + ' preventivas');
+  }
+}
+
+async function salvarPreventiva() {
+  const maqKey = document.getElementById('pv-maquina').value;
+  if (!maqKey) { toast('Selecione uma máquina', 'err'); return; }
   const maq = state.maquinas.find(m => m._key === maqKey);
   const equip = maq ? (maq.tag ? maq.tag + ' · ' + maq.nome : maq.nome) : '';
 
-  const pv = {
-    tarefa,
+  const base = {
     equip,
-    maqKey: maqKey || '',
+    maqKey,
     setor:  document.getElementById('pv-setor').value,
     freq:   parseInt(document.getElementById('pv-freq').value),
     ultima: document.getElementById('pv-ultima').value,
     resp:   document.getElementById('pv-resp').value,
     obs:    document.getElementById('pv-obs').value.trim(),
-    urg:    'alta', // preventivas vencidas sempre viram alta
+    urg:    'alta',
   };
+
   if (editandoPrevKey) {
-    window._fbUpdatePrev(editandoPrevKey, pv);
+    // ── EDIÇÃO · single task via campo texto ──
+    const tarefa = document.getElementById('pv-tarefa-edit').value.trim();
+    if (!tarefa) { toast('Descreva a tarefa', 'err'); return; }
+    window._fbUpdatePrev(editandoPrevKey, { ...base, tarefa });
+    toast('Preventiva atualizada', 'ok');
   } else {
-    window._fbPushPrev(pv);
+    // ── CRIAÇÃO · multi-tarefa ──
+    const tarefas = [..._pvTarefasMarcadas];
+    if (!tarefas.length) { toast('Selecione ao menos 1 tarefa', 'err'); return; }
+    if (!window._fbPushPrev) { toast('Firebase não pronto', 'err'); return; }
+    for (const tarefa of tarefas) {
+      await window._fbPushPrev({
+        ...base,
+        tarefa,
+        criadoPor: state.user || '—',
+        criadoTs: nowStr(),
+      });
+    }
+    toast(tarefas.length + ' preventiva' + (tarefas.length===1?'':'s') + ' cadastrada' + (tarefas.length===1?'':'s'), 'ok');
   }
   editandoPrevKey = null;
   fecharModal('modal-preventiva');
@@ -4484,144 +4620,7 @@ function deletarPreventiva(key) {
     .forEach(c => { if (window._fbRemoveCard) window._fbRemoveCard(c._key); });
 }
 
-// ═══ CADASTRO EM MASSA (v3.32.5) ═══════════════════════════════════════
-let _massaMaqKeys = new Set();
-
-function abrirModalMassa() {
-  _massaMaqKeys.clear();
-  // Popula select de responsável
-  const respSel = document.getElementById('mass-resp');
-  respSel.innerHTML = STANDARD_USERS.map(n => '<option value="' + n + '">' + n + '</option>').join('');
-  // Popula select de tarefa (união das tarefas padrão de todas as máquinas)
-  const allTarefas = new Set();
-  state.maquinas.forEach(m => {
-    const prevs = Array.isArray(m.prevs) ? m.prevs : (m.prevs ? m.prevs.split('\n').filter(Boolean) : []);
-    prevs.forEach(t => allTarefas.add(t));
-  });
-  const tSel = document.getElementById('mass-tarefa-sel');
-  tSel.innerHTML = '<option value="">Selecionar tarefa...</option>' +
-    [...allTarefas].sort().map(t => '<option value="' + t + '">' + t + '</option>').join('') +
-    '<option value="__outro__">+ Outra tarefa...</option>';
-  document.getElementById('mass-tarefa-custom').value = '';
-  document.getElementById('mass-tarefa-custom').style.display = 'none';
-  // Data padrão = hoje
-  document.getElementById('mass-ultima').value = todayStr();
-  document.getElementById('mass-busca').value = '';
-  _massaRenderList('');
-  _massaAtualizarSummary();
-  document.getElementById('modal-massa').classList.add('open');
-}
-window.abrirModalMassa = abrirModalMassa;
-
-function _massaOnTarefaChange() {
-  const v = document.getElementById('mass-tarefa-sel').value;
-  const custom = document.getElementById('mass-tarefa-custom');
-  if (v === '__outro__') { custom.style.display = ''; custom.focus(); }
-  else custom.style.display = 'none';
-}
-window._massaOnTarefaChange = _massaOnTarefaChange;
-
-function _massaRenderList(filtro) {
-  const list = document.getElementById('mass-maq-list');
-  if (!list) return;
-  const f = (filtro || '').toLowerCase().trim();
-  const html = state.maquinas
-    .filter(m => !f || (m.nome||'').toLowerCase().includes(f) || (m.tag||'').toLowerCase().includes(f))
-    .map(m => {
-      const checked = _massaMaqKeys.has(m._key) ? 'checked' : '';
-      const setor = m.setor === 'eletrica' ? 'Elétrica' : 'Mecânica';
-      return '<label class="mass-maq-row" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'">'
-        + '<input type="checkbox" data-maqkey="' + m._key + '" ' + checked + ' onchange="_massaToggle(this)" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer">'
-        + '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--green);background:var(--green-lt);padding:2px 6px;border-radius:4px">' + (m.tag || '—') + '</span>'
-        + '<span style="font-size:13px;flex:1">' + (m.nome || '—') + '</span>'
-        + '<span style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace">' + setor + '</span>'
-      + '</label>';
-    }).join('');
-  list.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Nenhuma máquina encontrada</div>';
-}
-function _massaFiltrar(val) { _massaRenderList(val); }
-window._massaFiltrar = _massaFiltrar;
-
-function _massaToggle(cb) {
-  const k = cb.dataset.maqkey;
-  if (cb.checked) _massaMaqKeys.add(k);
-  else _massaMaqKeys.delete(k);
-  _massaAtualizarSummary();
-}
-window._massaToggle = _massaToggle;
-
-function _massaMarcarTodas() {
-  state.maquinas.forEach(m => _massaMaqKeys.add(m._key));
-  _massaRenderList(document.getElementById('mass-busca').value);
-  _massaAtualizarSummary();
-}
-window._massaMarcarTodas = _massaMarcarTodas;
-
-function _massaLimpar() {
-  _massaMaqKeys.clear();
-  _massaRenderList(document.getElementById('mass-busca').value);
-  _massaAtualizarSummary();
-}
-window._massaLimpar = _massaLimpar;
-
-function _massaAtualizarSummary() {
-  const n = _massaMaqKeys.size;
-  const sum = document.getElementById('mass-summary');
-  const btn = document.getElementById('mass-btn-lancar');
-  if (!sum || !btn) return;
-  if (n === 0) {
-    sum.textContent = 'Nenhuma máquina selecionada';
-    sum.style.background = 'var(--surface2)';
-    sum.style.color = 'var(--muted)';
-    sum.style.borderColor = 'var(--border)';
-    btn.textContent = 'Lançar preventivas';
-    btn.disabled = true;
-    btn.style.opacity = '.5';
-    btn.style.cursor = 'not-allowed';
-  } else {
-    sum.textContent = n + ' máquina' + (n===1?'':'s') + ' selecionada' + (n===1?'':'s') + ' · serão cadastradas ' + n + ' preventiva' + (n===1?'':'s');
-    sum.style.background = 'var(--green-lt)';
-    sum.style.color = 'var(--green)';
-    sum.style.borderColor = 'var(--green-md)';
-    btn.textContent = '✓ Lançar ' + n + ' preventiva' + (n===1?'':'s');
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-  }
-}
-
-async function confirmarMassa() {
-  if (_massaMaqKeys.size === 0) return;
-  if (!window._fbPushPrev) { toast('Firebase não pronto', 'err'); return; }
-  // Coleta base
-  const tarefaSel = document.getElementById('mass-tarefa-sel').value;
-  const tarefaCustom = document.getElementById('mass-tarefa-custom').value.trim();
-  const tarefa = tarefaSel === '__outro__' ? tarefaCustom : tarefaSel;
-  if (!tarefa) { toast('Informe a tarefa', 'err'); return; }
-  const freq = parseInt(document.getElementById('mass-freq').value);
-  const setor = document.getElementById('mass-setor').value;
-  const ultima = document.getElementById('mass-ultima').value;
-  const resp = document.getElementById('mass-resp').value;
-  if (!ultima) { toast('Informe a data da última execução', 'err'); return; }
-
-  const maqKeys = [...(_massaMaqKeys)];
-  for (const maqKey of maqKeys) {
-    const maq = state.maquinas.find(m => m._key === maqKey);
-    const equip = maq ? (maq.tag ? maq.tag + ' · ' + maq.nome : maq.nome) : '';
-    await window._fbPushPrev({
-      tarefa, freq, setor, ultima, resp,
-      maqKey, equip,
-      obs: '[lote] cadastrada via cadastro em massa',
-      criadoPor: state.user || '—',
-      criadoTs: nowStr(),
-    });
-  }
-
-  toast(maqKeys.length + ' preventiva' + (maqKeys.length===1?'':'s') + ' lançada' + (maqKeys.length===1?'':'s'), 'ok');
-  fecharModal('modal-massa');
-}
-window.confirmarMassa = confirmarMassa;
-// ═══ FIM CADASTRO EM MASSA ═══════════════════════════════════════
+// ═══ CADASTRO EM MASSA REMOVIDO v3.35.0 (Ajuste 2 · unificado no +Preventiva) ═══
 function executarPreventiva(key) {
   // Intercepta com modal de assinatura
   const pv = state.preventivas.find(p => (p._key || p.id) === key);
@@ -5427,7 +5426,7 @@ function renderMaquinas() {
         '<div class="maquina-zelador">' +
           zelAv +
           '<div class="maquina-zel-info">' +
-            '<div class="maquina-zel-label">ZELADOR</div>' +
+            '<div class="maquina-zel-label">RESPONSÁVEL</div>' +
             zelHtml +
           '</div>' +
         '</div>' +
@@ -5518,43 +5517,46 @@ function populatePvMaquinaSelect() {
   if (current) sel.value = current;
 }
 
+// v3.35.0 — troca de máquina: puxa setor + responsável da máquina (auto-fill)
+// + re-renderiza lista de tarefas pra multi-select (só no modo criação)
 function onPvMaquinaChange() {
   const key = document.getElementById('pv-maquina').value;
-  const sel = document.getElementById('pv-tarefa-sel');
-  sel.innerHTML = '<option value="">Selecionar tarefa...</option>';
-  document.getElementById('pv-tarefa-custom-wrap').style.display = 'none';
+  const respSel = document.getElementById('pv-resp');
+  const isEdicao = !!editandoPrevKey;
 
-  if (!key) return;
+  if (!key) {
+    if (!isEdicao) { _pvTarefasMarcadas.clear(); _pvTarefasCustom = []; _pvRenderTarefas(); _pvAtualizarSummary(); }
+    return;
+  }
   const m = state.maquinas.find(x => x._key === key);
   if (!m) return;
 
   // Preenche setor automaticamente
   document.getElementById('pv-setor').value = m.setor || 'mecanica';
 
-  // Popula tarefas
-  const prevs = Array.isArray(m.prevs) ? m.prevs : (m.prevs ? m.prevs.split('\n').filter(Boolean) : []);
-  prevs.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p; opt.textContent = p;
-    sel.appendChild(opt);
-  });
-  const outroOpt = document.createElement('option');
-  outroOpt.value = '__outro__'; outroOpt.textContent = '+ Outra tarefa...';
-  sel.appendChild(outroOpt);
-}
+  // v3.35.0 — auto-fill responsável da máquina (se não estiver editando, ou
+  // se o campo resp estiver vazio)
+  if (m.responsavel && respSel) {
+    const srcU = (typeof USERS !== 'undefined') ? USERS : (window.USERS||{});
+    const respUser = srcU[_resolveUserKey(m.responsavel)];
+    const respNome = respUser ? respUser.nome : m.responsavel;
+    // Tenta setar pelo valor (nome) — nossos <option> usam nome como value
+    if (!respSel.value || !isEdicao) {
+      const opts = Array.from(respSel.options).map(o => o.value);
+      if (opts.includes(respNome)) respSel.value = respNome;
+      else if (opts.includes(m.responsavel)) respSel.value = m.responsavel;
+    }
+  }
 
-function onPvTarefaChange() {
-  const val = document.getElementById('pv-tarefa-sel').value;
-  const wrap = document.getElementById('pv-tarefa-custom-wrap');
-  if (val === '__outro__') {
-    wrap.style.display = '';
-    document.getElementById('pv-tarefa').value = '';
-    setTimeout(() => document.getElementById('pv-tarefa').focus(), 50);
-  } else {
-    wrap.style.display = 'none';
-    document.getElementById('pv-tarefa').value = val;
+  // Re-render da lista de tarefas (só no modo criação)
+  if (!isEdicao) {
+    _pvTarefasMarcadas.clear();
+    _pvTarefasCustom = [];
+    _pvRenderTarefas();
+    _pvAtualizarSummary();
   }
 }
+// onPvTarefaChange removida (não usamos mais select single de tarefa)
 
 
 // ── FOTO ─────────────────────────────────────────────────

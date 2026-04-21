@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.40 — 21/04/2026
-> **Versão atual do HUB:** v3.34.0
+> **Versão do doc:** 2.41 — 21/04/2026
+> **Versão atual do HUB:** v3.35.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -239,6 +239,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.35.0 | Manutenção · **+Preventiva multi-tarefa** (Ajuste 2): 1 máquina + N tarefas com checkboxes (do `m.prevs`) + input pra adicionar custom. Loop de `_fbPushPrev`. Edição vira single-task (campo texto). Removido botão/modal/funções de "+ Em massa" (introduzidos v3.32.5). Polish do card de Máquina: "ZELADOR" → "RESPONSÁVEL", light mode coerente (branco no tema light), auto-fill do `pv-resp` puxando `m.responsavel` ao trocar máquina. |
 | v3.34.0 | Manutenção · **card de Máquina redesign** estilo Bank Account (Ajuste 1 auditoria). Card dark sempre, eyebrow DM Mono, badge de status (ativa/manut/parada), nome Outfit 900, linha `•••••• RET-01`, footer com zelador + localização. 3 campos novos em `manutencao/maquinas/{id}`: `status`, `responsavel`, `localizacao`. Fix bug de texto "24 preventivas · ver no detalhe" (removido do card). |
 | v3.33.0 | **Sistema de Poderes** · REGRA GERAL da auditoria v3.32+ implementada. 5 poderes configuráveis por user (`deletarPreventiva`, `executarPreventiva`, `exportarDados`, `editarMaquina`, `reatribuirCard`). Schema `users-profile/{user}/powers/{poder}:bool`. Helper `window.canUser(userKey, poder)` no HUB e Manutenção. UI nova "⚡ Poderes" no modal Editar Usuário com toggles iOS-style. Seed inicial 1x (flag `fiobras-powers-seed-v1`) com override do Joacir em `deletarPreventiva`. Primeira aplicação prática (Ajuste 3b): delete de preventiva na tabela/cards mobile gated via `canUser`. |
 | v3.32.8 | **Fix** Manutenção · botões Editar/Deletar da tabela Preventiva não funcionavam (`\\x27` → `\x27` no onclick) + remove botão Executar da tabela desktop (passa pelo Kanban). Ajuste 3a da auditoria v3.32+. |
