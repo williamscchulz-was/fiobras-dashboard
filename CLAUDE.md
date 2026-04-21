@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.35 — 19/04/2026
-> **Versão atual do HUB:** v3.32.5
+> **Versão do doc:** 2.36 — 19/04/2026
+> **Versão atual do HUB:** v3.32.6
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -231,7 +231,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.32.5` (19/04/2026).
+**Versão atual:** `v3.32.6` (19/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -239,6 +239,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.32.6 | Manutenção · Worker Cloudflare "fiobras-digest-diario" (Item 8). Cron 08:30 BRT seg-sex. Lê preventivas diárias, agrupa por resp, publica em `manutencao/fcmPending`. Ciclo v3.10 COMPLETO. |
 | v3.32.5 | Manutenção · cadastro em massa de preventivas (Item 4). Modal novo com multi-select de máquinas, busca, "Marcar todas". Loop de `_fbPushPrev` com base compartilhada. |
 | v3.32.4 | Manutenção · hierarquia de preventivas (Items 1+2+3). Cascata ao concluir (freq maior executa menores da mesma máquina). Supressão visual calendário+Kanban (só maior hierarquia por semana+máquina). Item 3 já estava ok. |
 | v3.32.3 | Manutenção · avatar system (Item 10). Helpers `avatar()`/`avatarStack()` globais. CSS em tokens.css. Paleta fixa por user. Foto via users-profile. Aplicado em Kanban cards, calendário, cards mobile de preventiva. |
@@ -519,4 +520,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.35 · 19/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.36 · 19/04/2026*

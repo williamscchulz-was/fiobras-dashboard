@@ -1,0 +1,15 @@
+name = "fiobras-digest-diario"
+main = "src/index.js"
+compatibility_date = "2024-10-01"
+
+# Cron: segunda a sexta, 08:30 BRT = 11:30 UTC
+[triggers]
+crons = ["30 11 * * 1-5"]
+
+# Secrets (setados via: wrangler secret put <NOME>):
+#   FIREBASE_SERVICE_ACCOUNT = JSON inteiro da service account
+#   FIREBASE_DB_URL          = https://fiobras-hub-default-rtdb.firebaseio.com
+#   ADMIN_ROLES              = admin,joacir,william  (users que NÃO recebem — separado por vírgula)
+
+[observability]
+enabled = true
