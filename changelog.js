@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.31.3', d:'19 abr 2026', current:true,
+    v:'3.32.0', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · cards de Máquinas compactos.', desc:'Primeiro item do ciclo v3.10 do doc de Preventivas (renumerado v3.32.x aqui). Cards do inventário de máquinas ficaram compactos:\n\n• Código (m.tag) agora aparece como chip verde DM Mono no topo (antes vinha colado no subtítulo "RET-01 · Mecânica")\n• Nome da máquina em Outfit 900, hierarquia clara\n• Meta line única: Modelo + Ano + Setor (antes tinha 2 linhas)\n• Lista de 20 preventivas padrão SAI do card — substituída por "20 preventivas cadastradas · ver no detalhe" (acessível via botão Editar que já existia)\n\nAltura do card: ~500px → ~110px (-78%). Scroll da grid muito mais usável.\n\nSchema do Firebase inalterado. Só mudança visual no render. Compatível com cards sem tag (não mostra chip).\n\nItem 9 (Hub · permissão Gerente) auditado e fechado como "não-bug" — já funciona: getEffectiveModules("gerente") retorna ALL_MODULES automático.'}
+    ]
+  },
+  {
+    v:'3.31.3', d:'19 abr 2026',
     items:[
       {type:'high', title:'FIX REAL Manutenção · tabela de Preventivas vazia (ReferenceError silencioso).', desc:'Causa raiz real: CHECK_SVG_STR, EDIT_SVG_STR, DEL_SVG_STR eram usadas no renderPreventiva mas NUNCA foram definidas em lugar nenhum do código.\n\nComo renderMaquinas usa EDIT_SVG e DEL_SVG (sem _STR) LOCAIS, provavelmente era um typo antigo no renderPreventiva. Porém como William nunca teve preventivas cadastradas com dados válidos, nunca caiu no branch do render → ReferenceError nunca disparou → bug dormiu por meses.\n\nAgora com 5 preventivas, o render entra no loop, tenta referenciar CHECK_SVG_STR, dá ReferenceError, o JS interrompe mid-render → tbody fica vazio.\n\nFix: constantes globais CHECK_SVG_STR, EDIT_SVG_STR, DEL_SVG_STR definidas no topo do script (junto com VERSION/USERS). Agora renderPreventiva executa sem erro.'},
       {type:'feat', title:'Resumo de notificações "Enquanto você estava fora" não repete.', desc:'Antes: toda vez que o app carregava, mostrava o mesmo resumo de "X notificações não vistas" mesmo se já tinha mostrado minutos antes. Bug irritante.\n\nAgora: quando o resumo é mostrado, o timestamp atual é salvo em localStorage (fio_resumo_last_ts_<user>). Na próxima verificação, filtra pendentes com ts > last-seen → só mostra notificações REALMENTE novas desde a última visualização.\n\nPor usuário: se admin e Jacques usam o mesmo navegador/dispositivo, cada um tem seu last-seen separado.'}
