@@ -101,6 +101,70 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   Avatares consistentes (v3.32.3)
+   ═══════════════════════════════════════════════════════════════════════
+   Sistema único de avatares — reutilizado em HUB, CRM, Preço, Manutenção.
+   Se user tem foto cadastrada (users-profile/<key>/foto), usa foto.
+   Senão: iniciais + gradient fixo por user (classe .u-<key>).
+*/
+.av{
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:50%;font-family:'Outfit',sans-serif;font-weight:700;
+  color:#fff;letter-spacing:-.02em;position:relative;flex-shrink:0;
+  user-select:none;background-size:cover;background-position:center;
+  overflow:hidden;
+}
+.av.sz-xs{width:20px;height:20px;font-size:8.5px;border:1.5px solid var(--t-surface,#fff);}
+.av.sz-sm{width:26px;height:26px;font-size:10px;border:2px solid var(--t-surface,#fff);}
+.av.sz-md{width:32px;height:32px;font-size:12px;border:2px solid var(--t-surface,#fff);}
+.av.sz-lg{width:44px;height:44px;font-size:16px;border:3px solid var(--t-surface,#fff);}
+
+/* cores por user (gradient fixo) */
+.av.u-admin    {background:linear-gradient(135deg,#1B1F18,#3A3A3C);}
+.av.u-william  {background:linear-gradient(135deg,#008835,#00b347);}
+.av.u-joacir   {background:linear-gradient(135deg,#0D9488,#14B8A6);}
+.av.u-hernandes{background:linear-gradient(135deg,#2563EB,#60a5fa);}
+.av.u-vorlei   {background:linear-gradient(135deg,#EA580C,#fb923c);}
+.av.u-pedro    {background:linear-gradient(135deg,#7C3AED,#a855f7);}
+.av.u-ivonei   {background:linear-gradient(135deg,#D97706,#FBBF24);}
+.av.u-roland   {background:linear-gradient(135deg,#DC2626,#F87171);}
+.av.u-more     {background:var(--t-surface-2,#F4F6F0);color:var(--t-muted,#6B7166);border-color:var(--t-border,#E3E7DE);}
+.av.u-default  {background:linear-gradient(135deg,#6B7166,#9CA295);}
+
+/* stack empilhado */
+.av-stack{display:inline-flex;align-items:center;cursor:pointer;}
+.av-stack .av{margin-left:-8px;}
+.av-stack .av:first-child{margin-left:0;}
+.av-stack.sz-xs .av{margin-left:-6px;}
+
+/* tooltip hover */
+.av-wrap{position:relative;display:inline-block;}
+.av-wrap .av-tip{
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  margin-bottom:6px;background:#1B1F18;color:#fff;padding:4px 10px;
+  border-radius:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:100;
+}
+.av-wrap .av-tip::after{
+  content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:#1B1F18;
+}
+.av-wrap:hover .av-tip{opacity:1;}
+
+/* dropdown expansão */
+.av-dropdown{
+  position:absolute;top:100%;left:0;margin-top:6px;
+  background:var(--t-surface,#fff);border:1px solid var(--t-border,#E3E7DE);
+  border-radius:12px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.12);
+  min-width:220px;z-index:50;display:none;
+}
+.av-dropdown.open{display:block;}
+.av-dropitem{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;}
+.av-dropitem:hover{background:var(--t-surface-2,#F4F6F0);}
+.av-dropitem-name{font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;flex:1;color:var(--t-text,#1B1F18);}
+.av-dropitem-action{font-family:'DM Mono',monospace;font-size:10px;color:var(--t-muted,#6B7166);text-transform:uppercase;}
+
+/* ═══════════════════════════════════════════════════════════════════════
    Modais bottom-sheet em mobile (v3.28.0)
    ═══════════════════════════════════════════════════════════════════════
    Aplica em TODOS os apps que linkam tokens.css. Em mobile (≤640px),

@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.32.2', d:'19 abr 2026', current:true,
+    v:'3.32.3', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · avatares no lugar de nome + stack +N (Item 10 do ciclo v3.10).', desc:'Sistema unificado de avatares. Cor consistente por usuário (gradient fixo), iniciais quando não tem foto, foto se cadastrada em users-profile. 4 tamanhos (xs/sm/md/lg).\n\nHelpers globais:\n• avatar(nomeOuKey, size) → <span> com foto ou iniciais + tooltip com nome completo\n• avatarStack([users], size) → até 2 visíveis, resto vira chip +N\n• _avStackExpand() → click no +N expande dropdown com todos os participantes\n\nCSS em /css/tokens.css (compartilhado entre os 4 apps).\n\nAplicado em:\n• Cards Kanban: stack com autor + resp + quem reatribuiu + quem executou\n• Calendário · lista do dia: avatar do resp em cada preventiva\n• Cards mobile de preventiva: chip "Resp [avatar]" na meta line\n\nListener onValue em users-profile no Manutenção — quando user cadastra foto no HUB, Manutenção atualiza automaticamente.\n\nPaleta por user: Admin preto · William verde · Joacir teal · Hernandes azul · Vorlei laranja · Pedro roxo · Ivonei amarelo · Roland vermelho.'}
+    ]
+  },
+  {
+    v:'3.32.2', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · switch de notificações no header (Item 6 do ciclo v3.10).', desc:'Antes: banner "Ative as notificações" aparecia TODA vez que o app abria — incomodava usuários recorrentes.\n\nAgora:\n• Popup automático removido. initNotificacoes() só sincroniza estado do SO com o switch.\n• Novo botão 🔔/🔕 no header (ao lado do toggle dark mode) — chama toggleNotifPermission()\n• 1ª vez que user clica: pede permissão ao navegador\n• Se concedida: fica 🔔 ativo. Clicar de novo silencia (flag fio_notif_silenciar no localStorage)\n• Se silenciado: vira 🔕. Clicar reativa.\n• Se bloqueado no SO: toast orienta "libere em Configurações do site"\n• mostrarNotif() respeita a flag de silenciar\n\nNão tem como revogar permissão via JS (limitação do browser) — a flag silenciar faz o papel de "desligar" dentro do app.'}
     ]

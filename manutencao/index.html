@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.32.2">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.32.3">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2870,6 +2870,16 @@ onValue(historicoRef, snap => {
   renderDashboard();
 });
 
+// v3.32.3 — users-profile (pra avatar puxar foto quando user cadastrar)
+state.userProfiles = {};
+onValue(ref(db, 'users-profile'), snap => {
+  state.userProfiles = snap.val() || {};
+  // Re-renderiza pra atualizar avatares com fotos novas
+  if (typeof renderKanban === 'function') renderKanban();
+  if (typeof renderPreventiva === 'function') renderPreventiva();
+  if (typeof renderHistorico === 'function') renderHistorico();
+});
+
 // ── Firebase write helpers
 window._fbPushCard = (card) => push(kanbanRef, card);
 window._fbUpdateCard = (key, data) => update(ref(db, `manutencao/kanban/${key}`), data);
@@ -2919,6 +2929,85 @@ window._resetHistorico = () => {
 
 <script>
 const VERSION    = 'v3.9.2';
+
+// v3.32.3 — Avatar helpers (sistema unificado). Foto se cadastrada, senão iniciais+gradient.
+function _resolveUserKey(nomeOuKey) {
+  if (!nomeOuKey) return null;
+  const nk = String(nomeOuKey).toLowerCase().trim();
+  if (window.USERS && window.USERS[nk]) return nk;
+  if (typeof USERS !== 'undefined' && USERS[nk]) return nk;
+  // Busca por nome (case-insensitive)
+  const src = (typeof USERS !== 'undefined') ? USERS : (window.USERS||{});
+  for (const k in src) {
+    if ((src[k].nome||'').toLowerCase() === nk) return k;
+  }
+  return null;
+}
+function _getInitials(nome) {
+  if (!nome) return '?';
+  return String(nome).trim().split(/\s+/).slice(0,2).map(s => (s[0]||'').toUpperCase()).join('') || '?';
+}
+function avatar(nomeOuKey, size = 'sm') {
+  const key = _resolveUserKey(nomeOuKey);
+  const src = (typeof USERS !== 'undefined') ? USERS : (window.USERS||{});
+  const u = key ? src[key] : null;
+  const nome = u ? u.nome : (nomeOuKey || '—');
+  const initials = _getInitials(nome);
+  const ucls = key ? ('u-' + key) : 'u-default';
+  // Foto cadastrada em users-profile/<key>/foto ?
+  const prof = state.userProfiles && key ? state.userProfiles[key] : null;
+  const foto = prof && prof.foto ? prof.foto : null;
+  const stylePhoto = foto ? ' style="background-image:url(\'' + foto.replace(/'/g, "%27") + '\');color:transparent"' : '';
+  return '<span class="av-wrap">'
+    + '<span class="av sz-' + size + ' ' + ucls + '"' + stylePhoto + ' aria-label="' + nome + '">' + (foto ? '' : initials) + '</span>'
+    + '<span class="av-tip">' + nome + '</span>'
+  + '</span>';
+}
+function avatarStack(nomesOuKeys, size = 'sm') {
+  const unicos = [];
+  const vistos = new Set();
+  (nomesOuKeys || []).forEach(n => {
+    const k = _resolveUserKey(n) || (n || '').toLowerCase();
+    if (!vistos.has(k) && n) { vistos.add(k); unicos.push(n); }
+  });
+  if (!unicos.length) return '';
+  if (unicos.length <= 2) {
+    return '<span class="av-stack sz-' + size + '">' + unicos.map(n => avatar(n, size)).join('') + '</span>';
+  }
+  const primeiros = unicos.slice(0, 2).map(n => avatar(n, size)).join('');
+  const resto = unicos.length - 2;
+  const allData = unicos.join('|');
+  return '<span class="av-stack sz-' + size + '" data-users="' + allData + '" onclick="_avStackExpand(event)">'
+    + primeiros
+    + '<span class="av sz-' + size + ' u-more">+' + resto + '</span>'
+  + '</span>';
+}
+function _avStackExpand(ev) {
+  ev.stopPropagation();
+  const stack = ev.currentTarget;
+  // Fecha dropdowns abertos
+  document.querySelectorAll('.av-dropdown.open').forEach(d => d.remove());
+  const users = (stack.dataset.users || '').split('|').filter(Boolean);
+  const dd = document.createElement('div');
+  dd.className = 'av-dropdown open';
+  dd.innerHTML = users.map(n => {
+    const k = _resolveUserKey(n);
+    const src = (typeof USERS !== 'undefined') ? USERS : (window.USERS||{});
+    const u = k ? src[k] : null;
+    return '<div class="av-dropitem">'
+      + avatar(n, 'sm')
+      + '<span class="av-dropitem-name">' + (u ? u.nome : n) + '</span>'
+    + '</div>';
+  }).join('');
+  stack.style.position = 'relative';
+  stack.appendChild(dd);
+  setTimeout(() => {
+    document.addEventListener('click', () => dd.remove(), { once: true });
+  }, 0);
+}
+window.avatar = avatar;
+window.avatarStack = avatarStack;
+window._avStackExpand = _avStackExpand;
 
 // v3.31.3 — SVG icons inline (eram referenciados como CHECK_SVG_STR/EDIT_SVG_STR/DEL_SVG_STR
 // em renderPreventiva mas nunca foram definidos → ReferenceError silencioso quebrava
@@ -3511,12 +3600,16 @@ function buildCard(c) {
   if (c.col === 'todo')  btnsMover = `<button class="card-act-btn card-act-mv" onclick="event.stopPropagation();moverCard('${c._key}','doing')" title="Iniciar">▶</button>`;
   if (c.col === 'doing') btnsMover = `<button class="card-act-btn card-act-mv" onclick="event.stopPropagation();moverCard('${c._key}','todo')" title="Voltar">◀</button><button class="card-act-btn card-act-ok" onclick="event.stopPropagation();moverCard('${c._key}','done')" title="Concluir">✓</button>`;
 
-  // Responsável badge
-  const respHtml = c.resp
-    ? `<span class="card-resp-badge${state.isAdmin ? ' clickable' : ''}" ${state.isAdmin ? `onclick="event.stopPropagation();abrirModalReatribuir('${c._key}')"` : ''}>
-        <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2-5 6-5s6 2 6 5"/></svg>
-        ${c.resp}
-      </span>` : '';
+  // v3.32.3 — Responsável agora como avatar (stack se múltiplos autores/editores)
+  // Reúne participantes do card: autor + quem reatribuiu + resp atual
+  const participantes = [];
+  if (c.resp) participantes.push(c.resp);
+  if (c.autor && c.autor !== c.resp && c.autor !== 'Sistema') participantes.push(c.autor);
+  if (c.log && Array.isArray(c.log)) {
+    c.log.forEach(l => { if (l.resp && !participantes.includes(l.resp)) participantes.push(l.resp); });
+  }
+  const respHtml = participantes.length
+    ? `<span class="card-resp-badge${state.isAdmin ? ' clickable' : ''}" style="padding:2px 4px;background:transparent;border:0" ${state.isAdmin ? `onclick="event.stopPropagation();abrirModalReatribuir('${c._key}')"` : ''}>${avatarStack(participantes, 'xs')}</span>` : '';
 
   // Tipo legível (usa tipoLabel já declarado acima)
   const tipoTxt = tipoLabel[c.tipo] || c.tipo || '';
@@ -4116,6 +4209,7 @@ function renderPreventiva() {
         else if (dr <= 7) { statusKey = 'proxima'; statusLabel = dr === 0 ? 'Hoje' : 'Em ' + dr + 'd'; }
         else { statusKey = 'ok'; statusLabel = 'OK'; }
       }
+      const respAv = p.resp ? avatar(p.resp, 'sm') : '';
       return '<div class="prev-card prev-card-' + statusKey + '">' +
         '<div class="prev-card-h">' +
           '<div class="prev-card-id">' +
@@ -4124,9 +4218,9 @@ function renderPreventiva() {
           '</div>' +
           '<span class="prev-card-status prev-card-status-' + statusKey + '">' + statusLabel + '</span>' +
         '</div>' +
-        '<div class="prev-card-meta">' +
+        '<div class="prev-card-meta" style="align-items:center">' +
+          (respAv ? '<span style="display:inline-flex;align-items:center;gap:4px">Resp ' + respAv + '</span>' : '') +
           '<span>Freq <b>' + freqLabel + '</b></span>' +
-          '<span>Última <b>' + ultimaFmt + '</b></span>' +
           '<span>Próxima <b>' + proxFmt + '</b></span>' +
         '</div>' +
         '<div class="prev-card-actions">' +
@@ -4597,7 +4691,7 @@ function _abrirDiaDetail(dateISO, evs) {
         <div class="cal-detail-dot" style="background:${cor}"></div>
         <div class="cal-detail-body">
           <div class="cal-detail-task">${p.tarefa || '—'} <span style="font-size:0.6rem;color:var(--muted)">· ${p.equip || ''}</span></div>
-          <div class="cal-detail-meta">Resp: ${p.resp || '—'} · Freq: ${p.freq || '?'}d ${badge}</div>
+          <div class="cal-detail-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${p.resp ? avatar(p.resp, 'sm') : '—'} · Freq: ${p.freq || '?'}d ${badge}</div>
         </div>
         ${status === 'overdue' && key ? `<button class="btn-secondary" style="padding:4px 10px;font-size:0.58rem;white-space:nowrap" onclick="executarPreventiva('${key}')">Executar</button>` : ''}
       </div>`;
