@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.38.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.39.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2371,8 +2371,10 @@ display: none;
   <div class="panel active" id="panel-kanban">
     <div class="kanban-wrap">
       <div id="kanban-banner" style="display:none;background:#fdeaea;border:1.5px solid #f0b0b0;border-radius:8px;padding:14px 16px;margin-bottom:14px"></div>
-      <!-- v3.37.0: toolbar de pills removida (Ajuste auditoria 21/04/2026) · botão + Demanda agora fica na coluna A Fazer do board -->
-      <div class="kanban-toolbar" style="display:none"></div>
+      <!-- v3.39.0: toolbar simplificada — só o botão + Demanda proeminente -->
+      <div class="kanban-toolbar" style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn-primary" onclick="abrirModalDemanda()">+ Demanda</button>
+      </div>
 
   <!-- v3.36.0 — Kanban redesign (Ajuste 4): board-v2 dark sempre -->
   <div class="kanban-board board-v2" id="kanban-board">
@@ -2420,7 +2422,7 @@ display: none;
       <table class="data-table">
         <thead><tr>
           <th>Tarefa</th><th>Equipamento</th><th>Setor</th>
-          <th>Frequência</th><th>Última</th><th>Próxima</th><th>Status</th><th></th>
+          <th>Frequência</th><th>Responsável</th><th>Última</th><th>Próxima</th><th>Status</th><th></th>
         </tr></thead>
         <tbody id="prev-tbody"></tbody>
       </table>
@@ -3170,9 +3172,27 @@ onValue(historicoRef, snap => {
 });
 
 // v3.32.3 — users-profile (pra avatar puxar foto quando user cadastrar)
+// v3.39.0 — EXPANDE USERS local dinamicamente com users do HUB que não estão
+// hardcoded aqui (ex: William). Sem isso, _resolveUserKey não acha e o avatar
+// fica sem foto + cor default.
 state.userProfiles = {};
 onValue(ref(db, 'users-profile'), snap => {
   state.userProfiles = snap.val() || {};
+  // Merge dinâmico: pra cada profile que não existe no USERS local, adiciona
+  Object.entries(state.userProfiles).forEach(([k, p]) => {
+    if (!p) return;
+    if (!USERS[k]) {
+      USERS[k] = {
+        senha: null, // não precisa senha, não usa pra login no sub-app
+        isAdmin: p.roleOverride === 'admin', // roles vêm do HUB
+        nome: p.nomeCompleto || p.nome || k,
+      };
+    } else if (p.nomeCompleto && USERS[k].nome !== p.nomeCompleto) {
+      // Atualiza nome friendly se mudou no HUB (ex: "Admin" → "William Alexander Schulz")
+      // Mas só pra users não-hardcoded crítico (preserva 'admin'/'joacir')
+      if (k !== 'admin' && k !== 'joacir') USERS[k].nome = p.nomeCompleto;
+    }
+  });
   // Re-renderiza pra atualizar avatares com fotos novas
   if (typeof renderKanban === 'function') renderKanban();
   if (typeof renderPreventiva === 'function') renderPreventiva();
@@ -4677,7 +4697,7 @@ function renderPreventiva() {
     const msg = _prevSearch
       ? 'Nenhuma preventiva encontrada pra "' + _prevSearch + '"'
       : 'Nenhuma preventiva cadastrada.';
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">' + msg + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">' + msg + '</td></tr>';
     if (cardsHost) cardsHost.innerHTML = '<div class="empty-state" style="padding:32px 12px;text-align:center;color:var(--muted);font-size:0.78rem">' + msg + '</div>';
     if (pagEl) pagEl.style.display = 'none';
     return;
@@ -4739,11 +4759,16 @@ function renderPreventiva() {
         statusHtml = '<span class="badge badge-green">OK</span>';
       }
     }
+    // v3.39.0 — coluna Responsável com avatar + nome
+    const respCellHtml = p.resp
+      ? '<span style="display:inline-flex;align-items:center;gap:6px">' + avatar(p.resp, 'xs') + '<span style="font-size:.72rem">' + p.resp + '</span></span>'
+      : '<span style="color:var(--muted);font-size:.72rem;font-style:italic">—</span>';
     return '<tr>' +
       '<td>' + (p.tarefa||'—') + '</td>' +
       '<td>' + maqNome + '</td>' +
       '<td>' + setorLabel + '</td>' +
       '<td>' + freqLabel + '</td>' +
+      '<td>' + respCellHtml + '</td>' +
       '<td>' + ultimaFmt + '</td>' +
       '<td>' + proxFmt + '</td>' +
       '<td>' + statusHtml + '</td>' +

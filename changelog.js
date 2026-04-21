@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.38.0', d:'21 abr 2026', current:true,
+    v:'3.39.0', d:'21 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção + HUB · 4 ajustes (auditoria 21/04 tarde).',
+        desc:'1) Coluna Responsável adicionada à tabela de Preventivas (entre Frequência e Última). Mostra avatar xs + nome. colspan ajustado de 8 → 9.\n\n2) AUDITORIA avatar do William: o sub-app Manutenção tem USERS hardcoded (admin/joacir/hernandes/vorlei/pedro/ivonei/roland) e William não estava lá. Quando aparecia "W" num card, `_resolveUserKey` não achava e caía em default cinza. Fix: o onValue de users-profile agora EXPANDE dinamicamente o USERS local pra incluir qualquer user do HUB que tenha profile (nomeCompleto + chave). Assim o avatar resolve a chave certa, lê foto do users-profile/{key}/foto e aplica a cor da paleta `.u-{key}` quando existe.\n\n3) Botão "+ Demanda" voltou ao topo do Kanban (eu tinha tirado pra "limpar" mas sumiu junto). Toolbar simplificada: só o botão, alinhado à direita. O "+" na coluna A Fazer continua funcionando como atalho.\n\n4) Botão de olho de senha aparecia só pra users com senhaPlain salvo (a partir da v3.21.5). Users antigos (que cadastraram antes ou via Minha Conta) só têm senhaHash e o olho sumia. Agora o olho aparece sempre que tem senha; se não tem versão visualizável, clicar mostra toast explicando "cadastrada antes do sistema guardar versão visualizável — redefinir pelo cadeado pra poder visualizar".'}
+    ]
+  },
+  {
+    v:'3.38.0', d:'21 abr 2026',
     items:[
       {type:'feat', title:'Manutenção + HUB · 8 ajustes da auditoria noturna (21/04).',
         desc:'1) Card Kanban: data saiu do canto superior (sobrepunha botões de ação) e foi pro footer junto com estimativa. Cor vermelha + ícone ⚠ quando age > 7 dias (em qualquer coluna ≠ done). Card "doing" continua vermelho com dot pulsante.\n\n2) Light mode no Kanban: quando o HUB está em tema light, o board ganha fundo sage claro, cards brancos, tags pastel, mantendo toda a hierarquia visual do dark.\n\n3+4) Modal Nova/Editar Preventiva aumentado (540 → 640px), modal de Máquina também (520 → 620px) com max-width:94vw. Não corta mais em viewports apertados.\n\n5) Nova Solicitação: campo "Seu nome" virou SELECT dos usuários do sistema (merge USERS local + users do HUB via userProfiles). Ninguém de fora solicita.\n\n6) Estimativa vira DIAS em vez de horas. Chip no card mostra "Nd" (ex: "3d"). Retrocompat: cards antigos com horasEstimadas continuam mostrando "Nh".\n\n7) Título separado do equipamento: modal de demanda ganhou campo "Título" obrigatório + select de máquinas cadastradas. Antes o título era auto-gerado concatenando equip+desc, ficava redundante. Agora título = o problema ("Vazamento no hidráulico"), equip = a máquina (RET-01).\n\n8) HUB: admin pode editar foto/avatar de qualquer user no painel "Editar Usuário". Avatar preview + botão Escolher imagem + Remover. Crop quadrado automático 400px JPEG 0.82 (mesmo pipeline do mcFotoChange). Salva em users-profile/{user}/foto.'}
