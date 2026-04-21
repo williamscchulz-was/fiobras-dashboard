@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.32.8', d:'21 abr 2026', current:true,
+    v:'3.33.0', d:'21 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Sistema de Poderes · permissões granulares configuráveis por usuário (REGRA GERAL da auditoria v3.32+).',
+        desc:'Estabelecida regra universal: toda vez que William definir "X pode Y", não hardcoda no código — cria um toggle no painel admin. Assim ele gerencia tudo por UI sem precisar de deploy.\n\n5 poderes iniciais:\n• deletarPreventiva (default usuário: NÃO · Joacir override: SIM via seed)\n• executarPreventiva (default usuário: SIM)\n• exportarDados (default usuário: NÃO)\n• editarMaquina (default usuário: NÃO)\n• reatribuirCard (default usuário: NÃO)\n\nArquitetura:\n• Schema: users-profile/{user}/powers/{poder} = bool\n• Helper global canUser(userKey, poder) no HUB e no sub-app Manutenção\n• Admin/Gerente sempre têm tudo (bypass) — toggles só aplicam pra Usuário comum\n• Seed inicial roda 1x (flag localStorage fiobras-powers-seed-v1): popula defaults pra todos os users cadastrados + override do Joacir em deletarPreventiva=true\n\nUI nova: seção "⚡ Poderes" no modal Editar Usuário (painel admin). 5 linhas com ícone colorido por urgência, nome, descrição, default da role e toggle iOS-style. Quando role vira admin/gerente, toggles ficam desabilitados + opacity reduzida (acesso automático).\n\nPrimeira aplicação (Ajuste 3b): botão Deletar da tabela/cards mobile de preventivas só aparece se canUser("deletarPreventiva"). Função também faz defense-in-depth (recusa com toast se chamada via console sem o poder).'}
+    ]
+  },
+  {
+    v:'3.32.8', d:'21 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · botões Editar/Deletar da tabela Preventiva não funcionavam + remove botão Executar da tabela (Ajuste 3a auditoria v3.32+).',
         desc:'Bug: os onclick da tabela desktop usavam \\\\x27 (duas barras) em vez de \\\\x27 (uma), fazendo o HTML renderizar literalmente \\\\x27 em vez de aspa simples. Clique não fazia nada (erro silencioso no attr).\n\nFix: \\\\x27 → \\\\x27 nos 3 botões. Cards mobile já estavam corretos.\n\nAlém disso, botão Executar (✓) removido da tabela desktop — execução passa pelo fluxo do Kanban, não direto da tabela. Botão Concluir continua nos cards mobile.\n\nDeletar ainda aberto pra todos (gated virá após implementação do sistema de powers — Ajuste 3b).'}

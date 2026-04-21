@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup v3.33 · Sistema de Poderes (REGRA GERAL)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#EDF1EA;--surface:#fff;--surface2:#F4F6F0;--border:#E3E7DE;--text:#1B1F18;--muted:#6B7166;--muted2:#9CA295;--green:#008835;--green-soft:#E6F4EC;--red:#DC2626;--blue:#2563EB;--amber:#D97706}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:'Poppins',sans-serif;color:var(--text);padding:32px 24px}
+  .wrap{max-width:1200px;margin:0 auto}
+  h1{font-family:'Outfit';font-weight:900;font-size:30px;margin:0 0 6px;letter-spacing:-.02em}
+  h1 .v{font-family:'DM Mono';font-size:12px;background:var(--green);color:#fff;padding:3px 8px;border-radius:6px;vertical-align:middle;margin-left:8px;font-weight:500}
+  .lead{color:var(--muted);font-size:14px;max-width:780px;margin-bottom:28px}
+  h2{font-family:'Outfit';font-weight:700;font-size:18px;margin:32px 0 12px;padding-top:18px;border-top:2px solid var(--border)}
+  h2:first-of-type{border-top:0;padding-top:0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+
+  /* ── Layout cols (desktop + mobile) ── */
+  .cols{display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
+  @media(max-width:880px){.cols{grid-template-columns:1fr}}
+  .col-label{font-family:'DM Mono';font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;font-weight:500}
+
+  /* ── Modal Editar Usuário (dark) ── */
+  .modal-bg-demo{background:rgba(0,0,0,.4);padding:28px;border-radius:14px;backdrop-filter:blur(8px)}
+  .modal-card{background:#1C1C1E;border:1px solid #3A3A3C;border-radius:16px;padding:24px;max-width:560px;margin:0 auto;color:#fff;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+  .modal-mobile .modal-card{max-width:340px;border-radius:18px 18px 0 0;padding:18px}
+  .m-handle{width:36px;height:4px;background:#3A3A3C;border-radius:2px;margin:0 auto 14px;display:none}
+  .modal-mobile .m-handle{display:block}
+
+  .m-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+  .m-title{font-family:'Outfit';font-weight:900;font-size:20px;letter-spacing:-.01em}
+  .m-x{background:transparent;border:0;color:#8E8E93;font-size:18px;cursor:pointer;padding:4px 8px}
+
+  .m-user{display:flex;align-items:center;gap:12px;background:#0A0A0A;border:1px solid #2C2C2E;border-radius:12px;padding:12px;margin-bottom:18px}
+  .m-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FF6B35,#F7931E);display:flex;align-items:center;justify-content:center;font-family:'Outfit';font-weight:900;font-size:16px;color:#fff;flex-shrink:0}
+  .m-uname{font-family:'Outfit';font-weight:700;font-size:15px}
+  .m-urole{font-size:11.5px;color:#8E8E93;font-family:'DM Mono';text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+  .m-section{margin-bottom:18px}
+  .m-section-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .m-section-title{font-family:'Outfit';font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:#fff}
+  .m-section-hint{font-size:11.5px;color:#8E8E93;line-height:1.4;margin-bottom:10px}
+
+  .m-field{margin-bottom:14px}
+  .m-label{display:block;font-family:'Poppins';font-weight:600;font-size:.6rem;text-transform:uppercase;letter-spacing:1.2px;color:#8E8E93;margin-bottom:6px}
+  .m-select{width:100%;background:#0A0A0A;border:1px solid #3A3A3C;border-radius:8px;padding:10px 12px;color:#fff;font-family:'Poppins';font-size:14px;outline:none}
+
+  /* ── Powers list ── */
+  .pow-list{background:#0A0A0A;border:1px solid #2C2C2E;border-radius:12px;overflow:hidden}
+  .pow-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #1F1F22;transition:background .15s;cursor:pointer}
+  .pow-row:last-child{border-bottom:0}
+  .pow-row:hover{background:rgba(255,255,255,.025)}
+  .pow-icon{width:32px;height:32px;border-radius:8px;background:#2C2C2E;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+  .pow-icon.danger{background:rgba(220,38,38,.15);color:#FCA5A5}
+  .pow-icon.warn{background:rgba(217,119,6,.15);color:#FDBA74}
+  .pow-icon.info{background:rgba(37,99,235,.15);color:#93C5FD}
+  .pow-body{flex:1;min-width:0}
+  .pow-name{font-family:'Outfit';font-weight:700;font-size:13.5px;color:#fff}
+  .pow-desc{font-size:11px;color:#8E8E93;line-height:1.35;margin-top:2px}
+  .pow-default{font-family:'DM Mono';font-size:9.5px;color:#52E07F;background:rgba(0,200,80,.08);padding:2px 6px;border-radius:4px;margin-top:4px;display:inline-block;letter-spacing:.5px}
+  .pow-default.dn{color:#FCA5A5;background:rgba(220,38,38,.08)}
+  /* Toggle iOS-style */
+  .switch{position:relative;width:42px;height:24px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0}
+  .switch-slider{position:absolute;inset:0;background:#3A3A3C;border-radius:999px;cursor:pointer;transition:.25s}
+  .switch-slider:before{content:'';position:absolute;width:20px;height:20px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+  .switch input:checked + .switch-slider{background:#00b347}
+  .switch input:checked + .switch-slider:before{transform:translateX(18px)}
+  .switch input:disabled + .switch-slider{opacity:.4;cursor:not-allowed}
+
+  .m-info-block{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:11.5px;color:#93C5FD;line-height:1.5}
+  .m-info-block b{color:#fff}
+
+  .m-actions{display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #2C2C2E}
+  .m-btn{flex:1;padding:11px;border-radius:8px;font-family:'Poppins';font-weight:600;font-size:13px;cursor:pointer;border:0;transition:.15s}
+  .m-btn-primary{background:#00b347;color:#fff}
+  .m-btn-primary:hover{background:#00d052}
+  .m-btn-ghost{background:transparent;color:#8E8E93;border:1px solid #3A3A3C}
+
+  /* ── Notes section ── */
+  .notes{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:30px}
+  .notes h3{font-family:'Outfit';font-weight:700;font-size:15px;margin:0 0 10px}
+  .notes ul{margin:0;padding-left:18px;font-size:13px;line-height:1.7;color:var(--text)}
+  .notes code{background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-family:'DM Mono';font-size:11px;color:var(--green)}
+
+  /* ── Defaults table ── */
+  .def-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:12.5px}
+  .def-table th, .def-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+  .def-table th{background:var(--surface2);font-family:'Outfit';font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+  .def-table tr:last-child td{border-bottom:0}
+  .def-table .col-poder{font-family:'DM Mono';font-size:11px;color:var(--green)}
+  .yes{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600;opacity:.7}
+  .yes-lock{color:var(--muted2);font-weight:600;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Sistema de Poderes <span class="v">v3.33 mockup</span></h1>
+  <p class="lead">Toda regra de permissão ("X pode Y") vira um toggle configurável na <b>Gestão de Usuários</b>. Admin liga/desliga por user. Helper <code style="font-family:'DM Mono';background:#fff;padding:1px 6px;border-radius:4px;font-size:12px">canUser(user, poder)</code> usado em todos os lugares — nada de hardcoded por nome.</p>
+
+  <!-- ──────────────────────────────────────────── -->
+  <h2>1 · Modal "Editar Usuário" (painel admin do HUB)</h2>
+  <p class="sub">Nova seção <b>"Poderes"</b> abaixo da seção atual de Módulos. Cada linha = 1 poder com toggle iOS-style + descrição.</p>
+
+  <div class="cols">
+    <!-- Desktop -->
+    <div>
+      <div class="col-label">Desktop · 560px modal</div>
+      <div class="modal-bg-demo">
+        <div class="modal-card">
+          <div class="m-head">
+            <div>
+              <div class="m-title">Editar Usuário</div>
+              <div style="font-size:11.5px;color:#8E8E93;margin-top:2px">Configurar permissões e poderes</div>
+            </div>
+            <button class="m-x">✕</button>
+          </div>
+
+          <div class="m-user">
+            <div class="m-avatar">JS</div>
+            <div>
+              <div class="m-uname">Joacir Schulz</div>
+              <div class="m-urole">USUÁRIO · TURNO A</div>
+            </div>
+          </div>
+
+          <div class="m-field">
+            <label class="m-label">Função</label>
+            <select class="m-select"><option>Usuário</option><option>Gerente</option><option>Administrador</option></select>
+          </div>
+
+          <div class="m-field">
+            <label class="m-label">Turno</label>
+            <select class="m-select"><option>Turno A</option><option>Turno B</option><option>Turno C</option></select>
+          </div>
+
+          <div class="m-section">
+            <div class="m-section-h">
+              <span class="m-section-title">⚡ Poderes</span>
+            </div>
+            <div class="m-section-hint">Permissões granulares por usuário. <b style="color:#fff">Admins/Gerentes têm tudo automático</b> — toggles aplicam só pra usuários comuns.</div>
+
+            <div class="pow-list">
+              <div class="pow-row">
+                <div class="pow-icon danger">🗑</div>
+                <div class="pow-body">
+                  <div class="pow-name">Deletar preventiva</div>
+                  <div class="pow-desc">Pode remover preventivas cadastradas (tabela e cards)</div>
+                  <span class="pow-default">DEFAULT USUÁRIO: NÃO</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+
+              <div class="pow-row">
+                <div class="pow-icon info">✓</div>
+                <div class="pow-body">
+                  <div class="pow-name">Executar preventiva</div>
+                  <div class="pow-desc">Pode marcar preventivas como concluídas (assinatura)</div>
+                  <span class="pow-default">DEFAULT USUÁRIO: SIM</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+
+              <div class="pow-row">
+                <div class="pow-icon info">📊</div>
+                <div class="pow-body">
+                  <div class="pow-name">Exportar dados</div>
+                  <div class="pow-desc">Pode baixar relatórios e exportações em CSV/PDF</div>
+                  <span class="pow-default dn">DEFAULT USUÁRIO: NÃO</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+
+              <div class="pow-row">
+                <div class="pow-icon warn">🔧</div>
+                <div class="pow-body">
+                  <div class="pow-name">Editar máquina</div>
+                  <div class="pow-desc">Pode editar cadastro/dados das máquinas (não só ler)</div>
+                  <span class="pow-default dn">DEFAULT USUÁRIO: NÃO</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+
+              <div class="pow-row">
+                <div class="pow-icon warn">↔</div>
+                <div class="pow-body">
+                  <div class="pow-name">Reatribuir card Kanban</div>
+                  <div class="pow-desc">Pode trocar o responsável de uma demanda no Kanban</div>
+                  <span class="pow-default dn">DEFAULT USUÁRIO: NÃO</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="m-info-block">
+              💡 <b>Joacir tem "Deletar preventiva" ligado por default</b> (William definiu). Os outros poderes seguem o default da role.
+            </div>
+          </div>
+
+          <div class="m-actions">
+            <button class="m-btn m-btn-ghost">Cancelar</button>
+            <button class="m-btn m-btn-primary">Salvar alterações</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile -->
+    <div>
+      <div class="col-label">Mobile · bottom-sheet</div>
+      <div class="modal-bg-demo modal-mobile" style="padding:0;background:#000;border-radius:18px;overflow:hidden">
+        <div style="height:80px;background:#0A0A0A"></div>
+        <div class="modal-card" style="margin:0;border-radius:18px 18px 0 0;border-bottom:0">
+          <div class="m-handle"></div>
+          <div class="m-head">
+            <div class="m-title" style="font-size:17px">Editar Usuário</div>
+            <button class="m-x">✕</button>
+          </div>
+
+          <div class="m-user" style="padding:10px;margin-bottom:14px">
+            <div class="m-avatar" style="width:38px;height:38px;font-size:14px">JS</div>
+            <div>
+              <div class="m-uname" style="font-size:14px">Joacir Schulz</div>
+              <div class="m-urole" style="font-size:10px">USUÁRIO · TURNO A</div>
+            </div>
+          </div>
+
+          <div class="m-field">
+            <label class="m-label">Função</label>
+            <select class="m-select" style="font-size:13px;padding:9px 11px"><option>Usuário</option></select>
+          </div>
+
+          <div class="m-section">
+            <div class="m-section-h"><span class="m-section-title" style="font-size:12px">⚡ Poderes</span></div>
+            <div class="pow-list">
+              <div class="pow-row" style="padding:10px 12px;gap:10px">
+                <div class="pow-icon danger" style="width:28px;height:28px;font-size:12px">🗑</div>
+                <div class="pow-body">
+                  <div class="pow-name" style="font-size:12.5px">Deletar preventiva</div>
+                  <div class="pow-desc" style="font-size:10.5px">Pode remover preventivas</div>
+                </div>
+                <label class="switch" style="width:38px;height:22px">
+                  <input type="checkbox" checked>
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="pow-row" style="padding:10px 12px;gap:10px">
+                <div class="pow-icon info" style="width:28px;height:28px;font-size:12px">✓</div>
+                <div class="pow-body">
+                  <div class="pow-name" style="font-size:12.5px">Executar preventiva</div>
+                  <div class="pow-desc" style="font-size:10.5px">Pode marcar concluídas</div>
+                </div>
+                <label class="switch" style="width:38px;height:22px">
+                  <input type="checkbox" checked>
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="pow-row" style="padding:10px 12px;gap:10px">
+                <div class="pow-icon info" style="width:28px;height:28px;font-size:12px">📊</div>
+                <div class="pow-body">
+                  <div class="pow-name" style="font-size:12.5px">Exportar dados</div>
+                  <div class="pow-desc" style="font-size:10.5px">Baixar CSV/PDF</div>
+                </div>
+                <label class="switch" style="width:38px;height:22px">
+                  <input type="checkbox">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="pow-row" style="padding:10px 12px;gap:10px">
+                <div class="pow-icon warn" style="width:28px;height:28px;font-size:12px">🔧</div>
+                <div class="pow-body">
+                  <div class="pow-name" style="font-size:12.5px">Editar máquina</div>
+                  <div class="pow-desc" style="font-size:10.5px">Editar cadastros</div>
+                </div>
+                <label class="switch" style="width:38px;height:22px">
+                  <input type="checkbox">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="pow-row" style="padding:10px 12px;gap:10px">
+                <div class="pow-icon warn" style="width:28px;height:28px;font-size:12px">↔</div>
+                <div class="pow-body">
+                  <div class="pow-name" style="font-size:12.5px">Reatribuir card</div>
+                  <div class="pow-desc" style="font-size:10.5px">Trocar responsável</div>
+                </div>
+                <label class="switch" style="width:38px;height:22px">
+                  <input type="checkbox">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-actions">
+            <button class="m-btn m-btn-ghost" style="padding:10px;font-size:12px">Cancelar</button>
+            <button class="m-btn m-btn-primary" style="padding:10px;font-size:12px">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────── -->
+  <h2>2 · Defaults por role</h2>
+  <p class="sub">Aplicados quando o user é criado ou quando a coluna ainda não foi tocada. <b>Admin/Gerente</b> sempre têm tudo (não precisam toggle).</p>
+
+  <table class="def-table">
+    <thead>
+      <tr>
+        <th>Poder</th>
+        <th>Admin</th>
+        <th>Gerente</th>
+        <th>Usuário (default)</th>
+        <th>Joacir (override)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="col-poder">deletarPreventiva</td><td class="yes-lock">SIM (auto)</td><td class="yes-lock">SIM (auto)</td><td class="no">NÃO</td><td class="yes">SIM</td></tr>
+      <tr><td class="col-poder">executarPreventiva</td><td class="yes-lock">SIM (auto)</td><td class="yes-lock">SIM (auto)</td><td class="yes">SIM</td><td class="yes">SIM</td></tr>
+      <tr><td class="col-poder">exportarDados</td><td class="yes-lock">SIM (auto)</td><td class="yes-lock">SIM (auto)</td><td class="no">NÃO</td><td class="no">NÃO</td></tr>
+      <tr><td class="col-poder">editarMaquina</td><td class="yes-lock">SIM (auto)</td><td class="yes-lock">SIM (auto)</td><td class="no">NÃO</td><td class="no">NÃO</td></tr>
+      <tr><td class="col-poder">reatribuirCard</td><td class="yes-lock">SIM (auto)</td><td class="yes-lock">SIM (auto)</td><td class="no">NÃO</td><td class="no">NÃO</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ──────────────────────────────────────────── -->
+  <h2>3 · Schema Firebase</h2>
+
+  <div class="notes">
+    <ul>
+      <li>Path: <code>users-profile/{user}/powers/{poder}</code> = <code>true | false</code></li>
+      <li>Helper global: <code>window.canUser(userKey, 'deletarPreventiva')</code></li>
+      <li>Lógica do helper:
+        <ol style="font-size:12.5px;margin:6px 0">
+          <li>Se role = admin OU gerente → sempre <code>true</code> (bypass)</li>
+          <li>Senão: lê <code>users-profile/{userKey}/powers/{poder}</code></li>
+          <li>Se nó não existe → usa <code>POWER_DEFAULTS[poder].producao</code></li>
+        </ol>
+      </li>
+      <li>Seed inicial roda 1x (flag em localStorage <code>fiobras-powers-seed-v1</code>):
+        <ul style="font-size:12.5px">
+          <li>Pra cada user em USERS hardcoded + dinâmicos: aplica defaults da role</li>
+          <li>Override do Joacir: <code>powers/deletarPreventiva = true</code></li>
+          <li>Não roda se chave já existe</li>
+        </ul>
+      </li>
+      <li>Sub-apps (Manutenção/CRM/Preço) leem do mesmo path via <code>onValue</code> e mantêm em <code>state.powers[user]</code></li>
+    </ul>
+  </div>
+
+  <!-- ──────────────────────────────────────────── -->
+  <h2>4 · Aplicação prática (Ajuste 3b)</h2>
+
+  <div class="notes">
+    <ul>
+      <li><b>Tabela de Preventivas</b> (<code>renderPreventiva</code>): botão Deletar só sai se <code>canUser(currentUser, 'deletarPreventiva')</code> retornar true</li>
+      <li><b>Cards mobile</b>: mesmo gate</li>
+      <li><b>Função <code>deletarPreventiva</code></b>: dupla checagem antes de remover (defense in depth)</li>
+      <li>Fluxo: user sem o poder não vê o botão; se chamar via console, função recusa com toast "Sem permissão"</li>
+    </ul>
+  </div>
+
+  <p style="margin-top:32px;color:var(--muted);font-size:12px;text-align:center;font-family:'DM Mono'">v3.33 mockup · aguardando aprovação</p>
+</div>
+</body>
+</html>

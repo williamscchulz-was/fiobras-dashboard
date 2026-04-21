@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.38 — 21/04/2026
-> **Versão atual do HUB:** v3.32.8
+> **Versão do doc:** 2.39 — 21/04/2026
+> **Versão atual do HUB:** v3.33.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -121,7 +121,7 @@ Cada sub-app:
 | `timeline-2026` | Timeline (testes, ocorrências). Múltiplas fotos + tag obrigatória. | `{id}/{objetivo,cliente,op,cor,tag,fotos:[{data,desc}],desc,resultado,criadoPor,...}` |
 | `mix-cores-{ano}` | Stats Cor. **Populado 2020-2026.** | `{mes}/{fibra}/{categoria} = kg` |
 | `timeline-tags` | Tags customizadas da Timeline. | `{id}/{nome,cor}` |
-| `users-profile/{user}` | Perfil do usuário (foto, email, senha hash + plain, nome completo, role override). | `{nomeCompleto, email, foto, senhaHash, senhaPlain, roleOverride, turnoOverride, modulesAllowedOverride, tabsAllowedOverride}` |
+| `users-profile/{user}` | Perfil do usuário (foto, email, senha hash + plain, nome completo, role override, **poderes granulares** — v3.33.0). | `{nomeCompleto, email, foto, senhaHash, senhaPlain, roleOverride, turnoOverride, modulesAllowedOverride, tabsAllowedOverride, powers:{deletarPreventiva,executarPreventiva,exportarDados,editarMaquina,reatribuirCard}}` |
 | `users-config/{user}` | Usuários criados via UI (admin). | `{nome, role, senha:null}` |
 | `audit-log/{id}` | Log de ações administrativas. | `{ts, by, action, target, details}` |
 | `active-sessions/{user}` | Heartbeat de sessões ativas. | `{lastSeen, userAgent, startedAt}` |
@@ -239,6 +239,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.33.0 | **Sistema de Poderes** · REGRA GERAL da auditoria v3.32+ implementada. 5 poderes configuráveis por user (`deletarPreventiva`, `executarPreventiva`, `exportarDados`, `editarMaquina`, `reatribuirCard`). Schema `users-profile/{user}/powers/{poder}:bool`. Helper `window.canUser(userKey, poder)` no HUB e Manutenção. UI nova "⚡ Poderes" no modal Editar Usuário com toggles iOS-style. Seed inicial 1x (flag `fiobras-powers-seed-v1`) com override do Joacir em `deletarPreventiva`. Primeira aplicação prática (Ajuste 3b): delete de preventiva na tabela/cards mobile gated via `canUser`. |
 | v3.32.8 | **Fix** Manutenção · botões Editar/Deletar da tabela Preventiva não funcionavam (`\\x27` → `\x27` no onclick) + remove botão Executar da tabela desktop (passa pelo Kanban). Ajuste 3a da auditoria v3.32+. |
 | v3.32.7 | **Fix** Manutenção · calendário e Kanban mostravam só 1 preventiva quando várias tinham a mesma freq na mesma semana+máquina (Ajuste 5 da auditoria v3.32+). Supressão v3.32.4 agrupava por (semana, máquina) mantendo só maior freq — quebrava quando TODAS tinham mesma freq. Agora: freqs DIFERENTES → maior absorve menores; MESMA freq → todas aparecem. |
 | v3.32.6 | Manutenção · Worker Cloudflare "fiobras-digest-diario" (Item 8). Cron 08:30 BRT seg-sex. Lê preventivas diárias, agrupa por resp, publica em `manutencao/fcmPending`. Ciclo v3.10 COMPLETO. |

@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.32.8">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.33.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3093,6 +3093,7 @@ const STANDARD_USERS = Object.entries(USERS).filter(([,u]) => !u.isAdmin).map(([
 
 const state = {
   user: null,
+  userKey: null,      // v3.33.0: chave do user pra lookup em userProfiles/powers
   isAdmin: false,
   cards: [],
   preventivas: [],
@@ -3100,6 +3101,37 @@ const state = {
   historico: [],
   maquinas: [],
 };
+
+// v3.33.0 — sistema de poderes (espelho do HUB index.html · REGRA GERAL)
+const POWER_DEFAULTS = {
+  deletarPreventiva:  { admin:true, gerente:true, producao:false },
+  executarPreventiva: { admin:true, gerente:true, producao:true  },
+  exportarDados:      { admin:true, gerente:true, producao:false },
+  editarMaquina:      { admin:true, gerente:true, producao:false },
+  reatribuirCard:     { admin:true, gerente:true, producao:false },
+};
+function _getUserRole(userKey){
+  if(!userKey) return 'producao';
+  const prof = (state.userProfiles||{})[userKey];
+  if(prof && prof.roleOverride) return prof.roleOverride;
+  return 'producao';
+}
+window.canUser = function(userKey, poder){
+  if(!userKey || !poder) return false;
+  const role = _getUserRole(userKey);
+  if(role === 'admin' || role === 'gerente') return true;
+  const prof = (state.userProfiles||{})[userKey] || {};
+  const powers = prof.powers || {};
+  if(typeof powers[poder] === 'boolean') return powers[poder];
+  const defaults = POWER_DEFAULTS[poder];
+  if(!defaults) return false;
+  return !!defaults[role];
+};
+// Helper curto pro user logado
+function _podeEu(poder){
+  if(state.isAdmin) return true; // atalho pro admin interno da Manutenção
+  return window.canUser(state.userKey, poder);
+}
 
 let kFilter = 'todos'; // mantido por compatibilidade legada
 // Filtros avançados (multi-dimensional)
@@ -3168,6 +3200,7 @@ function doLogin() {
   isAdmin  = userEntry.isAdmin;
 
   state.user    = userNome;
+  state.userKey = (sel === '__admin__' ? 'admin' : sel); // v3.33.0
   state.isAdmin = isAdmin;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -4269,10 +4302,12 @@ function renderPreventiva() {
       '<td>' + proxFmt + '</td>' +
       '<td>' + statusHtml + '</td>' +
       '<td style="white-space:nowrap">' +
-        // v3.32.8 — Ajuste 3a: bug \\x27 → \x27 (HTML não interpretava a barra dupla,
-        // quebrava onclick). Execução removida da tabela (passa pelo Kanban).
+        // v3.32.8 — Ajuste 3a: bug \\x27 → \x27. Execução removida (passa pelo Kanban).
+        // v3.33.0 — Ajuste 3b: delete gated por canUser('deletarPreventiva').
         '<button class="btn-secondary" style="padding:5px 10px;font-size:0.6rem;margin-right:3px" title="Editar" onclick="abrirModalPreventiva(\x27' + key + '\x27)">' + EDIT_SVG_STR + '</button>' +
-        '<button class="btn-secondary btn-del-prev" style="padding:5px 10px;font-size:0.6rem;color:var(--red);border-color:var(--red-md)" title="Deletar" onclick="deletarPreventiva(\x27' + key + '\x27)">' + DEL_SVG_STR + '</button>' +
+        (_podeEu('deletarPreventiva')
+          ? '<button class="btn-secondary btn-del-prev" style="padding:5px 10px;font-size:0.6rem;color:var(--red);border-color:var(--red-md)" title="Deletar" onclick="deletarPreventiva(\x27' + key + '\x27)">' + DEL_SVG_STR + '</button>'
+          : '') +
       '</td>' +
     '</tr>';
   }).join('');
@@ -4312,7 +4347,10 @@ function renderPreventiva() {
         '<div class="prev-card-actions">' +
           '<button class="prev-card-btn primary" onclick="executarPreventiva(\x27' + key + '\x27)">' + CHECK_SVG_STR + ' Concluir</button>' +
           '<button class="prev-card-btn" onclick="abrirModalPreventiva(\x27' + key + '\x27)" aria-label="Editar">' + EDIT_SVG_STR + '</button>' +
-          '<button class="prev-card-btn danger" onclick="deletarPreventiva(\x27' + key + '\x27)" aria-label="Deletar">' + DEL_SVG_STR + '</button>' +
+          // v3.33.0 — Ajuste 3b: delete gated
+          (_podeEu('deletarPreventiva')
+            ? '<button class="prev-card-btn danger" onclick="deletarPreventiva(\x27' + key + '\x27)" aria-label="Deletar">' + DEL_SVG_STR + '</button>'
+            : '') +
         '</div>' +
       '</div>';
     }).join('');
@@ -4395,6 +4433,8 @@ function salvarPreventiva() {
   fecharModal('modal-preventiva');
 }
 function deletarPreventiva(key) {
+  // v3.33.0 — Ajuste 3b: defense-in-depth contra chamada via console
+  if (!_podeEu('deletarPreventiva')) { toast('Sem permissão pra deletar preventivas', 'err'); return; }
   if (!confirm('Remover esta preventiva?')) return;
   if (window._fbRemovePrev) window._fbRemovePrev(key);
   // Remove todos os cards do Kanban vinculados a esta preventiva
