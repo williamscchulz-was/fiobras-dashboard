@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.30 — 19/04/2026
-> **Versão atual do HUB:** v3.32.0
+> **Versão do doc:** 2.31 — 19/04/2026
+> **Versão atual do HUB:** v3.32.1
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -231,7 +231,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.32.0` (19/04/2026).
+**Versão atual:** `v3.32.1` (19/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -239,6 +239,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.32.1 | Manutenção · frequência Diária (1d) no form de preventiva. Filtrada do calendário e do Kanban (só notificação, Item 7 do ciclo v3.10). |
 | v3.32.0 | Manutenção · cards de Máquinas compactos (Item 5 do ciclo v3.10). Código (m.tag) como chip verde, lista de preventivas sai do card (só no modal de edição). Altura 500→110px. |
 | v3.31.3 | **FIX REAL** Manutenção: `CHECK_SVG_STR`/`EDIT_SVG_STR`/`DEL_SVG_STR` nunca tinham sido definidas — ReferenceError silencioso apagava o tbody. + Resumo "enquanto você estava fora" só mostra 1x (last-seen por user em localStorage). |
 | v3.31.2 | **FIX REAL** Manutenção · `switchTab`/`switchTabMobile` agora re-renderizam ao trocar de aba (antes só dashboard/relatórios re-renderizavam, daí preventiva/maquinas/historico/kanban mantinham HTML antigo). |
@@ -514,4 +515,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.30 · 19/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.31 · 19/04/2026*

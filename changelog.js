@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.32.0', d:'19 abr 2026', current:true,
+    v:'3.32.1', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · frequência Diária no cadastro de preventivas (Item 7 do ciclo v3.10).', desc:'Adicionada opção "Diária (1d)" no select de frequência do form de preventiva.\n\nFrequências completas agora: Diária · Semanal · Quinzenal · Mensal · Trimestral · Semestral · Anual.\n\nRegra especial da Diária: NÃO aparece no calendário nem gera card no Kanban — é usada só como base pra notificação diária (Item 8). Filtros implementados:\n• _buildEventMap() ignora freq=1\n• gerarCardsPreventivas() ignora freq=1\n\nPreparação pro v3.32.6 (notificação cron 08:30 via Worker).'}
+    ]
+  },
+  {
+    v:'3.32.0', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · cards de Máquinas compactos.', desc:'Primeiro item do ciclo v3.10 do doc de Preventivas (renumerado v3.32.x aqui). Cards do inventário de máquinas ficaram compactos:\n\n• Código (m.tag) agora aparece como chip verde DM Mono no topo (antes vinha colado no subtítulo "RET-01 · Mecânica")\n• Nome da máquina em Outfit 900, hierarquia clara\n• Meta line única: Modelo + Ano + Setor (antes tinha 2 linhas)\n• Lista de 20 preventivas padrão SAI do card — substituída por "20 preventivas cadastradas · ver no detalhe" (acessível via botão Editar que já existia)\n\nAltura do card: ~500px → ~110px (-78%). Scroll da grid muito mais usável.\n\nSchema do Firebase inalterado. Só mudança visual no render. Compatível com cards sem tag (não mostra chip).\n\nItem 9 (Hub · permissão Gerente) auditado e fechado como "não-bug" — já funciona: getEffectiveModules("gerente") retorna ALL_MODULES automático.'}
     ]

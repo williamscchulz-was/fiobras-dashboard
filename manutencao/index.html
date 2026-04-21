@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.32.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.32.1">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2740,6 +2740,7 @@ display: none;
         </div>
         <div class="field"><label>Frequência</label>
           <select id="pv-freq">
+            <option value="1">Diária (1d · só notificação, não aparece no calendário/Kanban)</option>
             <option value="7">Semanal (7d)</option>
             <option value="15">Quinzenal (15d)</option>
             <option value="30" selected>Mensal (30d)</option>
@@ -3149,6 +3150,8 @@ function gerarCardsPreventivas() {
   if (!window._fbReady) return;
   state.preventivas.forEach(p => {
     if (!p.ultima) return;
+    // v3.32.1 — Diária (freq=1) não gera card no Kanban (só notificação)
+    if (parseInt(p.freq) === 1) return;
     const proxima = addDays(parseDt(p.ultima), parseInt(p.freq));
     const dr = diffDays(today(), proxima);
     if (dr <= 0) {
@@ -4560,6 +4563,8 @@ function _buildEventMap() {
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   (state.preventivas || []).forEach(p => {
     if (!p.ultima || !p.freq) return;
+    // v3.32.1 — Diária (freq=1) não aparece no calendário (só notificação)
+    if (parseInt(p.freq) === 1) return;
     const prox = addDays(parseDt(p.ultima), parseInt(p.freq));
     prox.setHours(0,0,0,0);
     const key = prox.toISOString().split('T')[0];
