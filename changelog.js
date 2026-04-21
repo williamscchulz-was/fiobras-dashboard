@@ -2,7 +2,15 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.29.0', d:'19 abr 2026', current:true,
+    v:'3.30.0', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Sub-apps mais rápidos via prefetch passivo + skeleton loader.', desc:'Antes: ao clicar num módulo (Preço/CRM/Manutenção) pela 1ª vez, demorava 1-2s pra carregar (parse 118-253KB + Firebase auth + listeners).\n\nAgora 2 técnicas combinadas:\n• <link rel="preconnect"> pra Firebase RTDB no <head> do HUB — abre TCP+TLS em paralelo com o boot. Quando user abre sub-app, handshake já tá pronto.\n• <link rel="prefetch"> dos 3 sub-apps no <head> — browser baixa em background quando idle (depois do boot, sem competir). NÃO ativa Firebase, NÃO renderiza, NÃO abre WebSocket. Quando user clica, vem do cache HTTP, instantâneo.\n\nBonus: skeleton loader (spinner verde discreto) no iframe-wrap enquanto carrega — feedback visual em vez de tela preta.\n\nIMPORTANTE: NÃO foi feito o pre-load de iframes ATIVOS (que abriria 25 conexões WebSocket simultâneas). Prefetch passivo é a abordagem correta.'},
+      {type:'feat', title:'Preço · redesign minimal + chips compactos pros valores fixos.', desc:'Antes: nos 4 abas (Vendas, Tingimento, Preparação, Retorção) os steps "Outros custos" tinham 6 campos visualmente iguais — 2 editáveis (R$ Retorção/Outros) e 4 fixos (Lucro op, Desp op, JCP, IRPJ+CSLL). Layout cheio, espaço sobrando, "unfinished".\n\nAgora hierarquia visual clara:\n• Editáveis ocupam 2 colunas como cards\n• Fixos viram chips compactos numa linha (pílulas com pontuação % minúscula + label + valor)\n• Visual mais profissional, mais denso, foco no que o usuário pode editar\n\nMudanças técnicas:\n• Helper g() agora lê de input OU de span[data-value] — pra Lucro Op (calculado dinamicamente) que virou chip\n• Helper setVal() pra escrever em qualquer um\n• Grid mudou de minmax(175px, 1fr) pra minmax(140px, 180px) com justify-content:start (campos com max-width pra não esticar)\n• Mobile: grid colapsa pra 2 colunas em ≤640px (chips wrap natural)'},
+      {type:'feat', title:'Mobile-friendly fix nos campos do Preço.', desc:'Inputs já tinham font-size:16px global (v3.22.0) — mas o grid antigo do Preço (cols-auto minmax 175px) ficava cramped em mobile pequeno. Novo grid (cols-fixed minmax 140-180px) colapsa pra 2 colunas em mobile e os chips fixos quebram naturalmente em múltiplas linhas. Sem zoom iOS.'}
+    ]
+  },
+  {
+    v:'3.29.0', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Imagens com loading="lazy" + decoding="async".', desc:'Todas as 12 tags <img> nos templates do HUB e Manutenção (Timeline fotos, Cor detalhe, Minha Conta avatar, modal lightbox, preview de upload) agora têm loading="lazy" + decoding="async".\n\nGanho:\n• Browser só baixa a imagem quando ela tá perto de aparecer no viewport\n• decoding="async" libera o main thread durante decode\n• Timeline com 4+ registros: economiza ~200KB no boot inicial\n• Cor detalhe: foto só baixa quando user abre o modal\n\nNão afeta imagens base64 inline (já estão no DOM).'}
     ]
