@@ -21,12 +21,12 @@
 <!-- Windows -->
 <meta name="msapplication-TileColor" content="#008835">
 <meta name="msapplication-TileImage" content="./icon-192.png">
-<meta name="theme-color" content="#008835"><!-- v3.31.1: voltou pro verde brand -->
+<meta name="theme-color" content="#008835"><!-- v3.31.2: voltou pro verde brand -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
 <link rel="stylesheet" href="css/hub.css?v=3.30.0">
 
-<!-- v3.31.1: prefetch passivo dos sub-apps + preconnect Firebase
+<!-- v3.31.2: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
      abrir WebSocket). Quando user clica no módulo, vem do cache HTTP. -->
 <link rel="preconnect" href="https://fiobras-hub-default-rtdb.firebaseio.com" crossorigin>
@@ -88,7 +88,7 @@
   </defs>
 </svg>
 
-<!-- ── Login (v3.31.1 — Glass + Aurora) ── -->
+<!-- ── Login (v3.31.2 — Glass + Aurora) ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-mark">
@@ -112,11 +112,11 @@
     </div>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.31.1</div>
+    <div class="login-foot">Sistema interno · v3.31.2</div>
   </div>
 </div>
 
-<!-- ── Splash (v3.31.1 — Aurora) ── -->
+<!-- ── Splash (v3.31.2 — Aurora) ── -->
 <div class="splash hide" id="splash">
   <div class="aurora-icon aurora-lg" aria-hidden="true">
     <svg viewBox="0 0 60 68"><use href="#i-fiobras-symbol-inv"/></svg>
@@ -272,7 +272,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.31.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.31.2</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -2106,10 +2106,10 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.31.1';
+const CURRENT_VERSION = '3.31.2';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
-// v3.31.1: removeu ~95KB de texto do bundle inicial.
+// v3.31.2: removeu ~95KB de texto do bundle inicial.
 let CHANGELOG = [];
 let _changelogPromise = null;
 function loadChangelog(){
@@ -2142,7 +2142,7 @@ function renderChangelog(){
   }).join('');
 }
 async function openChangelog(){
-  // v3.31.1: changelog é lazy-loaded
+  // v3.31.2: changelog é lazy-loaded
   const ov = document.getElementById('changelog-overlay');
   if(ov) ov.classList.add('open');
   // Mostra placeholder enquanto carrega
@@ -2176,7 +2176,7 @@ function checkChangelog(){
 // ── PWA Manifest ─────────────────────────────────────────────────────────
 // v3.14.0: ícones gerados em runtime via canvas a partir do símbolo SVG novo
 function _buildHubIcon(size){
-  // v3.31.1 — revertido pro original (v3.14.0): verde sólido + F branco + ponto amarelo
+  // v3.31.2 — revertido pro original (v3.14.0): verde sólido + F branco + ponto amarelo
   const c = document.createElement('canvas');
   c.width = size; c.height = size;
   const ctx = c.getContext('2d');
@@ -3364,7 +3364,7 @@ function loadSubApp(frameId, path){
   const f = document.getElementById(frameId);
   if(!f) return;
   if(!f.src){
-    // v3.31.1: skeleton loader no wrap enquanto carrega
+    // v3.31.2: skeleton loader no wrap enquanto carrega
     const wrap = f.closest('.subapp-frame-wrap');
     if(wrap) wrap.classList.add('loading');
     f.src = path;

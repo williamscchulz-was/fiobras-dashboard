@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.27 — 19/04/2026
-> **Versão atual do HUB:** v3.31.1
+> **Versão do doc:** 2.28 — 19/04/2026
+> **Versão atual do HUB:** v3.31.2
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -231,7 +231,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 ## 6. Versionamento e changelog
 
-**Versão atual:** `v3.31.1` (19/04/2026).
+**Versão atual:** `v3.31.2` (19/04/2026).
 
 **Fonte de verdade do changelog:** array `CHANGELOG` dentro do `index.html` + comment block box-drawing no topo do arquivo. Os dois devem estar em sync.
 
@@ -239,6 +239,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.31.2 | **FIX REAL** Manutenção · `switchTab`/`switchTabMobile` agora re-renderizam ao trocar de aba (antes só dashboard/relatórios re-renderizavam, daí preventiva/maquinas/historico/kanban mantinham HTML antigo). |
 | v3.31.1 | Fix Manutenção · tabela de Preventivas vazia. `renderPreventiva` agora aceita state.preventivas como Array, Object ou null. |
 | v3.31.0 | Manutenção · tabela de Preventivas vira cards verticais em mobile (≤640px). Status colorido via border + chip ("Atrasada Xd"/"Em Xd"/"OK"). FCM SW no PRECACHE. |
 | v3.30.0 | Sub-apps com `<link rel="prefetch">` passivo + `preconnect` Firebase + skeleton loader no iframe. Preço redesign minimal: 4 valores fixos viraram chips compactos (era 6 inputs grandes). Helper `g()`/`setVal()` lê de input OU span[data-value]. |
@@ -511,4 +512,4 @@ Tokens CSS em `:root` e `[data-theme="dark"]`:
 
 ---
 
-*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.27 · 19/04/2026*
+*Fiobras HUB — mini-ERP têxtil interno · CLAUDE.md v2.28 · 19/04/2026*

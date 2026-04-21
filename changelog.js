@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.31.1', d:'19 abr 2026', current:true,
+    v:'3.31.2', d:'19 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Fix REAL Manutenção · switchTab não re-renderizava ao trocar de aba.', desc:'A causa raiz do bug reportado. switchTab() só tinha re-render pra dashboard e relatórios — outros 4 tabs (preventiva, maquinas, historico, kanban) mantinham o último render.\n\nCenário: user abre Manutenção → tab Dashboard ativo. Firebase onValue dispara e chama renderPreventiva (state correto). MAS o tbody tá num painel inativo. Quando user clica em "Preventiva", switchTab só mudava display — tbody continua com o que foi renderizado antes.\n\nSe o cache local (localStorage) tinha state.preventivas vazio/antigo, o primeiro render do boot escrevia "Nenhuma" no tbody, e esse HTML ficava até o user recarregar a página. Mesmo com dados novos do Firebase, o tbody não era atualizado pra quem estava vendo outra aba.\n\nFix: switchTab e switchTabMobile agora re-renderizam quando o user troca pra qualquer aba (preventiva/maquinas/historico/kanban/relatorios).\n\nCombina com fix defensivo v3.31.1 (array ou object) — 2 camadas de segurança.'}
+    ]
+  },
+  {
+    v:'3.31.1', d:'19 abr 2026',
     items:[
       {type:'high', title:'Fix Manutenção · tabela de Preventivas dizia "Nenhuma" mesmo tendo cadastro.', desc:'Bug reportado pelo William: havia 5 preventivas cadastradas (apareciam no calendário dia 23/abril) mas a tabela "Plano Preventivo" mostrava "Nenhuma preventiva cadastrada".\n\nCausa: em certos cenários (provavelmente cache local restaurando state como Object em vez de Array, ou edge case de hydration), state.preventivas virava Object ao invés de Array. O check "if (!all.length)" dava true em Object (que não tem .length), caindo na empty state.\n\nFix defensivo em renderPreventiva:\n• Se Array.isArray(state.preventivas) → usa direto\n• Se for Object (bug de hydration) → converte via Object.entries().map()\n• Se null/undefined → vazio\n\nConsole.warn se conversão acontecer pra captura de telemetria.'}
     ]
