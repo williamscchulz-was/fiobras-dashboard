@@ -2,7 +2,22 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.32.3', d:'19 abr 2026', current:true,
+    v:'3.32.4', d:'19 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Manutenção · hierarquia de preventivas (cascata) + supressão visual (Itens 1+2+3).',
+        desc:'Maior mudança lógica do ciclo v3.10.\n\n' +
+        'ITEM 1 — Cascata ao concluir:\n' +
+        'Quando uma preventiva de frequência maior é executada, as menores da MESMA máquina também são marcadas como executadas (ultima = hoje). Ex: Anual concluída em 15/03 → Semestral/Trimestral/Mensal/Quinzenal/Semanal da mesma máquina também viram executadas em 15/03, e próxima data recalcula a partir disso. Diária (freq=1) fica fora — tem ciclo próprio.\n\n' +
+        'Implementado em confirmarAssinatura(): após atualizar a preventiva executada, itera sobre state.preventivas e atualiza todas com mesma maqKey + freq menor. Obs gravada: "[cascata] executada junto com <tarefa maior>".\n\n' +
+        'ITEM 2 — Supressão visual (calendário + Kanban):\n' +
+        'Mesma semana, mesma máquina → só a preventiva de maior hierarquia aparece. Ex: se na semana 23-29 tem Anual + Semestral + Trimestral + Semanal da Retorcedeira 1, só a Anual aparece no calendário e como card no Kanban. As menores ficam implícitas (serão executadas em cascata).\n\n' +
+        'Implementado via helper _weekKey(date) (ISO 8601) + agrupamento por (semana, maqKey) pegando o de maior freq. Aplicado em _buildEventMap() (calendário) e gerarCardsPreventivas() (Kanban).\n\n' +
+        'ITEM 3 — Recálculo pela data real de execução:\n' +
+        'JÁ ESTAVA IMPLEMENTADO desde versões anteriores. confirmarAssinatura() faz "ultima: hoje" (data real de execução, não programada). O cálculo da próxima é sempre ultima + freq, respeitando atrasos.'}
+    ]
+  },
+  {
+    v:'3.32.3', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · avatares no lugar de nome + stack +N (Item 10 do ciclo v3.10).', desc:'Sistema unificado de avatares. Cor consistente por usuário (gradient fixo), iniciais quando não tem foto, foto se cadastrada em users-profile. 4 tamanhos (xs/sm/md/lg).\n\nHelpers globais:\n• avatar(nomeOuKey, size) → <span> com foto ou iniciais + tooltip com nome completo\n• avatarStack([users], size) → até 2 visíveis, resto vira chip +N\n• _avStackExpand() → click no +N expande dropdown com todos os participantes\n\nCSS em /css/tokens.css (compartilhado entre os 4 apps).\n\nAplicado em:\n• Cards Kanban: stack com autor + resp + quem reatribuiu + quem executou\n• Calendário · lista do dia: avatar do resp em cada preventiva\n• Cards mobile de preventiva: chip "Resp [avatar]" na meta line\n\nListener onValue em users-profile no Manutenção — quando user cadastra foto no HUB, Manutenção atualiza automaticamente.\n\nPaleta por user: Admin preto · William verde · Joacir teal · Hernandes azul · Vorlei laranja · Pedro roxo · Ivonei amarelo · Roland vermelho.'}
     ]
