@@ -2,7 +2,13 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.32.1', d:'19 abr 2026', current:true,
+    v:'3.32.2', d:'19 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · switch de notificações no header (Item 6 do ciclo v3.10).', desc:'Antes: banner "Ative as notificações" aparecia TODA vez que o app abria — incomodava usuários recorrentes.\n\nAgora:\n• Popup automático removido. initNotificacoes() só sincroniza estado do SO com o switch.\n• Novo botão 🔔/🔕 no header (ao lado do toggle dark mode) — chama toggleNotifPermission()\n• 1ª vez que user clica: pede permissão ao navegador\n• Se concedida: fica 🔔 ativo. Clicar de novo silencia (flag fio_notif_silenciar no localStorage)\n• Se silenciado: vira 🔕. Clicar reativa.\n• Se bloqueado no SO: toast orienta "libere em Configurações do site"\n• mostrarNotif() respeita a flag de silenciar\n\nNão tem como revogar permissão via JS (limitação do browser) — a flag silenciar faz o papel de "desligar" dentro do app.'}
+    ]
+  },
+  {
+    v:'3.32.1', d:'19 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · frequência Diária no cadastro de preventivas (Item 7 do ciclo v3.10).', desc:'Adicionada opção "Diária (1d)" no select de frequência do form de preventiva.\n\nFrequências completas agora: Diária · Semanal · Quinzenal · Mensal · Trimestral · Semestral · Anual.\n\nRegra especial da Diária: NÃO aparece no calendário nem gera card no Kanban — é usada só como base pra notificação diária (Item 8). Filtros implementados:\n• _buildEventMap() ignora freq=1\n• gerarCardsPreventivas() ignora freq=1\n\nPreparação pro v3.32.6 (notificação cron 08:30 via Worker).'}
     ]

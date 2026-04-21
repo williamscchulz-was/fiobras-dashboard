@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.32.1">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.32.2">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2040,6 +2040,8 @@ display: none;
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="btn-notif-label">Notificar</span>
     </button>
+    <!-- v3.32.2 — switch de notificações (substitui popup automático) -->
+    <button class="btn-dark-toggle" id="btn-notif-toggle" onclick="toggleNotifPermission()" title="Notificações" style="font-size:15px;padding:0;min-width:34px">🔔</button>
     <button class="btn-dark-toggle" id="btn-dark-toggle" onclick="toggleDarkMode()" title="Alternar tema">
       <svg id="icon-dark" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg id="icon-light" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -4697,28 +4699,83 @@ function renderCalendario() {
 // ── NOTIFICAÇÕES ───────────────────────────────────────────
 let notifPermission = 'default';
 
+// v3.32.2 — popup automático removido. Agora só sincroniza estado atual
+// do SO com o switch na UI. User ativa manualmente via switch no header.
 function initNotificacoes() {
-  if (!('Notification' in window)) {
-    mostrarBannerNotif('Seu dispositivo não suporta notificações.', false);
-    return;
-  }
+  if (!('Notification' in window)) return;
   notifPermission = Notification.permission;
-
-  if (notifPermission === 'granted') {
-    // Já permitido — confirmar silenciosamente
-    esconderBannerNotif();
-    return;
-  }
-
-  if (notifPermission === 'denied') {
-    // Bloqueado — orientar usuário
-    mostrarBannerNotif('Notificações bloqueadas. Ative nas configurações do navegador.', false);
-    return;
-  }
-
-  // 'default' — ainda não decidiu, pedir
-  mostrarBannerNotif('Ative as notificações para receber alertas de manutenção.', true);
+  // Atualiza visual do switch (se já tá no DOM)
+  if (typeof _atualizarNotifSwitch === 'function') _atualizarNotifSwitch();
+  // Se user já disse "sim" antes, tá tudo ok — nada a fazer
+  // Se user disse "não", respeita (não pede de novo)
+  // Se 'default' — user nunca viu — NÃO pede automaticamente
 }
+
+// v3.32.2 — Switch de notificações (chamado pelo toggle no header)
+function toggleNotifPermission() {
+  if (!('Notification' in window)) {
+    toast('Seu dispositivo não suporta notificações.', 'err');
+    return;
+  }
+  const atual = Notification.permission;
+
+  if (atual === 'granted') {
+    // Já ativo — oferece desligar (localStorage flag; não dá pra revogar permissão do SO via JS)
+    const silenciar = localStorage.getItem('fio_notif_silenciar') === '1';
+    if (silenciar) {
+      localStorage.removeItem('fio_notif_silenciar');
+      toast('Notificações reativadas', 'ok');
+    } else {
+      localStorage.setItem('fio_notif_silenciar', '1');
+      toast('Notificações silenciadas (pra reativar, clique no sino)', 'ok');
+    }
+    _atualizarNotifSwitch();
+    return;
+  }
+
+  if (atual === 'denied') {
+    toast('Notificações bloqueadas no navegador. Libere em Configurações do site.', 'err', 5000);
+    return;
+  }
+
+  // 'default' — pede permissão agora
+  Notification.requestPermission().then(p => {
+    notifPermission = p;
+    if (p === 'granted') {
+      localStorage.removeItem('fio_notif_silenciar');
+      toast('Notificações ativadas!', 'ok');
+      initFCMToken();
+    } else if (p === 'denied') {
+      toast('Permissão negada. Libere em Configurações do site se mudar de ideia.', 'err');
+    }
+    _atualizarNotifSwitch();
+  });
+}
+window.toggleNotifPermission = toggleNotifPermission;
+
+// Atualiza ícone/estado visual do botão de notif no header
+function _atualizarNotifSwitch() {
+  const btn = document.getElementById('btn-notif-toggle');
+  if (!btn) return;
+  const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
+  const silenciar = localStorage.getItem('fio_notif_silenciar') === '1';
+  let icon, title;
+  if (perm === 'unsupported') {
+    icon = '🔕'; title = 'Notificações não suportadas neste dispositivo';
+    btn.disabled = true;
+  } else if (perm === 'granted' && !silenciar) {
+    icon = '🔔'; title = 'Notificações ativas · clique pra silenciar';
+  } else if (perm === 'granted' && silenciar) {
+    icon = '🔕'; title = 'Notificações silenciadas · clique pra reativar';
+  } else if (perm === 'denied') {
+    icon = '🔕'; title = 'Notificações bloqueadas no navegador';
+  } else {
+    icon = '🔔'; title = 'Ativar notificações';
+  }
+  btn.textContent = icon;
+  btn.title = title;
+}
+window._atualizarNotifSwitch = _atualizarNotifSwitch;
 
 function mostrarBannerNotif(msg, showBtn) {
   let banner = document.getElementById('notif-banner');
@@ -4761,6 +4818,8 @@ function mostrarNotif(titulo, corpo, tag) {
   if (!('Notification' in window)) return;
   notifPermission = Notification.permission;
   if (notifPermission !== 'granted') return;
+  // v3.32.2 — respeita flag "silenciar" (user desligou via switch)
+  if (localStorage.getItem('fio_notif_silenciar') === '1') return;
   if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
 
   const opts = {
