@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.40.3">
+<link rel="stylesheet" href="../css/tokens.css?v=3.40.4">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -1248,6 +1248,11 @@ const db=getDatabase(_app);
 signInAnonymously(getAuth(_app)).catch(e=>console.error('[Auth anon falhou]',e));
 const lr=ref(db,'crm/leads');
 onValue(lr,s=>{window._leads=s.val()||{};window.renderAll&&window.renderAll();});
+// v3.40.4 — sub-app CRM agora lê users-profile do HUB pra puxar foto/nome no avatar
+onValue(ref(db, 'users-profile'), s => {
+  window._userProfiles = s.val() || {};
+  if (window.renderAll) window.renderAll();
+});
 window._push=d=>push(lr,d);
 window._update=(id,d)=>update(ref(db,'crm/leads/'+id),d);
 window._remove=id=>remove(ref(db,'crm/leads/'+id));
@@ -1823,16 +1828,42 @@ const AVATAR_GRADIENTS = {
   edilson:  'linear-gradient(135deg,#2563EB,#60a5fa)',
   joacir:   'linear-gradient(135deg,#0d8a6c,#10b981)',
 };
+// v3.40.4 — resolve nome → chave em users-profile (igual _resolveUserKey do HUB/Manutenção)
+function _crmResolveUserKey(nomeOuKey){
+  if(!nomeOuKey) return null;
+  const nk = String(nomeOuKey).toLowerCase().trim();
+  const profs = window._userProfiles || {};
+  if (profs[nk]) return nk;
+  // Match por nomeCompleto/nome (case-insensitive, exato ou primeiro nome)
+  for (const k in profs) {
+    const p = profs[k] || {};
+    const pName = (p.nomeCompleto || p.nome || '').toLowerCase();
+    if (pName === nk) return k;
+    if (pName.startsWith(nk + ' ')) return k;
+    // primeiro nome bate? ex "william" pra "William Alexander Schulz"
+    const firstName = pName.split(/\s+/)[0];
+    if (firstName === nk) return k;
+  }
+  return null;
+}
 function avatarFor(name){
   if(!name) return null;
   const k = String(name).toLowerCase().trim().split(/\s+/)[0];
   const grad = AVATAR_GRADIENTS[k] || 'linear-gradient(135deg,#6B7166,#9CA295)';
   const initials = String(name).trim().split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';
-  return { grad, initials, name };
+  // v3.40.4 — pega foto do users-profile se existir
+  const userKey = _crmResolveUserKey(name);
+  const profile = userKey ? (window._userProfiles||{})[userKey] : null;
+  const foto = profile && profile.foto ? profile.foto : null;
+  return { grad, initials, name, foto };
 }
 function avatarChip(name, size=22){
   const a = avatarFor(name);
   if(!a) return '';
+  // v3.40.4 — quando há foto, usa background-image em vez das iniciais
+  if (a.foto) {
+    return `<div class="card-resp" title="${esc(a.name)}" style="background-image:url('${a.foto.replace(/'/g,"%27")}');background-size:cover;background-position:center;width:${size}px;height:${size}px;color:transparent"></div>`;
+  }
   return `<div class="card-resp" title="${esc(a.name)}" style="background:${a.grad};width:${size}px;height:${size}px;font-size:${Math.round(size*0.42)}px;">${esc(a.initials)}</div>`;
 }
 /* Pega o responsável mais relevante do lead: último autor do histórico ou criador */

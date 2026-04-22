@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.40.3', d:'22 abr 2026', current:true,
+    v:'3.40.4', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'CRM agora puxa avatar/foto do users-profile do HUB (não tinha conexão).',
+        desc:'AUDITORIA: William reportou que avatares só funcionavam na Timeline e Desenv. Cor (módulos nativos do HUB). Em CRM apareciam só iniciais cinza, mesmo pra users com foto cadastrada.\n\nCausa: o sub-app CRM tinha sua própria função `avatarFor(name)` com mapa hardcoded `AVATAR_GRADIENTS` (6 users) e ZERO conexão com `users-profile` do Firebase. Qualquer user fora do hardcoded virava círculo cinza, e ninguém puxava foto.\n\nNo Manutenção isso já tinha sido corrigido na v3.39.0 com expansão dinâmica do USERS via onValue de users-profile. Agora aplico padrão equivalente no CRM:\n\n• onValue(ref(db,"users-profile")) → window._userProfiles\n• `_crmResolveUserKey(nome)` resolve nome→chave matchando por nomeCompleto/nome/primeiro nome\n• `avatarFor(name)` agora pega foto do profile se existir\n• `avatarChip(name, size)` renderiza background-image quando tem foto\n\nTeste confirmado via preview: avatarFor("William") retorna foto base64 ✓; avatarFor("Givago") retorna gradient cinza (Givago é cliente externo, não user — comportamento correto).'}
+    ]
+  },
+  {
+    v:'3.40.3', d:'22 abr 2026',
     items:[
       {type:'fix', title:'CRÍTICO · "+ Preventiva" não salvava (toast() undefined no sub-app).',
         desc:'Diagnóstico via preview/eval: salvarPreventiva() chamava toast(...) na linha 5031, mas toast() NÃO existia no sub-app Manutenção (só no HUB). Erro silencioso ReferenceError travava a função APÓS o _fbPushPrev rodar — então a preventiva era de fato adicionada no Firebase, mas o modal não fechava e parecia que "não salvou".\n\nIntroduzi as 14 chamadas de toast() na refatoração v3.35.0 sem checar que o sub-app não tem essa função (tem apenas exibirInAppNotif e mostrarNotif).\n\nFix: shim global no sub-app Manutenção:\n```\nfunction toast(msg, tipo, durMs) {\n  exibirInAppNotif(tipo === "err" ? "⚠ Aviso" : "Manutenção", msg, "");\n}\nwindow.toast = toast;\n```\n\nResolve as 14 chamadas de uma vez: salvarPreventiva, deletarPreventiva (defense-in-depth), demanda, multi-tarefa, sistema de poderes (gated delete) etc.'}
