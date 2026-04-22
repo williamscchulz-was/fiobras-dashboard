@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.47.2">
+<link rel="stylesheet" href="../css/tokens.css?v=3.47.3">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -462,10 +462,19 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
   border-width:5px;border-style:solid;
   border-color:#1B1F18 transparent transparent transparent;
 }
-/* v3.47.1 — alinha tooltip pela borda esquerda quando avatar é o 1º do stack
-   (avatares ficam no canto esquerdo do card; tooltip não vaza pra fora) */
-.cs-stack .cs-item:first-child .cs-tip{ left:0; transform:none; }
-.cs-stack .cs-item:first-child .cs-tip:after{ left:13px; margin-left:0; }
+/* v3.47.3 — TODOS os tooltips do stack alinhados pela ESQUERDA do avatar.
+   v3.47.1 só pegava o first-child; mas avatares no meio também vazavam.
+   max-width + white-space:normal evita overflow horizontal. */
+.cs-stack .cs-item .cs-tip{
+  left: 0 !important;
+  transform: none !important;
+  max-width: 220px;
+  white-space: normal;
+}
+.cs-stack .cs-item .cs-tip:after{
+  left: 13px !important;
+  margin-left: 0 !important;
+}
 /* Garantir que parents NÃO cortem o tooltip */
 .crm-card, .card-foot, .card-foot-l, .av-stack { overflow: visible !important; }
 .cs-tip-nome{font-family:'Outfit',sans-serif;font-weight:700;font-size:12.5px;color:#fff}

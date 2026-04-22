@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.47.2', d:'22 abr 2026', current:true,
+    v:'3.47.3', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'CRM · tooltip ainda vazava em avatares do meio do stack.',
+        desc:'BUG persistente: v3.47.1 só corrigiu o first-child do stack. Avatares do meio (ex: 2º "admin" no card do Celso) continuavam centralizados → tooltip vazava pra esquerda do card.\n\nFix mais agressivo: TODOS os tooltips do stack alinhados pela ESQUERDA do avatar (left:0 + transform:none). Setinha aponta pra posição correta (left:13px). max-width:220px + white-space:normal evitam overflow horizontal mesmo com nome longo (quebra linha em vez de estender).\n\nCSS com !important pra sobrescrever a regra base do .cs-tip.'}
+    ]
+  },
+  {
+    v:'3.47.2', d:'22 abr 2026',
     items:[
       {type:'fix', title:'CRM · "Nenhum usuário disponível pra atribuir" — modal trocar resp ficava vazio.',
         desc:'BUG: clicar em trocar responsável mostrava erro "Nenhum usuário disponível pra atribuir" mesmo com 17 users cadastrados no HUB.\n\nCausa: o filtro do modal exigia `nomeCompleto` ou `nome` em users-profile, mas pra users criados via painel admin do HUB, o nome vive em users-config (não em users-profile). CRM nunca lia users-config.\n\nFix:\n• onValue de users-config adicionado (mesma lógica de users-profile)\n• Cache localStorage também\n• crmTrocarResp e _crmPopularRespSelect agora montam a lista a partir da UNIÃO de users-config + users-profile\n• Nome friendly tem prioridade: profile.nomeCompleto > config.nome > profile.nome > key\n• _crmResolveUserKey também busca em users-config (corrige avatar de users que só existem lá)\n\nResultado: lista de "trocar responsável" mostra todos os users do sistema. Avatar dos cards puxa nome/foto mesmo se profile estiver incompleto.'}
