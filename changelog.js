@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.48.0', d:'22 abr 2026', current:true,
+    v:'3.48.1', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · avatar com foto cinza (background-size: auto vs cover).',
+        desc:'BUG: William reportou avatar do Vorlei cinza no card de máquina mesmo com foto cadastrada. Não era hardcode (suspeita inicial), era um BUG SUTIL DE CSS.\n\nDiagnóstico via preview/eval:\n  cs.backgroundImage = url(data:image/jpeg;...) ✓ foto carregada\n  cs.backgroundSize = "auto" ❌ deveria ser "cover"\n\nCausa: a regra `.av.u-vorlei { background: linear-gradient(...) }` usa SHORTHAND `background:`. Shorthand RESETA todas as sub-propriedades, incluindo `background-size: auto` (default). Quando o JS adiciona `style="background-image:url(...)"` inline, o background-size do CSS da regra .u-vorlei (auto) ganha por especificidade — daí a foto carrega mas é renderizada no tamanho original (centenas de pixels) e só uma esquina aparece nos 32x32 do avatar.\n\nFix: função avatar() do Manutenção adiciona inline `background-size:cover; background-position:center` junto com `background-image`. Especificidade inline ganha do shorthand da classe.\n\nHUB e CRM não tinham o bug porque usam `<img>` element em vez de background-image.\n\nValidado: backgroundSize agora "cover", foto preenche o avatar.'}
+    ]
+  },
+  {
+    v:'3.48.0', d:'22 abr 2026',
     items:[
       {type:'high', title:'ZERO HARDCODE de usuários · USERS lê 100% do Firebase.',
         desc:'Conclusão da auditoria arquitetural. Todos os usuários hardcoded foram removidos:\n\n• HUB index.html: const USERS = {} (era 17 entries)\n• Manutenção: const USERS = {} (era admin/joacir)\n• Manutenção: 4 selects com 23 <option> hardcoded → populate dinâmico via _popUserSelect()\n• CRM: AVATAR_GRADIENTS hardcoded de 7 cores → função hash determinística (mesmo user sempre mesma cor, funciona pra QUALQUER user)\n\nFonte única de verdade: Firebase\n  - users-config/{key} = lista canônica + nome\n  - users-profile/{key} = foto, role, senha plain\n\ngetUser(key) e getAllUsers() agora derivam 100% do Firebase. Validado via preview/eval:\n  USERS = []  (vazio)\n  getUser("admin") → "William Schulz" (do Firebase)\n  getUser("vorlei") → "Vorlei" (do Firebase)\n  18 users em users-config + 18 em users-profile\n\nFallback de offline:\n• Cache localStorage (v3.43.0) cobre uso normal — usuários aparecem instantâneos no boot\n• Se Firebase off + cache vazio (1ª visita máquina nova sem net): splash "Conectando ao servidor..." com spinner + botão Tentar novamente\n• ZERO senha hardcoded — admin/joacir lêem senhaPlain de users-profile (gravado via seed v2 v3.45.0)\n\nResultado: criar/editar/excluir user no painel admin propaga em TODOS os apps imediatamente. Adicionar user novo apareceu nos selects do Manutenção sem deploy. Trocar foto no HUB → atualiza avatar do CRM em segundos.'}
