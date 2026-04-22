@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.47.6', d:'22 abr 2026', current:true,
+    v:'3.47.7', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'CRM · histórico do lead mostra QUEM fez cada ação (avatar + nome).',
+        desc:'BUG: aba HISTÓRICO mostrava "Movido de X para Y" / "Retornamos por WhatsApp" mas SEM o autor. Embora o `autor` fosse gravado no Firebase, renderHist() nunca renderizava esse campo.\n\nFix: renderHist() agora mostra chip ao lado do badge de tipo:\n  [📷 William]    ← avatar pequeno + nome do user\n\n• Avatar 18px com foto se cadastrada, senão inicial em gradient cinza\n• Nome vem do users-profile/users-config ATUAL (não do nome literal gravado no histórico) — se trocar nome do user no HUB, propaga em todas as entries\n• Resolve via _crmResolveUserKey (igual leadColaboradores) — mesmo padrão de dedup\n• Compat: usa h.texto OU h.acao como conteúdo (entries antigas e novas)\n• Compat: usa h.ts OU h.data pra timestamp\n\nResultado: agora dá pra rastrear quem fez cada movimentação.'}
+    ]
+  },
+  {
+    v:'3.47.6', d:'22 abr 2026',
     items:[
       {type:'fix', title:'CRM · 2 fixes: admin aparece como responsável + dedup do stack por chave (não nome).',
         desc:'BUG 1: Admin (William) não aparecia na lista de "Trocar responsável".\nCausa: filtro `if (k === "admin") return false` excluía a chave técnica, mas William é uma pessoa real (admin com nomeCompleto preenchido).\nFix: filtro só exclui se nomeCompleto for literalmente "admin" (genérico). Se tem nome real (ex: "William Alexander Schulz"), aparece na lista.\n\nBUG 2: Trocar nome do admin (de "William Alexander Schulz" para "William Schulz") criava DOIS avatares no stack do card — um pro nome antigo (gravado em entries antigas do histórico) e outro pro nome novo.\nCausa: leadColaboradores() deduplicava pelo NOME LITERAL. Quando o nome muda, entries antigas no Firebase ficam com nome velho e novas com nome novo → 2 keys diferentes → 2 avatares.\nFix: dedup agora usa USER KEY (resolvendo nome → chave via _crmResolveUserKey). "William Alexander Schulz" e "William Schulz" ambos resolvem pra chave `admin` → contam como 1 user só. Nome exibido no tooltip vem SEMPRE do users-profile/users-config (nome atual), não do nome gravado no histórico.\n\nResultado: trocar nome no HUB propaga em tempo real pros tooltips. Stack não duplica mais.'}

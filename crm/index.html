@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.47.6">
+<link rel="stylesheet" href="../css/tokens.css?v=3.47.7">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -660,6 +660,11 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
 .ret-nao    {background:var(--red-l);color:var(--red);border:1px solid #f5b0b0;}
 .ret-aguard {background:var(--yellow-l);color:#8a6500;border:1px solid #f5d980;}
 .hist-ts{font-size:0.6rem;color:var(--gray3);font-family:'DM Mono',monospace;margin-left:auto;}
+/* v3.47.7 — autor da entry no histórico */
+.hist-autor{display:inline-flex;align-items:center;gap:5px;background:var(--surface2,#F4F6F0);padding:3px 8px 3px 3px;border-radius:999px;border:1px solid var(--border,#E3E7DE);}
+.hist-autor-av{display:inline-block;width:18px;height:18px;border-radius:50%;background-size:cover;background-position:center;background-color:var(--green,#008835);flex-shrink:0;}
+.hist-autor-av-init{display:inline-flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit',sans-serif;font-weight:900;font-size:9px;line-height:1;background:linear-gradient(135deg,#6B7166,#9CA295);}
+.hist-autor-nome{font-size:0.65rem;font-weight:600;color:var(--text,#1B1F18);font-family:'Poppins',sans-serif;}
 .hist-autor{font-size:0.62rem;color:var(--muted);font-weight:500;}
 .hist-txt{font-size:0.78rem;color:var(--text2);line-height:1.5;margin-top:3px;}
 .hist-empty{font-size:0.75rem;color:var(--gray3);padding:12px 0;text-align:center;}
@@ -2775,14 +2780,34 @@ function renderHist(hist){
     const ret =h.retorno||'aguardando';
     const retCls={sim:'ret-sim',nao:'ret-nao',aguardando:'ret-aguard'}[ret]||'ret-aguard';
     const retLbl=RET_LBL[ret]||ret;
+    // v3.47.7 — mostra QUEM fez a ação (autor) com nome atual do users-profile
+    let autorHtml = '';
+    if (h.autor) {
+      const userKey = (typeof _crmResolveUserKey === 'function') ? _crmResolveUserKey(h.autor) : null;
+      let nomeAtual = h.autor;
+      let foto = null;
+      if (userKey) {
+        const p = (window._userProfiles||{})[userKey] || {};
+        const c = (window._usersConfig||{})[userKey] || {};
+        nomeAtual = p.nomeCompleto || c.nome || p.nome || h.autor;
+        foto = p.foto || null;
+      }
+      const av = foto
+        ? `<span class="hist-autor-av" style="background-image:url('${foto.replace(/'/g,"%27")}')"></span>`
+        : `<span class="hist-autor-av hist-autor-av-init">${(nomeAtual[0]||'?').toUpperCase()}</span>`;
+      autorHtml = `<span class="hist-autor">${av}<span class="hist-autor-nome">${esc(nomeAtual)}</span></span>`;
+    }
+    // Texto: prioriza h.texto, depois h.acao (entries de mover etapa têm acao)
+    const conteudo = h.texto || h.acao || '';
     return`<div class="hist-item">
       <div class="hist-dot tipo-${tipo}"></div>
       <div class="hist-header">
         <span class="hist-tipo-badge hbadge-${tipo}">${TIPO_LBL[tipo]||tipo}</span>
         <span class="hist-retorno ${retCls}">${retLbl}</span>
-        <span class="hist-ts">${new Date(h.ts).toLocaleString('pt-BR')}</span>
+        ${autorHtml}
+        <span class="hist-ts">${new Date(h.ts || h.data || Date.now()).toLocaleString('pt-BR')}</span>
       </div>
-      ${h.texto?`<div class="hist-txt">${esc(h.texto)}</div>`:''}
+      ${conteudo?`<div class="hist-txt">${esc(conteudo)}</div>`:''}
     </div>`;
   }).join('');
 }
