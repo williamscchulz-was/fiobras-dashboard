@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.48.6">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.48.7">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -4515,7 +4515,10 @@ function confirmarReatribuicao() {
   if (!card || !window._fbUpdateCard) return;
 
   const respAnterior = card.resp || 'Não atribuído';
-  window._fbUpdateCard(_reatribCardKey, { resp: _reatribNovoResp });
+  // v3.48.7 — atualiza resp + respKey juntos (Fase B). Sem isso o avatar
+  // continuava mostrando o respKey antigo cacheado pelo backfill.
+  const novoRespKey = (typeof _resolveUserKey === 'function') ? _resolveUserKey(_reatribNovoResp) : null;
+  window._fbUpdateCard(_reatribCardKey, { resp: _reatribNovoResp, respKey: novoRespKey });
 
   // Notifica o novo responsável
   if (window._fbPushFCMPending && _reatribNovoResp !== respAnterior) {
@@ -4892,8 +4895,10 @@ function editarCard(key) {
   document.getElementById('ca-urg').value    = card.urg    || 'media';
   const horasEl = document.getElementById('ca-horas');
   if (horasEl) horasEl.value = card.diasEstimados || card.horasEstimadas || '';
-  // v3.48.0 — popula select dinâmico do Firebase com valor atual selecionado
-  if (typeof _popUserSelect === 'function') _popUserSelect('ca-resp', { selected: card.resp || '' });
+  // v3.48.7 — Edit NÃO mostra Responsável (única fonte = avatar do card → Reatribuir).
+  // Evita 2 lugares pra mudar resp e o bug de updates dessincronizados.
+  const respWrap = document.getElementById('ca-resp')?.closest('.field');
+  if (respWrap) respWrap.style.display = 'none';
   document.getElementById('modal-card-admin').classList.add('open');
 }
 
@@ -4903,6 +4908,9 @@ function abrirModalCardAdmin() {
   const title = document.getElementById('ca-modal-title');
   if (title) title.textContent = 'Novo Card';
   ['ca-titulo','ca-desc','ca-equip'].forEach(id => document.getElementById(id).value = '');
+  // v3.48.7 — Novo card mostra Responsável (admin atribui na criação)
+  const respWrap = document.getElementById('ca-resp')?.closest('.field');
+  if (respWrap) respWrap.style.display = '';
   // v3.48.0 — responsável dinâmico do Firebase
   if (typeof _popUserSelect === 'function') _popUserSelect('ca-resp');
   document.getElementById('modal-card-admin').classList.add('open');
@@ -4912,6 +4920,9 @@ function salvarCardAdmin() {
   if (!titulo) return;
   const horasEl = document.getElementById('ca-horas');
   const diasVal = horasEl ? parseInt(horasEl.value) : 0;
+  // v3.48.7 — Responsável só é editável se o campo ainda existir (edit antigo).
+  // Por padrão Editar Solicitação NÃO mexe em resp — é exclusividade da Reatribuir.
+  const respEl = document.getElementById('ca-resp');
   const data = {
     titulo,
     desc:  document.getElementById('ca-desc').value.trim(),
@@ -4919,10 +4930,13 @@ function salvarCardAdmin() {
     setor: document.getElementById('ca-setor').value,
     tipo:  document.getElementById('ca-tipo').value,
     urg:   document.getElementById('ca-urg').value,
-    resp:  document.getElementById('ca-resp') ? document.getElementById('ca-resp').value : '',
     // v3.38.0: dias estimados (antes era horas)
     diasEstimados: diasVal > 0 ? diasVal : null,
   };
+  if (respEl && respEl.value) {
+    data.resp = respEl.value;
+    data.respKey = (typeof _resolveUserKey === 'function') ? _resolveUserKey(respEl.value) : null;
+  }
   if (_editCardKey) {
     window._fbUpdateCard(_editCardKey, data);
   } else {
