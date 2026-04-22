@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.47.4">
+<link rel="stylesheet" href="../css/tokens.css?v=3.47.5">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -1063,8 +1063,8 @@ html.in-hub-frame #bottomNav { display: none !important; }
 <!-- ═══ PIPELINE ═══ -->
 
 <div class="view" id="view-pipeline">
-  <!-- KPI bar (v3.21.15) — métricas rápidas do pipeline -->
-  <div class="kpi-bar" id="pipelineKpis">
+  <!-- v3.47.5 — KPI bar removida (William: "inútil") -->
+  <div class="kpi-bar" id="pipelineKpis" style="display:none">
     <div class="kpi"><span class="kpi-lbl">Em pipeline</span><span class="kpi-val" id="kpi-pipe">0</span></div>
     <div class="kpi"><span class="kpi-lbl">Em proposta</span><span class="kpi-val orange" id="kpi-prop">0</span></div>
     <div class="kpi"><span class="kpi-lbl">Fechados no mês</span><span class="kpi-val green" id="kpi-fech">0</span></div>
