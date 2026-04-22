@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.47.5">
+<link rel="stylesheet" href="../css/tokens.css?v=3.47.6">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2041,27 +2041,47 @@ function _crmIsUserAtivo(nome) {
   }
   return true; // não achou no profile → mantém (legacy)
 }
+// v3.47.6 — dedup por USER KEY (resolvendo nome → chave). Antes deduplicava pelo
+// nome literal, daí "William Alexander Schulz" e "William Schulz" viravam 2 entries
+// quando admin trocava o nome. Agora ambos resolvem pra key 'admin' e viram 1 só.
+// O nome exibido no tooltip vem do users-profile/users-config (sempre atualizado).
 function leadColaboradores(l) {
   if (!l) return [];
-  const colabs = []; // ordenado por data, sem dups
-  const seen = new Set();
-  function push(nome, acao, ts) {
-    if (!nome) return;
-    if (_crmIsNomeGenerico(nome)) return; // v3.47.0: filtra "U", "Sistema", etc
-    if (!_crmIsUserAtivo(nome)) return;   // v3.47.0: filtra inativos
-    const key = String(nome).toLowerCase().trim();
-    if (seen.has(key)) {
-      // user já no stack: atualiza pra ação MAIS RECENTE
-      const existing = colabs.find(c => c.key === key);
-      if (existing && (!existing.ts || (ts && ts > existing.ts))) {
-        existing.acao = acao;
-        existing.ts = ts;
-        existing.dataFmt = _crmDataFmt(ts);
+  const colabs = [];
+  const seen = new Set(); // chaves já vistas
+  function push(nomeOriginal, acao, ts) {
+    if (!nomeOriginal) return;
+    if (_crmIsNomeGenerico(nomeOriginal)) return;
+    if (!_crmIsUserAtivo(nomeOriginal)) return;
+    // v3.47.6: resolve nome → CHAVE do user (ou usa nome lowered como key se não achar)
+    const userKey = (typeof _crmResolveUserKey === 'function')
+      ? _crmResolveUserKey(nomeOriginal)
+      : null;
+    const dedupeKey = userKey || String(nomeOriginal).toLowerCase().trim();
+    // Nome friendly atual (do profile/config), com fallback pro original
+    const profs = window._userProfiles || {};
+    const cfg = window._usersConfig || {};
+    let nomeAtual = nomeOriginal;
+    if (userKey) {
+      const p = profs[userKey] || {};
+      const c = cfg[userKey] || {};
+      nomeAtual = p.nomeCompleto || c.nome || p.nome || nomeOriginal;
+    }
+    if (seen.has(dedupeKey)) {
+      // Já no stack: atualiza pra ação mais recente + nome atual
+      const existing = colabs.find(c => c.key === dedupeKey);
+      if (existing) {
+        existing.nome = nomeAtual; // atualiza pro nome novo
+        if (!existing.ts || (ts && ts > existing.ts)) {
+          existing.acao = acao;
+          existing.ts = ts;
+          existing.dataFmt = _crmDataFmt(ts);
+        }
       }
       return;
     }
-    seen.add(key);
-    colabs.push({ key, nome, acao, ts, dataFmt: _crmDataFmt(ts) });
+    seen.add(dedupeKey);
+    colabs.push({ key: dedupeKey, nome: nomeAtual, acao, ts, dataFmt: _crmDataFmt(ts) });
   }
   // Ordem temporal: data de criação primeiro
   const dataCriacao = l.data ? _crmParseDate(l.data) : null;
@@ -2073,13 +2093,17 @@ function leadColaboradores(l) {
       const h = l.historico[i];
       if (!h.autor) continue;
       const ts = h.data ? new Date(h.data).getTime() : null;
-      const acao = _crmSimplifyAcao(h.acao || 'Atualizou', l);
+      const acao = _crmSimplifyAcao(h.acao || h.texto || 'Atualizou', l);
       push(h.autor, acao, ts);
     }
   }
-  // Responsável definido pelo admin (campo l.responsavel) — destaca como "Atribuído"
-  if (l.responsavel && !seen.has(String(l.responsavel).toLowerCase().trim())) {
-    push(l.responsavel, 'Atribuído (admin)', null);
+  // Responsável definido pelo admin (l.responsavel) — destaca como "Atribuído"
+  if (l.responsavel) {
+    const respKey = (typeof _crmResolveUserKey === 'function')
+      ? _crmResolveUserKey(l.responsavel)
+      : null;
+    const respDedupe = respKey || String(l.responsavel).toLowerCase().trim();
+    if (!seen.has(respDedupe)) push(l.responsavel, 'Atribuído (admin)', null);
   }
   return colabs;
 }
@@ -2173,22 +2197,22 @@ window.crmTrocarResp = function(leadId) {
   if (!_crmIsAdmin()) { toast('Apenas admin pode trocar responsável.', 'err'); return; }
   const l = (window._leads || {})[leadId];
   if (!l) return;
-  // v3.47.2 — lista derivada da UNIÃO de users-config (chaves canônicas + nome)
-  // + users-profile (foto/nome alternativo). Antes só lia users-profile.
+  // v3.47.2 — lista derivada da UNIÃO de users-config + users-profile
+  // v3.47.6 — admin TAMBÉM aparece (é uma pessoa real) se tiver nomeCompleto preenchido
   const profs = window._userProfiles || {};
   const cfg = window._usersConfig || {};
   const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
   const users = Array.from(allKeys)
     .filter(k => {
-      if (k === 'admin') return false;
       const p = profs[k] || {};
       const c = cfg[k] || {};
-      if (p.active === false) return false;
-      if (c.active === false) return false;
+      if (p.active === false || c.active === false) return false;
       const nome = (p.nomeCompleto || c.nome || p.nome || '').trim();
       const lower = nome.toLowerCase();
       if (!nome) return false;
       if (lower === 'sistema' || lower === 'usuário' || lower === 'usuario' || lower === 'u' || lower === 'fiobras') return false;
+      // Filtra entry "Admin" genérico SEM nomeCompleto (mantém se admin tem nome real, ex: "William")
+      if (k === 'admin' && lower === 'admin') return false;
       return true;
     })
     .map(k => {
@@ -2616,12 +2640,14 @@ function _crmPopularRespSelect(atual) {
   const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
   const users = Array.from(allKeys)
     .filter(k => {
-      if (k === 'admin') return false;
       const p = profs[k] || {};
       const c = cfg[k] || {};
       if (p.active === false || c.active === false) return false;
       const nome = (p.nomeCompleto || c.nome || p.nome || '').trim();
-      return !!nome;
+      if (!nome) return false;
+      // v3.47.6: filtra "admin" só se for genérico (sem nomeCompleto preenchido)
+      if (k === 'admin' && nome.toLowerCase() === 'admin') return false;
+      return true;
     })
     .map(k => {
       const p = profs[k] || {};

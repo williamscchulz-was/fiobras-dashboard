@@ -11,7 +11,7 @@
  * Cliente detecta nova versão via 'controllerchange' e mostra toast "Atualizar".
  */
 
-const VERSION = '3.47.5';
+const VERSION = '3.47.6';
 const CACHE_NAME = `fiobras-hub-v${VERSION}`;
 
 const PRECACHE = [
