@@ -2,8 +2,8 @@
 
 > **Contexto persistente do projeto para o Claude Code.** Leia este documento no início de toda sessão antes de tocar em código. Ele descreve o que o sistema é, como está construído, as regras não-negociáveis e o workflow de entrega esperado.
 >
-> **Versão do doc:** 2.45 — 21/04/2026
-> **Versão atual do HUB:** v3.39.0
+> **Versão do doc:** 2.46 — 22/04/2026
+> **Versão atual do HUB:** v3.40.0
 > **Mantenedor:** William Schulz · Fiobras Fios Tintos Ltda.
 > **Repo:** `williamscchulz-was/fiobras-dashboard` (branch `main`)
 > **Domínio:** `https://hub.fiobras.com.br`
@@ -239,6 +239,7 @@ Clique na pílula de versão no header → modal com histórico (`CHANGELOG` arr
 
 | Versão | Marco |
 |---|---|
+| v3.40.0 | HUB · 3 ajustes estruturais: (1) **crop interativo** de imagem ao adicionar avatar (modal com zoom slider + drag, 400×400 JPEG 0.85, usado em Minha Conta + Editar Usuário); (2) **poderes condicionais** ao acesso ao módulo Manutenção (toggles disabled + aviso vermelho quando user não tem Manutenção marcado); (3) **migração USERS hardcoded → users-config**: seed 1x copia os 17 users do código pra Firebase, `isUserDinamico` agora retorna true pra todos (exceto `admin` protegido), admin edita/exclui qualquer user via UI. Flag `fiobras-users-seed-v1`. |
 | v3.39.0 | Manutenção + HUB · 4 ajustes: (1) coluna Responsável na tabela Preventivas; (2) FIX avatar do William — sub-app Manutenção agora expande USERS dinamicamente com users do HUB via onValue de users-profile; (3) botão "+ Demanda" voltou ao topo do Kanban; (4) olho de senha aparece sempre — se não tem `senhaPlain`, clique mostra toast explicando que precisa redefinir via cadeado. |
 | v3.38.0 | Manutenção + HUB · 8 ajustes: (1) data do card Kanban move pro footer + vermelho se age>7d; (2) light mode no Kanban; (3+4) modais Preventiva/Máquina maiores; (5) demanda com select de users; (6) dias estimados em vez de horas (compat com horasEstimadas); (7) título separado do equipamento + select de máquinas no modal de demanda; (8) HUB painel "Editar Usuário" ganhou upload de foto/avatar (admin edita qualquer user). |
 | v3.37.0 | Manutenção · 4 ajustes de polish: (1) toolbar de pills do Kanban removida; (2) Tabela Preventiva com busca + paginação (5/pág); (3) aba padrão = Kanban (não Dashboard); (4) `_resolveUserKey` ganha fallback em `state.userProfiles` → avatares do William e outros users do HUB puxam foto. |

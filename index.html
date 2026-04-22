@@ -21,7 +21,7 @@
 <!-- Windows -->
 <meta name="msapplication-TileColor" content="#008835">
 <meta name="msapplication-TileImage" content="./icon-192.png">
-<meta name="theme-color" content="#008835"><!-- v3.39.0: fix calendário supressão -->
+<meta name="theme-color" content="#008835"><!-- v3.40.0: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
 <link rel="stylesheet" href="css/hub.css?v=3.33.0">
@@ -112,7 +112,7 @@
     </div>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.39.0</div>
+    <div class="login-foot">Sistema interno · v3.40.0</div>
   </div>
 </div>
 
@@ -272,7 +272,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.39.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.40.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -912,6 +912,32 @@
 </div>
 
 <!-- Modal Editar usuário (admin only · v3.10.0) -->
+<!-- v3.40.0 — Modal de Crop de Imagem (avatar) · usado por geuFotoChange e mcFotoChange -->
+<div class="modal-bg" id="cropModal" onclick="if(event.target===this)cropCancel()">
+  <div class="modal" style="width:480px;max-width:94vw">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--text)">Recortar imagem</div>
+      <button class="sc-lanc-close" onclick="cropCancel()" aria-label="Fechar">
+        <svg class="icon sm"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="mc-hint" style="margin:0 0 12px;font-style:normal">Arraste a imagem pra posicionar · use o slider pra dar zoom · o quadrado verde é a área final.</div>
+    <div id="cropArea" style="position:relative;width:100%;aspect-ratio:1;background:#000;border-radius:12px;overflow:hidden;cursor:grab;user-select:none;touch-action:none">
+      <img id="cropImg" alt="" style="position:absolute;top:0;left:0;transform-origin:0 0;pointer-events:none;max-width:none">
+      <div style="position:absolute;inset:0;box-shadow:0 0 0 9999px rgba(0,0,0,.5);pointer-events:none;border:2px solid #00b347;border-radius:50%"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+      <span style="font-size:.65rem;color:var(--muted);font-family:'DM Mono',monospace">ZOOM</span>
+      <input type="range" id="cropZoom" min="1" max="3" step="0.05" value="1" style="flex:1" oninput="cropOnZoom(this.value)">
+      <span id="cropZoomVal" style="font-size:.65rem;color:var(--muted);font-family:'DM Mono',monospace;width:36px;text-align:right">1.0×</span>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+      <button class="save-btn" style="background:var(--border2);color:var(--text);box-shadow:none" onclick="cropCancel()">Cancelar</button>
+      <button class="save-btn" onclick="cropConfirm()">Aplicar recorte</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="geuModal" onclick="if(event.target===this)fecharEditarUsuario()">
   <div class="modal" style="width:480px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -920,7 +946,7 @@
         <svg class="icon sm"><use href="#i-x"/></svg>
       </button>
     </div>
-    <!-- v3.39.0 — Foto do usuário (admin pode editar avatar de qualquer user) -->
+    <!-- v3.40.0 — Foto do usuário (admin pode editar avatar de qualquer user) -->
     <div class="tl-form-field" id="geuFotoField">
       <label>Foto / Avatar</label>
       <div style="display:flex;align-items:center;gap:14px;background:var(--surface2);border:1.5px dashed var(--border2);border-radius:10px;padding:12px">
@@ -967,7 +993,7 @@
       <div id="geuTabs" class="geu-mods"></div>
       <div class="mc-hint" style="margin-top:6px">Abas com acesso limitado. Marque as que esse usuário pode ver.</div>
     </div>
-    <!-- v3.39.0 — Poderes (REGRA GERAL · permissões granulares) -->
+    <!-- v3.40.0 — Poderes (REGRA GERAL · permissões granulares) -->
     <div class="tl-form-field" id="geuPowersField">
       <label>⚡ Poderes</label>
       <div class="mc-hint" style="margin:0 0 8px">Permissões granulares por ação. Admins/Gerentes têm tudo automático — toggles aplicam só pra usuários comuns.</div>
@@ -1329,24 +1355,12 @@ window.mcFotoChange = (input) => {
   if(!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const MAX = 400;
-      let w = img.width, h = img.height;
-      // Crop centrado pra quadrado
-      const size = Math.min(w, h);
-      const sx = (w - size) / 2, sy = (h - size) / 2;
-      const c = document.createElement('canvas');
-      c.width = MAX; c.height = MAX;
-      const ctx = c.getContext('2d');
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, sx, sy, size, size, 0, 0, MAX, MAX);
-      mcFotoData = c.toDataURL('image/jpeg', 0.82);
+    // v3.40.0: usa modal de crop interativo
+    abrirCropModal(e.target.result, (croppedDataUrl) => {
+      mcFotoData = croppedDataUrl;
       mcRenderFotoPreview();
-      input.value = '';
-    };
-    img.src = e.target.result;
+    });
+    input.value = '';
   };
   reader.readAsDataURL(file);
 };
@@ -1464,8 +1478,12 @@ window.abrirGerenciarUsuarios = () => {
   // Fecha dropdown
   const dd = document.getElementById('userDd'), user = document.getElementById('topbarUser');
   if(dd) dd.classList.remove('open'); if(user) user.classList.remove('open');
-  // v3.39.0: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
+  // v3.40.0: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
   if(typeof window.aplicarPowersSeed === 'function') window.aplicarPowersSeed();
+  // v3.40.0: aplica seed de USERS hardcoded → users-config (1x · fiobras-users-seed-v1)
+  if(typeof window.aplicarUsuariosSeed === 'function') {
+    window.aplicarUsuariosSeed().then(() => setTimeout(renderGuList, 300));
+  }
   renderGuList();
   document.getElementById('guModal').classList.add('open');
 };
@@ -1497,7 +1515,7 @@ function renderGuList(){
     const effTurno = getEffectiveTurno(key);
     const turnoLbl = effTurno ? ('turno ' + effTurno) : '';
     // v3.21.5: span da senha plain (escondida; revela ao clicar no olho)
-    // v3.39.0: se o user tem senhaHash mas não tem senhaPlain (cadastrou antes da
+    // v3.40.0: se o user tem senhaHash mas não tem senhaPlain (cadastrou antes da
     // v3.21.5 ou via Minha Conta), o olho aparece mesmo assim e ao clicar explica
     // que precisa redefinir via cadeado pra poder visualizar.
     let senhaPlainHTML = '';
@@ -1742,7 +1760,8 @@ window.abrirEditarUsuario = (userKey) => {
   const host = document.getElementById('geuModulos');
   host.innerHTML = ALL_MODULES.map(m => {
     const checked = allowed.includes(m) ? 'checked' : '';
-    return '<label class="geu-mod"><input type="checkbox" value="' + m + '" ' + checked + '><span>' + MOD_LBL_FULL[m] + '</span></label>';
+    // v3.40.0: change re-renderiza poderes (manutenção habilita/desabilita toggles)
+    return '<label class="geu-mod"><input type="checkbox" value="' + m + '" ' + checked + ' onchange="if(geuEditingKey)geuRenderPowers(geuEditingKey)"><span>' + MOD_LBL_FULL[m] + '</span></label>';
   }).join('');
   // v3.11.0+: Render checkboxes de abas restritas (esconde a seção se não há nenhuma)
   const tabsField = document.getElementById('geuTabsField');
@@ -1762,41 +1781,147 @@ window.abrirEditarUsuario = (userKey) => {
       return '<label class="geu-mod"><input type="checkbox" data-tab="' + tab + '" ' + (isOn?'checked':'') + '><span>' + lbl + '</span></label>';
     }).join('');
   }
-  // v3.39.0: render seção de poderes
+  // v3.40.0: render seção de poderes
   geuRenderPowers(userKey);
-  // v3.39.0: reset state da foto + render preview
+  // v3.40.0: reset state da foto + render preview
   geuFotoData = null;
   geuRenderFotoPreview();
   // v3.21.0: aplica visibilidade da seção de módulos baseado no role
   geuOnRoleChange();
   document.getElementById('geuModal').classList.add('open');
 };
-// v3.39.0 — Ajuste 8: admin edita avatar de qualquer user pelo painel
+// v3.40.0 — Ajuste 8: admin edita avatar de qualquer user pelo painel
+// v3.40.0: lê imagem e abre modal de crop interativo
 let geuFotoData = null; // null = manter atual, '' = remover, data:... = nova
 window.geuOnFotoChange = (input) => {
   const file = input.files[0];
   if(!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const MAX = 400;
-      const size = Math.min(img.width, img.height);
-      const sx = (img.width - size) / 2, sy = (img.height - size) / 2;
-      const c = document.createElement('canvas');
-      c.width = MAX; c.height = MAX;
-      const ctx = c.getContext('2d');
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, sx, sy, size, size, 0, 0, MAX, MAX);
-      geuFotoData = c.toDataURL('image/jpeg', 0.82);
+    abrirCropModal(e.target.result, (croppedDataUrl) => {
+      geuFotoData = croppedDataUrl;
       geuRenderFotoPreview();
-      input.value = '';
-    };
-    img.src = e.target.result;
+    });
+    input.value = '';
   };
   reader.readAsDataURL(file);
 };
+
+// v3.40.0 — Modal de crop interativo (drag pra reposicionar + zoom)
+let _cropState = null;
+function abrirCropModal(dataUrl, callback) {
+  const img = new Image();
+  img.onload = () => {
+    const cropArea = document.getElementById('cropArea');
+    const cropImg = document.getElementById('cropImg');
+    cropImg.src = dataUrl;
+    document.getElementById('cropModal').classList.add('open');
+    requestAnimationFrame(() => {
+      const areaSize = cropArea.offsetWidth;
+      const minScale = areaSize / Math.min(img.width, img.height);
+      _cropState = {
+        img, areaSize, imgW: img.width, imgH: img.height,
+        scale: minScale, minScale,
+        x: (areaSize - img.width * minScale) / 2,
+        y: (areaSize - img.height * minScale) / 2,
+        dragging: false, dragStart: null,
+        callback,
+      };
+      const zoom = document.getElementById('cropZoom');
+      zoom.min = minScale.toFixed(3);
+      zoom.max = (minScale * 4).toFixed(3);
+      zoom.step = ((minScale * 4 - minScale) / 100).toFixed(4);
+      zoom.value = minScale;
+      cropApply();
+    });
+  };
+  img.src = dataUrl;
+}
+function cropApply() {
+  if (!_cropState) return;
+  const cropImg = document.getElementById('cropImg');
+  cropImg.style.transform = `translate(${_cropState.x}px, ${_cropState.y}px) scale(${_cropState.scale})`;
+  document.getElementById('cropZoomVal').textContent = (_cropState.scale / _cropState.minScale).toFixed(2) + '×';
+}
+window.cropOnZoom = (val) => {
+  if (!_cropState) return;
+  const newScale = parseFloat(val);
+  const cx = _cropState.areaSize / 2;
+  const cy = _cropState.areaSize / 2;
+  const ix = (cx - _cropState.x) / _cropState.scale;
+  const iy = (cy - _cropState.y) / _cropState.scale;
+  _cropState.scale = newScale;
+  _cropState.x = cx - ix * newScale;
+  _cropState.y = cy - iy * newScale;
+  cropClampPos();
+  cropApply();
+};
+function cropClampPos() {
+  if (!_cropState) return;
+  const w = _cropState.imgW * _cropState.scale;
+  const h = _cropState.imgH * _cropState.scale;
+  const a = _cropState.areaSize;
+  const minX = Math.min(0, a - w);
+  const maxX = Math.max(0, a - w);
+  const minY = Math.min(0, a - h);
+  const maxY = Math.max(0, a - h);
+  _cropState.x = Math.min(maxX, Math.max(minX, _cropState.x));
+  _cropState.y = Math.min(maxY, Math.max(minY, _cropState.y));
+}
+window.cropConfirm = () => {
+  if (!_cropState) return;
+  const OUT = 400;
+  const c = document.createElement('canvas');
+  c.width = OUT; c.height = OUT;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  const srcSize = _cropState.areaSize / _cropState.scale;
+  const srcX = -_cropState.x / _cropState.scale;
+  const srcY = -_cropState.y / _cropState.scale;
+  ctx.drawImage(_cropState.img, srcX, srcY, srcSize, srcSize, 0, 0, OUT, OUT);
+  const dataUrl = c.toDataURL('image/jpeg', 0.85);
+  const cb = _cropState.callback;
+  cropCancel();
+  if (cb) cb(dataUrl);
+};
+window.cropCancel = () => {
+  document.getElementById('cropModal').classList.remove('open');
+  _cropState = null;
+};
+// Drag handlers (mouse + touch)
+document.addEventListener('DOMContentLoaded', () => {
+  const area = document.getElementById('cropArea');
+  if (!area) return;
+  const start = (clientX, clientY) => {
+    if (!_cropState) return;
+    _cropState.dragging = true;
+    _cropState.dragStart = { x: clientX - _cropState.x, y: clientY - _cropState.y };
+    area.style.cursor = 'grabbing';
+  };
+  const move = (clientX, clientY) => {
+    if (!_cropState || !_cropState.dragging) return;
+    _cropState.x = clientX - _cropState.dragStart.x;
+    _cropState.y = clientY - _cropState.dragStart.y;
+    cropClampPos();
+    cropApply();
+  };
+  const end = () => {
+    if (!_cropState) return;
+    _cropState.dragging = false;
+    area.style.cursor = 'grab';
+  };
+  area.addEventListener('mousedown', e => start(e.clientX, e.clientY));
+  document.addEventListener('mousemove', e => move(e.clientX, e.clientY));
+  document.addEventListener('mouseup', end);
+  area.addEventListener('touchstart', e => { const t = e.touches[0]; start(t.clientX, t.clientY); }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!_cropState || !_cropState.dragging) return;
+    const t = e.touches[0]; move(t.clientX, t.clientY);
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('touchend', end);
+});
 window.geuRemoverFoto = () => {
   geuFotoData = '';
   geuRenderFotoPreview();
@@ -1829,23 +1954,50 @@ function geuRenderFotoPreview() {
   }
 }
 
-// v3.39.0 — render dos toggles de poderes
+// v3.40.0 — render dos toggles de poderes
+// v3.40.0 — poderes do Manutenção só ficam editáveis se o user tem o módulo liberado
 window.geuRenderPowers = (userKey) => {
   const host = document.getElementById('geuPowers'); if(!host) return;
+  const field = document.getElementById('geuPowersField');
   const role = document.getElementById('geuRole').value || getEffectiveRole(userKey);
   const profile = (window._usersProfile||{})[userKey] || {};
   const powers = profile.powers || {};
   const isFullAccess = (role === 'admin' || role === 'gerente');
+  // v3.40.0: todos os 5 poderes são do módulo Manutenção. Verifica acesso.
+  let modulesMarcados;
+  if (isFullAccess) {
+    modulesMarcados = ['resultados','producao','preco','manutencao','crm'];
+  } else {
+    modulesMarcados = Array.from(document.querySelectorAll('#geuModulos input:checked')).map(i => i.value);
+  }
+  const temAcessoManutencao = modulesMarcados.includes('manutencao');
+  // Aviso quando user não tem manutenção liberada
+  if (field) {
+    let hint = field.querySelector('.geu-pow-no-access');
+    if (!temAcessoManutencao && !isFullAccess) {
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.className = 'mc-hint geu-pow-no-access';
+        hint.style.cssText = 'background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);padding:8px 10px;border-radius:6px;color:#B91C1C;font-style:normal;margin:6px 0 8px';
+        field.insertBefore(hint, host);
+      }
+      hint.innerHTML = '⚠ <strong>Esses poderes só valem dentro do Manutenção.</strong> Marque "Manutenção" em Módulos liberados acima pra ativar.';
+    } else if (hint) {
+      hint.remove();
+    }
+  }
+  const blockEdit = !temAcessoManutencao && !isFullAccess;
   host.innerHTML = POWER_DEFS.map(d => {
     const def = POWER_DEFAULTS[d.key] || {};
     let isOn;
     if(isFullAccess) isOn = true;
+    else if(blockEdit) isOn = false;
     else if(typeof powers[d.key] === 'boolean') isOn = powers[d.key];
     else isOn = !!def.producao;
     const defLbl = def.producao ? 'DEFAULT USUÁRIO: SIM' : 'DEFAULT USUÁRIO: NÃO';
     const defCls = def.producao ? '' : 'dn';
-    const disabled = isFullAccess ? 'disabled' : '';
-    const rowCls = isFullAccess ? 'geu-pow geu-pow-disabled' : 'geu-pow';
+    const disabled = (isFullAccess || blockEdit) ? 'disabled' : '';
+    const rowCls = (isFullAccess || blockEdit) ? 'geu-pow geu-pow-disabled' : 'geu-pow';
     return '<div class="' + rowCls + '">' +
       '<div class="geu-pow-icon ' + (d.tone||'') + '"><svg class="icon"><use href="' + d.icon + '"/></svg></div>' +
       '<div class="geu-pow-body">' +
@@ -1869,6 +2021,8 @@ window.geuToggleAllModulos = (on) => {
   document.querySelectorAll('#geuModulos input[type="checkbox"]').forEach(i => {
     i.checked = !!on;
   });
+  // v3.40.0: re-renderiza poderes pra refletir o novo estado de "manutenção marcada"
+  if (geuEditingKey && typeof geuRenderPowers === 'function') geuRenderPowers(geuEditingKey);
 };
 // v3.21.0: ao mudar role, esconder/mostrar a seção de módulos
 window.geuOnRoleChange = () => {
@@ -1886,7 +2040,7 @@ window.geuOnRoleChange = () => {
     if(modField) modField.style.display = '';
     if(hint) hint.style.display = 'none';
   }
-  // v3.39.0: re-render dos poderes (admin/gerente desabilita toggles)
+  // v3.40.0: re-render dos poderes (admin/gerente desabilita toggles)
   if(geuEditingKey && typeof geuRenderPowers === 'function') geuRenderPowers(geuEditingKey);
 };
 window.salvarEditarUsuario = () => {
@@ -1910,7 +2064,7 @@ window.salvarEditarUsuario = () => {
   // v3.21.0: limpa modulesAllowedOverride se for admin/gerente (eles vêem tudo automático)
   profile.modulesAllowedOverride = isFullAccess ? null : modulesAllowed;
   profile.tabsAllowedOverride = tabsOverride;
-  // v3.39.0: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
+  // v3.40.0: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
   if(!isFullAccess){
     const powers = {};
     document.querySelectorAll('#geuPowers input[data-power]').forEach(i => {
@@ -1918,7 +2072,7 @@ window.salvarEditarUsuario = () => {
     });
     profile.powers = powers;
   }
-  // v3.39.0 — Ajuste 8: persiste foto (null = manter, '' = remover, data:... = nova)
+  // v3.40.0 — Ajuste 8: persiste foto (null = manter, '' = remover, data:... = nova)
   if (geuFotoData !== null) {
     profile.foto = geuFotoData || null;
   }
@@ -2062,8 +2216,39 @@ function getUser(userKey){
   return USERS[userKey] || (window._usersConfig||{})[userKey] || null;
 }
 function isUserDinamico(userKey){
-  return !USERS[userKey] && !!(window._usersConfig||{})[userKey];
+  // v3.40.0: depois do seed, TODOS os users (incluindo os hardcoded migrados)
+  // são editáveis/excluíveis via UI. Exceção: 'admin' (chave crítica do sistema)
+  // nunca pode ser excluído.
+  if (userKey === 'admin') return false;
+  // Se já está em users-config (foi migrado ou criado dinamicamente) → editável
+  if ((window._usersConfig||{})[userKey]) return true;
+  // Legacy: ainda não migrou (hardcoded sem entry em users-config)
+  return !USERS[userKey];
 }
+// v3.40.0 — Seed: copia USERS hardcoded → users-config (Firebase) na 1a vez que
+// admin abre o painel. Senhas plain de USERS (ex: admin='admin') vão pra
+// users-profile/{key}/senhaPlain. Roda 1x via flag localStorage.
+window.aplicarUsuariosSeed = async function(){
+  if(localStorage.getItem('fiobras-users-seed-v1')) return;
+  if(!window._criarUsuarioConfig || !window._salvarUserProfile) return;
+  const cfg = window._usersConfig || {};
+  const profiles = window._usersProfile || {};
+  let count = 0;
+  for (const [key, u] of Object.entries(USERS)) {
+    // Pula se já existe em users-config (já foi migrado ou criado via UI)
+    if (cfg[key]) continue;
+    // Cria entry em users-config
+    const data = { nome: u.nome, role: u.role || 'producao' };
+    if (u.turno) data.turno = u.turno;
+    try { await window._criarUsuarioConfig(key, data); count++; } catch(e){ console.warn('seed user', key, e); }
+    // Senha plain → profile (só pra admin que tem senha hardcoded)
+    if (u.senha && !profiles[key]?.senhaPlain) {
+      try { await window._salvarUserProfile(key, { senhaPlain: u.senha }); } catch(e){ console.warn('seed senha', key, e); }
+    }
+  }
+  localStorage.setItem('fiobras-users-seed-v1', '1');
+  if (count > 0) console.log('[users-seed] migrados', count, 'users hardcoded → users-config');
+};
 // v3.19.0: helper de avatar inline (substitui texto de username em cards/listas)
 // v3.20.1: tolerante a registros antigos que gravaram o NOME no lugar da CHAVE
 function _resolveUserKey(userKeyOrName){
@@ -2136,7 +2321,7 @@ function getEffectiveModules(userKey){
   return DEFAULT_MODULES_BY_ROLE[role] || DEFAULT_MODULES_BY_ROLE.producao;
 }
 
-// v3.39.0 — Sistema de poderes (REGRA GERAL · auditoria v3.32+)
+// v3.40.0 — Sistema de poderes (REGRA GERAL · auditoria v3.32+)
 // Toda regra de permissão "X pode Y" é configurável por user no painel admin.
 // Helper canUser() lê de users-profile/{user}/powers/{poder}, com defaults por role.
 const POWER_DEFS = [
@@ -2169,7 +2354,7 @@ window.canUser = function(userKey, poder){
   if(!def) return false;
   return !!def[role];
 };
-// Aplica seed 1x (admin abrindo painel pela 1ª vez após v3.39.0).
+// Aplica seed 1x (admin abrindo painel pela 1ª vez após v3.40.0).
 // Cria nó powers/* pra cada user com defaults da role + overrides do POWER_SEED_OVERRIDES.
 window.aplicarPowersSeed = function(){
   if(localStorage.getItem('fiobras-powers-seed-v1')) return;
@@ -2298,7 +2483,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.39.0';
+const CURRENT_VERSION = '3.40.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
