@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.43.2">
+<link rel="stylesheet" href="../css/tokens.css?v=3.44.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -939,9 +939,13 @@ html.in-hub-frame #bottomNav { display: none !important; }
       document.documentElement.setAttribute('data-theme', e.data.theme);
     }
   });
+  // v3.44.0 — gate único: requer sessão válida do HUB (24h TTL)
   let sess = null;
   try { sess = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null'); } catch(e){}
-  if(!sess){
+  const _SESSION_TTL = 24*3600*1000;
+  const expValido = sess && (sess.expires ? Date.now() < sess.expires : (sess.ts && Date.now() - sess.ts < _SESSION_TTL));
+  if(!sess || !expValido){
+    if(sess && !expValido) try { localStorage.removeItem('fiobras-dash-auth'); } catch(e){}
     document.getElementById('noSessionGate').style.display = 'flex';
     window.__hubBlocked = true;
   } else {
@@ -2428,14 +2432,38 @@ function abrirLead(id){
 
 function fecharModal(){document.getElementById('modal').classList.remove('open');_id=null;}
 
-// v3.43.2 — checa admin de TODAS as fontes (CRM próprio OU vindo do HUB via iframe)
+// v3.44.0 — Helper UNIFICADO de auth. Mesma assinatura de HUB e Manutenção.
+// SOURCE OF TRUTH único: localStorage.fiobras-dash-auth (gravado pelo HUB).
+const SESSION_TTL_MS = 24 * 3600 * 1000;
+window.getCurrentUser = function(){
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null'); } catch(e) {}
+  if(!s || !s.user) return null;
+  const exp = s.expires || (s.ts ? s.ts + SESSION_TTL_MS : 0);
+  if(exp && Date.now() > exp) {
+    try { localStorage.removeItem('fiobras-dash-auth'); } catch(e) {}
+    return null;
+  }
+  const profile = (window._userProfiles || {})[s.user] || {};
+  const role = profile.roleOverride || s.role || 'producao';
+  return {
+    key: s.user,
+    nome: profile.nomeCompleto || s.nome || s.user,
+    foto: profile.foto || null,
+    role: role,
+    isAdmin: role === 'admin',
+    isGerente: role === 'gerente' || role === 'admin',
+    powers: profile.powers || {},
+    expiresAt: exp,
+  };
+};
+
+// v3.43.2 + v3.44.0 — _crmIsAdmin agora delega ao helper unificado
 function _crmIsAdmin() {
+  const u = getCurrentUser();
+  if (u && u.isAdmin) return true;
+  // Compat com login direto no CRM (legacy, removido na Fase 4)
   if (window._user && window._user.papel === 'admin') return true;
-  if (window.__hubSession && (window.__hubSession.role === 'admin' || window.__hubSession.papel === 'admin')) return true;
-  try {
-    const s = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null');
-    if (s && (s.role === 'admin' || s.papel === 'admin')) return true;
-  } catch(e) {}
   return false;
 }
 

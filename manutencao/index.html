@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.43.2">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.44.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2185,9 +2185,13 @@ display: none;
       document.documentElement.setAttribute('data-theme', e.data.theme);
     }
   });
+  // v3.44.0 — gate único: requer sessão válida do HUB (24h TTL)
   let sess = null;
   try { sess = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null'); } catch(e){}
-  if(!sess){
+  const _SESSION_TTL = 24*3600*1000;
+  const expValido = sess && (sess.expires ? Date.now() < sess.expires : (sess.ts && Date.now() - sess.ts < _SESSION_TTL));
+  if(!sess || !expValido){
+    if(sess && !expValido) try { localStorage.removeItem('fiobras-dash-auth'); } catch(e){}
     document.getElementById('noSessionGate').style.display = 'flex';
     window.__hubBlocked = true;
   } else {
@@ -3303,6 +3307,33 @@ window._resetHistorico = () => {
 
 <script>
 const VERSION    = 'v3.9.2';
+
+// v3.44.0 — Helper UNIFICADO de auth. Lê localStorage.fiobras-dash-auth gravado
+// pelo HUB. SOURCE OF TRUTH único pra "quem é o user logado".
+const SESSION_TTL_MS = 24 * 3600 * 1000;
+window.getCurrentUser = function(){
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null'); } catch(e) {}
+  if(!s || !s.user) return null;
+  const exp = s.expires || (s.ts ? s.ts + SESSION_TTL_MS : 0);
+  if(exp && Date.now() > exp) {
+    try { localStorage.removeItem('fiobras-dash-auth'); } catch(e) {}
+    return null;
+  }
+  const profile = (state.userProfiles || {})[s.user] || {};
+  const config = (state.usersConfig || {})[s.user] || {};
+  const role = profile.roleOverride || config.role || s.role || 'producao';
+  return {
+    key: s.user,
+    nome: profile.nomeCompleto || s.nome || config.nome || s.user,
+    foto: profile.foto || null,
+    role: role,
+    isAdmin: role === 'admin',
+    isGerente: role === 'gerente' || role === 'admin',
+    powers: profile.powers || {},
+    expiresAt: exp,
+  };
+};
 
 // v3.32.3 — Avatar helpers (sistema unificado). Foto se cadastrada, senão iniciais+gradient.
 // v3.40.3 — shim de toast() pra compat com refatorações v3.35+ (HUB tem toast,

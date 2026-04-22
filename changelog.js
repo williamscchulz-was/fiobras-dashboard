@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.43.2', d:'22 abr 2026', current:true,
+    v:'3.44.0', d:'22 abr 2026', current:true,
+    items:[
+      {type:'high', title:'AUTH UNIFICADO · helper getCurrentUser() em todos os apps + sessão expira em 24h (Fases 1+2 da auditoria).',
+        desc:'Início da unificação completa do sistema de autenticação. Antes existiam 3 sistemas paralelos de login (HUB, Manutenção, CRM) com checagens de admin diferentes em cada lugar.\n\nFASE 1 — Helper window.getCurrentUser() em TODOS os apps:\n• Mesma assinatura nos 4 apps: { key, nome, role, isAdmin, isGerente, foto, powers, expiresAt }\n• Lê localStorage.fiobras-dash-auth (gravado pelo HUB) e enriquece com users-profile do Firebase\n• Substitui 12+ checagens diferentes de admin que existiam (state.isAdmin, _user.papel, state.user.role, etc)\n• _crmIsAdmin() agora delega ao helper unificado\n\nFASE 2 — Sessão única expira em 24h:\n• HUB grava campo `expires` na sessão (Date.now() + 24h)\n• getCurrentUser() retorna null se sessão expirou (e remove do localStorage)\n• Sub-apps (Manutenção, CRM, Preço) gates de boot agora verificam expiração: sessão velha = "Acesse pelo HUB"\n• Compat: sessões antigas sem campo `expires` ganham 24h a partir do `ts` original\n\nResultado: admin no HUB = admin em todos os sub-apps. Trocou senha → invalidou. Não tem como ficar com sessão antiga rodando indefinidamente.\n\nPróximo: Fase 3 — migrar admin/joacir hardcoded pra users-config (eliminar últimos hardcodes).'}
+    ]
+  },
+  {
+    v:'3.43.2', d:'22 abr 2026',
     items:[
       {type:'fix', title:'CRM · admin via HUB iframe agora reconhecido (campo Resp ficava bloqueado).',
         desc:'BUG: William reportou "sou admin mas aparece a mensagem apenas administrador pode editar". Confirmado via preview/eval: window._user = null quando CRM roda via iframe do HUB (sessão fica em window.__hubSession e localStorage["fiobras-dash-auth"]).\n\nMinha checagem (window._user.papel === "admin") só detectava login DIRETO no CRM, ignorando admin vindo do HUB.\n\nFix: novo helper _crmIsAdmin() verifica TODAS as fontes:\n  1. window._user.papel (login direto CRM)\n  2. window.__hubSession.role/papel (iframe do HUB)\n  3. localStorage fiobras-dash-auth (fallback)\n\nAplicado em:\n  - _crmPopularRespSelect (campo Responsável do modal)\n  - avatarChip (avatar clicável no card)\n  - avatarStack (ícone de edit verde)\n  - crmTrocarResp (prompt direto)\n  - salvarLead (registra no histórico)\n\nNome do admin no histórico também passa a usar __hubSession.user como fallback.'}

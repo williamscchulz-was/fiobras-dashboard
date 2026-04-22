@@ -6,7 +6,7 @@
 <title>Fiobras · Precificação</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.43.2">
+<link rel="stylesheet" href="../css/tokens.css?v=3.44.0">
 <!--
   ╔═══════════════════════════════════════════════════════════════╗
   ║  FIOBRAS PRECIFICAÇÃO — CHANGELOG                            ║
@@ -714,11 +714,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
       document.documentElement.setAttribute('data-theme', e.data.theme);
     }
   });
+  // v3.44.0 — gate único: requer sessão válida do HUB (24h TTL)
   let sess = null;
   try { sess = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null'); } catch(e){}
-  // v3.21.6: gate só verifica sessão válida — quem chega aqui já passou pelo
-  // canAccessModule do HUB (que faz o controle granular por user)
-  if(!sess){
+  const _SESSION_TTL = 24*3600*1000;
+  const expValido = sess && (sess.expires ? Date.now() < sess.expires : (sess.ts && Date.now() - sess.ts < _SESSION_TTL));
+  if(!sess || !expValido){
+    if(sess && !expValido) try { localStorage.removeItem('fiobras-dash-auth'); } catch(e){}
     document.getElementById('noSessionGate').style.display = 'flex';
     window.__hubBlocked = true;
   } else {
