@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.47.0', d:'22 abr 2026', current:true,
+    v:'3.47.1', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'CRM · tooltip do stack de avatares vazava pra fora do card.',
+        desc:'BUG: hover no avatar admin (esquerda do stack) abria tooltip centralizado que ultrapassava a borda esquerda do card e ficava cortado.\n\nFix:\n• Removido min-width:160px (tooltip agora se adapta ao conteúdo)\n• Quando avatar é o PRIMEIRO do stack, tooltip alinha à esquerda (left:0) com a setinha apontando pro avatar\n• overflow:visible forçado em .crm-card, .card-foot, .av-stack pra garantir que tooltip não seja cortado pelos pais\n• Tooltip continua centralizado pros avatares do meio do stack'}
+    ]
+  },
+  {
+    v:'3.47.0', d:'22 abr 2026',
     items:[
       {type:'feat', title:'CRM · modal visual pra trocar responsável + filtro de "U"/inativos.',
         desc:'William reportou: "ta ruim de mexer" (prompt nativo do JS), "tirar esse user padrão da lista" (avatar "U" cinza aparecia nos cards).\n\nDuas mudanças:\n\n1. MODAL VISUAL próprio substitui o prompt nativo:\n   - Cabeçalho com título do lead\n   - Mostra responsável atual destacado em âmbar\n   - Lista scrollable com avatar (foto se houver) + nome de cada user\n   - Click seleciona (border verde + checkmark)\n   - Botões Cancelar/Salvar fixos no rodapé\n   - Animação fade-in + backdrop-filter blur\n\n2. FILTRO de users genéricos no leadColaboradores() e na lista do modal:\n   - "Sistema", "Usuário", "Usuario", "U", "admin", "Fiobras" não aparecem mais\n   - Users marcados como `active: false` (v3.46.0) também filtrados\n   - Nome friendly "atual" no badge âmbar quando o user já é o responsável\n\nResultado: o "U" cinza some dos cards. Trocar responsável vira fluxo visual e claro.'}
