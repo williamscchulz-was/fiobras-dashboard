@@ -1753,32 +1753,12 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 }
 .print-header { display:none; }
 
-/* ── Login screen ── */
-.login-screen{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at 30% 20%,#00a040 0%,#008835 40%,#006020 100%);transition:opacity .5s,visibility .5s;}
-.login-screen.hide{opacity:0;visibility:hidden;pointer-events:none;}
-.login-card{background:#fff;border-radius:16px;padding:40px 36px 36px;width:340px;max-width:90vw;box-shadow:0 24px 64px rgba(0,0,0,.35);text-align:center;}
-/* v3.14.0: marca composta no login (símbolo + Fiobras + HUB) */
-.login-mark{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;}
-.login-mark-svg{width:48px;height:54px;flex-shrink:0;}
-.login-mark-text{display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
-.login-logo{font-family:'Outfit',sans-serif;font-size:1.7rem;font-weight:600;color:#008835;letter-spacing:-.5px;line-height:1;}
-.login-sub{font-family:'Outfit',sans-serif;font-weight:300;font-size:.62rem;letter-spacing:4px;text-transform:uppercase;color:#008835;line-height:1;}
-.login-mark + .login-line{margin-top:24px;}
-.login-mark ~ .login-line + *{margin-top:8px;}
-.login-card .login-line + .login-field{margin-top:8px;}
-.login-card > .login-line{margin:18px 0 22px;}
-.login-field{width:100%;margin-bottom:14px;}
-.login-label{display:block;font-family:'Poppins',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#567A5E;margin-bottom:5px;text-align:left;}
-.login-select,.login-input{width:100%;padding:12px 14px;border:1.5px solid #CDDBD2;border-radius:8px;font-family:'Poppins',sans-serif;font-size:.82rem;color:#1A2E1E;background:#fff;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;}
-.login-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23567A5E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
-.login-select:focus,.login-input:focus{border-color:#008835;}
-.login-pass-wrap{height:0;overflow:hidden;transition:height .3s ease;margin-bottom:0;}
-.login-pass-wrap.show{height:72px;margin-bottom:14px;}
-.login-btn{width:100%;padding:13px;background:#008835;color:#fff;border:none;border-radius:8px;font-family:'Poppins',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .15s,transform .1s;margin-top:4px;}
-.login-btn:hover{background:#007030;transform:translateY(-1px);}.login-btn:active{transform:translateY(0);}
-.login-err{font-family:'Poppins',sans-serif;font-size:.7rem;color:#C0392B;margin-top:12px;min-height:20px;}
-.login-line{width:60px;height:2px;background:linear-gradient(90deg,#006020,#FFCB00,#0076BE);margin:0 auto 28px;border-radius:4px;opacity:.6;}
+/* v3.48.8 — Bloco legado de Login removido. Tinha .login-card{background:#fff}
+   sobrescrevendo o design dark glass moderno (linha 41+). Causava card branco +
+   label do checkbox "Manter conectado" invisível (texto branco no fundo branco).
+   Toda a estilização de login vive agora em UM lugar só (linhas 28-99).
+   Mantida só a regra de visibilidade do password field via .show: */
+.login-pass-wrap:not(.show){display:none;}
 
 /* ── Splash screen ── */
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;

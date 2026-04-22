@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.48.7', d:'22 abr 2026', current:true,
+    v:'3.48.8', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Login · checkbox "Manter conectado" invisível (CSS legado branco sobrescrevia o dark glass).',
+        desc:'BUG: William reportou que o login "tem o botão mas não salva". Print mostrou o card de login BRANCO (deveria ser dark glass desde v3.25.0) com o checkbox visível mas SEM o texto da label "Manter conectado neste dispositivo".\n\nCausa: dois blocos `.login-card` no hub.css:\n  - Linha 41 (moderno v3.25.0): dark glass com backdrop-filter, fundo rgba(12,18,14,0.55), texto branco\n  - Linha 1760 (legado): `background:#fff` com texto verde\n\nCSS source order: o LEGADO ganhava (definido depois). Resultado:\n  - Card branco em vez de dark glass\n  - Label "Manter conectado" tem `color:rgba(255,255,255,.72)` → texto BRANCO no fundo BRANCO → invisível\n  - Campo de senha tinha `height:0` (transição com classe .show) também legado\n\nFix: deletado todo o bloco legado (linhas 1755-1781). Mantida só uma regra essencial pra visibilidade do password field via classe `.show`:\n  .login-pass-wrap:not(.show){display:none;}\n\nResultado:\n  - Card volta pro dark glass moderno\n  - "Manter conectado neste dispositivo" agora visível ao lado do checkbox\n  - Senha aparece quando user selecionado tem senha cadastrada\n  - O save em si JÁ FUNCIONAVA (setSession grava em localStorage com TTL 30d) — a percepção de "não salva" vinha da UI quebrada que escondia o feedback do checkbox.'}
+    ]
+  },
+  {
+    v:'3.48.7', d:'22 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · Kanban: 1 lugar pra mudar responsável + sync resp/respKey.',
         desc:'2 problemas reportados pelo William após v3.48.6:\n\n1) DOIS LUGARES pra mudar responsável: o card tinha avatar clicável → modal Reatribuir, MAS o form Editar Solicitação também tinha dropdown Responsável. Confuso.\n   FIX: removido o dropdown do Editar (display:none na edição). Reatribuir vira a única forma de trocar responsável de um card existente. O form de "+ Demanda" mantém o dropdown (admin atribui na criação).\n\n2) Mudar responsável de UM card supostamente "mudava de todos pro mesmo". Provável causa: respKey ficava STALE — Reatribuir só atualizava `resp` (nome), mas NÃO atualizava `respKey` (chave canônica). Em buildCard a prioridade é `c.respKey || c.resp`, então o avatar continuava puxando o respKey antigo (gravado pelo backfill). Edit form tinha o mesmo problema.\n   FIX: confirmarReatribuicao + salvarCardAdmin (edit) agora atualizam `resp` E `respKey` JUNTOS. Cada card mantém seu próprio par sincronizado.\n\nResultado esperado: trocar responsável afeta SÓ aquele card, e o avatar reflete a mudança imediatamente.'}
