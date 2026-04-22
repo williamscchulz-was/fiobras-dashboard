@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.43.0', d:'22 abr 2026', current:true,
+    v:'3.43.1', d:'22 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'CRM · campo "Responsável" no modal de edição (admin altera direto).',
+        desc:'William reportou que não conseguia trocar o responsável — o ícone de edit ao lado do stack de avatares (v3.42.0) era discreto demais e ele não viu.\n\nMudança: campo "Responsável" agora aparece dentro do modal de edição do lead (aba DADOS, abaixo do "Próximo follow-up"). Select com todos os users do users-profile.\n\n• Pra ADMIN: select editável; ao salvar, se mudou, registra no histórico ("Responsável trocado de X para Y" com autor)\n• Pra usuário comum: select disabled (visualização apenas) com title "Apenas administradores podem alterar"\n• Valor inicial = l.responsavel atual OU último autor do histórico (legacy)\n• Se o resp atual está fora da lista (legacy), entra como primeira opção pra preservar\n\nO ícone discreto do card continua funcionando (v3.42.0), mas agora a UX principal é via modal.'}
+    ]
+  },
+  {
+    v:'3.43.0', d:'22 abr 2026',
     items:[
       {type:'high', title:'CRÍTICO · cache de users-profile em localStorage (resolve avatares cinza definitivamente).',
         desc:'Diagnóstico estrutural: o problema de avatares cinza (Vorlei, Joacir, etc) NÃO era cache do SW como eu vinha apostando. Era RACE CONDITION:\n\n1. Sub-app boot → cards renderizam IMEDIATAMENTE com state.userProfiles vazio\n2. Avatar() retorna iniciais cinza (sem foto)\n3. Firebase users-profile chega ~500ms-3s depois\n4. Re-render acontece, mas se houver qualquer hiccup (rede lenta, painel não-ativo, click em outro lugar), o card já visualizado pelo user fica com foto ANTIGA cacheada visualmente\n\nFIX ESTRUTURAL — cache cross-app via localStorage:\n• HUB grava users-profile em localStorage["fiobras-users-profile-cache"] toda vez que Firebase atualiza\n• Sub-apps (Manutenção, CRM) lêem esse cache SINCRONAMENTE no boot, ANTES de qualquer renderização\n• state.userProfiles começa POPULADO com a última versão conhecida (não vazio)\n• Quando Firebase chega, atualiza com versão fresh\n• Resultado: cards renderizam com FOTO desde o primeiro frame\n\nMesma estratégia pra users-config (cacheado em "fiobras-users-config-cache").\n\nUSERS local do Manutenção também é hidratado SÍNCRONO do cache (não precisa esperar Firebase pra _resolveUserKey funcionar).\n\nPra primeira sessão (cache vazio): mantém comportamento antigo, mas dali em diante sempre pega instantâneo.'}

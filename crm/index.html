@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.43.0">
+<link rel="stylesheet" href="../css/tokens.css?v=3.43.1">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -1179,6 +1179,11 @@ html.in-hub-frame #bottomNav { display: none !important; }
     <div class="fld">
       <label>Próximo follow-up</label>
       <input type="date" id="f-followup">
+    </div>
+    <!-- v3.43.1 — campo "Responsável" no modal (substitui o ícone discreto do card) -->
+    <div class="fld" id="f-resp-fld" style="display:none">
+      <label>Responsável <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted);font-size:.8em">(quem está conduzindo o lead)</span></label>
+      <select id="f-resp"></select>
     </div>
   </div>
 </div>
@@ -2403,6 +2408,8 @@ function abrirLead(id){
   document.getElementById('f-obs').value=l.obs||'';
   document.getElementById('f-produto').value=l.produto||'';
   document.getElementById('f-followup').value=l.followup||'';
+  // v3.43.1 — campo Responsável (popula select com users do users-profile)
+  _crmPopularRespSelect(l.responsavel || leadResponsavel(l) || '');
   document.getElementById('mTitulo').textContent=l.nome;
   document.getElementById('mSub').textContent=l.empresa||'Lead';
   document.getElementById('btnDel').style.display='';
@@ -2415,6 +2422,38 @@ function abrirLead(id){
 }
 
 function fecharModal(){document.getElementById('modal').classList.remove('open');_id=null;}
+
+// v3.43.1 — popula o select de Responsável no modal (só admin pode alterar)
+function _crmPopularRespSelect(atual) {
+  const sel = document.getElementById('f-resp');
+  const fld = document.getElementById('f-resp-fld');
+  if (!sel || !fld) return;
+  const isAdmin = (window._user && window._user.papel === 'admin');
+  const profs = window._userProfiles || {};
+  const users = Object.entries(profs)
+    .filter(([k]) => k !== 'admin')
+    .map(([k, p]) => ({ key: k, nome: p.nomeCompleto || p.nome || k }))
+    .sort((a, b) => a.nome.localeCompare(b.nome));
+  // Se o atual não está na lista, adiciona pra preservar valor legacy
+  if (atual && !users.find(u => u.nome.toLowerCase() === String(atual).toLowerCase())) {
+    users.unshift({ key: '__legacy__', nome: atual });
+  }
+  sel.innerHTML = '<option value="">— sem responsável —</option>' +
+    users.map(u => `<option value="${u.nome.replace(/"/g,'&quot;')}"${u.nome === atual ? ' selected' : ''}>${u.nome}</option>`).join('');
+  // Visibilidade do campo
+  fld.style.display = '';
+  if (!isAdmin) {
+    sel.disabled = true;
+    sel.title = 'Apenas administradores podem alterar o responsável';
+    sel.style.opacity = '.6';
+    sel.style.cursor = 'not-allowed';
+  } else {
+    sel.disabled = false;
+    sel.title = 'Trocar responsável do lead';
+    sel.style.opacity = '1';
+    sel.style.cursor = '';
+  }
+}
 
 function resetForm(){
   ['f-nome','f-empresa','f-tel','f-email','f-cidade','f-obs'].forEach(i=>document.getElementById(i).value='');
@@ -2560,8 +2599,21 @@ function salvarLead(){
     data:_id?((window._leads||{})[_id]?.data||Date.now()):Date.now(),
     etapaSince:_id&&(window._leads||{})[_id]?.etapa===etapaFinal?((window._leads||{})[_id]?.etapaSince||Date.now()):Date.now(),
   };
+  // v3.43.1 — campo Responsável (admin pode trocar)
+  const respSel = document.getElementById('f-resp');
+  const novoResp = respSel ? respSel.value : '';
+  const respAnterior = _id ? ((window._leads||{})[_id]?.responsavel || '') : '';
+  if (novoResp) data.responsavel = novoResp;
   if(_id){
     data.historico=(window._leads||{})[_id]?.historico||[];
+    // Se admin trocou o responsável, registra no histórico
+    if (window._user?.papel === 'admin' && novoResp && novoResp !== respAnterior) {
+      data.historico = [...data.historico, {
+        acao: 'Responsável trocado de "' + (respAnterior || '—') + '" para "' + novoResp + '"',
+        data: new Date().toISOString(),
+        autor: window._user.nome,
+      }];
+    }
     window._update(_id,data);
     logEvento('editar','Editou lead: '+nome,data.produto?'Produto: '+data.produto:'');
     toast('Lead atualizado.');
