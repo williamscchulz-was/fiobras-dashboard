@@ -76,7 +76,11 @@
 }
 .login-select option{background:#0a100c;color:#fff;}
 .login-input:focus,.login-select:focus{border-color:rgba(0,211,95,0.6);background:rgba(0,0,0,0.38);box-shadow:0 0 0 3px rgba(0,211,95,0.12);}
-.login-pass-wrap{margin-bottom:16px;}
+.login-pass-wrap{margin-bottom:12px;}
+/* v3.48.5 — checkbox "Manter conectado" */
+.login-remember{display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:.72rem;color:rgba(255,255,255,.72);user-select:none;}
+.login-remember input[type="checkbox"]{width:16px;height:16px;accent-color:#00a241;cursor:pointer;margin:0;}
+.login-remember:hover{color:rgba(255,255,255,.92);}
 .login-btn{
   width:100%;height:52px;background:linear-gradient(180deg,#00a241 0%,#007a2e 100%);
   color:#fff;border:0;border-radius:16px;

@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.48.4', d:'22 abr 2026', current:true,
+    v:'3.48.5', d:'22 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Login · checkbox "Manter conectado" (auto-login por 30 dias).',
+        desc:'Antes a sessão durava 24h fixos — todo dia precisava re-logar. Agora:\n\n• Checkbox "Manter conectado neste dispositivo" no card de login (entre senha e botão Entrar)\n• Marcado por padrão (default true) — quem não quiser desmarca\n• Marcado: TTL = 30 dias (login automático ao reabrir o app/aba)\n• Desmarcado: TTL = 24h (comportamento antigo)\n• Preferência salva em localStorage (fiobras-remember) — próxima visita o checkbox volta no estado escolhido\n• Renovação automática (toast "Sessão expira em X min") herda o TTL escolhido — se você marcou Manter, renova +30d; se não, renova +24h\n\nSegurança: como o token tá em localStorage, qualquer pessoa com acesso físico ao device entra. Pra equipamento compartilhado (PC do laboratório, tablet do chão de fábrica) basta desmarcar.'}
+    ]
+  },
+  {
+    v:'3.48.4', d:'22 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · Kanban: card minimalista (avatar grande à esquerda, click abre detalhes).',
         desc:'Redesign aprovado pelo William após mockup (_mockup-v3.48.3.html).\n\nMudanças visuais:\n• Avatar 22px → 44px (foto/iniciais bem visíveis, do responsável)\n• Altura do card 150px → ~70px (cabe 2× mais cards na tela)\n• Tags 3 chips no topo → 1 linha de meta única (RET-01 · Tipo · Data relativa)\n• Borda esquerda colorida indica urgência (vermelho/laranja/verde)\n• Botões de ação direita: ▶ Iniciar / ◀ Voltar / ✓ Concluir / ✎ Editar\n• Excluir saiu do card → vai pro modal de detalhe (evita acidente)\n• Comments badge mostra contador só quando >0\n• Mobile: avatar 38px, esconde chip de urgência (fica só borda)\n\nInteração:\n• Click no card chama abrirDetalheCard() — quem pode editar (admin/autor/resp) abre modal de edição (mostra desc, peças, equipamento, todos os campos). Quem só pode ler expande comentários inline.\n• Click no avatar (admin) → modal Reatribuir Responsável (mantido)\n• Click nos botões de ação → stopPropagation (não abre modal sem querer)\n• Drag-and-drop preservado (HTML5 nativo)\n\nClasse nova: .kc3 (substitui .kc2 nos cards do Kanban). Estilos antigos .kc2-* mantidos no CSS pra outros usos (thumb da máquina, etc).'}

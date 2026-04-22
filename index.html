@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#008835"><!-- v3.48.1: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
-<link rel="stylesheet" href="css/hub.css?v=3.33.0">
+<link rel="stylesheet" href="css/hub.css?v=3.48.5">
 
 <!-- v3.32.6: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
@@ -110,9 +110,14 @@
       <label class="login-label" for="loginPass">Senha</label>
       <input class="login-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
+    <!-- v3.48.5 — manter conectado (auto-login por 30 dias) -->
+    <label class="login-remember" for="loginRemember">
+      <input type="checkbox" id="loginRemember" checked>
+      <span>Manter conectado neste dispositivo</span>
+    </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.48.4</div>
+    <div class="login-foot">Sistema interno · v3.48.5</div>
   </div>
 </div>
 
@@ -277,7 +282,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.48.4</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.48.5</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -1145,8 +1150,10 @@ function canAccessTab(tab){
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────
-// v3.48.1 — sessão ganha campo `expires` (24h) + role/nome enriquecidos do profile
-const SESSION_TTL_MS = 24 * 3600 * 1000; // 24h
+// v3.48.1 — sessão ganha campo `expires` + role/nome enriquecidos do profile
+// v3.48.5 — TTL passa pra 30 dias quando "Manter conectado" tá marcado (default).
+const SESSION_TTL_MS = 24 * 3600 * 1000;             // 24h (sessão curta)
+const SESSION_TTL_LONG_MS = 30 * 24 * 3600 * 1000;   // 30 dias (manter conectado)
 function getSession(){
   try{
     const s = JSON.parse(localStorage.getItem('fiobras-dash-auth'));
@@ -1160,18 +1167,25 @@ function getSession(){
     return s;
   }catch(e){return null;}
 }
-function setSession(user){
+function setSession(user, remember){
   const u = getUser(user) || {};
   const profile = (window._usersProfile||{})[user] || {};
   const role = profile.roleOverride || u.role || 'producao';
   const now = Date.now();
+  // v3.48.5: se `remember` indefinido, herda da preferência salva (default: true)
+  if (remember === undefined) {
+    try { remember = localStorage.getItem('fiobras-remember') !== '0'; } catch(e) { remember = true; }
+  }
+  const ttl = remember ? SESSION_TTL_LONG_MS : SESSION_TTL_MS;
   localStorage.setItem('fiobras-dash-auth', JSON.stringify({
     user: user,
     role: role,
     nome: profile.nomeCompleto || u.nome || user,
     ts: now,
-    expires: now + SESSION_TTL_MS,
+    expires: now + ttl,
+    remember: !!remember,
   }));
+  try { localStorage.setItem('fiobras-remember', remember ? '1' : '0'); } catch(e){}
 }
 function clearSession(){localStorage.removeItem('fiobras-dash-auth');}
 
@@ -1272,7 +1286,10 @@ async function doLogin(){
     } catch(e){ err.textContent='Erro ao validar senha'; return; }
   }
   // 3) Sem senha: login direto (comportamento atual)
-  setSession(sel);
+  // v3.48.5: lê checkbox "Manter conectado" pra escolher TTL (24h vs 30d)
+  const rememberEl = document.getElementById('loginRemember');
+  const remember = rememberEl ? rememberEl.checked : true;
+  setSession(sel, remember);
   const displayName = (profile.nomeCompleto && profile.nomeCompleto.trim()) || u.nome;
   showSplash(displayName, getEffectiveRole(sel));
 }
@@ -1508,10 +1525,21 @@ window._refreshLoginUserOptions = () => {
   if(cur && sel.querySelector('option[value="' + cur + '"]')) sel.value = cur;
 };
 // Refresh inicial (caso Firebase já carregou ou ainda não, vai re-rodar quando carregar)
+function _initLoginUI(){
+  window._refreshLoginUserOptions();
+  // v3.48.5 — restaura preferência "Manter conectado" (default true)
+  const rem = document.getElementById('loginRemember');
+  if(rem){
+    try {
+      const saved = localStorage.getItem('fiobras-remember');
+      rem.checked = saved !== '0'; // default true
+    } catch(e) { rem.checked = true; }
+  }
+}
 if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', () => window._refreshLoginUserOptions());
+  document.addEventListener('DOMContentLoaded', _initLoginUI);
 } else {
-  setTimeout(() => window._refreshLoginUserOptions(), 0);
+  setTimeout(_initLoginUI, 0);
 }
 
 // Aplica campo de senha no login quando o user selecionado tem senha cadastrada
@@ -2654,7 +2682,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.48.4';
+const CURRENT_VERSION = '3.48.5';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
