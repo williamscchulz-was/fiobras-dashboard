@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.43.1', d:'22 abr 2026', current:true,
+    v:'3.43.2', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'CRM · admin via HUB iframe agora reconhecido (campo Resp ficava bloqueado).',
+        desc:'BUG: William reportou "sou admin mas aparece a mensagem apenas administrador pode editar". Confirmado via preview/eval: window._user = null quando CRM roda via iframe do HUB (sessão fica em window.__hubSession e localStorage["fiobras-dash-auth"]).\n\nMinha checagem (window._user.papel === "admin") só detectava login DIRETO no CRM, ignorando admin vindo do HUB.\n\nFix: novo helper _crmIsAdmin() verifica TODAS as fontes:\n  1. window._user.papel (login direto CRM)\n  2. window.__hubSession.role/papel (iframe do HUB)\n  3. localStorage fiobras-dash-auth (fallback)\n\nAplicado em:\n  - _crmPopularRespSelect (campo Responsável do modal)\n  - avatarChip (avatar clicável no card)\n  - avatarStack (ícone de edit verde)\n  - crmTrocarResp (prompt direto)\n  - salvarLead (registra no histórico)\n\nNome do admin no histórico também passa a usar __hubSession.user como fallback.'}
+    ]
+  },
+  {
+    v:'3.43.1', d:'22 abr 2026',
     items:[
       {type:'feat', title:'CRM · campo "Responsável" no modal de edição (admin altera direto).',
         desc:'William reportou que não conseguia trocar o responsável — o ícone de edit ao lado do stack de avatares (v3.42.0) era discreto demais e ele não viu.\n\nMudança: campo "Responsável" agora aparece dentro do modal de edição do lead (aba DADOS, abaixo do "Próximo follow-up"). Select com todos os users do users-profile.\n\n• Pra ADMIN: select editável; ao salvar, se mudou, registra no histórico ("Responsável trocado de X para Y" com autor)\n• Pra usuário comum: select disabled (visualização apenas) com title "Apenas administradores podem alterar"\n• Valor inicial = l.responsavel atual OU último autor do histórico (legacy)\n• Se o resp atual está fora da lista (legacy), entra como primeira opção pra preservar\n\nO ícone discreto do card continua funcionando (v3.42.0), mas agora a UX principal é via modal.'}

@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.43.1">
+<link rel="stylesheet" href="../css/tokens.css?v=3.43.2">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -1944,7 +1944,8 @@ function avatarFor(name){
 function avatarChip(name, size=22, leadId){
   const a = avatarFor(name);
   if(!a) return '';
-  const isAdmin = (window._user && window._user.papel === 'admin');
+  // v3.43.2 — usa helper (detecta admin via _user OU __hubSession OU localStorage)
+  const isAdmin = (typeof _crmIsAdmin === 'function') ? _crmIsAdmin() : (window._user && window._user.papel === 'admin');
   const clickAttr = (isAdmin && leadId)
     ? `onclick="event.stopPropagation();crmTrocarResp('${leadId}')" style="cursor:pointer" title="Clique pra trocar responsável (admin)"`
     : `title="${esc(a.name)}"`;
@@ -2029,7 +2030,8 @@ function _crmSimplifyAcao(acao, l) {
 // v3.42.0 — render do stack de avatares com tooltip (max 4 + chip "+N")
 function avatarStack(colabs, leadId) {
   if (!colabs || !colabs.length) return '';
-  const isAdmin = (window._user && window._user.papel === 'admin');
+  // v3.43.2 — detecta admin via __hubSession também (não só _user)
+  const isAdmin = (typeof _crmIsAdmin === 'function') ? _crmIsAdmin() : (window._user && window._user.papel === 'admin');
   const MAX = 4;
   const visible = colabs.slice(0, MAX);
   const overflow = colabs.slice(MAX);
@@ -2080,8 +2082,9 @@ function avatarStack(colabs, leadId) {
   return html;
 }
 // v3.41.1 — admin troca responsável de qualquer card
+// v3.43.2 — detecta admin via _user OU __hubSession OU localStorage
 window.crmTrocarResp = function(leadId) {
-  if (!window._user || window._user.papel !== 'admin') {
+  if (!_crmIsAdmin()) {
     alert('Apenas admin pode trocar responsável.');
     return;
   }
@@ -2106,12 +2109,14 @@ window.crmTrocarResp = function(leadId) {
   const idx = parseInt(escolha) - 1;
   if (isNaN(idx) || idx < 0 || !users[idx]) { alert('Opção inválida.'); return; }
   const novoResp = users[idx].nome;
+  // v3.43.2 — adminNome detectado via _user OU __hubSession
+  const adminNome = (window._user?.nome) || (window.__hubSession?.user) || 'admin';
   // Atualiza Firebase + log
   const histPrev = Array.isArray(l.historico) ? l.historico : [];
   const novoHist = [...histPrev, {
-    acao: 'Responsável trocado de "' + atual + '" para "' + novoResp + '" por ' + window._user.nome,
+    acao: 'Responsável trocado de "' + atual + '" para "' + novoResp + '" por ' + adminNome,
     data: new Date().toISOString(),
-    autor: window._user.nome,
+    autor: adminNome,
   }];
   window._update(leadId, { responsavel: novoResp, historico: novoHist });
   if (window._logPush) {
@@ -2119,7 +2124,7 @@ window.crmTrocarResp = function(leadId) {
       acao: 'Responsável trocado',
       lead: titulo,
       leadId,
-      por: window._user.nome,
+      por: adminNome,
       de: atual,
       para: novoResp,
       ts: Date.now(),
@@ -2423,12 +2428,23 @@ function abrirLead(id){
 
 function fecharModal(){document.getElementById('modal').classList.remove('open');_id=null;}
 
+// v3.43.2 — checa admin de TODAS as fontes (CRM próprio OU vindo do HUB via iframe)
+function _crmIsAdmin() {
+  if (window._user && window._user.papel === 'admin') return true;
+  if (window.__hubSession && (window.__hubSession.role === 'admin' || window.__hubSession.papel === 'admin')) return true;
+  try {
+    const s = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null');
+    if (s && (s.role === 'admin' || s.papel === 'admin')) return true;
+  } catch(e) {}
+  return false;
+}
+
 // v3.43.1 — popula o select de Responsável no modal (só admin pode alterar)
 function _crmPopularRespSelect(atual) {
   const sel = document.getElementById('f-resp');
   const fld = document.getElementById('f-resp-fld');
   if (!sel || !fld) return;
-  const isAdmin = (window._user && window._user.papel === 'admin');
+  const isAdmin = _crmIsAdmin();
   const profs = window._userProfiles || {};
   const users = Object.entries(profs)
     .filter(([k]) => k !== 'admin')
@@ -2607,11 +2623,13 @@ function salvarLead(){
   if(_id){
     data.historico=(window._leads||{})[_id]?.historico||[];
     // Se admin trocou o responsável, registra no histórico
-    if (window._user?.papel === 'admin' && novoResp && novoResp !== respAnterior) {
+    // v3.43.2 — usa helper _crmIsAdmin (detecta __hubSession também)
+    if (_crmIsAdmin() && novoResp && novoResp !== respAnterior) {
+      const adminNome = (window._user?.nome) || (window.__hubSession?.user) || 'admin';
       data.historico = [...data.historico, {
         acao: 'Responsável trocado de "' + (respAnterior || '—') + '" para "' + novoResp + '"',
         data: new Date().toISOString(),
-        autor: window._user.nome,
+        autor: adminNome,
       }];
     }
     window._update(_id,data);
