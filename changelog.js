@@ -2,7 +2,16 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.41.1', d:'22 abr 2026', current:true,
+    v:'3.42.0', d:'22 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'CRM · stack de colaboradores no card (mockup aprovado).',
+        desc:'Antes: card mostrava SÓ o último autor do histórico. Agora mostra TODOS os participantes do lead empilhados.\n\n• Ordem cronológica (criador primeiro)\n• Max 4 visíveis + chip "+N" agrupando os restantes\n• Hover em cada avatar abre tooltip dark minimalista com:\n  - Nome (Outfit 700)\n  - Ação simplificada (Cadastrou / Assumiu lead / Retorno feito / Comentou / Mudou de etapa / etc)\n  - Data em DM Mono verde (ex: 09/04)\n• Avatar do responsável atual ganha box-shadow verde sutil + badge "RESP" no tooltip\n• Avatar tem foto se cadastrada em users-profile, senão gradient + iniciais\n• Hover sobe 3px + scale 1.1 + tooltip aparece com seta\n\nAjustes:\n• Função leadColaboradores(l) extrai users únicos do l.historico + l.responsavel em ordem cronológica\n• _crmSimplifyAcao(acao) reduz texto longo do histórico pra 1-2 palavras\n• avatarStack(colabs, leadId) renderiza\n\nÍcone de edit verde aparece ao lado do stack pra ADMIN — clique troca responsável (label visível "admin: trocar resp" no hover, em vez de só o avatar invisível).'},
+      {type:'feat', title:'HUB · botão "Atualizar app" no dropdown do user (limpa cache forçado).',
+        desc:'William reportou múltiplas vezes que avatares/funções novas não apareciam no navegador dele mesmo após releases — sempre era cache antigo do Service Worker. O auto-update existente (toast "Nova versão") não era suficiente porque ele às vezes ignorava o toast ou o re-check do SW estava com janela longa.\n\nNovo: botão "Atualizar app" no dropdown do user (no HUB). Click executa:\n  - caches.delete() de TODOS os caches do SW\n  - serviceWorker.getRegistrations().forEach(r => r.unregister())\n  - location.reload(true)\n\nResolve qualquer "ficou cinza/sumiu/não atualizou" em 2 segundos. Use sempre que algo parecer estranho após release.'}
+    ]
+  },
+  {
+    v:'3.41.1', d:'22 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · re-render do CARD DE MÁQUINA quando users-profile carrega.',
         desc:'BUG: avatar do responsável (Vorlei, Joacir, etc) ficava CINZA mesmo após Firebase carregar a foto. Eu confirmei via preview/eval que avatar() retornava o HTML correto com foto base64, mas o card visual continuava sem foto.\n\nCausa: o helper _rebuildUsersFromFirebase (v3.41.0) chamava renderKanban/renderPreventiva/renderHistorico mas FALTAVA renderMaquinas e renderDashboard. Como o card de máquina é renderizado uma vez no boot (antes do users-profile chegar), ele ficava com avatar fallback (iniciais cinza) pra sempre.\n\nFix: incluí renderMaquinas e renderDashboard no rebuild. Agora qualquer mudança em users-profile/users-config dispara re-render de TODAS as views.'},

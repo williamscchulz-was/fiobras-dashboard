@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup v3.42 · CRM card · stack de colaboradores</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#EDF1EA;--surface:#fff;--surface2:#F4F6F0;--border:#E3E7DE;--border2:#CFD6C6;--text:#1B1F18;--muted:#6B7166;--muted2:#9CA295;--green:#008835;--green-soft:#E6F4EC;--red:#DC2626;--blue:#2563EB;--amber:#D97706}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:'Poppins',sans-serif;color:var(--text);padding:32px 24px}
+  .wrap{max-width:1100px;margin:0 auto}
+  h1{font-family:'Outfit';font-weight:900;font-size:28px;margin:0 0 6px;letter-spacing:-.02em}
+  h1 .v{font-family:'DM Mono';font-size:12px;background:var(--green);color:#fff;padding:3px 8px;border-radius:6px;vertical-align:middle;margin-left:8px;font-weight:500}
+  .lead{color:var(--muted);font-size:14px;max-width:780px;margin-bottom:28px;line-height:1.55}
+  h2{font-family:'Outfit';font-weight:700;font-size:18px;margin:36px 0 12px;padding-top:18px;border-top:2px solid var(--border)}
+  h2:first-of-type{border-top:0;padding-top:0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+
+  /* CRM card visual */
+  .crm-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(27,31,24,.04);position:relative}
+  .crm-card-top{border-top:3px solid var(--green);border-radius:12px 12px 0 0;margin:-14px -14px 12px;padding:12px 14px 0}
+  .crm-card-top.amber{border-top-color:#F59E0B}
+  .crm-card-top.blue{border-top-color:var(--blue)}
+  .crm-card-top.purple{border-top-color:#7C3AED}
+  .crm-head{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+  .crm-logo{width:32px;height:32px;border-radius:50%;background:#E0E7FF;color:#4338CA;display:flex;align-items:center;justify-content:center;font-family:'Outfit';font-weight:700;font-size:13px}
+  .crm-nome{font-family:'Outfit';font-weight:900;font-size:15px;line-height:1.2;color:var(--text)}
+  .crm-empresa{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .crm-empresa .age{color:var(--red);font-weight:600;margin-left:4px}
+  .crm-tag{display:inline-block;font-family:'Poppins';font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(0,136,53,.1);color:var(--green);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+  .crm-meta{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+  .crm-meta svg{width:11px;height:11px}
+  .crm-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+  .crm-foot-l{display:flex;align-items:center;gap:8px}
+  .crm-foot-r{display:flex;gap:6px}
+  .crm-act{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  .crm-act svg{width:13px;height:13px}
+  .crm-send{width:32px;height:32px;border-radius:50%;background:#FEF3C7;color:#D97706;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  .crm-send svg{width:14px;height:14px}
+
+  /* ═══ STACK DE AVATARES ═══ */
+  .av-stack{display:inline-flex;align-items:center;position:relative}
+  .av-item{
+    width:26px;height:26px;border-radius:50%;
+    border:2px solid #fff;
+    margin-left:-7px;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:'Outfit';font-weight:900;font-size:10px;color:#fff;
+    background-size:cover;background-position:center;
+    cursor:pointer;
+    position:relative;
+    transition:transform .15s, z-index 0s;
+    z-index:1;
+  }
+  .av-item:first-child{margin-left:0}
+  .av-item:hover{transform:translateY(-3px) scale(1.1);z-index:10}
+  .av-item.foto{color:transparent}
+  .av-item.more{background:#9CA295;color:#fff;cursor:pointer}
+  .av-item.av-suyanne{background:linear-gradient(135deg,#EA580C,#fb923c)}
+  .av-item.av-jacques{background:linear-gradient(135deg,#7C3AED,#a855f7)}
+  .av-item.av-william{background:linear-gradient(135deg,#008835,#00b347)}
+  .av-item.av-joacir{background:linear-gradient(135deg,#0d8a6c,#10b981)}
+  .av-item.av-edilson{background:linear-gradient(135deg,#2563EB,#60a5fa)}
+
+  /* TOOLTIP */
+  .av-tip{
+    position:absolute;
+    bottom:calc(100% + 10px);left:50%;
+    transform:translateX(-50%);
+    background:#1B1F18;color:#fff;
+    padding:8px 12px;
+    border-radius:8px;
+    font-size:11.5px;
+    line-height:1.4;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;visibility:hidden;
+    transition:opacity .15s, transform .15s;
+    z-index:100;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    text-align:left;
+    min-width:180px;
+  }
+  .av-tip:after{
+    content:'';position:absolute;
+    top:100%;left:50%;
+    margin-left:-5px;
+    border-width:5px;border-style:solid;
+    border-color:#1B1F18 transparent transparent transparent;
+  }
+  .av-tip-nome{font-family:'Outfit';font-weight:700;font-size:12.5px;color:#fff;margin-bottom:2px}
+  .av-tip-acao{font-family:'Poppins';font-size:10.5px;color:#9CA295;font-weight:500}
+  .av-tip-acao .data{color:#52E07F;font-family:'DM Mono';margin-left:4px}
+  .av-item:hover .av-tip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(-2px)}
+
+  .col-label{font-family:'DM Mono';font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;font-weight:500}
+
+  .notes{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:22px}
+  .notes h3{font-family:'Outfit';font-weight:700;font-size:14px;margin:0 0 10px}
+  .notes ul{margin:0;padding-left:18px;font-size:13px;line-height:1.7}
+  .notes code{background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-family:'DM Mono';font-size:11px;color:var(--green)}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:6px}
+  .legend-item{display:flex;align-items:center;gap:5px}
+  .legend-dot{width:8px;height:8px;border-radius:50%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CRM card · stack de colaboradores <span class="v">v3.42 mockup</span></h1>
+  <p class="lead">Hoje o card mostra <b>1 avatar</b> (último autor do histórico). Quando vários users participam — Suyanne cadastra, Jacques assume, William responde — todos deveriam aparecer empilhados. Hover em cada um mostra <b>nome + ação + data</b> num tooltip minimalista.</p>
+
+  <h2>1 · Cenários comuns</h2>
+
+  <div class="grid">
+
+    <!-- Cenário 1: 1 colaborador -->
+    <div>
+      <div class="col-label">1 colaborador (criador)</div>
+      <div class="crm-card">
+        <div class="crm-card-top">
+          <div class="crm-head">
+            <div class="crm-logo">F</div>
+            <div>
+              <div class="crm-nome">Flávia</div>
+              <div class="crm-empresa">Gaia Uniformes <span class="age">· 12d</span></div>
+            </div>
+          </div>
+        </div>
+        <span class="crm-tag">FIOS TINTOS (VENDA)</span>
+        <div class="crm-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>
+          09/04/2026
+        </div>
+        <div class="crm-foot">
+          <div class="crm-foot-l">
+            <span class="av-stack">
+              <span class="av-item av-suyanne">S
+                <span class="av-tip">
+                  <span class="av-tip-nome">Suyanne</span>
+                  <span class="av-tip-acao">Cadastrou lead<span class="data">· 09/04</span></span>
+                </span>
+              </span>
+            </span>
+            <button class="crm-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+            <button class="crm-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+          </div>
+          <button class="crm-send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cenário 2: 2 colaboradores (criador + assumiu) -->
+    <div>
+      <div class="col-label">2 · cadastrou + assumiu</div>
+      <div class="crm-card">
+        <div class="crm-card-top amber">
+          <div class="crm-head">
+            <div class="crm-logo" style="background:#FFF7ED;color:#9A3412">G</div>
+            <div>
+              <div class="crm-nome">Givago</div>
+              <div class="crm-empresa">Belgotex do Brasil <span class="age">· 12d</span></div>
+            </div>
+          </div>
+        </div>
+        <span class="crm-tag">FIOS TINTOS (VENDA)</span>
+        <div class="crm-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>
+          09/04/2026
+        </div>
+        <div class="crm-foot">
+          <div class="crm-foot-l">
+            <span class="av-stack">
+              <span class="av-item av-suyanne">S
+                <span class="av-tip">
+                  <span class="av-tip-nome">Suyanne</span>
+                  <span class="av-tip-acao">Cadastrou lead<span class="data">· 09/04</span></span>
+                </span>
+              </span>
+              <span class="av-item av-jacques">J
+                <span class="av-tip">
+                  <span class="av-tip-nome">Jacques</span>
+                  <span class="av-tip-acao">Assumiu lead<span class="data">· 12/04</span></span>
+                </span>
+              </span>
+            </span>
+            <button class="crm-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+            <button class="crm-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+          </div>
+          <button class="crm-send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cenário 3: 3 colaboradores -->
+    <div>
+      <div class="col-label">3 · cadastrou + assumiu + retorno</div>
+      <div class="crm-card">
+        <div class="crm-card-top blue">
+          <div class="crm-head">
+            <div class="crm-logo" style="background:#DBEAFE;color:#1E40AF">C</div>
+            <div>
+              <div class="crm-nome">Casa Mineira</div>
+              <div class="crm-empresa">Têxtil Mineira S/A <span class="age" style="color:#D97706">· 5d</span></div>
+            </div>
+          </div>
+        </div>
+        <span class="crm-tag">FIOS TINTOS (VENDA)</span>
+        <div class="crm-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>
+          16/04/2026
+        </div>
+        <div class="crm-foot">
+          <div class="crm-foot-l">
+            <span class="av-stack">
+              <span class="av-item av-suyanne">S
+                <span class="av-tip">
+                  <span class="av-tip-nome">Suyanne</span>
+                  <span class="av-tip-acao">Cadastrou lead<span class="data">· 16/04</span></span>
+                </span>
+              </span>
+              <span class="av-item av-jacques">J
+                <span class="av-tip">
+                  <span class="av-tip-nome">Jacques</span>
+                  <span class="av-tip-acao">Assumiu lead<span class="data">· 17/04</span></span>
+                </span>
+              </span>
+              <span class="av-item av-william">W
+                <span class="av-tip">
+                  <span class="av-tip-nome">William</span>
+                  <span class="av-tip-acao">Retorno feito<span class="data">· 20/04</span></span>
+                </span>
+              </span>
+            </span>
+            <button class="crm-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+          </div>
+          <button class="crm-send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cenário 4: 4+ colaboradores -->
+    <div>
+      <div class="col-label">5 · todos os envolvidos + "+N"</div>
+      <div class="crm-card">
+        <div class="crm-card-top purple">
+          <div class="crm-head">
+            <div class="crm-logo" style="background:#EDE9FE;color:#5B21B6">A</div>
+            <div>
+              <div class="crm-nome">Alpargatas Brasil</div>
+              <div class="crm-empresa">Alpargatas SA <span class="age">· 18d</span></div>
+            </div>
+          </div>
+        </div>
+        <span class="crm-tag">FIOS TINTOS (VENDA)</span>
+        <div class="crm-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>
+          02/04/2026
+        </div>
+        <div class="crm-foot">
+          <div class="crm-foot-l">
+            <span class="av-stack">
+              <span class="av-item av-suyanne">S
+                <span class="av-tip">
+                  <span class="av-tip-nome">Suyanne</span>
+                  <span class="av-tip-acao">Cadastrou lead<span class="data">· 02/04</span></span>
+                </span>
+              </span>
+              <span class="av-item av-jacques">J
+                <span class="av-tip">
+                  <span class="av-tip-nome">Jacques</span>
+                  <span class="av-tip-acao">Assumiu lead<span class="data">· 03/04</span></span>
+                </span>
+              </span>
+              <span class="av-item av-william">W
+                <span class="av-tip">
+                  <span class="av-tip-nome">William</span>
+                  <span class="av-tip-acao">Retorno feito<span class="data">· 08/04</span></span>
+                </span>
+              </span>
+              <span class="av-item more">+2
+                <span class="av-tip" style="min-width:200px">
+                  <span class="av-tip-nome">+ 2 colaboradores</span>
+                  <span class="av-tip-acao">Joacir · Comentou em 12/04</span>
+                  <span class="av-tip-acao">Edilson · Mudou pra "Proposta" em 16/04</span>
+                </span>
+              </span>
+            </span>
+          </div>
+          <button class="crm-send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2>2 · Tipos de ação no tooltip</h2>
+  <p class="sub">A ação mostrada vem do <code style="font-family:'DM Mono';background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:11.5px">l.historico[].acao</code> simplificada para 1 linha.</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#EA580C"></span>Cadastrou lead</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#7C3AED"></span>Assumiu (responsável)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#008835"></span>Retorno feito / Proposta enviada</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#2563EB"></span>Comentou</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#0D8A6C"></span>Mudou de etapa</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#D97706"></span>Trocou responsável (admin)</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2>3 · Comportamento</h2>
+
+  <div class="notes">
+    <ul>
+      <li><b>Limite 4 visíveis</b> — depois mostra <code>+N</code> com tooltip que lista os restantes (Joacir · Comentou em 12/04, etc).</li>
+      <li><b>Ordem cronológica</b> — primeiro a aparecer é o mais antigo (criador), último é o mais recente.</li>
+      <li><b>Hover</b> — avatar sobe um pouco (translate -3px + scale 1.1) + tooltip dark com nome + ação + data colorida.</li>
+      <li><b>Foto vs iniciais</b> — se o user tem foto em <code>users-profile/{key}/foto</code>, mostra. Senão, gradient + inicial.</li>
+      <li><b>Click no avatar</b> (admin) — continua abrindo o prompt pra trocar responsável (v3.41.1).</li>
+      <li><b>Mobile</b> — sem hover; tap mostra o tooltip por 2s e desaparece (igual ao avatar do HUB que tem <code>userChipTap</code>).</li>
+    </ul>
+  </div>
+
+  <h2>4 · Implementação</h2>
+  <div class="notes">
+    <ul>
+      <li><code>leadColaboradores(l)</code> — nova função: extrai users únicos do <code>l.historico</code> + criador, na ordem cronológica, retornando <code>[{key, nome, foto, acao, data}]</code>.</li>
+      <li><code>avatarStack(colaboradores, leadId)</code> — render do stack com tooltips, max 4 visíveis + chip "+N".</li>
+      <li>Substituir <code>${avatarChip(leadResponsavel(l), 22, id)}</code> por <code>${avatarStack(leadColaboradores(l), id)}</code>.</li>
+      <li>Mantém <code>l.responsavel</code> (campo trocado pelo admin) destacando-o no stack com border verde sutil.</li>
+    </ul>
+  </div>
+
+  <p style="margin-top:32px;color:var(--muted);font-size:12px;text-align:center;font-family:'DM Mono'">v3.42 mockup · aguardando aprovação · passe o mouse nos avatares acima pra ver o tooltip</p>
+</div>
+</body>
+</html>

@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.41.1">
+<link rel="stylesheet" href="../css/tokens.css?v=3.42.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -386,6 +386,79 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 
 /* avatar do responsável (footer do card) */
 .card-resp{border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:700;border:2px solid #fff;flex-shrink:0;letter-spacing:.02em;}
+
+/* v3.42.0 — Stack de colaboradores no card */
+.cs-stack{display:inline-flex;align-items:center;position:relative}
+.cs-item{
+  width:26px;height:26px;border-radius:50%;
+  border:2px solid #fff;
+  margin-left:-7px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:'Outfit',sans-serif;font-weight:900;font-size:10px;color:#fff;
+  background-size:cover;background-position:center;
+  position:relative;
+  transition:transform .15s, z-index 0s;
+  z-index:1;
+}
+.cs-item:first-child{margin-left:0}
+.cs-item:hover{transform:translateY(-3px) scale(1.1);z-index:10}
+.cs-item.cs-item-resp{box-shadow:0 0 0 2px #008835}
+.cs-item.cs-more{background:#9CA295;color:#fff;cursor:pointer;font-size:10px}
+.cs-tip{
+  position:absolute;
+  bottom:calc(100% + 10px);left:50%;
+  transform:translateX(-50%);
+  background:#1B1F18;color:#fff;
+  padding:8px 12px;
+  border-radius:8px;
+  font-size:11.5px;
+  line-height:1.5;
+  white-space:nowrap;
+  pointer-events:none;
+  opacity:0;visibility:hidden;
+  transition:opacity .15s;
+  z-index:1000;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  text-align:left;
+  min-width:160px;
+  display:flex;flex-direction:column;gap:2px;
+}
+.cs-tip:after{
+  content:'';position:absolute;
+  top:100%;left:50%;
+  margin-left:-5px;
+  border-width:5px;border-style:solid;
+  border-color:#1B1F18 transparent transparent transparent;
+}
+.cs-tip-nome{font-family:'Outfit',sans-serif;font-weight:700;font-size:12.5px;color:#fff}
+.cs-tip-badge{display:inline-block;background:rgba(0,200,80,.2);color:#52E07F;font-family:'DM Mono',monospace;font-size:8.5px;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.cs-tip-acao{font-family:'Poppins',sans-serif;font-size:10.5px;color:#9CA295;font-weight:500}
+.cs-tip-data{color:#52E07F;font-family:'DM Mono',monospace}
+.cs-item:hover .cs-tip{opacity:1;visibility:visible}
+
+/* v3.42.0 — botão "edit" admin do lado do stack */
+.cs-edit-hint{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;
+  border-radius:50%;
+  background:rgba(0,136,53,.1);color:var(--green);
+  margin-left:6px;cursor:pointer;
+  transition:background .15s;
+  position:relative;
+}
+.cs-edit-hint:hover{background:rgba(0,136,53,.2)}
+.cs-edit-hint svg{width:11px;height:11px}
+.cs-edit-hint:after{
+  content:'admin: trocar resp';
+  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:#1B1F18;color:#fff;
+  font-size:10.5px;font-family:'Poppins',sans-serif;
+  padding:5px 9px;border-radius:6px;
+  white-space:nowrap;
+  opacity:0;visibility:hidden;transition:opacity .15s;
+  pointer-events:none;
+}
+.cs-edit-hint:hover:after{opacity:1;visibility:visible}
 
 /* tempo na etapa — discreto ao lado da empresa */
 .card-age{font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;color:var(--muted2);letter-spacing:.02em;white-space:nowrap;}
@@ -1587,7 +1660,7 @@ function renderPipeline(){
         ${followupBadge(l.followup)?`<div class="card-badges">${followupBadge(l.followup)}</div>`:''}
         <div class="card-foot">
           <div class="card-foot-l">
-            ${avatarChip(leadResponsavel(l), 22, id)}
+            ${avatarStack(leadColaboradores(l), id)}
             ${tel?`<a class="card-iact" href="tel:${tel}" onclick="event.stopPropagation()" title="Ligar ${telFmt}"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>`:''}
             ${wa?`<a class="card-iact" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>`:''}
             ${mail?`<a class="card-iact" href="mailto:${mail}" onclick="event.stopPropagation()" title="Email"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>`:''}
@@ -1860,16 +1933,140 @@ function avatarFor(name){
 function avatarChip(name, size=22, leadId){
   const a = avatarFor(name);
   if(!a) return '';
-  // v3.41.1 — admin pode clicar pra trocar responsável (passa leadId no terceiro arg)
   const isAdmin = (window._user && window._user.papel === 'admin');
   const clickAttr = (isAdmin && leadId)
     ? `onclick="event.stopPropagation();crmTrocarResp('${leadId}')" style="cursor:pointer" title="Clique pra trocar responsável (admin)"`
     : `title="${esc(a.name)}"`;
-  // v3.40.4 — quando há foto, usa background-image em vez das iniciais
   if (a.foto) {
     return `<div class="card-resp" ${clickAttr} style="background-image:url('${a.foto.replace(/'/g,"%27")}');background-size:cover;background-position:center;width:${size}px;height:${size}px;color:transparent${(isAdmin && leadId) ? ';cursor:pointer' : ''}"></div>`;
   }
   return `<div class="card-resp" ${clickAttr} style="background:${a.grad};width:${size}px;height:${size}px;font-size:${Math.round(size*0.42)}px;${(isAdmin && leadId) ? 'cursor:pointer;' : ''}">${esc(a.initials)}</div>`;
+}
+
+// v3.42.0 — extrai colaboradores únicos do lead em ordem cronológica (mockup aprovado).
+// Cada um vira { nome, acao, dataFmt } pra renderizar no stack + tooltip.
+function leadColaboradores(l) {
+  if (!l) return [];
+  const colabs = []; // ordenado por data, sem dups
+  const seen = new Set();
+  function push(nome, acao, ts) {
+    if (!nome) return;
+    const key = String(nome).toLowerCase().trim();
+    if (seen.has(key)) {
+      // user já no stack: atualiza pra ação MAIS RECENTE
+      const existing = colabs.find(c => c.key === key);
+      if (existing && (!existing.ts || (ts && ts > existing.ts))) {
+        existing.acao = acao;
+        existing.ts = ts;
+        existing.dataFmt = _crmDataFmt(ts);
+      }
+      return;
+    }
+    seen.add(key);
+    colabs.push({ key, nome, acao, ts, dataFmt: _crmDataFmt(ts) });
+  }
+  // Ordem temporal: data de criação primeiro
+  const dataCriacao = l.data ? _crmParseDate(l.data) : null;
+  const criador = (l.historico && l.historico[0] && l.historico[0].autor) || null;
+  if (criador) push(criador, 'Cadastrou lead', dataCriacao);
+  // Histórico (segunda em diante)
+  if (Array.isArray(l.historico)) {
+    for (let i = 1; i < l.historico.length; i++) {
+      const h = l.historico[i];
+      if (!h.autor) continue;
+      const ts = h.data ? new Date(h.data).getTime() : null;
+      const acao = _crmSimplifyAcao(h.acao || 'Atualizou', l);
+      push(h.autor, acao, ts);
+    }
+  }
+  // Responsável definido pelo admin (campo l.responsavel) — destaca como "Atribuído"
+  if (l.responsavel && !seen.has(String(l.responsavel).toLowerCase().trim())) {
+    push(l.responsavel, 'Atribuído (admin)', null);
+  }
+  return colabs;
+}
+
+function _crmParseDate(d) {
+  // d pode ser "DD/MM/YYYY" ou ISO ou timestamp
+  if (!d) return null;
+  if (typeof d === 'number') return d;
+  const m = String(d).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (m) return new Date(+m[3], +m[2]-1, +m[1]).getTime();
+  const t = Date.parse(d);
+  return isNaN(t) ? null : t;
+}
+function _crmDataFmt(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+}
+function _crmSimplifyAcao(acao, l) {
+  const a = String(acao).toLowerCase();
+  if (a.includes('responsável trocado') || a.includes('atribuído')) return 'Atribuído';
+  if (a.includes('cadastr')) return 'Cadastrou';
+  if (a.includes('assumiu') || a.includes('assumido')) return 'Assumiu lead';
+  if (a.includes('retorno')) return 'Retorno feito';
+  if (a.includes('proposta')) return 'Proposta enviada';
+  if (a.includes('comentou') || a.includes('comentário')) return 'Comentou';
+  if (a.includes('movido') || a.includes('mudou')) return 'Mudou de etapa';
+  if (a.includes('ganho') || a.includes('fechado')) return 'Fechou ganho';
+  if (a.includes('perdido')) return 'Perdeu lead';
+  // fallback: pega primeiras 30 chars
+  return acao.length > 30 ? acao.substring(0, 30) + '…' : acao;
+}
+
+// v3.42.0 — render do stack de avatares com tooltip (max 4 + chip "+N")
+function avatarStack(colabs, leadId) {
+  if (!colabs || !colabs.length) return '';
+  const isAdmin = (window._user && window._user.papel === 'admin');
+  const MAX = 4;
+  const visible = colabs.slice(0, MAX);
+  const overflow = colabs.slice(MAX);
+  const respAtualKey = (window._leads && leadId)
+    ? (() => { const l = window._leads[leadId]; const r = l && (l.responsavel || (l.historico && l.historico[l.historico.length-1] && l.historico[l.historico.length-1].autor)); return r ? String(r).toLowerCase().trim() : null; })()
+    : null;
+  let html = '<span class="cs-stack">';
+  visible.forEach(c => {
+    const a = avatarFor(c.nome);
+    if (!a) return;
+    const isResp = (c.key === respAtualKey);
+    const respClass = isResp ? ' cs-item-resp' : '';
+    const clickAttr = (isAdmin && leadId)
+      ? `onclick="event.stopPropagation();crmTrocarResp('${leadId}')" style="cursor:pointer"`
+      : '';
+    const bg = a.foto
+      ? `background-image:url('${a.foto.replace(/'/g,"%27")}');background-size:cover;background-position:center;color:transparent`
+      : `background:${a.grad}`;
+    html += `<span class="cs-item${respClass}" style="${bg}" ${clickAttr}>` +
+              (a.foto ? '' : esc(a.initials)) +
+              `<span class="cs-tip">` +
+                `<span class="cs-tip-nome">${esc(a.name)}${isResp ? ' <span class="cs-tip-badge">resp</span>' : ''}</span>` +
+                `<span class="cs-tip-acao">${esc(c.acao || '—')}${c.dataFmt ? ` <span class="cs-tip-data">· ${c.dataFmt}</span>` : ''}</span>` +
+              `</span>` +
+            `</span>`;
+  });
+  if (overflow.length) {
+    const tipLines = overflow.map(c => {
+      const nome = esc(c.nome);
+      const acao = esc(c.acao || '—');
+      const data = c.dataFmt ? ` · ${c.dataFmt}` : '';
+      return `<span class="cs-tip-acao">${nome} · ${acao}${data}</span>`;
+    }).join('');
+    html += `<span class="cs-item cs-more">+${overflow.length}` +
+              `<span class="cs-tip" style="min-width:200px">` +
+                `<span class="cs-tip-nome">+ ${overflow.length} colaborador${overflow.length>1?'es':''}</span>` +
+                tipLines +
+              `</span>` +
+            `</span>`;
+  }
+  html += '</span>';
+  // v3.42.0: hint visual quando admin pode trocar responsável
+  if (isAdmin && leadId) {
+    html += '<span class="cs-edit-hint" title="Admin pode trocar o responsável" onclick="event.stopPropagation();crmTrocarResp(\''+leadId+'\')">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+            '</span>';
+  }
+  return html;
 }
 // v3.41.1 — admin troca responsável de qualquer card
 window.crmTrocarResp = function(leadId) {
