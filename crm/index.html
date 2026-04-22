@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.42.0">
+<link rel="stylesheet" href="../css/tokens.css?v=3.43.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -1322,6 +1322,12 @@ signInAnonymously(getAuth(_app)).catch(e=>console.error('[Auth anon falhou]',e))
 const lr=ref(db,'crm/leads');
 onValue(lr,s=>{window._leads=s.val()||{};window.renderAll&&window.renderAll();});
 // v3.40.4 — sub-app CRM agora lê users-profile do HUB pra puxar foto/nome no avatar
+// v3.43.0 — preload SÍNCRONO do cache localStorage (gravado pelo HUB).
+// Resolve race: cards renderizam ANTES do Firebase responder.
+window._userProfiles = (() => {
+  try { return JSON.parse(localStorage.getItem('fiobras-users-profile-cache') || '{}'); }
+  catch(e) { return {}; }
+})();
 onValue(ref(db, 'users-profile'), s => {
   window._userProfiles = s.val() || {};
   if (window.renderAll) window.renderAll();

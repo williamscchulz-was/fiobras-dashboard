@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.42.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.43.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3184,8 +3184,33 @@ onValue(historicoRef, snap => {
 // v3.39.0 — EXPANDE USERS local dinamicamente com users do HUB que não estão
 // hardcoded aqui (ex: William). Sem isso, _resolveUserKey não acha e o avatar
 // fica sem foto + cor default.
-state.userProfiles = {};
-state.usersConfig = {};
+// v3.43.0 — preload SÍNCRONO do cache do localStorage (gravado pelo HUB).
+// Resolve race: cards renderizam ANTES do Firebase responder, usando último
+// snapshot conhecido. Quando Firebase chega, _rebuildUsersFromFirebase atualiza.
+state.userProfiles = (() => {
+  try { return JSON.parse(localStorage.getItem('fiobras-users-profile-cache') || '{}'); }
+  catch(e) { return {}; }
+})();
+state.usersConfig = (() => {
+  try { return JSON.parse(localStorage.getItem('fiobras-users-config-cache') || '{}'); }
+  catch(e) { return {}; }
+})();
+// Hidrata USERS local com o cache imediatamente (antes do Firebase chegar)
+(function _hidratarUSERSDoCache(){
+  const profiles = state.userProfiles || {};
+  const config = state.usersConfig || {};
+  const allKeys = new Set([...Object.keys(config), ...Object.keys(profiles)]);
+  allKeys.forEach(k => {
+    if (USERS[k]) return;
+    const p = profiles[k] || {}, c = config[k] || {};
+    USERS[k] = {
+      senha: null,
+      isAdmin: (p.roleOverride === 'admin' || c.role === 'admin'),
+      nome: p.nomeCompleto || c.nome || p.nome || k,
+    };
+  });
+  if (typeof _refreshStandardUsers === 'function') _refreshStandardUsers();
+})();
 // v3.41.0 — Source of Truth UNIFICADO
 // users-config = lista canônica de chaves (CRUD admin no HUB)
 // users-profile = metadata (foto, nomeCompleto, role)

@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.42.0', d:'22 abr 2026', current:true,
+    v:'3.43.0', d:'22 abr 2026', current:true,
+    items:[
+      {type:'high', title:'CRÍTICO · cache de users-profile em localStorage (resolve avatares cinza definitivamente).',
+        desc:'Diagnóstico estrutural: o problema de avatares cinza (Vorlei, Joacir, etc) NÃO era cache do SW como eu vinha apostando. Era RACE CONDITION:\n\n1. Sub-app boot → cards renderizam IMEDIATAMENTE com state.userProfiles vazio\n2. Avatar() retorna iniciais cinza (sem foto)\n3. Firebase users-profile chega ~500ms-3s depois\n4. Re-render acontece, mas se houver qualquer hiccup (rede lenta, painel não-ativo, click em outro lugar), o card já visualizado pelo user fica com foto ANTIGA cacheada visualmente\n\nFIX ESTRUTURAL — cache cross-app via localStorage:\n• HUB grava users-profile em localStorage["fiobras-users-profile-cache"] toda vez que Firebase atualiza\n• Sub-apps (Manutenção, CRM) lêem esse cache SINCRONAMENTE no boot, ANTES de qualquer renderização\n• state.userProfiles começa POPULADO com a última versão conhecida (não vazio)\n• Quando Firebase chega, atualiza com versão fresh\n• Resultado: cards renderizam com FOTO desde o primeiro frame\n\nMesma estratégia pra users-config (cacheado em "fiobras-users-config-cache").\n\nUSERS local do Manutenção também é hidratado SÍNCRONO do cache (não precisa esperar Firebase pra _resolveUserKey funcionar).\n\nPra primeira sessão (cache vazio): mantém comportamento antigo, mas dali em diante sempre pega instantâneo.'}
+    ]
+  },
+  {
+    v:'3.42.0', d:'22 abr 2026',
     items:[
       {type:'feat', title:'CRM · stack de colaboradores no card (mockup aprovado).',
         desc:'Antes: card mostrava SÓ o último autor do histórico. Agora mostra TODOS os participantes do lead empilhados.\n\n• Ordem cronológica (criador primeiro)\n• Max 4 visíveis + chip "+N" agrupando os restantes\n• Hover em cada avatar abre tooltip dark minimalista com:\n  - Nome (Outfit 700)\n  - Ação simplificada (Cadastrou / Assumiu lead / Retorno feito / Comentou / Mudou de etapa / etc)\n  - Data em DM Mono verde (ex: 09/04)\n• Avatar do responsável atual ganha box-shadow verde sutil + badge "RESP" no tooltip\n• Avatar tem foto se cadastrada em users-profile, senão gradient + iniciais\n• Hover sobe 3px + scale 1.1 + tooltip aparece com seta\n\nAjustes:\n• Função leadColaboradores(l) extrai users únicos do l.historico + l.responsavel em ordem cronológica\n• _crmSimplifyAcao(acao) reduz texto longo do histórico pra 1-2 palavras\n• avatarStack(colabs, leadId) renderiza\n\nÍcone de edit verde aparece ao lado do stack pra ADMIN — clique troca responsável (label visível "admin: trocar resp" no hover, em vez de só o avatar invisível).'},
