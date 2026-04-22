@@ -21,7 +21,7 @@
 <!-- Windows -->
 <meta name="msapplication-TileColor" content="#008835">
 <meta name="msapplication-TileImage" content="./icon-192.png">
-<meta name="theme-color" content="#008835"><!-- v3.47.1: fix calendário supressão -->
+<meta name="theme-color" content="#008835"><!-- v3.47.2: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
 <link rel="stylesheet" href="css/hub.css?v=3.33.0">
@@ -112,7 +112,7 @@
     </div>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.47.1</div>
+    <div class="login-foot">Sistema interno · v3.47.2</div>
   </div>
 </div>
 
@@ -231,7 +231,7 @@
         Histórico de versões
         <span class="dd-tag" id="ddVersion">v2.8.0</span>
       </button>
-      <!-- v3.47.1 — Botão pra forçar atualização (limpa cache + reload) -->
+      <!-- v3.47.2 — Botão pra forçar atualização (limpa cache + reload) -->
       <button class="user-dd-item" onclick="forcarAtualizar()" title="Limpa cache do navegador e recarrega a versão mais nova">
         <svg class="icon sm"><use href="#i-loader"/></svg>
         Atualizar app
@@ -277,7 +277,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.47.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.47.2</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -917,7 +917,7 @@
 </div>
 
 <!-- Modal Editar usuário (admin only · v3.10.0) -->
-<!-- v3.47.1 — Modal de Crop de Imagem (avatar) · usado por geuFotoChange e mcFotoChange -->
+<!-- v3.47.2 — Modal de Crop de Imagem (avatar) · usado por geuFotoChange e mcFotoChange -->
 <div class="modal-bg" id="cropModal" style="z-index:9999" onclick="if(event.target===this)cropCancel()">
   <div class="modal" style="width:480px;max-width:94vw">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -951,7 +951,7 @@
         <svg class="icon sm"><use href="#i-x"/></svg>
       </button>
     </div>
-    <!-- v3.47.1 — Foto do usuário (admin pode editar avatar de qualquer user) -->
+    <!-- v3.47.2 — Foto do usuário (admin pode editar avatar de qualquer user) -->
     <div class="tl-form-field" id="geuFotoField">
       <label>Foto / Avatar</label>
       <div style="display:flex;align-items:center;gap:14px;background:var(--surface2);border:1.5px dashed var(--border2);border-radius:10px;padding:12px">
@@ -972,7 +972,7 @@
         <option value="admin">Administrador</option>
       </select>
     </div>
-    <!-- v3.47.1 — Status (Ativo/Inativo) -->
+    <!-- v3.47.2 — Status (Ativo/Inativo) -->
     <div class="tl-form-field" id="geuActiveField">
       <label>Status do usuário</label>
       <div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px">
@@ -1012,7 +1012,7 @@
       <div id="geuTabs" class="geu-mods"></div>
       <div class="mc-hint" style="margin-top:6px">Abas com acesso limitado. Marque as que esse usuário pode ver.</div>
     </div>
-    <!-- v3.47.1 — Poderes (REGRA GERAL · permissões granulares) -->
+    <!-- v3.47.2 — Poderes (REGRA GERAL · permissões granulares) -->
     <div class="tl-form-field" id="geuPowersField">
       <label>⚡ Poderes</label>
       <div class="mc-hint" style="margin:0 0 8px">Permissões granulares por ação. Admins/Gerentes têm tudo automático — toggles aplicam só pra usuários comuns.</div>
@@ -1163,7 +1163,7 @@ function canAccessTab(tab){
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────
-// v3.47.1 — sessão ganha campo `expires` (24h) + role/nome enriquecidos do profile
+// v3.47.2 — sessão ganha campo `expires` (24h) + role/nome enriquecidos do profile
 const SESSION_TTL_MS = 24 * 3600 * 1000; // 24h
 function getSession(){
   try{
@@ -1193,7 +1193,7 @@ function setSession(user){
 }
 function clearSession(){localStorage.removeItem('fiobras-dash-auth');}
 
-// v3.47.1 — Helper UNIFICADO. Usar em todos os apps (HUB, Manutenção, CRM, Preço).
+// v3.47.2 — Helper UNIFICADO. Usar em todos os apps (HUB, Manutenção, CRM, Preço).
 // Fonte única de verdade pra "quem é o user logado e o que pode fazer".
 window.getCurrentUser = function(){
   const s = getSession();
@@ -1216,7 +1216,7 @@ window.getCurrentUser = function(){
   };
 };
 
-// v3.47.1 — aviso visual quando sessão tá pra expirar (1h antes) + auto-renovação
+// v3.47.2 — aviso visual quando sessão tá pra expirar (1h antes) + auto-renovação
 // no uso (qualquer click renova). Roda em loop a cada 60s.
 let _sessionExpireToastId = null;
 function _checkSessionExpiring(){
@@ -1269,7 +1269,7 @@ async function doLogin(){
   const u=getUser(sel);
   if(!u){err.textContent='Usuário inválido';return;}
   const profile = (window._usersProfile || {})[sel] || {};
-  // v3.47.1 — bloqueia login de user inativo
+  // v3.47.2 — bloqueia login de user inativo
   if(profile.active === false){
     err.textContent='Usuário inativo. Contate um administrador.';
     return;
@@ -1467,7 +1467,7 @@ window.mcFotoChange = (input) => {
   if(!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    // v3.47.1: usa modal de crop interativo
+    // v3.47.2: usa modal de crop interativo
     abrirCropModal(e.target.result, (croppedDataUrl) => {
       mcFotoData = croppedDataUrl;
       mcRenderFotoPreview();
@@ -1590,13 +1590,13 @@ window.abrirGerenciarUsuarios = () => {
   // Fecha dropdown
   const dd = document.getElementById('userDd'), user = document.getElementById('topbarUser');
   if(dd) dd.classList.remove('open'); if(user) user.classList.remove('open');
-  // v3.47.1: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
+  // v3.47.2: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
   if(typeof window.aplicarPowersSeed === 'function') window.aplicarPowersSeed();
-  // v3.47.1: aplica seed de USERS hardcoded → users-config (1x · fiobras-users-seed-v1)
+  // v3.47.2: aplica seed de USERS hardcoded → users-config (1x · fiobras-users-seed-v1)
   if(typeof window.aplicarUsuariosSeed === 'function') {
     window.aplicarUsuariosSeed().then(() => setTimeout(renderGuList, 300));
   }
-  // v3.47.1: garante admin/joacir em users-config como `protected: true` (1x)
+  // v3.47.2: garante admin/joacir em users-config como `protected: true` (1x)
   if(typeof window.aplicarUsuariosSeedV2 === 'function') {
     window.aplicarUsuariosSeedV2().then(() => setTimeout(renderGuList, 400));
   }
@@ -1631,7 +1631,7 @@ function renderGuList(){
     const effTurno = getEffectiveTurno(key);
     const turnoLbl = effTurno ? ('turno ' + effTurno) : '';
     // v3.21.5: span da senha plain (escondida; revela ao clicar no olho)
-    // v3.47.1: se o user tem senhaHash mas não tem senhaPlain (cadastrou antes da
+    // v3.47.2: se o user tem senhaHash mas não tem senhaPlain (cadastrou antes da
     // v3.21.5 ou via Minha Conta), o olho aparece mesmo assim e ao clicar explica
     // que precisa redefinir via cadeado pra poder visualizar.
     let senhaPlainHTML = '';
@@ -1642,7 +1642,7 @@ function renderGuList(){
       // Tem senha (hash) mas não tem versão visualizável
       senhaPlainHTML = '<button class="gu-row-pw-eye" onclick="toast(\'Senha cadastrada antes do sistema guardar versão visualizável. Use o cadeado pra redefinir e poder visualizar.\',\'info\',4500)" title="Sem versão visualizável — redefinir via cadeado" style="opacity:.55"><svg class="icon sm"><use href="#i-eye"/></svg></button>';
     }
-    // v3.47.1 — badge "INATIVO" cinza pra users desativados
+    // v3.47.2 — badge "INATIVO" cinza pra users desativados
     const isInativo = p.active === false;
     const inativoBadge = isInativo ? '<span class="gu-row-meta-sep">·</span><span class="tag tag--sm tag--neutral" style="opacity:.85"><svg><use href="#i-x-circle"/></svg>inativo</span>' : '';
     const rowOpacityStyle = isInativo ? ' style="opacity:.55"' : '';
@@ -1876,7 +1876,7 @@ window.abrirEditarUsuario = (userKey) => {
   document.getElementById('geuRole').value = getEffectiveRole(userKey);
   const eff = getEffectiveTurno(userKey);
   document.getElementById('geuTurno').value = eff ? String(eff) : '';
-  // v3.47.1 — campo active (default true se não setado)
+  // v3.47.2 — campo active (default true se não setado)
   const profileAtual = (window._usersProfile||{})[userKey] || {};
   const ativo = profileAtual.active !== false; // default true
   const activeEl = document.getElementById('geuActive');
@@ -1901,7 +1901,7 @@ window.abrirEditarUsuario = (userKey) => {
   const host = document.getElementById('geuModulos');
   host.innerHTML = ALL_MODULES.map(m => {
     const checked = allowed.includes(m) ? 'checked' : '';
-    // v3.47.1: change re-renderiza poderes (manutenção habilita/desabilita toggles)
+    // v3.47.2: change re-renderiza poderes (manutenção habilita/desabilita toggles)
     return '<label class="geu-mod"><input type="checkbox" value="' + m + '" ' + checked + ' onchange="if(geuEditingKey)geuRenderPowers(geuEditingKey)"><span>' + MOD_LBL_FULL[m] + '</span></label>';
   }).join('');
   // v3.11.0+: Render checkboxes de abas restritas (esconde a seção se não há nenhuma)
@@ -1922,17 +1922,17 @@ window.abrirEditarUsuario = (userKey) => {
       return '<label class="geu-mod"><input type="checkbox" data-tab="' + tab + '" ' + (isOn?'checked':'') + '><span>' + lbl + '</span></label>';
     }).join('');
   }
-  // v3.47.1: render seção de poderes
+  // v3.47.2: render seção de poderes
   geuRenderPowers(userKey);
-  // v3.47.1: reset state da foto + render preview
+  // v3.47.2: reset state da foto + render preview
   geuFotoData = null;
   geuRenderFotoPreview();
   // v3.21.0: aplica visibilidade da seção de módulos baseado no role
   geuOnRoleChange();
   document.getElementById('geuModal').classList.add('open');
 };
-// v3.47.1 — Ajuste 8: admin edita avatar de qualquer user pelo painel
-// v3.47.1: lê imagem e abre modal de crop interativo
+// v3.47.2 — Ajuste 8: admin edita avatar de qualquer user pelo painel
+// v3.47.2: lê imagem e abre modal de crop interativo
 let geuFotoData = null; // null = manter atual, '' = remover, data:... = nova
 window.geuOnFotoChange = (input) => {
   const file = input.files[0];
@@ -1948,7 +1948,7 @@ window.geuOnFotoChange = (input) => {
   reader.readAsDataURL(file);
 };
 
-// v3.47.1 — Modal de crop interativo (drag pra reposicionar + zoom)
+// v3.47.2 — Modal de crop interativo (drag pra reposicionar + zoom)
 let _cropState = null;
 function abrirCropModal(dataUrl, callback) {
   const img = new Image();
@@ -2095,8 +2095,8 @@ function geuRenderFotoPreview() {
   }
 }
 
-// v3.47.1 — render dos toggles de poderes
-// v3.47.1 — poderes do Manutenção só ficam editáveis se o user tem o módulo liberado
+// v3.47.2 — render dos toggles de poderes
+// v3.47.2 — poderes do Manutenção só ficam editáveis se o user tem o módulo liberado
 window.geuRenderPowers = (userKey) => {
   const host = document.getElementById('geuPowers'); if(!host) return;
   const field = document.getElementById('geuPowersField');
@@ -2104,7 +2104,7 @@ window.geuRenderPowers = (userKey) => {
   const profile = (window._usersProfile||{})[userKey] || {};
   const powers = profile.powers || {};
   const isFullAccess = (role === 'admin' || role === 'gerente');
-  // v3.47.1: todos os 5 poderes são do módulo Manutenção. Verifica acesso.
+  // v3.47.2: todos os 5 poderes são do módulo Manutenção. Verifica acesso.
   let modulesMarcados;
   if (isFullAccess) {
     modulesMarcados = ['resultados','producao','preco','manutencao','crm'];
@@ -2162,7 +2162,7 @@ window.geuToggleAllModulos = (on) => {
   document.querySelectorAll('#geuModulos input[type="checkbox"]').forEach(i => {
     i.checked = !!on;
   });
-  // v3.47.1: re-renderiza poderes pra refletir o novo estado de "manutenção marcada"
+  // v3.47.2: re-renderiza poderes pra refletir o novo estado de "manutenção marcada"
   if (geuEditingKey && typeof geuRenderPowers === 'function') geuRenderPowers(geuEditingKey);
 };
 // v3.21.0: ao mudar role, esconder/mostrar a seção de módulos
@@ -2181,7 +2181,7 @@ window.geuOnRoleChange = () => {
     if(modField) modField.style.display = '';
     if(hint) hint.style.display = 'none';
   }
-  // v3.47.1: re-render dos poderes (admin/gerente desabilita toggles)
+  // v3.47.2: re-render dos poderes (admin/gerente desabilita toggles)
   if(geuEditingKey && typeof geuRenderPowers === 'function') geuRenderPowers(geuEditingKey);
 };
 window.salvarEditarUsuario = () => {
@@ -2205,10 +2205,10 @@ window.salvarEditarUsuario = () => {
   // v3.21.0: limpa modulesAllowedOverride se for admin/gerente (eles vêem tudo automático)
   profile.modulesAllowedOverride = isFullAccess ? null : modulesAllowed;
   profile.tabsAllowedOverride = tabsOverride;
-  // v3.47.1 — salva active (default true se checkbox não existe)
+  // v3.47.2 — salva active (default true se checkbox não existe)
   const activeEl = document.getElementById('geuActive');
   profile.active = activeEl ? !!activeEl.checked : true;
-  // v3.47.1: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
+  // v3.47.2: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
   if(!isFullAccess){
     const powers = {};
     document.querySelectorAll('#geuPowers input[data-power]').forEach(i => {
@@ -2216,7 +2216,7 @@ window.salvarEditarUsuario = () => {
     });
     profile.powers = powers;
   }
-  // v3.47.1 — Ajuste 8: persiste foto (null = manter, '' = remover, data:... = nova)
+  // v3.47.2 — Ajuste 8: persiste foto (null = manter, '' = remover, data:... = nova)
   if (geuFotoData !== null) {
     profile.foto = geuFotoData || null;
   }
@@ -2360,7 +2360,7 @@ function getUser(userKey){
   return USERS[userKey] || (window._usersConfig||{})[userKey] || null;
 }
 function isUserDinamico(userKey){
-  // v3.47.1: protected = true em users-config marca admin/joacir como intocáveis
+  // v3.47.2: protected = true em users-config marca admin/joacir como intocáveis
   // (antes era hardcode em USERS local; agora flag do Firebase)
   const cfg = (window._usersConfig||{})[userKey];
   if (cfg && cfg.protected) return false;
@@ -2371,7 +2371,7 @@ function isUserDinamico(userKey){
   // Legacy: ainda não migrou (hardcoded sem entry em users-config)
   return !USERS[userKey];
 }
-// v3.47.1 — Seed: copia USERS hardcoded → users-config (Firebase) na 1a vez que
+// v3.47.2 — Seed: copia USERS hardcoded → users-config (Firebase) na 1a vez que
 // admin abre o painel. Senhas plain de USERS (ex: admin='admin') vão pra
 // users-profile/{key}/senhaPlain. Roda 1x via flag localStorage.
 window.aplicarUsuariosSeed = async function(){
@@ -2396,7 +2396,7 @@ window.aplicarUsuariosSeed = async function(){
   if (count > 0) console.log('[users-seed] migrados', count, 'users hardcoded → users-config');
 };
 
-// v3.47.1 — Seed-v2: garante admin e joacir em users-config + senha em users-profile,
+// v3.47.2 — Seed-v2: garante admin e joacir em users-config + senha em users-profile,
 // marcados como `protected: true` (admin não pode excluir/editar via UI).
 window.aplicarUsuariosSeedV2 = async function(){
   if(localStorage.getItem('fiobras-users-seed-v2')) return;
@@ -2490,7 +2490,7 @@ function getEffectiveModules(userKey){
   return DEFAULT_MODULES_BY_ROLE[role] || DEFAULT_MODULES_BY_ROLE.producao;
 }
 
-// v3.47.1 — Sistema de poderes (REGRA GERAL · auditoria v3.32+)
+// v3.47.2 — Sistema de poderes (REGRA GERAL · auditoria v3.32+)
 // Toda regra de permissão "X pode Y" é configurável por user no painel admin.
 // Helper canUser() lê de users-profile/{user}/powers/{poder}, com defaults por role.
 const POWER_DEFS = [
@@ -2523,7 +2523,7 @@ window.canUser = function(userKey, poder){
   if(!def) return false;
   return !!def[role];
 };
-// Aplica seed 1x (admin abrindo painel pela 1ª vez após v3.47.1).
+// Aplica seed 1x (admin abrindo painel pela 1ª vez após v3.47.2).
 // Cria nó powers/* pra cada user com defaults da role + overrides do POWER_SEED_OVERRIDES.
 window.aplicarPowersSeed = function(){
   if(localStorage.getItem('fiobras-powers-seed-v1')) return;
@@ -2652,7 +2652,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.47.1';
+const CURRENT_VERSION = '3.47.2';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -2687,7 +2687,7 @@ function renderChangelog(){
     return '<div class="cl-ver"><div class="cl-ver-head"><div class="cl-ver-num">v'+ver.v+'</div><div class="cl-ver-date">'+ver.d+'</div>'+cur+'</div>'+items+'</div>';
   }).join('');
 }
-// v3.47.1 — força limpeza de cache (SW + caches) e reload pra pegar versão mais nova
+// v3.47.2 — força limpeza de cache (SW + caches) e reload pra pegar versão mais nova
 window.forcarAtualizar = async function() {
   toast('Atualizando app...', 'info', 1500);
   try {
@@ -2912,7 +2912,7 @@ if('serviceWorker' in navigator){
       });
     });
     checkUpdate();
-    // v3.47.1 — checa update IMEDIATAMENTE no boot + a cada 5 min de uso
+    // v3.47.2 — checa update IMEDIATAMENTE no boot + a cada 5 min de uso
     // (antes era só a cada 30 min, deixava users com cache stale por horas)
     reg.update().catch(()=>{});
     setInterval(() => reg.update().catch(()=>{}), 5 * 60 * 1000);
@@ -3162,7 +3162,7 @@ const usersProfileRef = ref(db, 'users-profile');
 window._usersProfile = window._usersProfile || {};
 onValue(usersProfileRef, (snapshot) => {
   window._usersProfile = snapshot.val() || {};
-  // v3.47.1 — persiste em localStorage pra sub-apps lerem SINCRONAMENTE no boot
+  // v3.47.2 — persiste em localStorage pra sub-apps lerem SINCRONAMENTE no boot
   // (resolve race condition: cards renderizavam ANTES de Firebase chegar = avatar cinza)
   try { localStorage.setItem('fiobras-users-profile-cache', JSON.stringify(window._usersProfile)); } catch(e) {}
   // Repopula shell do user logado caso dados tenham mudado
@@ -3176,7 +3176,7 @@ const usersConfigRef = ref(db, 'users-config');
 window._usersConfig = window._usersConfig || {};
 onValue(usersConfigRef, (snapshot) => {
   window._usersConfig = snapshot.val() || {};
-  // v3.47.1 — também cacheia config pra sub-apps
+  // v3.47.2 — também cacheia config pra sub-apps
   try { localStorage.setItem('fiobras-users-config-cache', JSON.stringify(window._usersConfig)); } catch(e) {}
   // Atualiza login dropdown e painel admin se abertos
   if (typeof window._applyLoginSenhaField === 'function') window._applyLoginSenhaField();

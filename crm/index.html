@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.47.1">
+<link rel="stylesheet" href="../css/tokens.css?v=3.47.2">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -1370,13 +1370,21 @@ const lr=ref(db,'crm/leads');
 onValue(lr,s=>{window._leads=s.val()||{};window.renderAll&&window.renderAll();});
 // v3.40.4 — sub-app CRM agora lê users-profile do HUB pra puxar foto/nome no avatar
 // v3.43.0 — preload SÍNCRONO do cache localStorage (gravado pelo HUB).
-// Resolve race: cards renderizam ANTES do Firebase responder.
+// v3.47.2 — também lê users-config (nome canônico) — sem isso lista de "trocar resp" ficava vazia
 window._userProfiles = (() => {
   try { return JSON.parse(localStorage.getItem('fiobras-users-profile-cache') || '{}'); }
   catch(e) { return {}; }
 })();
+window._usersConfig = (() => {
+  try { return JSON.parse(localStorage.getItem('fiobras-users-config-cache') || '{}'); }
+  catch(e) { return {}; }
+})();
 onValue(ref(db, 'users-profile'), s => {
   window._userProfiles = s.val() || {};
+  if (window.renderAll) window.renderAll();
+});
+onValue(ref(db, 'users-config'), s => {
+  window._usersConfig = s.val() || {};
   if (window.renderAll) window.renderAll();
 });
 window._push=d=>push(lr,d);
@@ -1959,15 +1967,25 @@ function _crmResolveUserKey(nomeOuKey){
   if(!nomeOuKey) return null;
   const nk = String(nomeOuKey).toLowerCase().trim();
   const profs = window._userProfiles || {};
-  if (profs[nk]) return nk;
-  // Match por nomeCompleto/nome (case-insensitive, exato ou primeiro nome)
+  const cfg = window._usersConfig || {};
+  // v3.47.2 — checa em ambas as fontes
+  if (profs[nk] || cfg[nk]) return nk;
+  // Match por nomeCompleto/nome em users-profile
   for (const k in profs) {
     const p = profs[k] || {};
     const pName = (p.nomeCompleto || p.nome || '').toLowerCase();
     if (pName === nk) return k;
     if (pName.startsWith(nk + ' ')) return k;
-    // primeiro nome bate? ex "william" pra "William Alexander Schulz"
     const firstName = pName.split(/\s+/)[0];
+    if (firstName === nk) return k;
+  }
+  // v3.47.2 — fallback: match por nome em users-config
+  for (const k in cfg) {
+    const c = cfg[k] || {};
+    const cName = (c.nome || '').toLowerCase();
+    if (cName === nk) return k;
+    if (cName.startsWith(nk + ' ')) return k;
+    const firstName = cName.split(/\s+/)[0];
     if (firstName === nk) return k;
   }
   return null;
@@ -2146,19 +2164,29 @@ window.crmTrocarResp = function(leadId) {
   if (!_crmIsAdmin()) { toast('Apenas admin pode trocar responsável.', 'err'); return; }
   const l = (window._leads || {})[leadId];
   if (!l) return;
+  // v3.47.2 — lista derivada da UNIÃO de users-config (chaves canônicas + nome)
+  // + users-profile (foto/nome alternativo). Antes só lia users-profile.
   const profs = window._userProfiles || {};
-  // Filtra: chave válida, nome real (sem "sistema"/"usuario"/"u"), ativo
-  const users = Object.entries(profs)
-    .filter(([k, p]) => {
+  const cfg = window._usersConfig || {};
+  const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
+  const users = Array.from(allKeys)
+    .filter(k => {
       if (k === 'admin') return false;
+      const p = profs[k] || {};
+      const c = cfg[k] || {};
       if (p.active === false) return false;
-      const nome = (p.nomeCompleto || p.nome || '').trim();
+      if (c.active === false) return false;
+      const nome = (p.nomeCompleto || c.nome || p.nome || '').trim();
       const lower = nome.toLowerCase();
       if (!nome) return false;
-      if (lower === 'sistema' || lower === 'usuário' || lower === 'usuario' || lower === 'u') return false;
+      if (lower === 'sistema' || lower === 'usuário' || lower === 'usuario' || lower === 'u' || lower === 'fiobras') return false;
       return true;
     })
-    .map(([k, p]) => ({ key: k, nome: p.nomeCompleto || p.nome || k, foto: p.foto || null }))
+    .map(k => {
+      const p = profs[k] || {};
+      const c = cfg[k] || {};
+      return { key: k, nome: p.nomeCompleto || c.nome || p.nome || k, foto: p.foto || null };
+    })
     .sort((a, b) => a.nome.localeCompare(b.nome));
   if (!users.length) { toast('Nenhum usuário disponível pra atribuir.', 'err'); return; }
   const atual = leadResponsavel(l) || '';
@@ -2569,10 +2597,24 @@ function _crmPopularRespSelect(atual) {
   const fld = document.getElementById('f-resp-fld');
   if (!sel || !fld) return;
   const isAdmin = _crmIsAdmin();
+  // v3.47.2 — UNIÃO users-profile + users-config (igual crmTrocarResp)
   const profs = window._userProfiles || {};
-  const users = Object.entries(profs)
-    .filter(([k]) => k !== 'admin')
-    .map(([k, p]) => ({ key: k, nome: p.nomeCompleto || p.nome || k }))
+  const cfg = window._usersConfig || {};
+  const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
+  const users = Array.from(allKeys)
+    .filter(k => {
+      if (k === 'admin') return false;
+      const p = profs[k] || {};
+      const c = cfg[k] || {};
+      if (p.active === false || c.active === false) return false;
+      const nome = (p.nomeCompleto || c.nome || p.nome || '').trim();
+      return !!nome;
+    })
+    .map(k => {
+      const p = profs[k] || {};
+      const c = cfg[k] || {};
+      return { key: k, nome: p.nomeCompleto || c.nome || p.nome || k };
+    })
     .sort((a, b) => a.nome.localeCompare(b.nome));
   // Se o atual não está na lista, adiciona pra preservar valor legacy
   if (atual && !users.find(u => u.nome.toLowerCase() === String(atual).toLowerCase())) {
