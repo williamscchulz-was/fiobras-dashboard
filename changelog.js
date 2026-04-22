@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.40.0', d:'22 abr 2026', current:true,
+    v:'3.40.1', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Service Worker · update mais agressivo (boot + 5 min em vez de só 30 min).',
+        desc:'Diagnóstico: William reportou que ao selecionar imagem do avatar, "nada acontece". Eu confirmei via preview/eval que ANTES do hard reload todas as funções da v3.40.0 (abrirCropModal, cropConfirm, aplicarUsuariosSeed) apareciam undefined no window — ou seja, o navegador estava servindo o JS cacheado pelo Service Worker da release anterior.\n\nO SW já tinha mecanismo de auto-update + toast "Atualizar agora" + skipWaiting. Mas o re-check só acontecia a cada 30 minutos de uso, então users que abriam o app recém após uma release nova podiam ficar várias horas com cache stale.\n\nFix: chama reg.update() IMEDIATAMENTE no boot do app + setInterval de 5 min em vez de 30 min. Combinado com o toast existente, o user vê a opção de atualizar muito mais cedo. Zero impacto em performance porque o reg.update() é só uma comparação de hash, não baixa nada se nada mudou.\n\nNada de feature nova nesta release — só o fix do mecanismo de update. As funcionalidades da v3.40.0 (crop interativo, poderes condicionais, migração USERS) já estavam funcionando, era só o cache antigo que escondia.'}
+    ]
+  },
+  {
+    v:'3.40.0', d:'22 abr 2026',
     items:[
       {type:'high', title:'HUB · 3 ajustes estruturais (auditoria 22/04).',
         desc:'1) CROP interativo de imagem ao adicionar avatar. Antes o sistema cortava automático do centro. Agora abre modal com a imagem cheia, slider de zoom (1× → 4× do tamanho mínimo) e drag pra reposicionar. Quadrado verde marca a área que vira o avatar 400×400 JPEG 0.85. Funciona pro user editar a própria foto (Minha Conta) e pro admin editar foto de qualquer user (Editar Usuário).\n\n2) PODERES CONDICIONAIS: os 5 poderes (deletarPreventiva/executarPreventiva/exportarDados/editarMaquina/reatribuirCard) são todos do módulo Manutenção. Agora os toggles SÓ ficam editáveis se o user tem "Manutenção" marcado em Módulos liberados. Se não tem, aparece aviso vermelho "⚠ Esses poderes só valem dentro do Manutenção. Marque Manutenção em Módulos liberados acima pra ativar." e os toggles ficam disabled. Re-render reativo: marcar/desmarcar Manutenção atualiza o estado dos poderes na hora.\n\n3) MIGRAÇÃO USERS HARDCODED → users-config (auditoria estrutural pedida pelo William: "não podemos ter user hardcode"). Seed roda 1x quando admin abre Gerenciar Usuários: copia os 17 USERS hardcoded pra users-config no Firebase + senha plain do admin pra users-profile. Flag fiobras-users-seed-v1 garante que roda só uma vez. Depois disso, isUserDinamico() retorna true pra todos (exceto chave "admin" que continua protegida contra exclusão). Admin agora edita/exclui qualquer user (Anderson, Vorlei, etc) via UI sem precisar mexer no código. Compatibilidade: USERS hardcoded continua existindo como fallback até toda base estar migrada.'}
