@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.47.3', d:'22 abr 2026', current:true,
+    v:'3.47.4', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'CRM · novo lead registra criador no histórico + mover etapa pega user real.',
+        desc:'BUG 1: "Novo Lead" não mostrava avatar do criador no card.\nCausa: salvarLead() criava com historico=[]. leadColaboradores() não tinha entry de "Cadastrou lead" pra extrair criador.\nFix: ao criar (salvarLead com _id null), adiciona automaticamente:\n  historico = [{ acao: "Cadastrou lead", autor: <user atual>, data: ISO }]\n\nBUG 2: Mover lead pra outra etapa registrava "Usuário" genérico.\nCausa: usuario = window._user?.nome — null quando vem do HUB iframe (sessão fica em __hubSession).\nFix: usa getCurrentUser() (Fase 1 da auditoria) com fallback chain pra todas as fontes (_user → __hubSession → localStorage).\n\nResultado:\n• Novo lead criado AGORA mostra avatar do criador no stack do card\n• Mover etapa registra o user que moveu (avatar aparece no stack)\n• Aplicado em moverDireto + 4 outras funções que registravam histórico\n\nLeads ANTIGOS sem histórico continuam sem avatar (sem como recuperar autor passado). Daqui pra frente todos terão.'}
+    ]
+  },
+  {
+    v:'3.47.3', d:'22 abr 2026',
     items:[
       {type:'fix', title:'CRM · tooltip ainda vazava em avatares do meio do stack.',
         desc:'BUG persistente: v3.47.1 só corrigiu o first-child do stack. Avatares do meio (ex: 2º "admin" no card do Celso) continuavam centralizados → tooltip vazava pra esquerda do card.\n\nFix mais agressivo: TODOS os tooltips do stack alinhados pela ESQUERDA do avatar (left:0 + transform:none). Setinha aponta pra posição correta (left:13px). max-width:220px + white-space:normal evitam overflow horizontal mesmo com nome longo (quebra linha em vez de estender).\n\nCSS com !important pra sobrescrever a regra base do .cs-tip.'}

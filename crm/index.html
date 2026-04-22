@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.47.3">
+<link rel="stylesheet" href="../css/tokens.css?v=3.47.4">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2289,11 +2289,15 @@ function moverDireto(id, etapaDestino){
   const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
   const etapaOrigem = mapE(l.etapa);
   if(etapaOrigem === etapaDestino) return;
-  const usuario = window._user?.nome || 'Usuário';
+  // v3.47.4 — pega user logado de TODAS as fontes (window._user OU __hubSession OU localStorage)
+  const u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+  const usuario = (u && u.nome) || (window._user?.nome) || (window.__hubSession?.user) || 'Usuário';
   const hist = [...(l.historico||[]), {
     ts: Date.now(), tipo: 'outro', retorno: 'aguardando',
     texto: `Movido de "${ELBL[etapaOrigem]}" para "${ELBL[etapaDestino]}"`,
+    acao: `Movido de "${ELBL[etapaOrigem]}" para "${ELBL[etapaDestino]}"`, // v3.47.4: alias pra leadColaboradores()
     autor: usuario,
+    data: new Date().toISOString(), // v3.47.4: campo padrão
     etapaMov: { de: etapaOrigem, para: etapaDestino }
   }];
   window._update(id, { etapa: etapaDestino, etapaSince: Date.now(), historico: hist });
@@ -2811,7 +2815,13 @@ function salvarLead(){
     logEvento('editar','Editou lead: '+nome,data.produto?'Produto: '+data.produto:'');
     toast('Lead atualizado.');
   }else{
-    data.historico=[];
+    // v3.47.4 — registra autor da criação no histórico (avatar do criador no card)
+    const autorNome = (window._user?.nome) || (window.__hubSession?.user) || 'Sistema';
+    data.historico = [{
+      acao: 'Cadastrou lead',
+      autor: autorNome,
+      data: new Date().toISOString(),
+    }];
     window._push(data);
     if(_qual==='quente') notificarEmail(data);
     if(_qual==='quente')logEvento('novo_quente','Novo lead quente: '+nome,(data.empresa||'')+' / '+(data.produto||''));
@@ -3161,7 +3171,7 @@ function confirmarMover(){
   const obs=document.getElementById('moverObs').value.trim();
   const l=(window._leads||{})[id];
   /* Registra no histórico automaticamente */
-  const usuario=window._user?.nome||'Usuário';
+  const usuario=(typeof getCurrentUser==='function'&&getCurrentUser()?.nome)||window._user?.nome||window.__hubSession?.user||'Usuário';
   const textoHist=obs
     ? `[${ELBL[etapaDestino]}] ${obs}`
     : `Movido de "${ELBL[etapaOrigem]}" para "${ELBL[etapaDestino]}"`;
@@ -3391,7 +3401,7 @@ function confirmarPerdido(){
   const l=(window._leads||{})[id];
   const mapE=e=>e==='contato'?'novo':e==='ganho'?'fechado':e;
   const etapaOrigem=mapE(l?.etapa||'novo');
-  const usuario=window._user?.nome||'Usuario';
+  const usuario=(typeof getCurrentUser==='function'&&getCurrentUser()?.nome)||window._user?.nome||window.__hubSession?.user||'Usuario';
   const hist=[...(l?.historico||[]),{
     ts:Date.now(),tipo:'outro',retorno:'nao',
     texto:`[Perdido] ${obs}`,
@@ -3543,7 +3553,7 @@ function addCliInteracao(cliId){
     ts:Date.now(),
     tipo:tipo,
     texto:texto,
-    autor:window._user?.nome||'Usuario',
+    autor:(typeof getCurrentUser==='function'&&getCurrentUser()?.nome)||window._user?.nome||window.__hubSession?.user||'Usuario',
   };
   if(valor&&(tipo==='preco'||tipo==='negociacao')) entry.valor=valor;
   const tl=[...(c.timeline||[]),entry];
@@ -3576,7 +3586,7 @@ function migrarParaCliente(leadId){
       ts:Date.now(),
       tipo:'negociacao',
       texto:'Cliente convertido do pipeline (lead fechado)',
-      autor:window._user?.nome||'Sistema'
+      autor:(typeof getCurrentUser==='function'&&getCurrentUser()?.nome)||window._user?.nome||window.__hubSession?.user||'Sistema'
     }]
   });
 }
