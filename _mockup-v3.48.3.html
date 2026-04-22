@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup v3.48.3 — Card Kanban Minimalista</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*:before,*:after{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1A1D22;color:#fff;font-family:'Poppins',sans-serif;padding:32px;min-height:100vh}
+  h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:24px;margin-bottom:8px}
+  h2{font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;color:#9CA295;margin:24px 0 12px;letter-spacing:1px;text-transform:uppercase}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1200px;margin:0 auto}
+  .col-label{font-family:'DM Mono',monospace;font-size:11px;color:#6B7166;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px}
+  .stack{display:flex;flex-direction:column;gap:14px}
+
+  /* ========== ATUAL (v3.48.2) ========== */
+  .card-old{background:#252527;border:1px solid #353A42;border-radius:12px;padding:14px;position:relative}
+  .old-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;padding-right:90px}
+  .old-tag{font-size:.56rem;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:.2px}
+  .old-tag.t-prev{background:rgba(37,99,235,.18);color:#93C5FD}
+  .old-tag.u-alta{background:rgba(220,38,38,.12);color:#F87171;border:1px solid rgba(220,38,38,.3)}
+  .old-tag.s-mec{background:rgba(148,163,184,.18);color:#CBD5E1}
+  .old-actions{position:absolute;top:10px;right:10px;display:flex;gap:3px}
+  .old-ab{width:24px;height:24px;border-radius:6px;border:0;background:rgba(255,255,255,.04);color:#9CA295;display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+  .old-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:.88rem;color:#fff;line-height:1.3;margin:4px 0 8px}
+  .old-desc{font-size:.72rem;color:#9CA295;line-height:1.45;margin-bottom:10px}
+  .old-eq{font-family:'DM Mono',monospace;font-size:.6rem;color:#8E9490;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;gap:6px}
+  .old-eq-tag{color:#4ADE80;background:rgba(0,200,80,.1);padding:2px 7px;border-radius:4px;font-weight:600}
+  .old-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
+  .old-foot-l{display:flex;gap:10px;align-items:center}
+  .old-av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#7B2D9F,#A855F7);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:2px solid #1A1D22}
+  .old-icon-mini{width:11px;height:11px;color:#6B7166}
+  .old-date{font-family:'DM Mono',monospace;font-size:10px;color:#6B7166}
+  .old-progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.04);border-radius:0 0 12px 12px;overflow:hidden}
+  .old-progress-fill{width:0%;height:100%;background:linear-gradient(90deg,#6366F1,#818CF8)}
+
+  /* ========== NOVO (proposta minimalista) ========== */
+  .card-new{
+    background:#252527;border:1px solid #2E3138;border-radius:12px;
+    padding:14px;position:relative;display:grid;
+    grid-template-columns:44px 1fr auto;gap:12px;align-items:center;
+  }
+  .card-new.urg-alta{border-left:3px solid #DC2626}
+  .card-new.urg-media{border-left:3px solid #F59E0B}
+  .card-new.urg-baixa{border-left:3px solid #10B981}
+
+  /* Avatar GRANDE à esquerda (44px vs antes 22px) */
+  .new-av{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#7B2D9F,#A855F7);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;color:#fff;
+    flex-shrink:0;
+  }
+  .new-av.av-vorlei{background:linear-gradient(135deg,#1B5E20,#43A047)}
+  .new-av.av-edilson{background:linear-gradient(135deg,#0D47A1,#1976D2)}
+
+  /* Centro: título + meta linha única */
+  .new-body{min-width:0}
+  .new-title{
+    font-family:'Outfit',sans-serif;font-weight:700;font-size:.84rem;
+    color:#fff;line-height:1.25;margin-bottom:4px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .new-meta{
+    font-family:'DM Mono',monospace;font-size:.58rem;
+    color:#6B7166;text-transform:uppercase;letter-spacing:.6px;
+    display:flex;gap:8px;align-items:center;
+  }
+  .new-meta-tag{
+    background:rgba(0,200,80,.1);color:#4ADE80;
+    padding:1px 6px;border-radius:3px;font-weight:600;
+  }
+  .new-meta-sep{opacity:.4}
+  .new-meta-overdue{color:#F87171;font-weight:600}
+
+  /* Direita: chip de urgência + ações compactas */
+  .new-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .new-urg{
+    font-family:'Poppins',sans-serif;font-size:.55rem;font-weight:600;
+    padding:2px 7px;border-radius:4px;letter-spacing:.3px;text-transform:uppercase;
+  }
+  .new-urg.alta{background:rgba(220,38,38,.15);color:#F87171}
+  .new-urg.media{background:rgba(245,158,11,.15);color:#FCD34D}
+  .new-urg.baixa{background:rgba(16,185,129,.15);color:#6EE7B7}
+
+  .new-ab{
+    width:26px;height:26px;border-radius:6px;border:0;
+    background:rgba(255,255,255,.05);color:#9CA295;
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:11px;transition:.15s;
+  }
+  .new-ab:hover{background:rgba(255,255,255,.12);color:#fff}
+  .new-ab.ok{color:#6EE7B7}
+  .new-ab.ok:hover{background:rgba(16,185,129,.18);color:#10B981}
+
+  /* Expansão (clique no card abre detalhes) */
+  .new-expand{font-size:.62rem;color:#6B7166;margin-top:6px;font-style:italic}
+
+  /* Tooltip — avatar agora ancorado à esquerda (não centralizado) */
+  .av-wrap{position:relative;display:inline-block}
+  .av-tip{
+    position:absolute;bottom:calc(100% + 6px);
+    left:0;          /* ⬅️ era left:50%; transform:translateX(-50%) */
+    background:#1B1F18;color:#fff;padding:4px 10px;
+    border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;
+    opacity:0;pointer-events:none;transition:opacity .15s;z-index:100;
+  }
+  .av-tip:after{
+    content:"";position:absolute;top:100%;left:18px;
+    border:4px solid transparent;border-top-color:#1B1F18;
+  }
+  .av-wrap:hover .av-tip{opacity:1}
+
+  /* Comparação altura: novo é 50% menor */
+  .height-note{
+    font-family:'DM Mono',monospace;font-size:.55rem;
+    color:#6B7166;text-align:center;padding-top:4px;
+  }
+</style>
+</head>
+<body>
+  <h1>Mockup v3.48.3 — Card Kanban Minimalista</h1>
+  <p style="color:#9CA295;font-size:.78rem;max-width:700px;margin-bottom:24px">
+    Avatar grande (44px) à esquerda · título + 1 linha de meta no centro · urgência + ações compactas à direita.
+    Comentários/peças/data passam pra modal de detalhe ao clicar no card. Altura cai de ~150px → ~70px.
+  </p>
+
+  <div class="row">
+    <div>
+      <div class="col-label">▼ ATUAL (v3.48.2)</div>
+      <div class="stack">
+        <div class="card-old">
+          <div class="old-actions">
+            <button class="old-ab">▶</button>
+            <button class="old-ab">✎</button>
+            <button class="old-ab">🗑</button>
+          </div>
+          <div class="old-tags">
+            <span class="old-tag t-prev">Preventiva</span>
+            <span class="old-tag u-alta">Alta</span>
+            <span class="old-tag s-mec">Mecânica</span>
+          </div>
+          <div class="old-title">Abrir tampas das cabeceiras e efetuar limpeza</div>
+          <div class="old-desc">Vencida em 23/04/2026. Responsável: Vorlei.</div>
+          <div class="old-eq"><span class="old-eq-tag">RET-01</span><span>RETORCEDEIRA VTS 07 2001</span></div>
+          <div class="old-foot">
+            <div class="old-foot-l">
+              <span class="old-av">VL</span>
+              <svg class="old-icon-mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <svg class="old-icon-mini" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2l2 2-6 6-2-2 6-6z"/></svg>
+            </div>
+            <div class="old-date">Hoje</div>
+          </div>
+          <div class="old-progress"><div class="old-progress-fill"></div></div>
+        </div>
+        <div class="height-note">altura: ~150px · 8 elementos visíveis</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="col-label">▼ NOVO (proposta)</div>
+      <div class="stack">
+        <div class="card-new urg-alta">
+          <div class="av-wrap">
+            <span class="new-av av-vorlei">VL</span>
+            <span class="av-tip">Vorlei</span>
+          </div>
+          <div class="new-body">
+            <div class="new-title">Abrir tampas das cabeceiras e efetuar limpeza</div>
+            <div class="new-meta">
+              <span class="new-meta-tag">RET-01</span>
+              <span>Preventiva</span>
+              <span class="new-meta-sep">·</span>
+              <span class="new-meta-overdue">Vencida 1d</span>
+            </div>
+          </div>
+          <div class="new-right">
+            <button class="new-ab ok" title="Iniciar">▶</button>
+            <button class="new-ab" title="Editar">✎</button>
+          </div>
+        </div>
+
+        <div class="card-new urg-media">
+          <div class="av-wrap">
+            <span class="new-av av-edilson">ED</span>
+            <span class="av-tip">Edilson</span>
+          </div>
+          <div class="new-body">
+            <div class="new-title">Conferir tensão e condição das correias</div>
+            <div class="new-meta">
+              <span class="new-meta-tag">RET-01</span>
+              <span>Demanda</span>
+              <span class="new-meta-sep">·</span>
+              <span>Hoje</span>
+            </div>
+          </div>
+          <div class="new-right">
+            <button class="new-ab ok" title="Iniciar">▶</button>
+            <button class="new-ab" title="Editar">✎</button>
+          </div>
+        </div>
+
+        <div class="card-new urg-baixa">
+          <div class="av-wrap">
+            <span class="new-av">JS</span>
+            <span class="av-tip">Joacir</span>
+          </div>
+          <div class="new-body">
+            <div class="new-title">Lubrificar mancais — preventiva mensal</div>
+            <div class="new-meta">
+              <span class="new-meta-tag">PRE-02</span>
+              <span>Preventiva</span>
+              <span class="new-meta-sep">·</span>
+              <span>3d</span>
+            </div>
+          </div>
+          <div class="new-right">
+            <button class="new-ab ok" title="Iniciar">▶</button>
+            <button class="new-ab" title="Editar">✎</button>
+          </div>
+        </div>
+
+        <div class="height-note">altura: ~70px · 4 elementos visíveis · clique abre detalhes</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Mobile (≤480px)</h2>
+  <div style="max-width:380px;margin:0 auto;background:#1A1D22;padding:12px;border-radius:12px">
+    <div class="card-new urg-alta" style="margin-bottom:8px">
+      <div class="av-wrap">
+        <span class="new-av av-vorlei" style="width:38px;height:38px;font-size:13px">VL</span>
+        <span class="av-tip">Vorlei</span>
+      </div>
+      <div class="new-body">
+        <div class="new-title" style="font-size:.78rem">Abrir tampas e limpar</div>
+        <div class="new-meta" style="font-size:.55rem">
+          <span class="new-meta-tag">RET-01</span>
+          <span class="new-meta-overdue">Vencida 1d</span>
+        </div>
+      </div>
+      <div class="new-right">
+        <button class="new-ab ok" title="Iniciar">▶</button>
+      </div>
+    </div>
+    <div class="card-new urg-media">
+      <div class="av-wrap">
+        <span class="new-av av-edilson" style="width:38px;height:38px;font-size:13px">ED</span>
+        <span class="av-tip">Edilson</span>
+      </div>
+      <div class="new-body">
+        <div class="new-title" style="font-size:.78rem">Conferir correias</div>
+        <div class="new-meta" style="font-size:.55rem">
+          <span class="new-meta-tag">RET-01</span>
+          <span>Hoje</span>
+        </div>
+      </div>
+      <div class="new-right">
+        <button class="new-ab ok" title="Iniciar">▶</button>
+      </div>
+    </div>
+  </div>
+
+  <h2>Resumo das mudanças</h2>
+  <ul style="color:#9CA295;font-size:.78rem;line-height:1.7;max-width:700px;margin:0 auto;list-style:none">
+    <li>✓ Avatar 22px → <b style="color:#fff">44px</b> (foto/iniciais bem visíveis)</li>
+    <li>✓ Altura 150px → <b style="color:#fff">70px</b> (cabe 2× mais cards na tela)</li>
+    <li>✓ Tags 3 chips no topo → <b style="color:#fff">1 linha de meta</b> (RET-01 · Tipo · Data)</li>
+    <li>✓ Comentários/peças/descrição → <b style="color:#fff">passam pra modal de detalhe</b> (clique no card)</li>
+    <li>✓ Botões de ação só os essenciais (▶ Iniciar e ✎ Editar) — Excluir vai pro modal</li>
+    <li>✓ Borda esquerda colorida indica urgência (vermelho/laranja/verde)</li>
+    <li>✓ Tooltip do avatar ancorado à esquerda — não corta mais no card</li>
+  </ul>
+</body>
+</html>

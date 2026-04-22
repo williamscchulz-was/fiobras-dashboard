@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.48.2">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.48.3">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3713,7 +3713,7 @@ function doLogout() {
 }
 
 // ── UTILS ─────────────────────────────────────────────
-function today() { return new Date(); }
+function today() { const d = new Date(); d.setHours(0,0,0,0); return d; } // v3.48.3 — midnight pra diffDays bater certo (antes considerava hora atual e gerava card "vencida amanhã")
 function parseDt(s) { return s ? new Date(s + 'T00:00:00') : null; }
 function diffDays(a, b) { return Math.round((b - a) / 86400000); }
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
@@ -3938,8 +3938,20 @@ function renderDashboard() {
 function updateBanner() {
   const banner = document.getElementById('kanban-banner');
   if (!banner) return;
-  const pendentes = state.cards.filter(c => c.tipo === 'preventiva' && c.urg === 'alta' && c.col === 'todo');
-  if (!pendentes.length) { banner.style.display = 'none'; return; }
+  // v3.48.3 — banner só aparece (a) entre 07:30 e 08:00 BRT (b) pro user responsável.
+  // Fora dessa janela, ou pra outros users, fica só o card no Kanban (não polui a tela).
+  const now = new Date();
+  const minsAgora = now.getHours() * 60 + now.getMinutes();
+  const dentroJanela = minsAgora >= (7 * 60 + 30) && minsAgora <= (8 * 60); // 07:30 → 08:00
+  const userAtual = (state.user || '').toLowerCase();
+  let pendentes = state.cards.filter(c => c.tipo === 'preventiva' && c.urg === 'alta' && c.col === 'todo');
+  // Filtra só as do user logado (compara contra resp da preventiva)
+  pendentes = pendentes.filter(c => {
+    const pv = state.preventivas.find(p => (p._key || p.id) === c.prevId);
+    const resp = (pv ? pv.resp : c.resp) || '';
+    return resp.toLowerCase() === userAtual;
+  });
+  if (!dentroJanela || !pendentes.length) { banner.style.display = 'none'; return; }
   banner.style.display = 'block';
   const qtd = pendentes.length;
   const titulo = qtd === 1 ? 'Alta: 1 preventiva vencida pendente' : ('Alta: ' + qtd + ' preventivas vencidas pendentes');
@@ -4071,7 +4083,11 @@ function _tickTimers() {
 let _timerInterval = null;
 function _iniciarTimers() {
   if (_timerInterval) clearInterval(_timerInterval);
-  _timerInterval = setInterval(_tickTimers, 60000);
+  _timerInterval = setInterval(() => {
+    _tickTimers();
+    // v3.48.3 — re-avalia banner pra esconder/aparecer fora da janela 07:30-08:00
+    if (typeof updateBanner === 'function') updateBanner();
+  }, 60000);
 }
 
 // v3.36.0 — Kanban redesign (Ajuste 4): card novo estilo Linear/Trello dark
@@ -4151,14 +4167,9 @@ function buildCard(c) {
     estHtml = `<span class="kc2-est"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${c.horasEstimadas}h</span>`;
   }
 
-  // Peças badge (só pra admin)
-  const pecas = Array.isArray(c.pecas) ? c.pecas : (c.pecas && typeof c.pecas === 'object' ? Object.values(c.pecas) : []);
-  const pecasHtml = state.isAdmin
-    ? `<span class="kc2-pecas" onclick="event.stopPropagation();abrirModalPecas('${c._key}')" title="${pecas.length ? pecas.length + ' peça' + (pecas.length>1?'s':'') : 'Adicionar peças'}">
-        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2l2 2-6 6-2-2 6-6z"/><line x1="13" y1="5" x2="15" y2="3"/><circle cx="4" cy="13" r="2"/></svg>
-        ${pecas.length || ''}
-      </span>`
-    : '';
+  // v3.48.3 — botão de peças removido do card (William: "n precisa de botao para adicionar peças tira fora").
+  // Peças cadastradas continuam acessíveis no modal de detalhe.
+  const pecasHtml = '';
 
   // Botões de ação
   const canEdit = state.isAdmin || (c.autor === state.user) || (c.resp === state.user);

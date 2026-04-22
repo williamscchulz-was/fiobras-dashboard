@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.48.2', d:'22 abr 2026', current:true,
+    v:'3.48.3', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · Kanban: 5 ajustes (banner timing/filter · tooltip avatar · peças · vencida bug · push 07:30).',
+        desc:'Pacote de ajustes na tela do Kanban (mockup do redesign do card em _mockup-v3.48.3.html aguardando aprovação):\n\n• BANNER vermelho "preventivas vencidas pendentes" agora só aparece (a) entre 07:30-08:00 BRT (b) pro user RESPONSÁVEL daquela preventiva. Fora dessa janela ou pra outros users, fica só o card no Kanban — não polui mais a tela. Banner reavalia a cada minuto pra esconder/aparecer sozinho.\n\n• TOOLTIP do avatar (.av-tip em tokens.css) ancorado à esquerda em vez de centralizado. Antes vazava do card quando avatar tava no canto esquerdo do footer. Agora estica só pra direita, dentro do card.\n\n• BOTÃO peças removido do card Kanban. Estava poluindo. Peças continuam acessíveis via modal de detalhe.\n\n• BUG "Vencida 23/04 quando hoje é 22/04": função today() retornava `new Date()` com hora atual, enquanto parseDt(p.ultima) zerava pra 00:00. Resultado: diffDays(today=15:00, prox=23/04 00:00) = 0.4 → round(0) → triggava como "vencida hoje". Fix: today() agora seta hours 0,0,0,0 — diff vira 1 dia inteiro (não dispara).\n\n• PUSH digest diário do worker Cloudflare movido de 08:30 BRT → 07:30 BRT (cron "30 10 * * 1-5"). Precisa wrangler deploy pra aplicar.'}
+    ]
+  },
+  {
+    v:'3.48.2', d:'22 abr 2026',
     items:[
       {type:'fix', title:'Pós-ZERO HARDCODE · 3 fixes (senha "FIXA" · modal Reatribuir · William sumido).',
         desc:'Bugs reportados após v3.48.0 (eliminação de USERS hardcoded):\n\n1) HUB · Painel "Gerenciar usuários" mostrava tag "FIXA" e desabilitava botão Resetar pra users que vieram do seed antigo (admin/joacir). Causa: `getAllUsers()` agora retorna `senha: p.senhaPlain` pra TODOS os users (não tem mais conceito de hardcoded), mas a lógica de tag ainda checava `u.senha !== null` como sinal de "fixa". Fix: tag virou só "definida" / "sem senha", e admin pode resetar QUALQUER senha. resetarSenhaUser passa `{senhaHash:null, senhaPlain:null}` (Firebase update merge precisa de null explícito pra remover campo).\n\n2) Manutenção · Modal "Reatribuir Responsável" mostrava TODOS os users do HUB (incluindo CRM, Produção, etc). Devia mostrar só users com acesso ao módulo Manutenção. Fix: `abrirModalReatribuir()` filtra por `role === admin || gerente || modulesAllowedOverride.includes(manutencao)`. Mesmo filtro aplicado em `_popUserSelect()` (selects de demanda/preventiva/máquina). Modal agora também mostra foto, label do role (Admin/Gerente/Técnico) e estado vazio.\n\n3) Manutenção · William Schulz (admin) não aparecia em listas. Causa: filtros excluíam role admin/gerente. Fix: incluídos explicitamente.'}

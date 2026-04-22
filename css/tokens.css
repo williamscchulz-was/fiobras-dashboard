@@ -139,14 +139,16 @@
 
 /* tooltip hover */
 .av-wrap{position:relative;display:inline-block;}
+/* v3.48.3 — tooltip ancorado à esquerda (left:0 em vez de left:50%) pra não vazar do card.
+   Quando o avatar tá no canto esquerdo do card, centralizar fazia o tooltip estourar pra fora. */
 .av-wrap .av-tip{
-  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  position:absolute;bottom:100%;left:0;transform:none;
   margin-bottom:6px;background:#1B1F18;color:#fff;padding:4px 10px;
   border-radius:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;
   white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:100;
 }
 .av-wrap .av-tip::after{
-  content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  content:"";position:absolute;top:100%;left:14px;transform:none;
   border:4px solid transparent;border-top-color:#1B1F18;
 }
 .av-wrap:hover .av-tip{opacity:1;}
