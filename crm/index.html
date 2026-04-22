@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.40.0">
+<link rel="stylesheet" href="../css/tokens.css?v=3.40.2">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -624,6 +624,8 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
 
 /* BOTTOM NAV */
 .bnav{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px 2px;color:#b0bec5;transition:color 0.2s;font-family:'Poppins',sans-serif;min-width:0;}
+/* v3.40.2 — em iframe do HUB esconde bottom-nav (HUB tem própria pílula mnav-pill) */
+html.in-hub-frame #bottomNav { display: none !important; }
 .bnav-pill{width:40px;height:30px;border-radius:16px;display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
 .bnav.active{color:var(--green);}
 .bnav.active .bnav-pill{background:var(--green-l);}
@@ -871,6 +873,10 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
     window.__hubBlocked = true;
   } else {
     window.__hubSession = sess;
+  }
+  // v3.40.2 — em iframe do HUB, esconde bottom-nav do sub-app
+  if (window !== window.top) {
+    document.documentElement.classList.add('in-hub-frame');
   }
 })();
 </script>

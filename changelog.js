@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.40.1', d:'22 abr 2026', current:true,
+    v:'3.40.2', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'2 fixes urgentes: crop modal por trás + nav mobile dos sub-apps duplicada.',
+        desc:'1) Modal de Crop de imagem aparecia POR TRÁS do modal "Editar Usuário" (ambos com z-index 200; o crop foi inserido antes no DOM). Sem ver o modal, click "Aplicar recorte" caía no overlay do modal de baixo, parecia que "não salvava". Fix: cropModal ganhou z-index:9999 inline.\n\n2) No mobile, dentro de um sub-app (Manutenção/CRM), apareciam DUAS pílulas de navegação: a do sub-app POR CIMA da do HUB. Fix: detecta `window !== window.top` no boot do sub-app e adiciona class `in-hub-frame` no <html>; CSS esconde a bottom-nav do sub-app quando essa class está presente. Aplicado em Manutenção e CRM (Preço não tem nav mobile).'}
+    ]
+  },
+  {
+    v:'3.40.1', d:'22 abr 2026',
     items:[
       {type:'fix', title:'Service Worker · update mais agressivo (boot + 5 min em vez de só 30 min).',
         desc:'Diagnóstico: William reportou que ao selecionar imagem do avatar, "nada acontece". Eu confirmei via preview/eval que ANTES do hard reload todas as funções da v3.40.0 (abrirCropModal, cropConfirm, aplicarUsuariosSeed) apareciam undefined no window — ou seja, o navegador estava servindo o JS cacheado pelo Service Worker da release anterior.\n\nO SW já tinha mecanismo de auto-update + toast "Atualizar agora" + skipWaiting. Mas o re-check só acontecia a cada 30 minutos de uso, então users que abriam o app recém após uma release nova podiam ficar várias horas com cache stale.\n\nFix: chama reg.update() IMEDIATAMENTE no boot do app + setInterval de 5 min em vez de 30 min. Combinado com o toast existente, o user vê a opção de atualizar muito mais cedo. Zero impacto em performance porque o reg.update() é só uma comparação de hash, não baixa nada se nada mudou.\n\nNada de feature nova nesta release — só o fix do mecanismo de update. As funcionalidades da v3.40.0 (crop interativo, poderes condicionais, migração USERS) já estavam funcionando, era só o cache antigo que escondia.'}
