@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.47.8">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.48.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2554,15 +2554,8 @@ display: none;
       <div class="field">
         <label>Responsável pela alteração</label>
         <div id="mv-nome-display" style="background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:8px;padding:10px 14px;font-size:0.85rem;font-weight:600;color:var(--blue)"></div>
-        <select id="mv-nome" style="display:none;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Poppins',sans-serif;font-size:0.8rem;padding:9px 12px;outline:none;width:100%">
-          <option value="">Selecionar...</option>
-          <option>Joacir</option>
-          <option>Hernandes</option>
-          <option>Vorlei</option>
-          <option>Pedro</option>
-          <option>Ivonei</option>
-          <option>Roland</option>
-        </select>
+        <!-- v3.48.0 — populado via _popUserSelect('mv-nome') -->
+        <select id="mv-nome" style="display:none;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Poppins',sans-serif;font-size:0.8rem;padding:9px 12px;outline:none;width:100%"></select>
       </div>
       <div class="field">
         <label>Horário</label>
@@ -2902,15 +2895,8 @@ display: none;
             </select>
           </div>
           <div class="field"><label>Responsável</label>
-            <select id="dem-resp">
-              <option value="">Selecionar...</option>
-              <option>Hernandes</option>
-              <option>Vorlei</option>
-              <option>Pedro</option>
-              <option>Ivonei</option>
-              <option>Roland</option>
-              <option>Joacir</option>
-            </select>
+            <!-- v3.48.0 — populado via _popUserSelect('dem-resp') -->
+            <select id="dem-resp"></select>
           </div>
         </div>
         <div class="field"><label>Descrição</label><textarea id="dem-desc" placeholder="Descreva o que precisa ser feito..."></textarea></div>
@@ -2975,12 +2961,8 @@ display: none;
       <div class="modal-row">
         <div class="field"><label>Equipamento</label><input id="ca-equip" placeholder="Nome do equipamento"></div>
         <div class="field"><label>Responsável</label>
-          <select id="ca-resp">
-            <option value="">Selecionar...</option>
-            <option>Hernandes</option><option>Vorlei</option>
-            <option>Pedro</option><option>Ivonei</option>
-            <option>Roland</option><option>Joacir</option>
-          </select>
+          <!-- v3.48.0 — populado via _popUserSelect('ca-resp') -->
+          <select id="ca-resp"></select>
         </div>
       </div>
       <div class="field"><label>Descrição</label><textarea id="ca-desc" placeholder="Detalhes do serviço..."></textarea></div>
@@ -3067,16 +3049,8 @@ display: none;
       <div class="modal-row">
         <div class="field"><label>Última execução</label><input id="pv-ultima" type="date"></div>
         <div class="field"><label>Responsável</label>
-          <select id="pv-resp">
-            <option value="">Selecionar...</option>
-            <option>Joacir</option>
-            <option>Eugênio</option>
-            <option>Hernandes</option>
-            <option>Vorlei</option>
-            <option>Pedro</option>
-            <option>Ivonei</option>
-            <option>Roland</option>
-          </select>
+          <!-- v3.48.0 — populado via _popUserSelect('pv-resp') -->
+          <select id="pv-resp"></select>
         </div>
       </div>
       <div class="field"><label>Observações</label><textarea id="pv-obs" placeholder="Procedimento, materiais..."></textarea></div>
@@ -3336,6 +3310,35 @@ window.getCurrentUser = function(){
 };
 
 // v3.32.3 — Avatar helpers (sistema unificado). Foto se cadastrada, senão iniciais+gradient.
+// v3.48.0 — popula <select> de responsável dinamicamente da fonte única (Firebase).
+// Substitui os 23 <option> hardcoded que existiam em 4 modais.
+window._popUserSelect = function(selectId, opts) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  opts = opts || {};
+  const valorAtual = sel.value || opts.selected || '';
+  const cfg = state.usersConfig || {};
+  const profs = state.userProfiles || {};
+  const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
+  const users = Array.from(allKeys)
+    .filter(k => {
+      if (k === 'admin') return false; // admin não vira responsável de demanda/preventiva
+      const c = cfg[k] || {};
+      const p = profs[k] || {};
+      if (c.active === false || p.active === false) return false;
+      return !!(p.nomeCompleto || c.nome || p.nome);
+    })
+    .map(k => {
+      const c = cfg[k] || {};
+      const p = profs[k] || {};
+      return p.nomeCompleto || c.nome || p.nome || k;
+    })
+    .sort((a, b) => a.localeCompare(b));
+  const placeholder = opts.placeholder || 'Selecionar...';
+  sel.innerHTML = '<option value="">' + placeholder + '</option>' +
+    users.map(n => '<option' + (n === valorAtual ? ' selected' : '') + '>' + n + '</option>').join('');
+};
+
 // v3.40.3 — shim de toast() pra compat com refatorações v3.35+ (HUB tem toast,
 // sub-app só tinha exibirInAppNotif). Sem isso, 14 chamadas dão ReferenceError
 // silencioso e travam funções (ex: salvarPreventiva não fechava o modal).
@@ -3449,10 +3452,9 @@ const DEL_SVG_STR   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="non
 // SOURCE OF TRUTH: users-config (lista) + users-profile (foto/nome/role) no Firebase.
 // Quando users-config carrega via onValue, o USERS é enriquecido em runtime.
 // Os 2 hardcoded abaixo (admin/joacir) garantem login mesmo sem Firebase.
-const USERS = {
-  'admin':  { senha: 'admin', isAdmin: true,  nome: 'Admin'  },
-  'joacir': { senha: '2725',  isAdmin: true,  nome: 'Joacir' },
-};
+// v3.48.0 — ZERO HARDCODE. SSOT = Firebase (users-config + users-profile).
+// Hidratado sincronamente via cache localStorage (preload) + atualizado via onValue.
+const USERS = {};
 // STANDARD_USERS legacy: mantido apenas pra códigos que ainda referenciam (será derivado
 // dinamicamente após Firebase carregar — ver _refreshStandardUsers abaixo).
 let STANDARD_USERS = [];
@@ -4572,6 +4574,7 @@ function abrirModalMover(key, col, card) {
   const mvDisplay = document.getElementById('mv-nome-display');
   const mvSel     = document.getElementById('mv-nome');
   if (state.isAdmin) {
+    if (typeof _popUserSelect === 'function') _popUserSelect('mv-nome', { selected: state.user });
     mvDisplay.style.display = 'none';
     mvSel.style.display     = '';
     mvSel.value             = state.user || '';
@@ -4656,6 +4659,8 @@ function abrirModalDemanda() {
   // v3.38.0 — popula selects
   _populateDemSolicitantes();
   _populateDemEquip();
+  // v3.48.0 — responsável dinâmico do Firebase
+  if (typeof _popUserSelect === 'function') _popUserSelect('dem-resp');
   document.getElementById('dem-nome').value = state.user || '';
   document.getElementById('dem-titulo').value = '';
   document.getElementById('dem-equip').value = '';
@@ -4745,8 +4750,8 @@ function editarCard(key) {
   document.getElementById('ca-urg').value    = card.urg    || 'media';
   const horasEl = document.getElementById('ca-horas');
   if (horasEl) horasEl.value = card.diasEstimados || card.horasEstimadas || '';
-  const respEl = document.getElementById('ca-resp');
-  if (respEl) respEl.value = card.resp || '';
+  // v3.48.0 — popula select dinâmico do Firebase com valor atual selecionado
+  if (typeof _popUserSelect === 'function') _popUserSelect('ca-resp', { selected: card.resp || '' });
   document.getElementById('modal-card-admin').classList.add('open');
 }
 
@@ -4756,6 +4761,8 @@ function abrirModalCardAdmin() {
   const title = document.getElementById('ca-modal-title');
   if (title) title.textContent = 'Novo Card';
   ['ca-titulo','ca-desc','ca-equip'].forEach(id => document.getElementById(id).value = '');
+  // v3.48.0 — responsável dinâmico do Firebase
+  if (typeof _popUserSelect === 'function') _popUserSelect('ca-resp');
   document.getElementById('modal-card-admin').classList.add('open');
 }
 function salvarCardAdmin() {
@@ -4976,6 +4983,8 @@ let _pvTarefasCustom = []; // tarefas livres adicionadas via input
 function abrirModalPreventiva(key) {
   editandoPrevKey = key || null;
   populatePvMaquinaSelect();
+  // v3.48.0 — popula select de responsável dinâmico (Firebase)
+  if (typeof _popUserSelect === 'function') _popUserSelect('pv-resp');
   const modal = document.getElementById('modal-preventiva');
   const titulo = document.getElementById('pv-modal-title');
   const tarefasWrap = document.getElementById('pv-tarefas-wrap');
@@ -4998,7 +5007,8 @@ function abrirModalPreventiva(key) {
     document.getElementById('pv-setor').value  = p.setor  || 'mecanica';
     document.getElementById('pv-freq').value   = p.freq   || 30;
     document.getElementById('pv-ultima').value = p.ultima || todayStr();
-    document.getElementById('pv-resp').value   = p.resp   || '';
+    // v3.48.0 — re-popula com valor atual selecionado
+    if (typeof _popUserSelect === 'function') _popUserSelect('pv-resp', { selected: p.resp || '' });
     document.getElementById('pv-obs').value    = p.obs    || '';
     document.getElementById('pv-save-btn').textContent = 'Salvar alterações';
   } else {

@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.47.8">
+<link rel="stylesheet" href="../css/tokens.css?v=3.48.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -1970,16 +1970,23 @@ const IS_TOUCH_DEVICE = window.matchMedia('(pointer:coarse)').matches;
 const ALERTA_DIAS_CARD = 7; // tempo na etapa que vira alerta (antes era 3)
 let _crmPopBtn = null; // botão que abriu o popover ativo
 
-/* Cores de avatar por usuário (gradient) */
-const AVATAR_GRADIENTS = {
-  admin:    'linear-gradient(135deg,#1B1F18,#3A3A3C)',
-  william:  'linear-gradient(135deg,#008835,#00b347)',
-  geovani:  'linear-gradient(135deg,#008835,#00b347)',
-  jacques:  'linear-gradient(135deg,#7C3AED,#a855f7)',
-  suyanne:  'linear-gradient(135deg,#EA580C,#fb923c)',
-  edilson:  'linear-gradient(135deg,#2563EB,#60a5fa)',
-  joacir:   'linear-gradient(135deg,#0d8a6c,#10b981)',
-};
+/* v3.48.0 — cor do avatar derivada da chave (hash determinístico).
+   Mesmo user → sempre mesma cor. Funciona pra QUALQUER user, sem hardcode.
+   Antes tinha 7 cores fixas só pra alguns users — outros viravam cinza. */
+const AVATAR_GRADIENTS = new Proxy({}, {
+  get(_, key) {
+    if (!key) return 'linear-gradient(135deg,#6B7166,#9CA295)';
+    const k = String(key).toLowerCase();
+    // Hash simples da chave → hue determinístico
+    let hash = 0;
+    for (let i = 0; i < k.length; i++) {
+      hash = ((hash << 5) - hash) + k.charCodeAt(i);
+      hash |= 0;
+    }
+    const hue = Math.abs(hash) % 360;
+    return `linear-gradient(135deg, hsl(${hue},45%,38%), hsl(${hue},55%,52%))`;
+  }
+});
 // v3.40.4 — resolve nome → chave em users-profile (igual _resolveUserKey do HUB/Manutenção)
 function _crmResolveUserKey(nomeOuKey){
   if(!nomeOuKey) return null;

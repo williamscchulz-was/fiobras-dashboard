@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.47.8', d:'22 abr 2026', current:true,
+    v:'3.48.0', d:'22 abr 2026', current:true,
+    items:[
+      {type:'high', title:'ZERO HARDCODE de usuários · USERS lê 100% do Firebase.',
+        desc:'Conclusão da auditoria arquitetural. Todos os usuários hardcoded foram removidos:\n\n• HUB index.html: const USERS = {} (era 17 entries)\n• Manutenção: const USERS = {} (era admin/joacir)\n• Manutenção: 4 selects com 23 <option> hardcoded → populate dinâmico via _popUserSelect()\n• CRM: AVATAR_GRADIENTS hardcoded de 7 cores → função hash determinística (mesmo user sempre mesma cor, funciona pra QUALQUER user)\n\nFonte única de verdade: Firebase\n  - users-config/{key} = lista canônica + nome\n  - users-profile/{key} = foto, role, senha plain\n\ngetUser(key) e getAllUsers() agora derivam 100% do Firebase. Validado via preview/eval:\n  USERS = []  (vazio)\n  getUser("admin") → "William Schulz" (do Firebase)\n  getUser("vorlei") → "Vorlei" (do Firebase)\n  18 users em users-config + 18 em users-profile\n\nFallback de offline:\n• Cache localStorage (v3.43.0) cobre uso normal — usuários aparecem instantâneos no boot\n• Se Firebase off + cache vazio (1ª visita máquina nova sem net): splash "Conectando ao servidor..." com spinner + botão Tentar novamente\n• ZERO senha hardcoded — admin/joacir lêem senhaPlain de users-profile (gravado via seed v2 v3.45.0)\n\nResultado: criar/editar/excluir user no painel admin propaga em TODOS os apps imediatamente. Adicionar user novo apareceu nos selects do Manutenção sem deploy. Trocar foto no HUB → atualiza avatar do CRM em segundos.'}
+    ]
+  },
+  {
+    v:'3.47.8', d:'22 abr 2026',
     items:[
       {type:'feat', title:'CRM · admin pode deletar entries do histórico do lead.',
         desc:'Cada entry do histórico ganhou botão lixeira (visível só pra admin). Click pede confirmação com preview do conteúdo a deletar — se confirmar, remove a entry do array `historico` no Firebase.\n\nUtilidade:\n• Limpar testes acidentais (movimentações errôneas)\n• Remover entries de auditoria que poluem timeline\n• Corrigir interações registradas equivocadamente\n\nLog em crm/log: cada deleção registra "Histórico deletado · <descrição> · por <admin>" pra rastreio.\n\nNão deleta o lead em si — só a entry específica. Outras entries permanecem.'}
