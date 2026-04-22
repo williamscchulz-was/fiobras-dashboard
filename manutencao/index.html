@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.48.4">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.48.6">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3211,6 +3211,8 @@ onValue(prevRef, snap => {
   state.preventivas = val ? Object.entries(val).map(([k,v]) => ({...v, _key:k})) : DEFAULT_PREV;
   gerarCardsPreventivas();
   limparCardsOrfaos();
+  // v3.48.6 — limpeza one-shot dos cards fantasma (gerados antes do fix v3.48.3)
+  if (typeof limparCardsFantasma === 'function') setTimeout(limparCardsFantasma, 1500);
   renderPreventiva();
   renderDashboard();
   _salvarCacheLocal();
@@ -3460,7 +3462,13 @@ function avatar(nomeOuKey, size = 'sm') {
   const key = _resolveUserKey(nomeOuKey);
   const src = (typeof USERS !== 'undefined') ? USERS : (window.USERS||{});
   const u = key ? src[key] : null;
-  const nome = u ? u.nome : (nomeOuKey || '—');
+  // v3.48.6 — nome friendly atual SEMPRE do users-profile (sobrevive a rename)
+  const profPriority = key ? (state.userProfiles && state.userProfiles[key]) : null;
+  const cfgPriority  = key ? (state.usersConfig && state.usersConfig[key]) : null;
+  const nome = (profPriority?.nomeCompleto)
+            || (cfgPriority?.nome)
+            || (u ? u.nome : null)
+            || (nomeOuKey || '—');
   const initials = _getInitials(nome);
   const ucls = key ? ('u-' + key) : 'u-default';
   // Foto cadastrada em users-profile/<key>/foto ?
@@ -3817,6 +3825,37 @@ function limparCardsOrfaos() {
       window._fbRemoveCard(c._key);
     }
   });
+}
+
+// v3.48.6 — limpeza one-shot de cards "fantasma" gerados antes do fix do today()
+// midnight (v3.48.3). Remove cards de preventiva onde proxima > hoje (não venceu ainda).
+// Roda 1x via flag, só pra admin. Cards em "doing" ou "done" NÃO são tocados.
+function limparCardsFantasma() {
+  const FLAG = 'fiobras-cleanup-cards-fantasma-v1';
+  try {
+    if (localStorage.getItem(FLAG) === '1') return;
+    if (!state.isAdmin) return;
+    if (!window._fbRemoveCard) return;
+    const hoje = (function(){ const d = new Date(); d.setHours(0,0,0,0); return d; })();
+    let removidos = 0;
+    state.cards.forEach(c => {
+      if (c.tipo !== 'preventiva' || !c.prevId) return;
+      if (c.col !== 'todo') return; // só mexe em "a fazer"
+      const pv = state.preventivas.find(p => (p._key || p.id) === c.prevId);
+      if (!pv || !pv.ultima || !pv.freq) return;
+      const proxima = addDays(parseDt(pv.ultima), parseInt(pv.freq));
+      if (proxima > hoje) {
+        // ainda não venceu — fantasma
+        window._fbRemoveCard(c._key);
+        removidos++;
+      }
+    });
+    localStorage.setItem(FLAG, '1');
+    if (removidos > 0) {
+      console.log('[cleanup fantasma] removidos:', removidos);
+      if (typeof toast === 'function') toast('Limpeza: ' + removidos + ' card' + (removidos>1?'s':'') + ' fantasma de preventiva removido' + (removidos>1?'s':''), 'ok', 4000);
+    }
+  } catch(e){ console.warn('[cleanup fantasma]', e); }
 }
 function gerarCardsPreventivas() {
   if (!window._fbReady) return;
@@ -4196,7 +4235,8 @@ function buildCard(c) {
   const eqTagHtml = eqTag ? `<span class="kc3-eqtag">${eqTag}</span>` : '';
 
   // Avatar grande do responsável
-  const respKey = c.resp || c.autor || '';
+  // v3.48.6 — Fase C: prefere chave canônica (respKey/autorKey) sobre snapshot (resp/autor)
+  const respKey = c.respKey || c.autorKey || c.resp || c.autor || '';
   const isAdminClick = state.isAdmin;
   const avHtml = respKey
     ? `<span class="kc3-av-wrap" ${isAdminClick ? `onclick="event.stopPropagation();abrirModalReatribuir('${c._key}')"` : ''}>${avatar(respKey, 'lg')}</span>`
@@ -4886,7 +4926,12 @@ function salvarCardAdmin() {
   if (_editCardKey) {
     window._fbUpdateCard(_editCardKey, data);
   } else {
-    window._fbPushCard({ ...data, col: 'todo', data: nowStr(), ts: Date.now(), autor: state.user });
+    // v3.48.6 — Fase B: grava autorKey + respKey junto do nome (sobrevive a rename)
+    const respValor = data.resp || '';
+    const respKey = respValor && typeof _resolveUserKey === 'function' ? _resolveUserKey(respValor) : null;
+    window._fbPushCard({ ...data, col: 'todo', data: nowStr(), ts: Date.now(),
+      autor: state.user, autorKey: state.userKey || null,
+      respKey: respKey });
   }
   _editCardKey = null;
   fecharModal('modal-card-admin');
@@ -6257,7 +6302,8 @@ function adicionarComentario(cardKey) {
   const card = state.cards.find(c => c._key === cardKey);
   if (!card) return;
   const comments = card.comments ? [...card.comments] : [];
-  comments.push({ texto, autor: state.user, hora: nowStr() });
+  // v3.48.6 — Fase B: autorKey junto do nome (snapshot)
+  comments.push({ texto, autor: state.user, autorKey: state.userKey || null, hora: nowStr() });
   window._fbUpdateCard(cardKey, { comments });
   input.value = '';
 }

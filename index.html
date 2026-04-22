@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#008835"><!-- v3.48.1: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
-<link rel="stylesheet" href="css/hub.css?v=3.48.5">
+<link rel="stylesheet" href="css/hub.css?v=3.48.6">
 
 <!-- v3.32.6: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.48.5</div>
+    <div class="login-foot">Sistema interno · v3.48.6</div>
   </div>
 </div>
 
@@ -282,7 +282,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.48.5</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.48.6</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -773,8 +773,9 @@
       </div>
     </div>
     <div class="tl-form-field">
-      <label>Nome completo</label>
+      <label>Nome completo <span class="mc-lbl-sub" id="mcNomeLbl"></span></label>
       <input type="text" id="mcNome" placeholder="Ex: William Schulz" maxlength="60">
+      <div class="mc-lbl-sub" id="mcNomeAviso" style="display:none;margin-top:6px;color:var(--muted)">Pra alterar seu nome, fale com o administrador.</div>
     </div>
     <div class="tl-form-field">
       <label>Email</label>
@@ -968,6 +969,12 @@
           <div class="mc-hint" style="margin-top:6px">Quadrada, máx 400px. Comprimida automaticamente.</div>
         </div>
       </div>
+    </div>
+    <!-- v3.48.6 — admin master edita o nome completo (single source of truth) -->
+    <div class="tl-form-field" id="geuNomeCompletoField">
+      <label>Nome completo <span class="mc-lbl-sub">(visível em todos os módulos)</span></label>
+      <input type="text" id="geuNomeCompleto" placeholder="Ex: William Schulz" maxlength="60" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);background:var(--input-bg)">
+      <div class="mc-lbl-sub" style="margin-top:6px;color:var(--muted)">Trocar o nome propaga em todos os históricos. Audit-log registra a mudança.</div>
     </div>
     <div class="tl-form-field">
       <label>Tipo de acesso (role)</label>
@@ -1430,6 +1437,18 @@ window.abrirMinhaConta = () => {
   if(dd) dd.classList.remove('open'); if(user) user.classList.remove('open');
   // Preenche campos
   document.getElementById('mcNome').value = profile.nomeCompleto || USERS[sess.user]?.nome || '';
+  // v3.48.6 — Fase A da auditoria de identidade: só admin master pode editar nome.
+  // Pra outros users vira read-only com aviso. Trocar nome quebra histórico/avatares
+  // de entries antigas (ver AUDIT-USER-IDENTITY.md).
+  const isAdminMaster = sess.user === 'admin';
+  const nomeInput = document.getElementById('mcNome');
+  const nomeAviso = document.getElementById('mcNomeAviso');
+  if (nomeInput) {
+    nomeInput.disabled = !isAdminMaster;
+    nomeInput.style.opacity = isAdminMaster ? '' : '.6';
+    nomeInput.style.cursor  = isAdminMaster ? '' : 'not-allowed';
+  }
+  if (nomeAviso) nomeAviso.style.display = isAdminMaster ? 'none' : 'block';
   document.getElementById('mcEmail').value = profile.email || '';
   document.getElementById('mcSenhaNova').value = '';
   document.getElementById('mcSenhaConf').value = '';
@@ -1494,7 +1513,11 @@ window.salvarMinhaConta = async () => {
     if(senhaNova !== senhaConf){ toast('Senhas não conferem','err'); return; }
   }
   const profile = Object.assign({}, (window._usersProfile || {})[sess.user] || {});
-  profile.nomeCompleto = nome || null;
+  // v3.48.6 — Fase A: só admin master pode trocar próprio nome via Minha Conta
+  const isAdminMaster = sess.user === 'admin';
+  if (isAdminMaster) {
+    profile.nomeCompleto = nome || null;
+  } // else: ignora silenciosamente — input já tá disabled
   profile.email = email || null;
   profile.foto = mcFotoData || null;
   if(senhaNova){
@@ -1602,6 +1625,8 @@ window.abrirGerenciarUsuarios = () => {
   if(dd) dd.classList.remove('open'); if(user) user.classList.remove('open');
   // v3.48.1: aplica seed de poderes 1x (flag localStorage fiobras-powers-seed-v1)
   if(typeof window.aplicarPowersSeed === 'function') window.aplicarPowersSeed();
+  // v3.48.6 — Fase D da auditoria de identidade: backfill de autorKey/respKey 1x
+  if(typeof window._backfillUserKeys === 'function') window._backfillUserKeys();
   // v3.48.1: aplica seed de USERS hardcoded → users-config (1x · fiobras-users-seed-v1)
   if(typeof window.aplicarUsuariosSeed === 'function') {
     window.aplicarUsuariosSeed().then(() => setTimeout(renderGuList, 300));
@@ -1882,7 +1907,11 @@ window.abrirEditarUsuario = (userKey) => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
   const u = getUser(userKey); if(!u){ toast('Usuário inválido','err'); return; }
   geuEditingKey = userKey;
-  document.getElementById('geuNome').textContent = (((window._usersProfile||{})[userKey]||{}).nomeCompleto || u.nome);
+  const nomeAtual = (((window._usersProfile||{})[userKey]||{}).nomeCompleto || u.nome || '');
+  document.getElementById('geuNome').textContent = nomeAtual;
+  // v3.48.6 — preenche campo "Nome completo" editável
+  const nomeInputEl = document.getElementById('geuNomeCompleto');
+  if (nomeInputEl) nomeInputEl.value = nomeAtual;
   document.getElementById('geuRole').value = getEffectiveRole(userKey);
   const eff = getEffectiveTurno(userKey);
   document.getElementById('geuTurno').value = eff ? String(eff) : '';
@@ -2209,6 +2238,14 @@ window.salvarEditarUsuario = () => {
     tabsOverride[i.dataset.tab] = i.checked;
   });
   const profile = Object.assign({}, (window._usersProfile||{})[geuEditingKey] || {});
+  // v3.48.6 — captura nome anterior pra audit-log de rename
+  const nomeAntigo = profile.nomeCompleto || (getUser(geuEditingKey)?.nome) || '';
+  const nomeInputEl2 = document.getElementById('geuNomeCompleto');
+  const nomeNovo = nomeInputEl2 ? nomeInputEl2.value.trim() : nomeAntigo;
+  if (nomeNovo && nomeNovo !== nomeAntigo) {
+    profile.nomeCompleto = nomeNovo;
+    logAudit('user.renameNome', geuEditingKey, { de: nomeAntigo, para: nomeNovo });
+  }
   profile.roleOverride = role;
   // turnoOverride: null explícito quando "Nenhum", número quando 1/2/3
   profile.turnoOverride = turnoStr ? parseInt(turnoStr, 10) : null;
@@ -2682,7 +2719,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.48.5';
+const CURRENT_VERSION = '3.48.6';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -3089,7 +3126,7 @@ function showOnlineToast(isOnline){
 </script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, child, onValue, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getDatabase, ref, child, onValue, set, update, remove, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
@@ -3256,6 +3293,103 @@ window._deactivateAuditLog = () => {
 window._gravarAuditLog = (entry) => {
   const id = 'al_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   return update(ref(db, 'audit-log/' + id), entry).catch(e => console.error('Erro ao gravar audit:', e));
+};
+
+// v3.48.6 — Fase D: backfill one-shot de autorKey/respKey em entries antigas.
+// Resolve nomes literais → chave canônica via _resolveUserKey (HUB) e adiciona
+// o campo *Key sem alterar o nome original (preserva histórico de display).
+// Roda 1x via flag localStorage. Só admin dispara.
+window._backfillUserKeys = async function(){
+  const FLAG = 'fiobras-backfill-userkey-v1';
+  if (localStorage.getItem(FLAG) === '1') { console.log('[backfill userkeys] já rodou'); return; }
+  const sess = (typeof getSession === 'function') ? getSession() : null;
+  if (!sess || (typeof getEffectiveRole === 'function' && getEffectiveRole(sess.user) !== 'admin')) {
+    console.warn('[backfill userkeys] requer admin');
+    return;
+  }
+  if (typeof _resolveUserKey !== 'function') {
+    console.warn('[backfill userkeys] _resolveUserKey indisponível');
+    return;
+  }
+  const ups = {}; // multipath update
+  let count = 0;
+
+  // ─ CRM leads ─
+  try {
+    const snap = await get(ref(db, 'crm/leads'));
+    const leads = snap.val() || {};
+    Object.entries(leads).forEach(([leadId, lead]) => {
+      if (!lead) return;
+      // historico
+      if (Array.isArray(lead.historico)) {
+        lead.historico.forEach((h, j) => {
+          if (h && h.autor && !h.autorKey) {
+            const k = _resolveUserKey(h.autor);
+            if (k) { ups['crm/leads/' + leadId + '/historico/' + j + '/autorKey'] = k; count++; }
+          }
+        });
+      }
+      // responsavel → responsavelKey
+      if (lead.responsavel && !lead.responsavelKey) {
+        const k = _resolveUserKey(lead.responsavel);
+        if (k) { ups['crm/leads/' + leadId + '/responsavelKey'] = k; count++; }
+      }
+    });
+  } catch(e){ console.warn('[backfill] crm/leads', e); }
+
+  // ─ CRM clientes (timeline) ─
+  try {
+    const snap = await get(ref(db, 'crm/clientes'));
+    const clientes = snap.val() || {};
+    Object.entries(clientes).forEach(([cliId, cli]) => {
+      if (!cli || !Array.isArray(cli.timeline)) return;
+      cli.timeline.forEach((t, j) => {
+        if (t && t.autor && !t.autorKey) {
+          const k = _resolveUserKey(t.autor);
+          if (k) { ups['crm/clientes/' + cliId + '/timeline/' + j + '/autorKey'] = k; count++; }
+        }
+      });
+    });
+  } catch(e){ console.warn('[backfill] crm/clientes', e); }
+
+  // ─ Manutenção kanban ─
+  try {
+    const snap = await get(ref(db, 'manutencao/kanban'));
+    const cards = snap.val() || {};
+    Object.entries(cards).forEach(([cardId, c]) => {
+      if (!c) return;
+      if (c.autor && !c.autorKey) {
+        const k = _resolveUserKey(c.autor);
+        if (k) { ups['manutencao/kanban/' + cardId + '/autorKey'] = k; count++; }
+      }
+      if (c.resp && !c.respKey) {
+        const k = _resolveUserKey(c.resp);
+        if (k) { ups['manutencao/kanban/' + cardId + '/respKey'] = k; count++; }
+      }
+      if (Array.isArray(c.comments)) {
+        c.comments.forEach((cm, j) => {
+          if (cm && cm.autor && !cm.autorKey) {
+            const k = _resolveUserKey(cm.autor);
+            if (k) { ups['manutencao/kanban/' + cardId + '/comments/' + j + '/autorKey'] = k; count++; }
+          }
+        });
+      }
+    });
+  } catch(e){ console.warn('[backfill] manutencao/kanban', e); }
+
+  if (count === 0) {
+    console.log('[backfill userkeys] nada pra atualizar');
+    localStorage.setItem(FLAG, '1');
+    return;
+  }
+  try {
+    await update(ref(db), ups);
+    console.log('[backfill userkeys] ' + count + ' campos atualizados');
+    if (typeof toast === 'function') toast('Backfill: ' + count + ' entradas associadas a chaves de usuário', 'ok');
+    localStorage.setItem(FLAG, '1');
+  } catch(e){
+    console.error('[backfill userkeys] erro no update:', e);
+  }
 };
 
 // ── Sessões ativas — Firebase (v3.13.0; lazy v3.23.2) ───────────────────

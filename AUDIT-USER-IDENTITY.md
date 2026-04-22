@@ -1,6 +1,6 @@
 # AUDITORIA — Resolução de identidade de usuários
 
-> **Status:** ABERTA · Reportada por William em 22/04/2026 · v3.48.3
+> **Status:** ✅ FASES A+B+C+D EXECUTADAS em v3.48.6 · Reportada por William em 22/04/2026
 > **Severidade:** Alta — afeta histórico, avatares, cards, atribuições.
 
 ---
@@ -89,28 +89,28 @@ A partir da v3.48.0 com USERS lendo de Firebase, isso fica ainda mais frágil po
 ## 6. Plano técnico (a executar quando aprovado)
 
 ### Fase A — Bloqueio preventivo (rápido, baixo risco)
-- [ ] Modal "Minha Conta" no HUB: campo `nomeCompleto` vira `disabled` pra todos exceto admin master.
-- [ ] Mensagem clara: "Pra alterar seu nome, fale com William."
-- [ ] Audit-log toda alteração de nome feita pelo admin: `{action:'user.renameNome', target:userKey, details:{de, para}}`.
+- [x] Modal "Minha Conta" no HUB: campo `nomeCompleto` vira `disabled` pra todos exceto admin master.
+- [x] Mensagem clara: "Pra alterar seu nome, fale com William."
+- [x] Audit-log toda alteração de nome feita pelo admin: `{action:'user.renameNome', target:userKey, details:{de, para}}`.
 
 ### Fase B — Migração de schema (médio prazo, requer cuidado)
-- [ ] **Passo 1 — Gravar chave junto do nome em entries NOVAS:**
+- [x] **Passo 1 — Gravar chave junto do nome em entries NOVAS:**
   - CRM: ao gravar entry em `historico`, gravar `autor: nome, autorKey: chave`.
   - Manutenção: idem em `kanban.resp`, `kanban.autor`, `comments.autor`, `historico.by`, `fcmPending.resp/de`.
-- [ ] **Passo 2 — Render reescrito pra preferir chave:**
+- [x] **Passo 2 — Render reescrito pra preferir chave:**
   - `entry.autorKey` → resolve nome ATUAL via `users-profile/<autorKey>/nomeCompleto`
   - Fallback: `entry.autor` (string literal) só pra entries antigas sem `autorKey`
-- [ ] **Passo 3 — Backfill one-shot:**
+- [x] **Passo 3 — Backfill one-shot:**
   - Script que percorre todas as entries antigas (`historico`, `kanban.log`, `comments`, etc) e adiciona `autorKey` resolvido via `_resolveUserKey(autor)` no momento do backfill.
   - Flag `localStorage["fiobras-backfill-userkey-v1"]` pra rodar 1x.
   - Entries que `_resolveUserKey` não consegue resolver no momento do backfill ficam com `autorKey: null` (avatar cinza, mas sem alarme).
 
 ### Fase C — Stack avatares dedup por chave (não por nome)
-- [ ] Já corrigido em parte pra CRM (v3.47.6 — `_crmResolveUserKey`).
-- [ ] Aplicar mesmo padrão em **toda renderização de avatar stack** (Manutenção `kc2-avs`, audit-log, sessões ativas, etc).
+- [x] Já corrigido em parte pra CRM (v3.47.6 — `_crmResolveUserKey`).
+- [x] Aplicar mesmo padrão em **toda renderização de avatar stack** (Manutenção `kc2-avs`, audit-log, sessões ativas, etc).
 
 ### Fase D — Validação
-- [ ] Trocar nome do William em ambiente de teste: avatares antigos e novos do William em todos os módulos passam a renderizar com a foto/cor única dele.
+- [x] Trocar nome do William em ambiente de teste: avatares antigos e novos do William em todos os módulos passam a renderizar com a foto/cor única dele.
 
 ---
 

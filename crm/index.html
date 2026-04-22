@@ -1988,6 +1988,28 @@ const AVATAR_GRADIENTS = new Proxy({}, {
   }
 });
 // v3.40.4 — resolve nome → chave em users-profile (igual _resolveUserKey do HUB/Manutenção)
+// v3.48.6 — Fase B da auditoria de identidade: helpers canônicos
+// Sempre que gravar "quem fez algo", chamar _crmAutor() pra ter chave + nome juntos.
+// Render prefere chave (sobrevive a rename); cai no nome só pra entries antigas.
+function _crmCurrentUserKey(){
+  try {
+    if (typeof getCurrentUser === 'function') { const u = getCurrentUser(); if (u?.key) return u.key; }
+    if (window._user?.key) return window._user.key;
+    if (window.__hubSession?.user) return window.__hubSession.user;
+    const s = JSON.parse(localStorage.getItem('fiobras-dash-auth'));
+    if (s?.user) return s.user;
+  } catch(e){}
+  return null;
+}
+function _crmCurrentUserNome(){
+  try {
+    if (typeof getCurrentUser === 'function') { const u = getCurrentUser(); if (u?.nome) return u.nome; }
+  } catch(e){}
+  return window._user?.nome || window.__hubSession?.user || 'Usuario';
+}
+function _crmAutor(){
+  return { autorKey: _crmCurrentUserKey(), autor: _crmCurrentUserNome() };
+}
 function _crmResolveUserKey(nomeOuKey){
   if(!nomeOuKey) return null;
   const nk = String(nomeOuKey).toLowerCase().trim();
@@ -2101,25 +2123,30 @@ function leadColaboradores(l) {
   }
   // Ordem temporal: data de criação primeiro
   const dataCriacao = l.data ? _crmParseDate(l.data) : null;
-  const criador = (l.historico && l.historico[0] && l.historico[0].autor) || null;
+  // v3.48.6 — Fase C: prefere autorKey (canônica) quando existe; cai pro autor (snapshot)
+  const h0 = l.historico && l.historico[0];
+  const criador = h0 ? (h0.autorKey || h0.autor) : null;
   if (criador) push(criador, 'Cadastrou lead', dataCriacao);
   // Histórico (segunda em diante)
   if (Array.isArray(l.historico)) {
     for (let i = 1; i < l.historico.length; i++) {
       const h = l.historico[i];
-      if (!h.autor) continue;
+      const who = h.autorKey || h.autor;
+      if (!who) continue;
       const ts = h.data ? new Date(h.data).getTime() : null;
       const acao = _crmSimplifyAcao(h.acao || h.texto || 'Atualizou', l);
-      push(h.autor, acao, ts);
+      push(who, acao, ts);
     }
   }
   // Responsável definido pelo admin (l.responsavel) — destaca como "Atribuído"
-  if (l.responsavel) {
+  // v3.48.6 — prefere responsavelKey (canônica) sobre responsavel (snapshot)
+  if (l.responsavel || l.responsavelKey) {
+    const respWho = l.responsavelKey || l.responsavel;
     const respKey = (typeof _crmResolveUserKey === 'function')
-      ? _crmResolveUserKey(l.responsavel)
+      ? _crmResolveUserKey(respWho)
       : null;
-    const respDedupe = respKey || String(l.responsavel).toLowerCase().trim();
-    if (!seen.has(respDedupe)) push(l.responsavel, 'Atribuído (admin)', null);
+    const respDedupe = respKey || String(respWho).toLowerCase().trim();
+    if (!seen.has(respDedupe)) push(respWho, 'Atribuído (admin)', null);
   }
   return colabs;
 }
@@ -2290,19 +2317,25 @@ window._crmRmConfirmar = function(leadId) {
   if (!novoResp) return;
   const l = (window._leads || {})[leadId]; if (!l) return;
   const atual = leadResponsavel(l) || '—';
-  const adminNome = (window._user?.nome) || (window.__hubSession?.user) || 'admin';
+  // v3.48.6 — usa helper canônico (autorKey + autor snapshot)
+  const aut = _crmAutor();
+  const adminNome = aut.autor;
   const tituloLead = l.nome || l.empresa || ('Lead ' + leadId);
+  // Resolve chave do novo resp pra gravar respKey também (Fase B)
+  const novoRespKey = (typeof _crmResolveUserKey === 'function') ? _crmResolveUserKey(novoResp) : null;
   const histPrev = Array.isArray(l.historico) ? l.historico : [];
   const novoHist = [...histPrev, {
     acao: 'Responsável trocado de "' + atual + '" para "' + novoResp + '" por ' + adminNome,
     data: new Date().toISOString(),
     autor: adminNome,
+    autorKey: aut.autorKey,
   }];
-  window._update(leadId, { responsavel: novoResp, historico: novoHist });
+  window._update(leadId, { responsavel: novoResp, responsavelKey: novoRespKey, historico: novoHist });
   if (window._logPush) {
     window._logPush({
       acao: 'Responsável trocado', lead: tituloLead,
-      leadId, por: adminNome, de: atual, para: novoResp, ts: Date.now(),
+      leadId, por: adminNome, porKey: aut.autorKey,
+      de: atual, para: novoResp, paraKey: novoRespKey, ts: Date.now(),
     });
   }
   document.querySelectorAll('.crm-resp-modal-bg').forEach(m => m.remove());
@@ -2314,10 +2347,20 @@ window._crmRmConfirmar = function(leadId) {
    autor do histórico (legacy). */
 function leadResponsavel(l){
   if(!l) return null;
+  // v3.48.6 — prefere chave canônica e resolve nome atual via users-profile
+  const profs = window._userProfiles || {};
+  const cfg   = window._usersConfig || {};
+  function nomeFromKey(k) {
+    if (!k) return null;
+    const p = profs[k] || {}; const c = cfg[k] || {};
+    return p.nomeCompleto || c.nome || p.nome || k;
+  }
+  if (l.responsavelKey) return nomeFromKey(l.responsavelKey) || l.responsavel || null;
   if (l.responsavel) return l.responsavel;
   const h = l.historico||[];
   for(let i=h.length-1; i>=0; i--){
-    if(h[i].autor) return h[i].autor;
+    if (h[i].autorKey) return nomeFromKey(h[i].autorKey);
+    if (h[i].autor) return h[i].autor;
   }
   return null;
 }
@@ -2329,14 +2372,15 @@ function moverDireto(id, etapaDestino){
   const mapE = e => e==='contato'?'novo' : e==='ganho'?'fechado' : e;
   const etapaOrigem = mapE(l.etapa);
   if(etapaOrigem === etapaDestino) return;
-  // v3.47.4 — pega user logado de TODAS as fontes (window._user OU __hubSession OU localStorage)
-  const u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
-  const usuario = (u && u.nome) || (window._user?.nome) || (window.__hubSession?.user) || 'Usuário';
+  // v3.48.6 — autorKey + autor snapshot (Fase B)
+  const aut = _crmAutor();
+  const usuario = aut.autor;
   const hist = [...(l.historico||[]), {
     ts: Date.now(), tipo: 'outro', retorno: 'aguardando',
     texto: `Movido de "${ELBL[etapaOrigem]}" para "${ELBL[etapaDestino]}"`,
     acao: `Movido de "${ELBL[etapaOrigem]}" para "${ELBL[etapaDestino]}"`, // v3.47.4: alias pra leadColaboradores()
     autor: usuario,
+    autorKey: aut.autorKey,
     data: new Date().toISOString(), // v3.47.4: campo padrão
     etapaMov: { de: etapaOrigem, para: etapaDestino }
   }];
@@ -2795,15 +2839,18 @@ function renderHist(hist){
     const retCls={sim:'ret-sim',nao:'ret-nao',aguardando:'ret-aguard'}[ret]||'ret-aguard';
     const retLbl=RET_LBL[ret]||ret;
     // v3.47.7 — mostra QUEM fez a ação (autor) com nome atual do users-profile
+    // v3.48.6 — Fase C: prioriza h.autorKey (canônica) sobre h.autor (snapshot)
+    //          → entry sobrevive a rename do user
     let autorHtml = '';
-    if (h.autor) {
-      const userKey = (typeof _crmResolveUserKey === 'function') ? _crmResolveUserKey(h.autor) : null;
-      let nomeAtual = h.autor;
+    if (h.autor || h.autorKey) {
+      const userKey = h.autorKey
+        || ((typeof _crmResolveUserKey === 'function') ? _crmResolveUserKey(h.autor) : null);
+      let nomeAtual = h.autor || userKey || '';
       let foto = null;
       if (userKey) {
         const p = (window._userProfiles||{})[userKey] || {};
         const c = (window._usersConfig||{})[userKey] || {};
-        nomeAtual = p.nomeCompleto || c.nome || p.nome || h.autor;
+        nomeAtual = p.nomeCompleto || c.nome || p.nome || h.autor || userKey;
         foto = p.foto || null;
       }
       const av = foto
@@ -2901,22 +2948,29 @@ function salvarLead(){
     // Se admin trocou o responsável, registra no histórico
     // v3.43.2 — usa helper _crmIsAdmin (detecta __hubSession também)
     if (_crmIsAdmin() && novoResp && novoResp !== respAnterior) {
-      const adminNome = (window._user?.nome) || (window.__hubSession?.user) || 'admin';
+      // v3.48.6 — grava autorKey + responsavelKey (Fase B)
+      const aut = _crmAutor();
+      data.responsavelKey = (typeof _crmResolveUserKey === 'function') ? _crmResolveUserKey(novoResp) : null;
       data.historico = [...data.historico, {
         acao: 'Responsável trocado de "' + (respAnterior || '—') + '" para "' + novoResp + '"',
         data: new Date().toISOString(),
-        autor: adminNome,
+        autor: aut.autor,
+        autorKey: aut.autorKey,
       }];
     }
     window._update(_id,data);
     logEvento('editar','Editou lead: '+nome,data.produto?'Produto: '+data.produto:'');
     toast('Lead atualizado.');
   }else{
-    // v3.47.4 — registra autor da criação no histórico (avatar do criador no card)
-    const autorNome = (window._user?.nome) || (window.__hubSession?.user) || 'Sistema';
+    // v3.48.6 — autorKey + autor snapshot
+    const aut = _crmAutor();
+    if (data.responsavel) {
+      data.responsavelKey = (typeof _crmResolveUserKey === 'function') ? _crmResolveUserKey(data.responsavel) : null;
+    }
     data.historico = [{
       acao: 'Cadastrou lead',
-      autor: autorNome,
+      autor: aut.autor,
+      autorKey: aut.autorKey,
       data: new Date().toISOString(),
     }];
     window._push(data);
@@ -3267,8 +3321,9 @@ function confirmarMover(){
   const {id,etapaOrigem,etapaDestino}=_moverPendente;
   const obs=document.getElementById('moverObs').value.trim();
   const l=(window._leads||{})[id];
-  /* Registra no histórico automaticamente */
-  const usuario=(typeof getCurrentUser==='function'&&getCurrentUser()?.nome)||window._user?.nome||window.__hubSession?.user||'Usuário';
+  /* v3.48.6 — autorKey + autor snapshot (Fase B) */
+  const aut=_crmAutor();
+  const usuario=aut.autor;
   const textoHist=obs
     ? `[${ELBL[etapaDestino]}] ${obs}`
     : `Movido de "${ELBL[etapaOrigem]}" para "${ELBL[etapaDestino]}"`;
@@ -3278,6 +3333,7 @@ function confirmarMover(){
     retorno:'aguardando',
     texto:textoHist,
     autor:usuario,
+    autorKey:aut.autorKey,
     etapaMov:{de:etapaOrigem,para:etapaDestino}
   }];
   window._update(id,{etapa:etapaDestino,etapaSince:Date.now(),historico:hist});
@@ -3498,11 +3554,14 @@ function confirmarPerdido(){
   const l=(window._leads||{})[id];
   const mapE=e=>e==='contato'?'novo':e==='ganho'?'fechado':e;
   const etapaOrigem=mapE(l?.etapa||'novo');
-  const usuario=(typeof getCurrentUser==='function'&&getCurrentUser()?.nome)||window._user?.nome||window.__hubSession?.user||'Usuario';
+  // v3.48.6 — autorKey + autor snapshot (Fase B)
+  const aut=_crmAutor();
+  const usuario=aut.autor;
   const hist=[...(l?.historico||[]),{
     ts:Date.now(),tipo:'outro',retorno:'nao',
     texto:`[Perdido] ${obs}`,
     autor:usuario,
+    autorKey:aut.autorKey,
     etapaMov:{de:etapaOrigem,para:'perdido'}
   }];
   window._update(id,{etapa:'perdido',etapaSince:Date.now(),historico:hist});
@@ -3646,11 +3705,14 @@ function addCliInteracao(cliId){
   const tipo=_cliTipoAtivo[cliId]||'whatsapp';
   const valor=(valorInput?.value||'').trim();
   const c=(window._clientes||{})[cliId];if(!c) return;
+  // v3.48.6 — autorKey + autor snapshot (Fase B)
+  const _aut=_crmAutor();
   const entry={
     ts:Date.now(),
     tipo:tipo,
     texto:texto,
-    autor:(typeof getCurrentUser==='function'&&getCurrentUser()?.nome)||window._user?.nome||window.__hubSession?.user||'Usuario',
+    autor:_aut.autor,
+    autorKey:_aut.autorKey,
   };
   if(valor&&(tipo==='preco'||tipo==='negociacao')) entry.valor=valor;
   const tl=[...(c.timeline||[]),entry];
@@ -3679,12 +3741,16 @@ function migrarParaCliente(leadId){
     produto:l.produto||'',
     desde:Date.now(),
     leadId:leadId,
-    timeline:[{
-      ts:Date.now(),
-      tipo:'negociacao',
-      texto:'Cliente convertido do pipeline (lead fechado)',
-      autor:(typeof getCurrentUser==='function'&&getCurrentUser()?.nome)||window._user?.nome||window.__hubSession?.user||'Sistema'
-    }]
+    timeline:[(function(){
+      const _a=_crmAutor();
+      return {
+        ts:Date.now(),
+        tipo:'negociacao',
+        texto:'Cliente convertido do pipeline (lead fechado)',
+        autor:_a.autor,
+        autorKey:_a.autorKey,
+      };
+    })()]
   });
 }
 
