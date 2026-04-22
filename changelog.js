@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.40.2', d:'22 abr 2026', current:true,
+    v:'3.40.3', d:'22 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'CRÍTICO · "+ Preventiva" não salvava (toast() undefined no sub-app).',
+        desc:'Diagnóstico via preview/eval: salvarPreventiva() chamava toast(...) na linha 5031, mas toast() NÃO existia no sub-app Manutenção (só no HUB). Erro silencioso ReferenceError travava a função APÓS o _fbPushPrev rodar — então a preventiva era de fato adicionada no Firebase, mas o modal não fechava e parecia que "não salvou".\n\nIntroduzi as 14 chamadas de toast() na refatoração v3.35.0 sem checar que o sub-app não tem essa função (tem apenas exibirInAppNotif e mostrarNotif).\n\nFix: shim global no sub-app Manutenção:\n```\nfunction toast(msg, tipo, durMs) {\n  exibirInAppNotif(tipo === "err" ? "⚠ Aviso" : "Manutenção", msg, "");\n}\nwindow.toast = toast;\n```\n\nResolve as 14 chamadas de uma vez: salvarPreventiva, deletarPreventiva (defense-in-depth), demanda, multi-tarefa, sistema de poderes (gated delete) etc.'}
+    ]
+  },
+  {
+    v:'3.40.2', d:'22 abr 2026',
     items:[
       {type:'fix', title:'2 fixes urgentes: crop modal por trás + nav mobile dos sub-apps duplicada.',
         desc:'1) Modal de Crop de imagem aparecia POR TRÁS do modal "Editar Usuário" (ambos com z-index 200; o crop foi inserido antes no DOM). Sem ver o modal, click "Aplicar recorte" caía no overlay do modal de baixo, parecia que "não salvava". Fix: cropModal ganhou z-index:9999 inline.\n\n2) No mobile, dentro de um sub-app (Manutenção/CRM), apareciam DUAS pílulas de navegação: a do sub-app POR CIMA da do HUB. Fix: detecta `window !== window.top` no boot do sub-app e adiciona class `in-hub-frame` no <html>; CSS esconde a bottom-nav do sub-app quando essa class está presente. Aplicado em Manutenção e CRM (Preço não tem nav mobile).'}
