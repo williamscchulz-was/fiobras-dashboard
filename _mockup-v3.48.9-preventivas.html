@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup v3.48.9 — Preventivas agrupadas por máquina</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*:before,*:after{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1A1D22;color:#fff;font-family:'Poppins',sans-serif;padding:32px;min-height:100vh}
+  h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:24px;margin-bottom:8px}
+  h2{font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;color:#9CA295;margin:32px 0 14px;letter-spacing:1px;text-transform:uppercase}
+  .col-label{font-family:'DM Mono',monospace;font-size:11px;color:#6B7166;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px}
+  .stack{display:flex;flex-direction:column;gap:14px}
+  .wrap{max-width:1200px;margin:0 auto}
+
+  /* ==================== ATUAL (tabela 1 linha por tarefa) ==================== */
+  .old-table{width:100%;background:#252527;border:1px solid #2E3138;border-radius:12px;overflow:hidden;border-collapse:collapse}
+  .old-table th{padding:14px 16px;text-align:left;font-family:'DM Mono',monospace;font-size:.65rem;color:#6B7166;text-transform:uppercase;letter-spacing:1px;font-weight:500;border-bottom:1px solid #2E3138;background:#1F2125}
+  .old-table td{padding:14px 16px;font-family:'Poppins',sans-serif;font-size:.78rem;color:#CFD3CB;border-bottom:1px solid #2A2D33}
+  .old-table tr:last-child td{border-bottom:0}
+  .old-eqtag{color:#4ADE80;font-weight:600;font-family:'DM Mono',monospace;font-size:.7rem}
+  .old-av{display:inline-flex;align-items:center;gap:8px}
+  .old-av-circle{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#1B5E20,#43A047);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+  .old-status{display:inline-block;padding:3px 10px;border-radius:10px;background:rgba(245,158,11,.18);color:#FCD34D;font-size:.62rem;font-weight:600;text-transform:capitalize}
+
+  /* ==================== NOVO (cards agrupados por máquina) ==================== */
+  .pv-machine-list{display:flex;flex-direction:column;gap:10px}
+  .pv-machine-card{
+    background:#1F2125;border:1px solid #2A2D33;border-radius:14px;padding:16px;
+    display:grid;grid-template-columns:auto 1fr auto auto;gap:18px;align-items:center;
+    cursor:pointer;transition:.15s;
+  }
+  .pv-machine-card:hover{border-color:#3A3F47;background:#24262A}
+  .pv-machine-card.expanded{background:#24262A;border-color:#3A3F47;border-radius:14px 14px 0 0}
+
+  .pv-eqtag{
+    background:rgba(0,200,80,.12);color:#4ADE80;
+    padding:6px 12px;border-radius:6px;font-family:'DM Mono',monospace;font-weight:600;font-size:.72rem;
+    letter-spacing:.5px;
+  }
+  .pv-machine-info{min-width:0}
+  .pv-machine-nome{
+    font-family:'Outfit',sans-serif;font-weight:700;font-size:.92rem;color:#fff;
+    margin-bottom:4px;line-height:1.2;
+  }
+  .pv-machine-sub{
+    font-family:'DM Mono',monospace;font-size:.6rem;color:#6B7166;
+    text-transform:uppercase;letter-spacing:.6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  }
+  .pv-machine-sub-sep{opacity:.4}
+
+  .pv-counters{display:flex;gap:14px;align-items:center}
+  .pv-counter{display:flex;flex-direction:column;align-items:center;min-width:38px}
+  .pv-counter-num{font-family:'Outfit',sans-serif;font-weight:900;font-size:1.2rem;color:#fff;line-height:1}
+  .pv-counter-num.late{color:#F87171}
+  .pv-counter-num.due{color:#FCD34D}
+  .pv-counter-num.ok{color:#6EE7B7}
+  .pv-counter-lbl{font-family:'DM Mono',monospace;font-size:.52rem;color:#6B7166;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+  .pv-resp-stack{display:inline-flex;align-items:center;gap:-4px}
+  .pv-resp-av{
+    width:30px;height:30px;border-radius:50%;
+    background:linear-gradient(135deg,#1B5E20,#43A047);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:'Outfit',sans-serif;font-weight:700;font-size:11px;color:#fff;
+    border:2px solid #1F2125;margin-left:-6px;
+  }
+  .pv-resp-av:first-child{margin-left:0}
+
+  .pv-chevron{color:#6B7166;font-size:18px;transition:transform .2s}
+  .pv-machine-card.expanded .pv-chevron{transform:rotate(180deg);color:#9CA295}
+
+  /* Painel expandido — tarefas agrupadas por frequência */
+  .pv-expand{
+    background:#1B1E22;border:1px solid #2A2D33;border-top:0;border-radius:0 0 14px 14px;
+    padding:8px;
+    animation:pv-fade .2s ease-out;
+  }
+  @keyframes pv-fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+  .pv-freq-group{margin-bottom:6px}
+  .pv-freq-group:last-child{margin-bottom:0}
+  .pv-freq-header{
+    display:flex;align-items:center;gap:8px;
+    padding:10px 12px 6px;
+    font-family:'DM Mono',monospace;font-size:.6rem;color:#9CA295;
+    text-transform:uppercase;letter-spacing:1px;
+  }
+  .pv-freq-dot{width:6px;height:6px;border-radius:50%;background:#3B82F6}
+  .pv-freq-dot.diaria{background:#A855F7}
+  .pv-freq-dot.semanal{background:#3B82F6}
+  .pv-freq-dot.quinzenal{background:#0EA5E9}
+  .pv-freq-dot.mensal{background:#10B981}
+  .pv-freq-dot.trimestral{background:#F59E0B}
+  .pv-freq-dot.semestral{background:#EC4899}
+  .pv-freq-dot.anual{background:#EF4444}
+  .pv-freq-count{margin-left:auto;color:#6B7166}
+
+  .pv-task{
+    display:grid;grid-template-columns:1fr auto auto auto auto;
+    gap:14px;align-items:center;
+    padding:8px 12px;border-radius:8px;
+    transition:.1s;
+  }
+  .pv-task:hover{background:rgba(255,255,255,.03)}
+  .pv-task-tarefa{font-family:'Poppins',sans-serif;font-size:.74rem;color:#CFD3CB;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pv-task-resp{display:inline-flex;align-items:center;gap:6px}
+  .pv-task-av{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#1B5E20,#43A047);display:inline-flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#fff;flex-shrink:0}
+  .pv-task-resp-nome{font-family:'Poppins';font-size:.66rem;color:#9CA295}
+  .pv-task-data{font-family:'DM Mono',monospace;font-size:.62rem;color:#6B7166;white-space:nowrap}
+  .pv-task-status{
+    padding:2px 8px;border-radius:4px;
+    font-family:'Poppins';font-size:.55rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;
+  }
+  .pv-task-status.late  {background:rgba(220,38,38,.15);color:#F87171}
+  .pv-task-status.due   {background:rgba(245,158,11,.15);color:#FCD34D}
+  .pv-task-status.ok    {background:rgba(16,185,129,.15);color:#6EE7B7}
+  .pv-task-actions{display:inline-flex;gap:4px}
+  .pv-task-ab{
+    width:24px;height:24px;border-radius:6px;border:0;
+    background:rgba(255,255,255,.05);color:#9CA295;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  .pv-task-ab:hover{background:rgba(255,255,255,.12);color:#fff}
+  .pv-task-ab.danger:hover{color:#F87171}
+
+  /* Mobile responsive (≤640px) */
+  @media (max-width:640px){
+    body{padding:14px}
+    .pv-machine-card{grid-template-columns:auto 1fr auto;gap:12px;padding:14px}
+    .pv-counters{display:none}
+    .pv-task{grid-template-columns:1fr auto auto;gap:8px;padding:10px 12px}
+    .pv-task-resp{display:none}
+    .pv-task-actions{display:none}
+  }
+
+  /* Toolbar */
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+  .toolbar-search{
+    flex:1;max-width:340px;
+    background:#252527;border:1px solid #2E3138;border-radius:8px;
+    padding:8px 14px;color:#fff;font-family:'Poppins';font-size:.78rem;outline:none;
+  }
+  .toolbar-add{
+    background:linear-gradient(180deg,#00a241,#007a2e);color:#fff;border:0;border-radius:8px;
+    padding:9px 16px;font-family:'Poppins';font-weight:600;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mockup v3.48.9 — Preventivas agrupadas por máquina</h1>
+  <p style="color:#9CA295;font-size:.78rem;max-width:760px;margin-bottom:24px">
+    Hoje cada tarefa de preventiva é uma linha. Uma máquina com 12 tarefas vira 12 linhas, polui a tabela e dificulta ver "como tá a saúde dessa máquina".<br><br>
+    <b>Proposta:</b> 1 card por máquina mostrando contadores de status. Click expande agrupado por frequência (diária / semanal / mensal / trimestral / semestral / anual).
+  </p>
+
+  <h2>▼ ATUAL (1 linha por tarefa)</h2>
+  <div class="col-label">5 cards iguais pra RET-01 — repete o equipamento, repete o resp, repete a data</div>
+  <table class="old-table">
+    <thead>
+      <tr><th>Tarefa</th><th>Equipamento</th><th>Setor</th><th>Freq</th><th>Resp</th><th>Última</th><th>Próxima</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Abrir tampas das cabeceiras e efetuar limpeza</td><td><span class="old-eqtag">RET-01</span> · Retorcedeira VTS 07 2001</td><td>Mecânica</td><td>7 dias</td><td><span class="old-av"><span class="old-av-circle">VL</span> Vorlei</span></td><td>16/04/2026</td><td>23/04/2026</td><td><span class="old-status">Próxima</span></td></tr>
+      <tr><td>Conferir tensão e condição das correias</td><td><span class="old-eqtag">RET-01</span> · Retorcedeira VTS 07 2001</td><td>Mecânica</td><td>7 dias</td><td><span class="old-av"><span class="old-av-circle">VL</span> Vorlei</span></td><td>16/04/2026</td><td>23/04/2026</td><td><span class="old-status">Próxima</span></td></tr>
+      <tr><td>Verificar vazamento de óleos</td><td><span class="old-eqtag">RET-01</span> · Retorcedeira VTS 07 2001</td><td>Mecânica</td><td>7 dias</td><td><span class="old-av"><span class="old-av-circle">VL</span> Vorlei</span></td><td>16/04/2026</td><td>23/04/2026</td><td><span class="old-status">Próxima</span></td></tr>
+      <tr><td>Verificar folgas ou desgastes</td><td><span class="old-eqtag">RET-01</span> · Retorcedeira VTS 07 2001</td><td>Mecânica</td><td>30 dias</td><td><span class="old-av"><span class="old-av-circle">VL</span> Vorlei</span></td><td>30/03/2026</td><td>29/04/2026</td><td><span class="old-status">Próxima</span></td></tr>
+      <tr><td>Limpar ventilação do motor e dos painéis</td><td><span class="old-eqtag">RET-01</span> · Retorcedeira VTS 07 2001</td><td>Mecânica</td><td>90 dias</td><td><span class="old-av"><span class="old-av-circle">VL</span> Vorlei</span></td><td>10/02/2026</td><td>11/05/2026</td><td><span class="old-status">Próxima</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>▼ NOVO (1 card por máquina · click expande)</h2>
+  <div class="toolbar">
+    <input class="toolbar-search" placeholder="🔍 Buscar máquina, código ou responsável...">
+    <button class="toolbar-add">+ Preventiva</button>
+  </div>
+
+  <div class="pv-machine-list">
+
+    <!-- ─── Card 1: COLLAPSED ─── -->
+    <div class="pv-machine-card">
+      <span class="pv-eqtag">PRE-02</span>
+      <div class="pv-machine-info">
+        <div class="pv-machine-nome">Preparadora Murata 9C</div>
+        <div class="pv-machine-sub">
+          <span>Mecânica</span>
+          <span class="pv-machine-sub-sep">·</span>
+          <span>Próxima vencer · 05/05</span>
+        </div>
+      </div>
+      <div class="pv-counters">
+        <div class="pv-counter"><div class="pv-counter-num late">2</div><div class="pv-counter-lbl">Atrasadas</div></div>
+        <div class="pv-counter"><div class="pv-counter-num due">3</div><div class="pv-counter-lbl">Próximas</div></div>
+        <div class="pv-counter"><div class="pv-counter-num ok">7</div><div class="pv-counter-lbl">OK</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="pv-resp-stack">
+          <span class="pv-resp-av">JC</span>
+          <span class="pv-resp-av" style="background:linear-gradient(135deg,#0D47A1,#1976D2)">ED</span>
+        </div>
+        <span class="pv-chevron">⌄</span>
+      </div>
+    </div>
+
+    <!-- ─── Card 2: EXPANDED ─── -->
+    <div class="pv-machine-card expanded">
+      <span class="pv-eqtag">RET-01</span>
+      <div class="pv-machine-info">
+        <div class="pv-machine-nome">Retorcedeira VTS 07 2001</div>
+        <div class="pv-machine-sub">
+          <span>Mecânica</span>
+          <span class="pv-machine-sub-sep">·</span>
+          <span>Próxima vencer · 23/04</span>
+        </div>
+      </div>
+      <div class="pv-counters">
+        <div class="pv-counter"><div class="pv-counter-num late">0</div><div class="pv-counter-lbl">Atrasadas</div></div>
+        <div class="pv-counter"><div class="pv-counter-num due">5</div><div class="pv-counter-lbl">Próximas</div></div>
+        <div class="pv-counter"><div class="pv-counter-num ok">3</div><div class="pv-counter-lbl">OK</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="pv-resp-stack"><span class="pv-resp-av">VL</span></div>
+        <span class="pv-chevron">⌄</span>
+      </div>
+    </div>
+    <div class="pv-expand">
+      <!-- Diária -->
+      <div class="pv-freq-group">
+        <div class="pv-freq-header">
+          <span class="pv-freq-dot diaria"></span> Diária
+          <span class="pv-freq-count">1 tarefa</span>
+        </div>
+        <div class="pv-task">
+          <div class="pv-task-tarefa">Conferir nível de óleo do compressor</div>
+          <div class="pv-task-resp"><span class="pv-task-av">VL</span><span class="pv-task-resp-nome">Vorlei</span></div>
+          <div class="pv-task-data">22/04 → hoje</div>
+          <span class="pv-task-status due">Hoje</span>
+          <div class="pv-task-actions"><button class="pv-task-ab">✎</button><button class="pv-task-ab danger">🗑</button></div>
+        </div>
+      </div>
+
+      <!-- Semanal -->
+      <div class="pv-freq-group">
+        <div class="pv-freq-header">
+          <span class="pv-freq-dot semanal"></span> Semanal · 7 dias
+          <span class="pv-freq-count">3 tarefas</span>
+        </div>
+        <div class="pv-task">
+          <div class="pv-task-tarefa">Abrir tampas das cabeceiras e efetuar limpeza</div>
+          <div class="pv-task-resp"><span class="pv-task-av">VL</span><span class="pv-task-resp-nome">Vorlei</span></div>
+          <div class="pv-task-data">16/04 → 23/04</div>
+          <span class="pv-task-status due">Próxima · 1d</span>
+          <div class="pv-task-actions"><button class="pv-task-ab">✎</button><button class="pv-task-ab danger">🗑</button></div>
+        </div>
+        <div class="pv-task">
+          <div class="pv-task-tarefa">Conferir tensão e condição das correias</div>
+          <div class="pv-task-resp"><span class="pv-task-av">VL</span><span class="pv-task-resp-nome">Vorlei</span></div>
+          <div class="pv-task-data">16/04 → 23/04</div>
+          <span class="pv-task-status due">Próxima · 1d</span>
+          <div class="pv-task-actions"><button class="pv-task-ab">✎</button><button class="pv-task-ab danger">🗑</button></div>
+        </div>
+        <div class="pv-task">
+          <div class="pv-task-tarefa">Verificar vazamento de óleos</div>
+          <div class="pv-task-resp"><span class="pv-task-av">VL</span><span class="pv-task-resp-nome">Vorlei</span></div>
+          <div class="pv-task-data">16/04 → 23/04</div>
+          <span class="pv-task-status due">Próxima · 1d</span>
+          <div class="pv-task-actions"><button class="pv-task-ab">✎</button><button class="pv-task-ab danger">🗑</button></div>
+        </div>
+      </div>
+
+      <!-- Mensal -->
+      <div class="pv-freq-group">
+        <div class="pv-freq-header">
+          <span class="pv-freq-dot mensal"></span> Mensal · 30 dias
+          <span class="pv-freq-count">2 tarefas</span>
+        </div>
+        <div class="pv-task">
+          <div class="pv-task-tarefa">Verificar folgas ou desgastes de mancais e polias</div>
+          <div class="pv-task-resp"><span class="pv-task-av">VL</span><span class="pv-task-resp-nome">Vorlei</span></div>
+          <div class="pv-task-data">30/03 → 29/04</div>
+          <span class="pv-task-status due">Próxima · 7d</span>
+          <div class="pv-task-actions"><button class="pv-task-ab">✎</button><button class="pv-task-ab danger">🗑</button></div>
+        </div>
+        <div class="pv-task">
+          <div class="pv-task-tarefa">Lubrificar mancais</div>
+          <div class="pv-task-resp"><span class="pv-task-av">VL</span><span class="pv-task-resp-nome">Vorlei</span></div>
+          <div class="pv-task-data">02/04 → 02/05</div>
+          <span class="pv-task-status ok">10d</span>
+          <div class="pv-task-actions"><button class="pv-task-ab">✎</button><button class="pv-task-ab danger">🗑</button></div>
+        </div>
+      </div>
+
+      <!-- Trimestral -->
+      <div class="pv-freq-group">
+        <div class="pv-freq-header">
+          <span class="pv-freq-dot trimestral"></span> Trimestral · 90 dias
+          <span class="pv-freq-count">2 tarefas</span>
+        </div>
+        <div class="pv-task">
+          <div class="pv-task-tarefa">Limpar ventilação do motor e dos painéis</div>
+          <div class="pv-task-resp"><span class="pv-task-av">VL</span><span class="pv-task-resp-nome">Vorlei</span></div>
+          <div class="pv-task-data">10/02 → 11/05</div>
+          <span class="pv-task-status ok">19d</span>
+          <div class="pv-task-actions"><button class="pv-task-ab">✎</button><button class="pv-task-ab danger">🗑</button></div>
+        </div>
+        <div class="pv-task">
+          <div class="pv-task-tarefa">Calibrar sensores</div>
+          <div class="pv-task-resp"><span class="pv-task-av">VL</span><span class="pv-task-resp-nome">Vorlei</span></div>
+          <div class="pv-task-data">15/03 → 13/06</div>
+          <span class="pv-task-status ok">52d</span>
+          <div class="pv-task-actions"><button class="pv-task-ab">✎</button><button class="pv-task-ab danger">🗑</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Card 3: COLLAPSED com atraso ─── -->
+    <div class="pv-machine-card">
+      <span class="pv-eqtag">TIN-03</span>
+      <div class="pv-machine-info">
+        <div class="pv-machine-nome">Tinturaria Brazzoli HT</div>
+        <div class="pv-machine-sub">
+          <span>Mecânica</span>
+          <span class="pv-machine-sub-sep">·</span>
+          <span style="color:#F87171;font-weight:600">⚠ 3 atrasadas</span>
+        </div>
+      </div>
+      <div class="pv-counters">
+        <div class="pv-counter"><div class="pv-counter-num late">3</div><div class="pv-counter-lbl">Atrasadas</div></div>
+        <div class="pv-counter"><div class="pv-counter-num due">2</div><div class="pv-counter-lbl">Próximas</div></div>
+        <div class="pv-counter"><div class="pv-counter-num ok">5</div><div class="pv-counter-lbl">OK</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="pv-resp-stack">
+          <span class="pv-resp-av" style="background:linear-gradient(135deg,#7B2D9F,#A855F7)">PD</span>
+        </div>
+        <span class="pv-chevron">⌄</span>
+      </div>
+    </div>
+
+  </div>
+
+  <h2>▼ Mobile (≤640px)</h2>
+  <p style="color:#9CA295;font-size:.72rem;margin-bottom:14px">Contadores escondidos (vê só no detalhe). Card mantém máquina + responsável + chevron. Click expande grupo de tarefas (sem coluna de resp e ações — abrir tarefa pra editar).</p>
+
+  <div style="max-width:380px;margin:0 auto">
+    <div class="pv-machine-card" style="grid-template-columns:auto 1fr auto;gap:12px">
+      <span class="pv-eqtag">RET-01</span>
+      <div class="pv-machine-info">
+        <div class="pv-machine-nome" style="font-size:.84rem">Retorcedeira VTS 07</div>
+        <div class="pv-machine-sub" style="font-size:.55rem">
+          <span>5 próximas</span>
+          <span class="pv-machine-sub-sep">·</span>
+          <span>Vorlei</span>
+        </div>
+      </div>
+      <span class="pv-chevron">⌄</span>
+    </div>
+  </div>
+
+  <h2>Resumo das mudanças</h2>
+  <ul style="color:#9CA295;font-size:.78rem;line-height:1.7;list-style:none;max-width:760px">
+    <li>✓ <b style="color:#fff">1 card por máquina</b> — vê de relance "como tá essa máquina"</li>
+    <li>✓ Contadores coloridos: <span style="color:#F87171">atrasadas</span> · <span style="color:#FCD34D">próximas</span> · <span style="color:#6EE7B7">ok</span></li>
+    <li>✓ Stack de avatares dos responsáveis (1 ou +N)</li>
+    <li>✓ Click expande agrupando por <b style="color:#fff">frequência</b> (diária / semanal / quinzenal / mensal / trimestral / semestral / anual) com bullet colorido</li>
+    <li>✓ Cada tarefa mostra: nome · resp · datas · status · ações (editar/excluir)</li>
+    <li>✓ Mobile: contadores somem (só no detalhe), avatar simplifica</li>
+    <li>✓ Busca filtra por nome de máquina, código ou responsável</li>
+    <li>✓ Botão "+ Preventiva" continua no topo</li>
+  </ul>
+</div>
+</body>
+</html>
