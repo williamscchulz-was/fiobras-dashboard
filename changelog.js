@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.46.0', d:'22 abr 2026', current:true,
+    v:'3.47.0', d:'22 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'CRM · modal visual pra trocar responsável + filtro de "U"/inativos.',
+        desc:'William reportou: "ta ruim de mexer" (prompt nativo do JS), "tirar esse user padrão da lista" (avatar "U" cinza aparecia nos cards).\n\nDuas mudanças:\n\n1. MODAL VISUAL próprio substitui o prompt nativo:\n   - Cabeçalho com título do lead\n   - Mostra responsável atual destacado em âmbar\n   - Lista scrollable com avatar (foto se houver) + nome de cada user\n   - Click seleciona (border verde + checkmark)\n   - Botões Cancelar/Salvar fixos no rodapé\n   - Animação fade-in + backdrop-filter blur\n\n2. FILTRO de users genéricos no leadColaboradores() e na lista do modal:\n   - "Sistema", "Usuário", "Usuario", "U", "admin", "Fiobras" não aparecem mais\n   - Users marcados como `active: false` (v3.46.0) também filtrados\n   - Nome friendly "atual" no badge âmbar quando o user já é o responsável\n\nResultado: o "U" cinza some dos cards. Trocar responsável vira fluxo visual e claro.'}
+    ]
+  },
+  {
+    v:'3.46.0', d:'22 abr 2026',
     items:[
       {type:'high', title:'Fases 4+5+6 da auditoria · auto-login + aviso sessão + status ativo/inativo.',
         desc:'FASE 4 — Auto-login no Manutenção via sessão do HUB:\n• _autoLoginViaHub() roda no boot do sub-app\n• Lê getCurrentUser() (sessão do HUB) e popula state.user/userKey/isAdmin diretamente\n• User não vê tela de login do Manutenção quando vem do HUB\n• Login local fica como fallback (acesso direto /manutencao/)\n\nFASE 5 — Aviso visual de sessão expirando:\n• Helper _checkSessionExpiring() roda a cada 60s no HUB\n• 1h antes da expiração: toast âmbar "Sua sessão expira em X min" + botão "Renovar"\n• Click em "Renovar" estende +24h\n• Sessão expirada: alerta + reload pra tela de login\n\nFASE 6 — Campo `active` em users-profile:\n• Toggle "Ativo/Inativo" no modal Editar Usuário (default: ativo)\n• Login bloqueado pra inativos com mensagem "Usuário inativo. Contate um administrador"\n• Painel admin mostra users inativos com opacity reduzida + badge "INATIVO" cinza\n• Histórico do user é preservado (não deleta nada)\n• Útil pra desligar funcionário sem perder dados ou rastros'}

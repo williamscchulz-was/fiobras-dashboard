@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.46.0">
+<link rel="stylesheet" href="../css/tokens.css?v=3.47.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -386,6 +386,39 @@ min-width:18px;height:16px;padding:0 5px;margin-left:5px;
 
 /* avatar do responsável (footer do card) */
 .card-resp{border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:700;border:2px solid #fff;flex-shrink:0;letter-spacing:.02em;}
+
+/* v3.47.0 — Modal próprio "Trocar Responsável" (substitui prompt nativo) */
+.crm-resp-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;animation:crmRmFadeIn .15s ease-out;font-family:'Poppins',sans-serif}
+@keyframes crmRmFadeIn{from{opacity:0}to{opacity:1}}
+.crm-resp-modal{background:var(--surface,#fff);border-radius:16px;max-width:480px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.crm-rm-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid var(--border,#E3E7DE)}
+.crm-rm-title{font-family:'Outfit',sans-serif;font-weight:900;font-size:18px;color:var(--text,#1B1F18);letter-spacing:-.01em}
+.crm-rm-sub{font-size:13px;color:var(--muted,#6B7166);margin-top:2px}
+.crm-rm-close{background:transparent;border:0;font-size:18px;color:var(--muted,#6B7166);cursor:pointer;padding:4px 10px;border-radius:6px}
+.crm-rm-close:hover{background:var(--surface2,#F4F6F0);color:var(--text,#1B1F18)}
+.crm-rm-current{padding:12px 22px;background:var(--surface2,#F4F6F0);display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border,#E3E7DE)}
+.crm-rm-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--muted2,#9CA295);text-transform:uppercase;font-weight:500}
+.crm-rm-current-nome{font-family:'Outfit',sans-serif;font-weight:700;font-size:13.5px;color:var(--text,#1B1F18)}
+.crm-rm-list{flex:1;overflow-y:auto;padding:8px 12px;max-height:50vh}
+.crm-rm-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .15s;border:1px solid transparent}
+.crm-rm-item:hover{background:var(--surface2,#F4F6F0)}
+.crm-rm-item.sel{background:rgba(0,136,53,.08);border-color:#008835}
+.crm-rm-item.atual{background:rgba(245,158,11,.06)}
+.crm-rm-av{width:36px;height:36px;border-radius:50%;background-size:cover;background-position:center;flex-shrink:0;border:1.5px solid var(--border,#E3E7DE)}
+.crm-rm-av-fallback{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6B7166,#9CA295);color:#fff;font-family:'Outfit',sans-serif;font-weight:900;font-size:14px}
+.crm-rm-info{flex:1;min-width:0}
+.crm-rm-nome{font-family:'Outfit',sans-serif;font-weight:600;font-size:14px;color:var(--text,#1B1F18)}
+.crm-rm-badge{display:inline-block;background:rgba(245,158,11,.18);color:#92400E;font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;margin-left:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
+.crm-rm-check{width:24px;height:24px;border-radius:50%;background:#008835;color:#fff;display:none;align-items:center;justify-content:center}
+.crm-rm-check svg{width:14px;height:14px}
+.crm-rm-item.sel .crm-rm-check{display:flex}
+.crm-rm-actions{display:flex;gap:10px;padding:14px 22px;border-top:1px solid var(--border,#E3E7DE);background:var(--surface,#fff)}
+.crm-rm-btn{flex:1;padding:11px;border:0;border-radius:9px;font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:.15s}
+.crm-rm-btn.cancel{background:var(--surface2,#F4F6F0);color:var(--muted,#6B7166)}
+.crm-rm-btn.cancel:hover{background:var(--border,#E3E7DE)}
+.crm-rm-btn.confirm{background:#008835;color:#fff}
+.crm-rm-btn.confirm:hover:not(:disabled){background:#00a040}
+.crm-rm-btn.confirm:disabled{opacity:.4;cursor:not-allowed}
 
 /* v3.42.0 — Stack de colaboradores no card */
 .cs-stack{display:inline-flex;align-items:center;position:relative}
@@ -1960,13 +1993,30 @@ function avatarChip(name, size=22, leadId){
 }
 
 // v3.42.0 — extrai colaboradores únicos do lead em ordem cronológica (mockup aprovado).
-// Cada um vira { nome, acao, dataFmt } pra renderizar no stack + tooltip.
+// v3.47.0 — filtra entries genéricas ("Sistema", "Usuário", "U") + inativos
+function _crmIsNomeGenerico(nome) {
+  const n = String(nome || '').toLowerCase().trim();
+  return !n || n === 'sistema' || n === 'usuário' || n === 'usuario' || n === 'u' || n === 'admin' || n === 'fiobras';
+}
+function _crmIsUserAtivo(nome) {
+  if (!nome || !window._userProfiles) return true; // se não tem profile, assume ativo
+  const lower = String(nome).toLowerCase().trim();
+  // Acha pelo nome
+  for (const k in window._userProfiles) {
+    const p = window._userProfiles[k] || {};
+    const n = (p.nomeCompleto || p.nome || '').toLowerCase().trim();
+    if (n === lower) return p.active !== false;
+  }
+  return true; // não achou no profile → mantém (legacy)
+}
 function leadColaboradores(l) {
   if (!l) return [];
   const colabs = []; // ordenado por data, sem dups
   const seen = new Set();
   function push(nome, acao, ts) {
     if (!nome) return;
+    if (_crmIsNomeGenerico(nome)) return; // v3.47.0: filtra "U", "Sistema", etc
+    if (!_crmIsUserAtivo(nome)) return;   // v3.47.0: filtra inativos
     const key = String(nome).toLowerCase().trim();
     if (seen.has(key)) {
       // user já no stack: atualiza pra ação MAIS RECENTE
@@ -2085,37 +2135,81 @@ function avatarStack(colabs, leadId) {
   }
   return html;
 }
-// v3.41.1 — admin troca responsável de qualquer card
-// v3.43.2 — detecta admin via _user OU __hubSession OU localStorage
+// v3.41.1 + v3.47.0 — admin troca responsável via MODAL VISUAL próprio
+// (substitui o prompt nativo feio + filtra users genéricos/inativos)
 window.crmTrocarResp = function(leadId) {
-  if (!_crmIsAdmin()) {
-    alert('Apenas admin pode trocar responsável.');
-    return;
-  }
+  if (!_crmIsAdmin()) { toast('Apenas admin pode trocar responsável.', 'err'); return; }
   const l = (window._leads || {})[leadId];
   if (!l) return;
-  // Lista de users disponíveis (de users-profile do HUB)
   const profs = window._userProfiles || {};
+  // Filtra: chave válida, nome real (sem "sistema"/"usuario"/"u"), ativo
   const users = Object.entries(profs)
-    .filter(([k]) => k !== 'admin')
-    .map(([k, p]) => ({ key: k, nome: p.nomeCompleto || p.nome || k }))
+    .filter(([k, p]) => {
+      if (k === 'admin') return false;
+      if (p.active === false) return false;
+      const nome = (p.nomeCompleto || p.nome || '').trim();
+      const lower = nome.toLowerCase();
+      if (!nome) return false;
+      if (lower === 'sistema' || lower === 'usuário' || lower === 'usuario' || lower === 'u') return false;
+      return true;
+    })
+    .map(([k, p]) => ({ key: k, nome: p.nomeCompleto || p.nome || k, foto: p.foto || null }))
     .sort((a, b) => a.nome.localeCompare(b.nome));
-  if (!users.length) { alert('Nenhum user disponível pra atribuir.'); return; }
+  if (!users.length) { toast('Nenhum usuário disponível pra atribuir.', 'err'); return; }
+  const atual = leadResponsavel(l) || '';
+  const tituloLead = l.nome || l.empresa || ('Lead ' + leadId);
+  // Modal visual
+  const overlay = document.createElement('div');
+  overlay.className = 'crm-resp-modal-bg';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  const lista = users.map(u => {
+    const isAtual = u.nome.toLowerCase() === atual.toLowerCase();
+    const av = u.foto
+      ? `<div class="crm-rm-av" style="background-image:url('${u.foto.replace(/'/g,"%27")}')"></div>`
+      : `<div class="crm-rm-av crm-rm-av-fallback">${(u.nome[0]||'?').toUpperCase()}</div>`;
+    return `<div class="crm-rm-item${isAtual ? ' atual' : ''}" data-nome="${u.nome.replace(/"/g,'&quot;')}" onclick="_crmRmSelect(this)">
+      ${av}
+      <div class="crm-rm-info">
+        <div class="crm-rm-nome">${u.nome}${isAtual ? ' <span class="crm-rm-badge">atual</span>' : ''}</div>
+      </div>
+      <div class="crm-rm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+    </div>`;
+  }).join('');
+  overlay.innerHTML = `
+    <div class="crm-resp-modal">
+      <div class="crm-rm-head">
+        <div>
+          <div class="crm-rm-title">Trocar responsável</div>
+          <div class="crm-rm-sub">${tituloLead}</div>
+        </div>
+        <button class="crm-rm-close" onclick="this.closest('.crm-resp-modal-bg').remove()">✕</button>
+      </div>
+      <div class="crm-rm-current">
+        <span class="crm-rm-label">RESPONSÁVEL ATUAL</span>
+        <span class="crm-rm-current-nome">${atual || '— sem responsável —'}</span>
+      </div>
+      <div class="crm-rm-list">${lista}</div>
+      <div class="crm-rm-actions">
+        <button class="crm-rm-btn cancel" onclick="this.closest('.crm-resp-modal-bg').remove()">Cancelar</button>
+        <button class="crm-rm-btn confirm" id="crmRmConfirm" disabled onclick="_crmRmConfirmar('${leadId}')">Salvar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+};
+window._crmRmSelect = function(el) {
+  el.parentElement.querySelectorAll('.crm-rm-item').forEach(i => i.classList.remove('sel'));
+  el.classList.add('sel');
+  const btn = document.getElementById('crmRmConfirm');
+  if (btn) { btn.disabled = false; btn.dataset.nome = el.dataset.nome; }
+};
+window._crmRmConfirmar = function(leadId) {
+  const btn = document.getElementById('crmRmConfirm');
+  const novoResp = btn?.dataset.nome;
+  if (!novoResp) return;
+  const l = (window._leads || {})[leadId]; if (!l) return;
   const atual = leadResponsavel(l) || '—';
-  const opcoes = users.map((u, i) => (i + 1) + '. ' + u.nome).join('\n');
-  const titulo = l.nome || l.empresa || ('Lead ' + leadId);
-  const escolha = prompt(
-    'Trocar responsável de:\n"' + titulo + '"\n\n' +
-    'Atual: ' + atual + '\n\n' +
-    opcoes + '\n\nDigite o número (ou cancele):'
-  );
-  if (escolha === null) return;
-  const idx = parseInt(escolha) - 1;
-  if (isNaN(idx) || idx < 0 || !users[idx]) { alert('Opção inválida.'); return; }
-  const novoResp = users[idx].nome;
-  // v3.43.2 — adminNome detectado via _user OU __hubSession
   const adminNome = (window._user?.nome) || (window.__hubSession?.user) || 'admin';
-  // Atualiza Firebase + log
+  const tituloLead = l.nome || l.empresa || ('Lead ' + leadId);
   const histPrev = Array.isArray(l.historico) ? l.historico : [];
   const novoHist = [...histPrev, {
     acao: 'Responsável trocado de "' + atual + '" para "' + novoResp + '" por ' + adminNome,
@@ -2125,16 +2219,13 @@ window.crmTrocarResp = function(leadId) {
   window._update(leadId, { responsavel: novoResp, historico: novoHist });
   if (window._logPush) {
     window._logPush({
-      acao: 'Responsável trocado',
-      lead: titulo,
-      leadId,
-      por: adminNome,
-      de: atual,
-      para: novoResp,
-      ts: Date.now(),
+      acao: 'Responsável trocado', lead: tituloLead,
+      leadId, por: adminNome, de: atual, para: novoResp, ts: Date.now(),
     });
   }
+  document.querySelectorAll('.crm-resp-modal-bg').forEach(m => m.remove());
   if (window.renderAll) setTimeout(window.renderAll, 100);
+  toast('Responsável: ' + novoResp, 'ok');
 };
 /* Pega o responsável mais relevante do lead.
    v3.41.1: prioriza l.responsavel (campo trocado pelo admin); fallback pro último
