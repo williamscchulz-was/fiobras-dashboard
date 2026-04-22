@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.40.4">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.41.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3185,27 +3185,45 @@ onValue(historicoRef, snap => {
 // hardcoded aqui (ex: William). Sem isso, _resolveUserKey não acha e o avatar
 // fica sem foto + cor default.
 state.userProfiles = {};
-onValue(ref(db, 'users-profile'), snap => {
-  state.userProfiles = snap.val() || {};
-  // Merge dinâmico: pra cada profile que não existe no USERS local, adiciona
-  Object.entries(state.userProfiles).forEach(([k, p]) => {
-    if (!p) return;
+state.usersConfig = {};
+// v3.41.0 — Source of Truth UNIFICADO
+// users-config = lista canônica de chaves (CRUD admin no HUB)
+// users-profile = metadata (foto, nomeCompleto, role)
+// USERS local = só admin/joacir hardcoded como fallback offline pra LOGIN
+function _rebuildUsersFromFirebase() {
+  const profiles = state.userProfiles || {};
+  const config = state.usersConfig || {};
+  // Une as chaves de config + profile (cobre legacy que só existe em um dos dois)
+  const allKeys = new Set([...Object.keys(config), ...Object.keys(profiles)]);
+  allKeys.forEach(k => {
+    const p = profiles[k] || {};
+    const c = config[k] || {};
+    const nome = p.nomeCompleto || c.nome || p.nome || k;
     if (!USERS[k]) {
       USERS[k] = {
-        senha: null, // não precisa senha, não usa pra login no sub-app
-        isAdmin: p.roleOverride === 'admin', // roles vêm do HUB
-        nome: p.nomeCompleto || p.nome || k,
+        senha: null,
+        isAdmin: (p.roleOverride === 'admin' || c.role === 'admin'),
+        nome,
       };
-    } else if (p.nomeCompleto && USERS[k].nome !== p.nomeCompleto) {
-      // Atualiza nome friendly se mudou no HUB (ex: "Admin" → "William Alexander Schulz")
-      // Mas só pra users não-hardcoded crítico (preserva 'admin'/'joacir')
-      if (k !== 'admin' && k !== 'joacir') USERS[k].nome = p.nomeCompleto;
+    } else if (k !== 'admin' && k !== 'joacir') {
+      // Atualiza nome se Firebase mudou (preserva admin/joacir hardcoded)
+      USERS[k].nome = nome;
+      USERS[k].isAdmin = (p.roleOverride === 'admin' || c.role === 'admin');
     }
   });
-  // Re-renderiza pra atualizar avatares com fotos novas
+  _refreshStandardUsers();
+  // Re-renderiza UI
   if (typeof renderKanban === 'function') renderKanban();
   if (typeof renderPreventiva === 'function') renderPreventiva();
   if (typeof renderHistorico === 'function') renderHistorico();
+}
+onValue(ref(db, 'users-profile'), snap => {
+  state.userProfiles = snap.val() || {};
+  _rebuildUsersFromFirebase();
+});
+onValue(ref(db, 'users-config'), snap => {
+  state.usersConfig = snap.val() || {};
+  _rebuildUsersFromFirebase();
 });
 
 // ── Firebase write helpers
@@ -3368,16 +3386,23 @@ const CHECK_SVG_STR = '<svg width="13" height="13" viewBox="0 0 24 24" fill="non
 const EDIT_SVG_STR  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
 const DEL_SVG_STR   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
 // Usuários do sistema
+// v3.41.0 — USERS é AGORA só FALLBACK DE LOGIN OFFLINE.
+// SOURCE OF TRUTH: users-config (lista) + users-profile (foto/nome/role) no Firebase.
+// Quando users-config carrega via onValue, o USERS é enriquecido em runtime.
+// Os 2 hardcoded abaixo (admin/joacir) garantem login mesmo sem Firebase.
 const USERS = {
-  'admin':     { senha: 'admin',  isAdmin: true,  nome: 'Admin'     },
-  'joacir':    { senha: '2725',   isAdmin: true,  nome: 'Joacir'    },
-  'hernandes': { senha: null,     isAdmin: false, nome: 'Hernandes' },
-  'vorlei':    { senha: null,     isAdmin: false, nome: 'Vorlei'    },
-  'pedro':     { senha: null,     isAdmin: false, nome: 'Pedro'     },
-  'ivonei':    { senha: null,     isAdmin: false, nome: 'Ivonei'    },
-  'roland':    { senha: null,     isAdmin: false, nome: 'Roland'    },
+  'admin':  { senha: 'admin', isAdmin: true,  nome: 'Admin'  },
+  'joacir': { senha: '2725',  isAdmin: true,  nome: 'Joacir' },
 };
-const STANDARD_USERS = Object.entries(USERS).filter(([,u]) => !u.isAdmin).map(([,u]) => u.nome);
+// STANDARD_USERS legacy: mantido apenas pra códigos que ainda referenciam (será derivado
+// dinamicamente após Firebase carregar — ver _refreshStandardUsers abaixo).
+let STANDARD_USERS = [];
+function _refreshStandardUsers() {
+  STANDARD_USERS = Object.entries(USERS)
+    .filter(([k, u]) => !u.isAdmin && k !== 'admin')
+    .map(([, u]) => u.nome);
+}
+_refreshStandardUsers();
 
 const state = {
   user: null,
