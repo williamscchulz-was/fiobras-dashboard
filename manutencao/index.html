@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.48.3">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.48.4">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -617,6 +617,76 @@ cursor: default;
 .kanban-board.board-v2 .kanban-card.kc-doing { border-color: rgba(245,158,11,.35); box-shadow: 0 0 0 1px rgba(245,158,11,.2); }
 .kanban-board.board-v2 .kanban-card.kc-done { opacity: .82; }
 .kanban-board.board-v2 .kanban-card.dragging { opacity: .5; }
+
+/* v3.48.4 — Card Kanban minimalista (kc3). Avatar grande à esquerda, título + meta no centro,
+   urgência + ações à direita. Click no card abre modal de detalhe. */
+.kanban-board.board-v2 .kanban-card.kc3 { padding: 12px 14px; cursor: pointer; }
+.kanban-board.board-v2 .kanban-card.kc3.urg-alta  { border-left: 3px solid #DC2626; }
+.kanban-board.board-v2 .kanban-card.kc3.urg-media { border-left: 3px solid #F59E0B; }
+.kanban-board.board-v2 .kanban-card.kc3.urg-baixa { border-left: 3px solid #10B981; }
+.kanban-board.board-v2 .kanban-card.kc3.urg-prev  { border-left: 3px solid #3B82F6; }
+.kc3-grid { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; }
+.kc3-av { display: flex; align-items: center; justify-content: center; }
+.kc3-av .av { border-color: transparent !important; }
+.kc3-body { min-width: 0; }
+.kc3-title {
+  font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .82rem;
+  color: #fff; line-height: 1.25; margin-bottom: 4px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; word-break: break-word;
+}
+.kc3-meta {
+  font-family: 'DM Mono', monospace; font-size: .56rem;
+  color: #6B7166; text-transform: uppercase; letter-spacing: .6px;
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+}
+.kc3-eqtag { background: rgba(0,200,80,.12); color: #4ADE80; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.kc3-meta-tipo { color: #9CA295; }
+.kc3-meta-date { color: #6B7166; }
+.kc3-meta-date.overdue { color: #F87171; font-weight: 600; }
+.kc3-meta-date.overdue::before { content: '⚠ '; }
+.kc3-meta-sep { opacity: .4; }
+.kc3-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.kc3-urg {
+  font-family: 'Poppins', sans-serif; font-size: .55rem; font-weight: 600;
+  padding: 2px 7px; border-radius: 4px; letter-spacing: .3px; text-transform: uppercase;
+}
+.kc3-urg.u-alta  { background: rgba(220,38,38,.15); color: #F87171; }
+.kc3-urg.u-media { background: rgba(245,158,11,.15); color: #FCD34D; }
+.kc3-urg.u-baixa { background: rgba(16,185,129,.15); color: #6EE7B7; }
+.kc3-cmt {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: 'DM Mono', monospace; font-size: .58rem; color: #6B7166;
+}
+.kc3-cmt svg { width: 11px; height: 11px; }
+.kc3-actions { display: inline-flex; gap: 3px; }
+.kc3-ab {
+  width: 26px; height: 26px; border-radius: 6px; border: 0;
+  background: rgba(255,255,255,.05); color: #9CA295; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0; transition: .15s;
+}
+.kc3-ab:hover { background: rgba(255,255,255,.12); color: #fff; }
+.kc3-ab.ok { color: #6EE7B7; }
+.kc3-ab.ok:hover { background: rgba(16,185,129,.18); color: #10B981; }
+.kc3-ab svg { width: 12px; height: 12px; }
+
+[data-theme="light"] .kanban-board.board-v2 .kanban-card.kc3 { background: var(--surface,#fff); border-color: var(--border,#E3E7DE); }
+[data-theme="light"] .kanban-board.board-v2 .kanban-card.kc3 .kc3-title { color: var(--text); }
+[data-theme="light"] .kanban-board.board-v2 .kanban-card.kc3 .kc3-meta { color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kanban-card.kc3 .kc3-meta-tipo { color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kanban-card.kc3 .kc3-eqtag { color: #065F46; background: rgba(0,136,53,.1); }
+[data-theme="light"] .kanban-board.board-v2 .kanban-card.kc3 .kc3-ab { background: rgba(27,31,24,.05); color: var(--muted); }
+[data-theme="light"] .kanban-board.board-v2 .kanban-card.kc3 .kc3-ab:hover { background: rgba(27,31,24,.1); color: var(--text); }
+
+/* Mobile: avatar 38px, esconde chip de urgência (fica só borda esquerda colorida) */
+@media (max-width: 480px) {
+  .kc3-grid { grid-template-columns: 38px 1fr auto; gap: 10px; }
+  .av.sz-lg { width: 38px; height: 38px; font-size: 13px; }
+  .kc3-urg { display: none; }
+  .kc3-title { font-size: .78rem; }
+  .kc3-meta { font-size: .54rem; }
+}
 
 .kc2-thumb { margin: -14px -14px 12px; height: 110px; background-size: cover; background-position: center; position: relative; }
 .kc2-thumb:after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgba(26,29,34,.5)); }
@@ -4093,9 +4163,10 @@ function _iniciarTimers() {
 // v3.36.0 — Kanban redesign (Ajuste 4): card novo estilo Linear/Trello dark
 // Preserva TODAS as funcionalidades: drag, comentários, peças, reatribuir, mover, editar, deletar.
 function buildCard(c) {
+  // v3.48.4 — Card minimalista (kc3): avatar 44px à esquerda, título + meta no centro,
+  // urgência + ações à direita. Click no card abre detalhes via abrirDetalheCard().
   const tipoLabel = { preventiva:'Preventiva', demanda:'Demanda', corretiva:'Corretiva', instalacao:'Instalação', melhoria:'Melhoria' };
-  const urgLabel = { alta:'Alta', media:'Média', baixa:'Baixa', prev:'Preventiva' };
-  const setorLabel = c.setor === 'eletrica' ? 'Elétrica' : 'Mecânica';
+  const urgLabel  = { alta:'Alta', media:'Média', baixa:'Baixa', prev:'Prev' };
 
   // Timestamp — pega ts numérico ou tenta parsear data string
   const ts = c.ts
@@ -4119,121 +4190,93 @@ function buildCard(c) {
       if (c.col !== 'done' && ageDays > 7) dateCls = 'overdue';
     }
   }
-  const dateHtml = dateTxt ? `<span class="kc2-date ${dateCls}" data-ts="${ts}" data-col="${c.col}">${dateTxt}</span>` : '';
-
-  // Tags topo: tipo + urgência + setor
-  const tagTipo = c.tipo ? `<span class="kc2-tag t-${c.tipo}">${tipoLabel[c.tipo] || c.tipo}</span>` : '';
-  const tagUrg  = c.urg  ? `<span class="kc2-tag u-${c.urg}">${urgLabel[c.urg] || c.urg}</span>` : '';
-  const tagSetor = c.setor ? `<span class="kc2-tag s-${c.setor === 'eletrica' ? 'ele' : 'mec'}">${setorLabel}</span>` : '';
-
-  // Foto como banner top
-  const photoHtml = c.foto
-    ? `<img src="${c.foto}" class="kc2-photo" alt="" loading="lazy" decoding="async">`
-    : '';
-
-  // Equipamento com tag verde + nome
-  const eqParts = [];
+  // Equipamento — tag verde curta (RET-01) na meta line
   const maq = c.maqKey ? state.maquinas.find(m => m._key === c.maqKey) : null;
   const eqTag = (maq && maq.tag) ? maq.tag : (c.equip ? (c.equip.split(' · ')[0] || '') : '');
-  const eqNome = (maq && maq.nome) ? maq.nome : (c.equip ? (c.equip.split(' · ').slice(1).join(' · ') || c.equip) : '');
-  if (eqTag) eqParts.push(`<span class="kc2-eq-tag">${eqTag}</span>`);
-  if (eqNome) eqParts.push(`<span>${eqNome}</span>`);
-  const eqHtml = eqParts.length ? `<div class="kc2-eq">${eqParts.join('')}</div>` : '';
+  const eqTagHtml = eqTag ? `<span class="kc3-eqtag">${eqTag}</span>` : '';
 
-  // Participantes → avatar stack
-  const participantes = [];
-  if (c.resp) participantes.push(c.resp);
-  if (c.autor && c.autor !== c.resp && c.autor !== 'Sistema') participantes.push(c.autor);
-  if (c.log && Array.isArray(c.log)) {
-    c.log.forEach(l => { if (l.resp && !participantes.includes(l.resp)) participantes.push(l.resp); });
-  }
-  const respHtml = participantes.length
-    ? `<span class="kc2-avs${state.isAdmin ? ' clickable' : ''}" ${state.isAdmin ? `onclick="event.stopPropagation();abrirModalReatribuir('${c._key}')"` : ''}>${avatarStack(participantes, 'xs')}</span>`
+  // Avatar grande do responsável
+  const respKey = c.resp || c.autor || '';
+  const isAdminClick = state.isAdmin;
+  const avHtml = respKey
+    ? `<span class="kc3-av-wrap" ${isAdminClick ? `onclick="event.stopPropagation();abrirModalReatribuir('${c._key}')"` : ''}>${avatar(respKey, 'lg')}</span>`
+    : `<span class="av sz-lg u-default" aria-label="Sem responsável">—</span>`;
+
+  // Urgency chip
+  const urgChip = c.urg ? `<span class="kc3-urg u-${c.urg}">${urgLabel[c.urg] || c.urg}</span>` : '';
+
+  // Comments badge (small, só conta se >0)
+  const comments = Array.isArray(c.comments) ? c.comments : (c.comments ? Object.values(c.comments) : []);
+  const cmtHtml = comments.length
+    ? `<span class="kc3-cmt" title="${comments.length} comentário${comments.length>1?'s':''}">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 10a1.5 1.5 0 01-1.5 1.5H5l-3 3V3.5A1.5 1.5 0 013.5 2h9A1.5 1.5 0 0114 3.5z"/></svg>
+        ${comments.length}
+      </span>`
     : '';
 
-  // Comentários: contador clicável que abre a seção inline
-  const comments = Array.isArray(c.comments) ? c.comments : (c.comments ? Object.values(c.comments) : []);
-  const commentsCount = comments.length;
-  const commentsToggle = `<span class="kc2-comments" onclick="event.stopPropagation();_kcToggleExtras('${c._key}')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    ${commentsCount || ''}
-  </span>`;
-
-  // v3.38.0 — Estimativa: aceita diasEstimados (prioridade) OU horasEstimadas (legado)
-  let estHtml = '';
-  if (c.diasEstimados) {
-    estHtml = `<span class="kc2-est"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${c.diasEstimados}d</span>`;
-  } else if (c.horasEstimadas) {
-    estHtml = `<span class="kc2-est"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${c.horasEstimadas}h</span>`;
-  }
-
-  // v3.48.3 — botão de peças removido do card (William: "n precisa de botao para adicionar peças tira fora").
-  // Peças cadastradas continuam acessíveis no modal de detalhe.
-  const pecasHtml = '';
-
-  // Botões de ação
+  // Botões de ação compactos (▶ Iniciar / ◀ Voltar / ✓ Concluir / ✎ Editar)
+  // Excluir mudou pro modal de detalhe pra evitar acidente.
   const canEdit = state.isAdmin || (c.autor === state.user) || (c.resp === state.user);
-  const canDelete = state.isAdmin;
   const actBtns = [];
-  if (c.col === 'todo')  actBtns.push(`<button class="kc2-ab ok" onclick="event.stopPropagation();moverCard('${c._key}','doing')" title="Iniciar">▶</button>`);
+  if (c.col === 'todo')  actBtns.push(`<button class="kc3-ab ok" onclick="event.stopPropagation();moverCard('${c._key}','doing')" title="Iniciar"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3l8 5-8 5z"/></svg></button>`);
   if (c.col === 'doing') {
-    actBtns.push(`<button class="kc2-ab" onclick="event.stopPropagation();moverCard('${c._key}','todo')" title="Voltar">◀</button>`);
-    actBtns.push(`<button class="kc2-ab ok" onclick="event.stopPropagation();moverCard('${c._key}','done')" title="Concluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>`);
+    actBtns.push(`<button class="kc3-ab" onclick="event.stopPropagation();moverCard('${c._key}','todo')" title="Voltar"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M11 3L3 8l8 5z"/></svg></button>`);
+    actBtns.push(`<button class="kc3-ab ok" onclick="event.stopPropagation();moverCard('${c._key}','done')" title="Concluir"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 8 7 12 13 4"/></svg></button>`);
   }
   if (canEdit && c.col !== 'done') {
-    actBtns.push(`<button class="kc2-ab" onclick="event.stopPropagation();editarCard('${c._key}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`);
+    actBtns.push(`<button class="kc3-ab" onclick="event.stopPropagation();editarCard('${c._key}')" title="Editar"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11.5 1.5l3 3L5 14H2v-3z"/></svg></button>`);
   }
-  if (canDelete) {
-    actBtns.push(`<button class="kc2-ab danger" onclick="event.stopPropagation();deletarCard('${c._key}')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>`);
-  }
-  const actionsHtml = actBtns.length ? `<div class="kc2-actions">${actBtns.join('')}</div>` : '';
 
-  // Progresso automático por col
+  // Tipo label (na meta line)
+  const tipoTxt = tipoLabel[c.tipo] || c.tipo || '';
+
+  // Date com classe overdue compartilhada com kc2-date pra _tickTimers continuar funcionando
+  const dateHtml = dateTxt ? `<span class="kc3-meta-date kc2-date ${dateCls}" data-ts="${ts||''}" data-col="${c.col}">${dateTxt}</span>` : '';
+
+  // Meta line: RET-01 · Tipo · Data
+  const metaParts = [];
+  if (eqTagHtml) metaParts.push(eqTagHtml);
+  if (tipoTxt)   metaParts.push(`<span class="kc3-meta-tipo">${tipoTxt}</span>`);
+  if (dateHtml)  metaParts.push(dateHtml);
+  const metaHtml = `<div class="kc3-meta">${metaParts.join('<span class="kc3-meta-sep">·</span>')}</div>`;
+
+  // Progress bar (mantém kc2-progress pra reaproveitar CSS)
   const pgMap = { todo: 0, doing: 50, done: 100 };
   const pgCls = 'pg-' + (c.col || 'todo');
   const pgVal = typeof c.progresso === 'number' ? Math.max(0, Math.min(100, c.progresso)) : (pgMap[c.col] || 0);
   const progressHtml = `<div class="kc2-progress"><div class="kc2-progress-fill ${pgCls}" style="width:${pgVal}%"></div></div>`;
 
-  // Comentários inline (colapsados por padrão)
-  const commentsInline = `<div class="kc2-extras" id="extras-${c._key}">
-    ${comments.map(cm =>
-      `<div class="comment-item">
-        <span class="comment-who">${cm.autor||''}</span>
-        <span style="flex:1;font-size:0.65rem">${cm.texto||''}</span>
-        <span class="comment-time">${cm.hora||''}</span>
-      </div>`
-    ).join('')}
-    <div class="comment-input-wrap">
-      <input class="comment-input" id="ci-${c._key}" placeholder="Comentar..." onkeydown="if(event.key==='Enter')adicionarComentario('${c._key}')">
-      <button class="comment-send" onclick="adicionarComentario('${c._key}')">Enviar</button>
-    </div>
-  </div>`;
-
-  const cardCls = 'kanban-card kc-' + (c.col || 'todo');
+  const cardCls = 'kanban-card kc3 kc-' + (c.col || 'todo') + ' urg-' + (c.urg || 'baixa');
 
   return `<div class="${cardCls}" id="card-${c._key}" data-id="${c._key}" data-urg="${c.urg||'baixa'}" draggable="true"
-    ondragstart="onDragStart(event,'${c._key}')" ondragend="onDragEnd(event)">
-    ${photoHtml ? `<div class="kc2-thumb" style="background-image:url('${c.foto}')"></div>` : ''}
-    ${actionsHtml}
-    <div class="kc2-tags">${tagTipo}${tagUrg}${tagSetor}</div>
-    <div class="kc2-title">${c.titulo||''}</div>
-    ${c.desc ? `<div class="kc2-desc">${c.desc}</div>` : ''}
-    ${eqHtml}
-    <div class="kc2-foot">
-      <div class="kc2-foot-l">
-        ${respHtml}
-        ${commentsToggle}
-        ${pecasHtml}
+    ondragstart="onDragStart(event,'${c._key}')" ondragend="onDragEnd(event)"
+    onclick="abrirDetalheCard('${c._key}')">
+    <div class="kc3-grid">
+      <div class="kc3-av">${avHtml}</div>
+      <div class="kc3-body">
+        <div class="kc3-title">${c.titulo||''}</div>
+        ${metaHtml}
       </div>
-      <div style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-        ${dateHtml}
-        ${estHtml}
+      <div class="kc3-right">
+        ${urgChip}
+        ${cmtHtml}
+        ${actBtns.length ? `<div class="kc3-actions">${actBtns.join('')}</div>` : ''}
       </div>
     </div>
-    ${commentsInline}
     ${progressHtml}
   </div>`;
 }
+
+// v3.48.4 — Click no card abre detalhes. Quem pode editar abre o modal de edição
+// (que mostra TODOS os campos: desc, peças, equipamento, etc). Quem só pode ler
+// continua no comportamento de expand inline (preserva acesso a comentários).
+window.abrirDetalheCard = function(key) {
+  const card = state.cards.find(c => c._key === key);
+  if (!card) return;
+  const canEdit = state.isAdmin || (card.autor === state.user) || (card.resp === state.user);
+  if (canEdit) editarCard(key);
+  else _kcToggleExtras(key);
+};
 
 // Helpers v3.36.0
 function _relativeDate(ts) {

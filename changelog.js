@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.48.3', d:'22 abr 2026', current:true,
+    v:'3.48.4', d:'22 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · Kanban: card minimalista (avatar grande à esquerda, click abre detalhes).',
+        desc:'Redesign aprovado pelo William após mockup (_mockup-v3.48.3.html).\n\nMudanças visuais:\n• Avatar 22px → 44px (foto/iniciais bem visíveis, do responsável)\n• Altura do card 150px → ~70px (cabe 2× mais cards na tela)\n• Tags 3 chips no topo → 1 linha de meta única (RET-01 · Tipo · Data relativa)\n• Borda esquerda colorida indica urgência (vermelho/laranja/verde)\n• Botões de ação direita: ▶ Iniciar / ◀ Voltar / ✓ Concluir / ✎ Editar\n• Excluir saiu do card → vai pro modal de detalhe (evita acidente)\n• Comments badge mostra contador só quando >0\n• Mobile: avatar 38px, esconde chip de urgência (fica só borda)\n\nInteração:\n• Click no card chama abrirDetalheCard() — quem pode editar (admin/autor/resp) abre modal de edição (mostra desc, peças, equipamento, todos os campos). Quem só pode ler expande comentários inline.\n• Click no avatar (admin) → modal Reatribuir Responsável (mantido)\n• Click nos botões de ação → stopPropagation (não abre modal sem querer)\n• Drag-and-drop preservado (HTML5 nativo)\n\nClasse nova: .kc3 (substitui .kc2 nos cards do Kanban). Estilos antigos .kc2-* mantidos no CSS pra outros usos (thumb da máquina, etc).'}
+    ]
+  },
+  {
+    v:'3.48.3', d:'22 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · Kanban: 5 ajustes (banner timing/filter · tooltip avatar · peças · vencida bug · push 07:30).',
         desc:'Pacote de ajustes na tela do Kanban (mockup do redesign do card em _mockup-v3.48.3.html aguardando aprovação):\n\n• BANNER vermelho "preventivas vencidas pendentes" agora só aparece (a) entre 07:30-08:00 BRT (b) pro user RESPONSÁVEL daquela preventiva. Fora dessa janela ou pra outros users, fica só o card no Kanban — não polui mais a tela. Banner reavalia a cada minuto pra esconder/aparecer sozinho.\n\n• TOOLTIP do avatar (.av-tip em tokens.css) ancorado à esquerda em vez de centralizado. Antes vazava do card quando avatar tava no canto esquerdo do footer. Agora estica só pra direita, dentro do card.\n\n• BOTÃO peças removido do card Kanban. Estava poluindo. Peças continuam acessíveis via modal de detalhe.\n\n• BUG "Vencida 23/04 quando hoje é 22/04": função today() retornava `new Date()` com hora atual, enquanto parseDt(p.ultima) zerava pra 00:00. Resultado: diffDays(today=15:00, prox=23/04 00:00) = 0.4 → round(0) → triggava como "vencida hoje". Fix: today() agora seta hours 0,0,0,0 — diff vira 1 dia inteiro (não dispara).\n\n• PUSH digest diário do worker Cloudflare movido de 08:30 BRT → 07:30 BRT (cron "30 10 * * 1-5"). Precisa wrangler deploy pra aplicar.'}
