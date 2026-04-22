@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.44.0', d:'22 abr 2026', current:true,
+    v:'3.45.0', d:'22 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Fase 3 da auditoria · admin/joacir migrados pra users-config com flag protected.',
+        desc:'Antes: admin e joacir eram hardcoded em const USERS no HUB e Manutenção. Painel admin não conseguia editar/excluir esses 2 (eram "intocáveis" via UI).\n\nAgora: aplicarUsuariosSeedV2() roda 1x quando admin abre Gerenciar Usuários (flag fiobras-users-seed-v2). Garante:\n• users-config/admin = { nome:"Admin", role:"admin", protected:true }\n• users-config/joacir = { nome:"Joacir", role:"gerente", protected:true }\n• users-profile/{key}/senhaPlain = senha hardcoded (caso ainda não tenha)\n\nFlag `protected: true` substitui o hardcode. isUserDinamico() retorna false pra users com protected, escondendo botões de excluir no painel — mas admin continua podendo editar role, foto, módulos liberados etc.\n\nResultado: admin/joacir são gerenciados via Firebase como qualquer outro user, mas o sistema impede exclusão acidental.\n\nFallback de segurança: USERS hardcoded continua existindo no código pra casos extremos (Firebase fora do ar). Em runtime, getUser() prioriza users-config + users-profile.'}
+    ]
+  },
+  {
+    v:'3.44.0', d:'22 abr 2026',
     items:[
       {type:'high', title:'AUTH UNIFICADO · helper getCurrentUser() em todos os apps + sessão expira em 24h (Fases 1+2 da auditoria).',
         desc:'Início da unificação completa do sistema de autenticação. Antes existiam 3 sistemas paralelos de login (HUB, Manutenção, CRM) com checagens de admin diferentes em cada lugar.\n\nFASE 1 — Helper window.getCurrentUser() em TODOS os apps:\n• Mesma assinatura nos 4 apps: { key, nome, role, isAdmin, isGerente, foto, powers, expiresAt }\n• Lê localStorage.fiobras-dash-auth (gravado pelo HUB) e enriquece com users-profile do Firebase\n• Substitui 12+ checagens diferentes de admin que existiam (state.isAdmin, _user.papel, state.user.role, etc)\n• _crmIsAdmin() agora delega ao helper unificado\n\nFASE 2 — Sessão única expira em 24h:\n• HUB grava campo `expires` na sessão (Date.now() + 24h)\n• getCurrentUser() retorna null se sessão expirou (e remove do localStorage)\n• Sub-apps (Manutenção, CRM, Preço) gates de boot agora verificam expiração: sessão velha = "Acesse pelo HUB"\n• Compat: sessões antigas sem campo `expires` ganham 24h a partir do `ts` original\n\nResultado: admin no HUB = admin em todos os sub-apps. Trocou senha → invalidou. Não tem como ficar com sessão antiga rodando indefinidamente.\n\nPróximo: Fase 3 — migrar admin/joacir hardcoded pra users-config (eliminar últimos hardcodes).'}
