@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.47.7', d:'22 abr 2026', current:true,
+    v:'3.47.8', d:'22 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'CRM · admin pode deletar entries do histórico do lead.',
+        desc:'Cada entry do histórico ganhou botão lixeira (visível só pra admin). Click pede confirmação com preview do conteúdo a deletar — se confirmar, remove a entry do array `historico` no Firebase.\n\nUtilidade:\n• Limpar testes acidentais (movimentações errôneas)\n• Remover entries de auditoria que poluem timeline\n• Corrigir interações registradas equivocadamente\n\nLog em crm/log: cada deleção registra "Histórico deletado · <descrição> · por <admin>" pra rastreio.\n\nNão deleta o lead em si — só a entry específica. Outras entries permanecem.'}
+    ]
+  },
+  {
+    v:'3.47.7', d:'22 abr 2026',
     items:[
       {type:'fix', title:'CRM · histórico do lead mostra QUEM fez cada ação (avatar + nome).',
         desc:'BUG: aba HISTÓRICO mostrava "Movido de X para Y" / "Retornamos por WhatsApp" mas SEM o autor. Embora o `autor` fosse gravado no Firebase, renderHist() nunca renderizava esse campo.\n\nFix: renderHist() agora mostra chip ao lado do badge de tipo:\n  [📷 William]    ← avatar pequeno + nome do user\n\n• Avatar 18px com foto se cadastrada, senão inicial em gradient cinza\n• Nome vem do users-profile/users-config ATUAL (não do nome literal gravado no histórico) — se trocar nome do user no HUB, propaga em todas as entries\n• Resolve via _crmResolveUserKey (igual leadColaboradores) — mesmo padrão de dedup\n• Compat: usa h.texto OU h.acao como conteúdo (entries antigas e novas)\n• Compat: usa h.ts OU h.data pra timestamp\n\nResultado: agora dá pra rastrear quem fez cada movimentação.'}

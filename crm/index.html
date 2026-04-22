@@ -69,7 +69,7 @@ navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- v3.27.0: design tokens compartilhados (single source of truth) -->
-<link rel="stylesheet" href="../css/tokens.css?v=3.47.7">
+<link rel="stylesheet" href="../css/tokens.css?v=3.47.8">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -665,6 +665,10 @@ tr:hover td{background:var(--green-ll);cursor:pointer;}
 .hist-autor-av{display:inline-block;width:18px;height:18px;border-radius:50%;background-size:cover;background-position:center;background-color:var(--green,#008835);flex-shrink:0;}
 .hist-autor-av-init{display:inline-flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit',sans-serif;font-weight:900;font-size:9px;line-height:1;background:linear-gradient(135deg,#6B7166,#9CA295);}
 .hist-autor-nome{font-size:0.65rem;font-weight:600;color:var(--text,#1B1F18);font-family:'Poppins',sans-serif;}
+/* v3.47.8 — botão deletar entry (admin only) */
+.hist-del{background:transparent;border:1px solid var(--border,#E3E7DE);color:var(--muted2,#9CA295);width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;padding:0;margin-left:6px;}
+.hist-del:hover{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:#DC2626;}
+.hist-del svg{width:11px;height:11px;}
 .hist-autor{font-size:0.62rem;color:var(--muted);font-weight:500;}
 .hist-txt{font-size:0.78rem;color:var(--text2);line-height:1.5;margin-top:3px;}
 .hist-empty{font-size:0.75rem;color:var(--gray3);padding:12px 0;text-align:center;}
@@ -2775,7 +2779,10 @@ function renderHist(hist){
     el.innerHTML='<div class="hist-empty">Nenhuma interação registrada ainda.</div>';
     return;
   }
-  el.innerHTML=hist.slice().reverse().map(h=>{
+  // v3.47.8 — admin pode deletar entries do histórico
+  const isAdmin = (typeof _crmIsAdmin === 'function') ? _crmIsAdmin() : false;
+  // hist é exibido reverso, mas precisamos do índice ORIGINAL pra deletar
+  el.innerHTML=hist.map((h,idx)=>({h,idx})).reverse().map(({h,idx})=>{
     const tipo=h.tipo||'outro';
     const ret =h.retorno||'aguardando';
     const retCls={sim:'ret-sim',nao:'ret-nao',aguardando:'ret-aguard'}[ret]||'ret-aguard';
@@ -2797,8 +2804,11 @@ function renderHist(hist){
         : `<span class="hist-autor-av hist-autor-av-init">${(nomeAtual[0]||'?').toUpperCase()}</span>`;
       autorHtml = `<span class="hist-autor">${av}<span class="hist-autor-nome">${esc(nomeAtual)}</span></span>`;
     }
-    // Texto: prioriza h.texto, depois h.acao (entries de mover etapa têm acao)
     const conteudo = h.texto || h.acao || '';
+    // v3.47.8 — botão deletar pra admin
+    const delBtn = isAdmin
+      ? `<button class="hist-del" title="Deletar esta entry" onclick="_crmDeleteHistEntry(${idx})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>`
+      : '';
     return`<div class="hist-item">
       <div class="hist-dot tipo-${tipo}"></div>
       <div class="hist-header">
@@ -2806,11 +2816,40 @@ function renderHist(hist){
         <span class="hist-retorno ${retCls}">${retLbl}</span>
         ${autorHtml}
         <span class="hist-ts">${new Date(h.ts || h.data || Date.now()).toLocaleString('pt-BR')}</span>
+        ${delBtn}
       </div>
       ${conteudo?`<div class="hist-txt">${esc(conteudo)}</div>`:''}
     </div>`;
   }).join('');
 }
+
+// v3.47.8 — admin deleta entry específica do histórico do lead atual
+window._crmDeleteHistEntry = function(idx){
+  if(!_crmIsAdmin()){ toast('Apenas admin pode deletar histórico.','err'); return; }
+  if(!_id){ return; }
+  const l = (window._leads||{})[_id];
+  if(!l || !Array.isArray(l.historico)) return;
+  if(idx < 0 || idx >= l.historico.length) return;
+  const entry = l.historico[idx];
+  const desc = entry.texto || entry.acao || ('Entry ' + (idx+1));
+  if(!confirm('Deletar esta entry do histórico?\n\n"' + desc.substring(0, 80) + '"\n\nNão pode ser desfeito.')) return;
+  const novoHist = l.historico.filter((_,i) => i !== idx);
+  window._update(_id, { historico: novoHist });
+  l.historico = novoHist;
+  renderHist(novoHist);
+  toast('Entry removida do histórico','ok');
+  if (window._logPush) {
+    const adminNome = (typeof getCurrentUser === 'function' && getCurrentUser()?.nome) || (window._user?.nome) || (window.__hubSession?.user) || 'admin';
+    window._logPush({
+      acao: 'Histórico deletado',
+      lead: l.nome || l.empresa || _id,
+      leadId: _id,
+      por: adminNome,
+      removido: desc,
+      ts: Date.now(),
+    });
+  }
+};
 
 function addHist(){
   const txt=document.getElementById('histInput').value.trim();
