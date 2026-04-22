@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.48.7">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.48.9">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -358,6 +358,87 @@ white-space: nowrap;
 .btn-secondary:hover { border-color: var(--blue); color: var(--blue); }
 
 /* ── TABLES ── */
+/* v3.48.9 — Preventivas agrupadas por máquina (mockup aprovado) */
+.pv-machine-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.pv-machine-card {
+  background: var(--surface, #1F2125);
+  border: 1px solid var(--border, #2A2D33);
+  border-radius: 14px; padding: 14px 16px;
+  display: grid; grid-template-columns: auto 1fr auto auto;
+  gap: 16px; align-items: center;
+  cursor: pointer; transition: .15s;
+}
+.pv-machine-card:hover { border-color: var(--border2, #3A3F47); background: var(--surface2, #24262A); }
+.pv-machine-card.expanded { background: var(--surface2, #24262A); border-color: var(--border2, #3A3F47); border-radius: 14px 14px 0 0; }
+.pv-eqtag { background: rgba(0,200,80,.12); color: #4ADE80; padding: 6px 12px; border-radius: 6px; font-family: 'DM Mono', monospace; font-weight: 600; font-size: .72rem; letter-spacing: .5px; }
+[data-theme="light"] .pv-eqtag { background: rgba(0,136,53,.1); color: #065F46; }
+.pv-machine-info { min-width: 0; }
+.pv-machine-nome { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .92rem; color: var(--text, #fff); margin-bottom: 4px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+.pv-machine-sub { font-family: 'DM Mono', monospace; font-size: .6rem; color: var(--muted, #6B7166); text-transform: uppercase; letter-spacing: .6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pv-machine-sub-sep { opacity: .4; }
+.pv-counters { display: flex; gap: 14px; align-items: center; }
+.pv-counter { display: flex; flex-direction: column; align-items: center; min-width: 38px; }
+.pv-counter-num { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.2rem; color: var(--text, #fff); line-height: 1; }
+.pv-counter-num.late { color: #F87171; }
+.pv-counter-num.due { color: #FCD34D; }
+.pv-counter-num.ok { color: #6EE7B7; }
+.pv-counter-lbl { font-family: 'DM Mono', monospace; font-size: .52rem; color: var(--muted, #6B7166); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+.pv-resp-stack { display: inline-flex; align-items: center; }
+.pv-resp-stack .av { margin-left: -6px; border: 2px solid var(--surface, #1F2125); }
+.pv-resp-stack .av:first-child { margin-left: 0; }
+.pv-machine-card.expanded .pv-resp-stack .av { border-color: var(--surface2, #24262A); }
+.pv-chevron { color: var(--muted, #6B7166); font-size: 16px; transition: transform .2s; line-height: 1; }
+.pv-machine-card.expanded .pv-chevron { transform: rotate(180deg); color: var(--text, #fff); }
+
+.pv-expand {
+  background: var(--bg, #1B1E22);
+  border: 1px solid var(--border2, #2A2D33); border-top: 0;
+  border-radius: 0 0 14px 14px;
+  padding: 8px;
+  animation: pv-fade .2s ease-out;
+  margin-top: -10px; /* cola no card */
+}
+[data-theme="light"] .pv-expand { background: var(--bg-deep, #F4F6F0); }
+@keyframes pv-fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.pv-freq-group { margin-bottom: 6px; }
+.pv-freq-group:last-child { margin-bottom: 0; }
+.pv-freq-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; font-family: 'DM Mono', monospace; font-size: .6rem; color: var(--muted, #9CA295); text-transform: uppercase; letter-spacing: 1px; }
+.pv-freq-dot { width: 6px; height: 6px; border-radius: 50%; background: #3B82F6; }
+.pv-freq-dot.diaria { background: #A855F7; }
+.pv-freq-dot.semanal { background: #3B82F6; }
+.pv-freq-dot.quinzenal { background: #0EA5E9; }
+.pv-freq-dot.mensal { background: #10B981; }
+.pv-freq-dot.trimestral { background: #F59E0B; }
+.pv-freq-dot.semestral { background: #EC4899; }
+.pv-freq-dot.anual { background: #EF4444; }
+.pv-freq-count { margin-left: auto; color: var(--muted, #6B7166); }
+.pv-task { display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 14px; align-items: center; padding: 8px 12px; border-radius: 8px; transition: .1s; }
+.pv-task:hover { background: rgba(255,255,255,.03); }
+[data-theme="light"] .pv-task:hover { background: rgba(0,0,0,.03); }
+.pv-task-tarefa { font-family: 'Poppins', sans-serif; font-size: .74rem; color: var(--text, #CFD3CB); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-task-resp { display: inline-flex; align-items: center; gap: 6px; font-family: 'Poppins'; font-size: .66rem; color: var(--muted, #9CA295); }
+.pv-task-data { font-family: 'DM Mono', monospace; font-size: .62rem; color: var(--muted, #6B7166); white-space: nowrap; }
+.pv-task-status { padding: 2px 8px; border-radius: 4px; font-family: 'Poppins'; font-size: .55rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; white-space: nowrap; }
+.pv-task-status.late { background: rgba(220,38,38,.15); color: #F87171; }
+.pv-task-status.due { background: rgba(245,158,11,.15); color: #FCD34D; }
+.pv-task-status.ok { background: rgba(16,185,129,.15); color: #6EE7B7; }
+.pv-task-actions { display: inline-flex; gap: 4px; }
+.pv-task-ab { width: 26px; height: 26px; border-radius: 6px; border: 0; background: rgba(255,255,255,.05); color: var(--muted, #9CA295); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; transition: .15s; }
+.pv-task-ab svg { width: 12px; height: 12px; }
+.pv-task-ab:hover { background: rgba(255,255,255,.12); color: var(--text, #fff); }
+.pv-task-ab.danger:hover { color: #F87171; }
+[data-theme="light"] .pv-task-ab { background: rgba(0,0,0,.04); }
+[data-theme="light"] .pv-task-ab:hover { background: rgba(0,0,0,.08); }
+.pv-empty { padding: 32px 16px; text-align: center; color: var(--muted); font-size: .82rem; background: var(--surface, #1F2125); border: 1px dashed var(--border2, #2A2D33); border-radius: 12px; }
+
+@media (max-width: 640px) {
+  .pv-machine-card { grid-template-columns: auto 1fr auto; gap: 10px; padding: 12px 14px; }
+  .pv-counters { display: none; }
+  .pv-task { grid-template-columns: 1fr auto auto; gap: 8px; padding: 10px 12px; }
+  .pv-task-resp { display: none; }
+  .pv-task-actions { display: none; }
+}
+
 /* v3.31.0 — Cards mobile pra Preventivas (substitui tabela em ≤640px) */
 .prev-cards-mobile { display: none; }
 @media (max-width: 640px) {
@@ -2500,19 +2581,15 @@ display: none;
       </div>
       <div class="prev-count" id="prev-count">—</div>
     </div>
-    <!-- Desktop: tabela. Mobile (≤640px): cards via @media (v3.31.0) -->
-    <div class="table-wrap prev-table-wrap">
-      <table class="data-table">
-        <thead><tr>
-          <th>Tarefa</th><th>Equipamento</th><th>Setor</th>
-          <th>Frequência</th><th>Responsável</th><th>Última</th><th>Próxima</th><th>Status</th><th></th>
-        </tr></thead>
-        <tbody id="prev-tbody"></tbody>
-      </table>
+    <!-- v3.48.9 — Preventivas agrupadas POR MÁQUINA (mockup aprovado).
+         Click no card expande mostrando tarefas agrupadas por frequência. -->
+    <div class="pv-machine-list" id="pv-machine-list" aria-label="Preventivas agrupadas por máquina"></div>
+    <!-- Hosts legados mantidos pra não quebrar refs externas (escondidos via display:none) -->
+    <div style="display:none">
+      <table><tbody id="prev-tbody"></tbody></table>
+      <div id="prev-cards-mobile"></div>
+      <div id="prev-pagination"></div>
     </div>
-    <div class="prev-cards-mobile" id="prev-cards-mobile" aria-label="Lista de preventivas (mobile)"></div>
-    <!-- v3.37.0 — paginação -->
-    <div class="prev-pagination" id="prev-pagination" style="display:none"></div>
     <!-- CALENDÁRIO APRIMORADO -->
     <div class="cal-wrap" style="margin-top:28px">
       <!-- Header: nav + view tabs + legenda -->
@@ -4967,13 +5044,44 @@ window._prevGoPage = function(p) {
   renderPreventiva();
 };
 
+// v3.48.9 — Preventivas agrupadas POR MÁQUINA (mockup aprovado).
+// Cada máquina vira um card com contadores. Click expande mostrando tarefas
+// agrupadas por frequência (diária/semanal/quinzenal/mensal/trimestral/...).
+const _pvFreqBuckets = [
+  { key: 'diaria',     min: 1,   max: 1,   lbl: 'Diária',                dot: 'diaria' },
+  { key: 'semanal',    min: 2,   max: 7,   lbl: 'Semanal · 7 dias',      dot: 'semanal' },
+  { key: 'quinzenal',  min: 8,   max: 15,  lbl: 'Quinzenal · 15 dias',   dot: 'quinzenal' },
+  { key: 'mensal',     min: 16,  max: 35,  lbl: 'Mensal · 30 dias',      dot: 'mensal' },
+  { key: 'trimestral', min: 36,  max: 100, lbl: 'Trimestral · 90 dias',  dot: 'trimestral' },
+  { key: 'semestral',  min: 101, max: 200, lbl: 'Semestral · 180 dias',  dot: 'semestral' },
+  { key: 'anual',      min: 201, max: 99999, lbl: 'Anual · 365+ dias',   dot: 'anual' },
+];
+function _pvFreqBucket(freqDays) {
+  const f = parseInt(freqDays);
+  if (!f || f < 1) return _pvFreqBuckets[6];
+  return _pvFreqBuckets.find(b => f >= b.min && f <= b.max) || _pvFreqBuckets[6];
+}
+function _pvStatusFor(p) {
+  if (!p.ultima || !p.freq) return { key: 'sem', lbl: 'Sem data', dr: null };
+  const prox = addDays(parseDt(p.ultima), parseInt(p.freq));
+  const dr = diffDays(today(), prox);
+  if (dr < 0)      return { key: 'late', lbl: 'Atrasada ' + Math.abs(dr) + 'd', dr, prox };
+  if (dr === 0)   return { key: 'due',  lbl: 'Hoje',                            dr, prox };
+  if (dr <= 7)    return { key: 'due',  lbl: 'Em ' + dr + 'd',                  dr, prox };
+  return            { key: 'ok',   lbl: dr + 'd',                                 dr, prox };
+}
+const _pvExpanded = new Set(); // chaves de máquinas expandidas (estado UI)
+window._pvToggleMachine = function(maqKey) {
+  if (_pvExpanded.has(maqKey)) _pvExpanded.delete(maqKey);
+  else _pvExpanded.add(maqKey);
+  renderPreventiva();
+};
+
 function renderPreventiva() {
   renderCalendario();
-  const tbody = document.getElementById('prev-tbody') || document.getElementById('preventivas-tbody');
-  const cardsHost = document.getElementById('prev-cards-mobile');
-  const pagEl = document.getElementById('prev-pagination');
+  const host = document.getElementById('pv-machine-list');
   const countEl = document.getElementById('prev-count');
-  if (!tbody) return;
+  if (!host) return;
   // v3.31.1 — fix defensivo: aceita array, object, null ou undefined
   let allRaw;
   if (Array.isArray(state.preventivas)) {
@@ -5003,135 +5111,156 @@ function renderPreventiva() {
     const msg = _prevSearch
       ? 'Nenhuma preventiva encontrada pra "' + _prevSearch + '"'
       : 'Nenhuma preventiva cadastrada.';
-    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">' + msg + '</td></tr>';
-    if (cardsHost) cardsHost.innerHTML = '<div class="empty-state" style="padding:32px 12px;text-align:center;color:var(--muted);font-size:0.78rem">' + msg + '</div>';
-    if (pagEl) pagEl.style.display = 'none';
+    host.innerHTML = '<div class="pv-empty">' + msg + '</div>';
     return;
   }
-  // v3.37.0 — paginação
-  const totalPages = Math.ceil(all.length / PREV_PAGE_SIZE);
-  if (_prevPage > totalPages) _prevPage = 1;
-  const start = (_prevPage - 1) * PREV_PAGE_SIZE;
-  const pageItems = all.slice(start, start + PREV_PAGE_SIZE);
-  // Render paginação
-  if (pagEl) {
-    if (totalPages <= 1) {
-      pagEl.style.display = 'none';
-    } else {
-      pagEl.style.display = 'flex';
-      const btns = [];
-      btns.push('<button class="prev-page-btn" onclick="_prevGoPage(' + Math.max(1, _prevPage-1) + ')"' + (_prevPage === 1 ? ' disabled' : '') + '>‹</button>');
-      // Mostra todas as páginas se ≤7, senão usa janela com reticências
-      const pagesToShow = [];
-      if (totalPages <= 7) {
-        for (let i = 1; i <= totalPages; i++) pagesToShow.push(i);
-      } else {
-        pagesToShow.push(1);
-        if (_prevPage > 3) pagesToShow.push('...');
-        for (let i = Math.max(2, _prevPage-1); i <= Math.min(totalPages-1, _prevPage+1); i++) pagesToShow.push(i);
-        if (_prevPage < totalPages - 2) pagesToShow.push('...');
-        pagesToShow.push(totalPages);
-      }
-      pagesToShow.forEach(p => {
-        if (p === '...') btns.push('<span class="prev-page-info">…</span>');
-        else btns.push('<button class="prev-page-btn' + (p === _prevPage ? ' active' : '') + '" onclick="_prevGoPage(' + p + ')">' + p + '</button>');
-      });
-      btns.push('<button class="prev-page-btn" onclick="_prevGoPage(' + Math.min(totalPages, _prevPage+1) + ')"' + (_prevPage === totalPages ? ' disabled' : '') + '>›</button>');
-      btns.push('<span class="prev-page-info">' + _prevPage + ' / ' + totalPages + '</span>');
-      pagEl.innerHTML = btns.join('');
-    }
-  }
-  // Renderiza só os items da página atual
-  all = pageItems;
-  // v3.31.0: render duplo — tabela (desktop) + cards (mobile via @media)
-  tbody.innerHTML = all.map(p => {
-    const maq = state.maquinas.find(m => m._key === (p.maqKey || p.maquinaKey));
-    const maqNome = maq ? (maq.tag ? maq.tag + ' · ' + maq.nome : maq.nome) : (p.equip || '—');
-    const key = p._key || p.id || '';
-    const setorLabel = p.setor === 'eletrica' ? 'Elétrica' : 'Mecânica';
-    const freqLabel = p.freq ? p.freq + ' dias' : '—';
-    const ultimaFmt = p.ultima ? fmtDt(p.ultima) : '—';
-    var proxFmt = '—';
-    var statusHtml = '<span class="badge badge-gray">Sem data</span>';
-    if (p.ultima && p.freq) {
-      var prox = addDays(parseDt(p.ultima), parseInt(p.freq));
-      proxFmt = prox.toLocaleDateString('pt-BR');
-      var dr = diffDays(today(), prox);
-      if (dr < 0) {
-        statusHtml = '<span class="badge badge-red">Atrasada</span>';
-      } else if (dr <= 7) {
-        statusHtml = '<span class="badge badge-orange">Próxima</span>';
-      } else {
-        statusHtml = '<span class="badge badge-green">OK</span>';
-      }
-    }
-    // v3.39.0 — coluna Responsável com avatar + nome
-    const respCellHtml = p.resp
-      ? '<span style="display:inline-flex;align-items:center;gap:6px">' + avatar(p.resp, 'xs') + '<span style="font-size:.72rem">' + p.resp + '</span></span>'
-      : '<span style="color:var(--muted);font-size:.72rem;font-style:italic">—</span>';
-    return '<tr>' +
-      '<td>' + (p.tarefa||'—') + '</td>' +
-      '<td>' + maqNome + '</td>' +
-      '<td>' + setorLabel + '</td>' +
-      '<td>' + freqLabel + '</td>' +
-      '<td>' + respCellHtml + '</td>' +
-      '<td>' + ultimaFmt + '</td>' +
-      '<td>' + proxFmt + '</td>' +
-      '<td>' + statusHtml + '</td>' +
-      '<td style="white-space:nowrap">' +
-        // v3.32.8 — Ajuste 3a: bug \\x27 → \x27. Execução removida (passa pelo Kanban).
-        // v3.33.0 — Ajuste 3b: delete gated por canUser('deletarPreventiva').
-        '<button class="btn-secondary" style="padding:5px 10px;font-size:0.6rem;margin-right:3px" title="Editar" onclick="abrirModalPreventiva(\x27' + key + '\x27)">' + EDIT_SVG_STR + '</button>' +
-        (_podeEu('deletarPreventiva')
-          ? '<button class="btn-secondary btn-del-prev" style="padding:5px 10px;font-size:0.6rem;color:var(--red);border-color:var(--red-md)" title="Deletar" onclick="deletarPreventiva(\x27' + key + '\x27)">' + DEL_SVG_STR + '</button>'
-          : '') +
-      '</td>' +
-    '</tr>';
-  }).join('');
 
-  // v3.31.0 — render mobile cards (mesmo dataset, layout vertical pra mobile)
-  if (cardsHost) {
-    cardsHost.innerHTML = all.map(p => {
-      const maq = state.maquinas.find(m => m._key === (p.maqKey || p.maquinaKey));
-      const maqNome = maq ? (maq.tag ? maq.tag + ' · ' + maq.nome : maq.nome) : (p.equip || '—');
-      const key = p._key || p.id || '';
-      const setorLabel = p.setor === 'eletrica' ? 'Elétrica' : 'Mecânica';
-      const freqLabel = p.freq ? p.freq + 'd' : '—';
-      const ultimaFmt = p.ultima ? fmtDt(p.ultima) : '—';
-      let proxFmt = '—', statusKey = 'sem', statusLabel = 'Sem data';
-      if (p.ultima && p.freq) {
-        const prox = addDays(parseDt(p.ultima), parseInt(p.freq));
-        proxFmt = prox.toLocaleDateString('pt-BR');
-        const dr = diffDays(today(), prox);
-        if (dr < 0) { statusKey = 'atrasada'; statusLabel = 'Atrasada ' + Math.abs(dr) + 'd'; }
-        else if (dr <= 7) { statusKey = 'proxima'; statusLabel = dr === 0 ? 'Hoje' : 'Em ' + dr + 'd'; }
-        else { statusKey = 'ok'; statusLabel = 'OK'; }
-      }
-      const respAv = p.resp ? avatar(p.resp, 'sm') : '';
-      return '<div class="prev-card prev-card-' + statusKey + '">' +
-        '<div class="prev-card-h">' +
-          '<div class="prev-card-id">' +
-            '<div class="prev-card-t">' + (p.tarefa||'—') + '</div>' +
-            '<div class="prev-card-eq">' + maqNome + ' · ' + setorLabel + '</div>' +
-          '</div>' +
-          '<span class="prev-card-status prev-card-status-' + statusKey + '">' + statusLabel + '</span>' +
-        '</div>' +
-        '<div class="prev-card-meta" style="align-items:center">' +
-          (respAv ? '<span style="display:inline-flex;align-items:center;gap:4px">Resp ' + respAv + '</span>' : '') +
-          '<span>Freq <b>' + freqLabel + '</b></span>' +
-          '<span>Próxima <b>' + proxFmt + '</b></span>' +
-        '</div>' +
-        '<div class="prev-card-actions">' +
-          '<button class="prev-card-btn primary" onclick="executarPreventiva(\x27' + key + '\x27)">' + CHECK_SVG_STR + ' Concluir</button>' +
-          '<button class="prev-card-btn" onclick="abrirModalPreventiva(\x27' + key + '\x27)" aria-label="Editar">' + EDIT_SVG_STR + '</button>' +
-          // v3.33.0 — Ajuste 3b: delete gated
-          (_podeEu('deletarPreventiva')
-            ? '<button class="prev-card-btn danger" onclick="deletarPreventiva(\x27' + key + '\x27)" aria-label="Deletar">' + DEL_SVG_STR + '</button>'
-            : '') +
-        '</div>' +
-      '</div>';
-    }).join('');
+  // ── Agrupa preventivas POR MÁQUINA ──
+  // Chave do grupo = maqKey/maquinaKey OU "equip" como fallback (preventivas legacy sem maqKey)
+  const grupos = {}; // gkey → { tag, nome, setor, items: [], resps: Map<key,nome> }
+  all.forEach(p => {
+    const maq = state.maquinas.find(m => m._key === (p.maqKey || p.maquinaKey));
+    const gkey = (p.maqKey || p.maquinaKey) || ('eq:' + (p.equip || '__sem__').toLowerCase().trim());
+    if (!grupos[gkey]) {
+      grupos[gkey] = {
+        gkey,
+        tag: maq?.tag || (p.equip || '').split(' · ')[0] || '—',
+        nome: maq?.nome || (p.equip || '').split(' · ').slice(1).join(' · ') || (p.equip || 'Sem máquina'),
+        setor: maq?.setor || p.setor || 'mecanica',
+        items: [],
+        resps: new Map(),
+      };
+    }
+    grupos[gkey].items.push(p);
+    if (p.resp) {
+      const rk = (typeof _resolveUserKey === 'function') ? (_resolveUserKey(p.resp) || p.resp.toLowerCase()) : p.resp.toLowerCase();
+      if (!grupos[gkey].resps.has(rk)) grupos[gkey].resps.set(rk, p.resp);
+    }
+  });
+  // Ordena máquinas por: maior nº de atrasadas → próxima vencer mais cedo → tag
+  const lista = Object.values(grupos).map(g => {
+    let late = 0, due = 0, ok = 0, sem = 0, proxMaisCedo = null;
+    g.items.forEach(p => {
+      const st = _pvStatusFor(p);
+      if (st.key === 'late') late++;
+      else if (st.key === 'due') due++;
+      else if (st.key === 'ok') ok++;
+      else sem++;
+      if (st.prox && (!proxMaisCedo || st.prox < proxMaisCedo)) proxMaisCedo = st.prox;
+    });
+    return { ...g, late, due, ok, sem, proxMaisCedo };
+  });
+  lista.sort((a,b) => {
+    if (b.late !== a.late) return b.late - a.late;
+    if (a.proxMaisCedo && b.proxMaisCedo) return a.proxMaisCedo - b.proxMaisCedo;
+    if (a.proxMaisCedo) return -1;
+    if (b.proxMaisCedo) return 1;
+    return (a.tag || '').localeCompare(b.tag || '');
+  });
+
+  // ── Atualiza count topbar ──
+  if (countEl) {
+    if (_prevSearch) countEl.textContent = all.length + ' tarefa' + (all.length===1?'':'s') + ' em ' + lista.length + ' máquina' + (lista.length===1?'':'s');
+    else countEl.textContent = lista.length + ' máquina' + (lista.length===1?'':'s') + ' · ' + allRaw.length + ' preventiva' + (allRaw.length===1?'':'s');
   }
+
+  // ── Render ──
+  const setorLabel = (s) => s === 'eletrica' ? 'Elétrica' : 'Mecânica';
+  const fmtBR = (d) => d ? d.toLocaleDateString('pt-BR') : '—';
+
+  host.innerHTML = lista.map(g => {
+    const isExp = _pvExpanded.has(g.gkey);
+    // Resp stack (até 2 + "+N")
+    const respKeys = Array.from(g.resps.keys());
+    const respStackHtml = respKeys.length
+      ? '<div class="pv-resp-stack">' +
+          respKeys.slice(0, 3).map(rk => avatar(g.resps.get(rk), 'sm')).join('') +
+          (respKeys.length > 3 ? '<span class="av sz-sm u-more" style="background:rgba(255,255,255,.08);color:#9CA295;font-size:9px;font-weight:700">+' + (respKeys.length-3) + '</span>' : '') +
+        '</div>'
+      : '<span style="font-size:.6rem;color:var(--muted);font-style:italic">—</span>';
+    // Sub-line: setor + alerta de atraso ou próxima vencer
+    let subRight = '';
+    if (g.late > 0) subRight = '<span style="color:#F87171;font-weight:600">⚠ ' + g.late + ' atrasada' + (g.late>1?'s':'') + '</span>';
+    else if (g.proxMaisCedo) subRight = 'Próxima vencer · ' + g.proxMaisCedo.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+
+    let cardCls = 'pv-machine-card' + (isExp ? ' expanded' : '');
+    let cardHtml = '<div class="' + cardCls + '" onclick="_pvToggleMachine(\x27' + g.gkey + '\x27)">' +
+      '<span class="pv-eqtag">' + (g.tag || '—') + '</span>' +
+      '<div class="pv-machine-info">' +
+        '<div class="pv-machine-nome">' + (g.nome || '—') + '</div>' +
+        '<div class="pv-machine-sub">' +
+          '<span>' + setorLabel(g.setor) + '</span>' +
+          (subRight ? '<span class="pv-machine-sub-sep">·</span><span>' + subRight + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="pv-counters">' +
+        '<div class="pv-counter"><div class="pv-counter-num late">' + g.late + '</div><div class="pv-counter-lbl">Atrasadas</div></div>' +
+        '<div class="pv-counter"><div class="pv-counter-num due">' + g.due + '</div><div class="pv-counter-lbl">Próximas</div></div>' +
+        '<div class="pv-counter"><div class="pv-counter-num ok">' + g.ok + '</div><div class="pv-counter-lbl">OK</div></div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:14px">' +
+        respStackHtml +
+        '<span class="pv-chevron">⌄</span>' +
+      '</div>' +
+    '</div>';
+
+    if (!isExp) return cardHtml;
+
+    // ── Painel expandido: tarefas agrupadas por frequência ──
+    // Agrupa items por bucket de frequência
+    const byBucket = {};
+    g.items.forEach(p => {
+      const b = _pvFreqBucket(p.freq);
+      if (!byBucket[b.key]) byBucket[b.key] = { ...b, items: [] };
+      byBucket[b.key].items.push(p);
+    });
+    // Render na ordem dos buckets
+    const groupsHtml = _pvFreqBuckets
+      .filter(b => byBucket[b.key])
+      .map(b => {
+        const grp = byBucket[b.key];
+        // Ordena tarefas: late → due → ok
+        grp.items.sort((a,b2) => {
+          const sa = _pvStatusFor(a), sb = _pvStatusFor(b2);
+          const ord = { late:0, due:1, ok:2, sem:3 };
+          if (ord[sa.key] !== ord[sb.key]) return ord[sa.key] - ord[sb.key];
+          if (sa.dr != null && sb.dr != null) return sa.dr - sb.dr;
+          return 0;
+        });
+        const tasksHtml = grp.items.map(p => {
+          const key = p._key || p.id || '';
+          const st = _pvStatusFor(p);
+          const respHtml = p.resp
+            ? '<div class="pv-task-resp">' + avatar(p.resp, 'xs') + '<span class="pv-task-resp-nome">' + p.resp + '</span></div>'
+            : '<span style="font-size:.6rem;color:var(--muted);font-style:italic">—</span>';
+          const dataTxt = p.ultima
+            ? fmtDt(p.ultima) + ' → ' + fmtBR(st.prox)
+            : '—';
+          return '<div class="pv-task" onclick="event.stopPropagation()">' +
+            '<div class="pv-task-tarefa" title="' + (p.tarefa || '').replace(/"/g,'&quot;') + '">' + (p.tarefa || '—') + '</div>' +
+            respHtml +
+            '<div class="pv-task-data">' + dataTxt + '</div>' +
+            '<span class="pv-task-status ' + st.key + '">' + st.lbl + '</span>' +
+            '<div class="pv-task-actions">' +
+              '<button class="pv-task-ab" title="Editar" onclick="event.stopPropagation();abrirModalPreventiva(\x27' + key + '\x27)">' + EDIT_SVG_STR + '</button>' +
+              (_podeEu('deletarPreventiva')
+                ? '<button class="pv-task-ab danger" title="Deletar" onclick="event.stopPropagation();deletarPreventiva(\x27' + key + '\x27)">' + DEL_SVG_STR + '</button>'
+                : '') +
+            '</div>' +
+          '</div>';
+        }).join('');
+        return '<div class="pv-freq-group">' +
+          '<div class="pv-freq-header">' +
+            '<span class="pv-freq-dot ' + b.dot + '"></span>' +
+            '<span>' + b.lbl + '</span>' +
+            '<span class="pv-freq-count">' + grp.items.length + ' tarefa' + (grp.items.length===1?'':'s') + '</span>' +
+          '</div>' +
+          tasksHtml +
+        '</div>';
+      }).join('');
+
+    return cardHtml + '<div class="pv-expand">' + groupsHtml + '</div>';
+  }).join('');
 }
 
 let editandoPrevKey = null;
