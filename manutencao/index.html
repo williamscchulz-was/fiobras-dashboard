@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.45.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.46.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3555,6 +3555,37 @@ function tentarAutoLogin() {
   if (senha === userEntry.senha) doLogin();
 }
 
+// v3.46.0 — auto-login via sessão do HUB. Chamado no boot quando há sessão válida.
+// Substitui a tela de login local quando user vem do HUB.
+function _autoLoginViaHub() {
+  const u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+  if (!u || !u.key) return false;
+  state.user    = u.nome;
+  state.userKey = u.key;
+  state.isAdmin = u.isAdmin || u.isGerente; // gerente vê tudo no Manutenção também
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('h-nome').textContent = u.nome;
+  document.getElementById('h-role').textContent = u.isAdmin ? 'Administrador' : (u.isGerente ? 'Gerente' : 'Usuário');
+  if (state.isAdmin) document.body.classList.add('is-admin');
+  document.body.classList.add('logged-in');
+  const vEl = document.getElementById('app-version');
+  if (vEl) vEl.textContent = ' ' + VERSION;
+  const statsEl = document.getElementById('header-stats');
+  if (statsEl) { statsEl.style.opacity = '1'; statsEl.style.display = 'flex'; }
+  if (typeof updateHeaderStats === 'function') updateHeaderStats();
+  if (typeof initNotificacoes === 'function') initNotificacoes();
+  if (typeof initKChips === 'function') initKChips();
+  if (typeof agendarResetMeiaNoite === 'function') agendarResetMeiaNoite();
+  if (typeof agendarDigestDiario === 'function') agendarDigestDiario();
+  if (typeof resetNotificacoesDiarias === 'function') resetNotificacoesDiarias();
+  if (typeof aplicarQRSeExistir === 'function') aplicarQRSeExistir();
+  setTimeout(() => { if (typeof verificarNotificacoesPerdidas === 'function') verificarNotificacoesPerdidas(); }, 3000);
+  setTimeout(() => { if (typeof reNotificarPreventivasPendentes === 'function') reNotificarPreventivasPendentes(); }, 5000);
+  if (window._swRegistration && typeof initFCMToken === 'function') initFCMToken(window._swRegistration);
+  return true;
+}
+
 function doLogin() {
   const sel   = document.getElementById('login-user-sel').value;
   const senha = document.getElementById('login-senha') ? document.getElementById('login-senha').value : '';
@@ -6616,6 +6647,11 @@ document.addEventListener('DOMContentLoaded', function() {
     renderKanban();
     renderPreventiva();
     renderMaquinas();
+  }
+
+  // v3.46.0 — Auto-login via sessão do HUB. Se há sessão válida, entra direto.
+  if (typeof _autoLoginViaHub === 'function' && _autoLoginViaHub()) {
+    return; // bypass do login local — user já está logado
   }
 
   try {

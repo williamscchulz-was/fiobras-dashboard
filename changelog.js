@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.45.0', d:'22 abr 2026', current:true,
+    v:'3.46.0', d:'22 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Fases 4+5+6 da auditoria · auto-login + aviso sessão + status ativo/inativo.',
+        desc:'FASE 4 — Auto-login no Manutenção via sessão do HUB:\n• _autoLoginViaHub() roda no boot do sub-app\n• Lê getCurrentUser() (sessão do HUB) e popula state.user/userKey/isAdmin diretamente\n• User não vê tela de login do Manutenção quando vem do HUB\n• Login local fica como fallback (acesso direto /manutencao/)\n\nFASE 5 — Aviso visual de sessão expirando:\n• Helper _checkSessionExpiring() roda a cada 60s no HUB\n• 1h antes da expiração: toast âmbar "Sua sessão expira em X min" + botão "Renovar"\n• Click em "Renovar" estende +24h\n• Sessão expirada: alerta + reload pra tela de login\n\nFASE 6 — Campo `active` em users-profile:\n• Toggle "Ativo/Inativo" no modal Editar Usuário (default: ativo)\n• Login bloqueado pra inativos com mensagem "Usuário inativo. Contate um administrador"\n• Painel admin mostra users inativos com opacity reduzida + badge "INATIVO" cinza\n• Histórico do user é preservado (não deleta nada)\n• Útil pra desligar funcionário sem perder dados ou rastros'}
+    ]
+  },
+  {
+    v:'3.45.0', d:'22 abr 2026',
     items:[
       {type:'feat', title:'Fase 3 da auditoria · admin/joacir migrados pra users-config com flag protected.',
         desc:'Antes: admin e joacir eram hardcoded em const USERS no HUB e Manutenção. Painel admin não conseguia editar/excluir esses 2 (eram "intocáveis" via UI).\n\nAgora: aplicarUsuariosSeedV2() roda 1x quando admin abre Gerenciar Usuários (flag fiobras-users-seed-v2). Garante:\n• users-config/admin = { nome:"Admin", role:"admin", protected:true }\n• users-config/joacir = { nome:"Joacir", role:"gerente", protected:true }\n• users-profile/{key}/senhaPlain = senha hardcoded (caso ainda não tenha)\n\nFlag `protected: true` substitui o hardcode. isUserDinamico() retorna false pra users com protected, escondendo botões de excluir no painel — mas admin continua podendo editar role, foto, módulos liberados etc.\n\nResultado: admin/joacir são gerenciados via Firebase como qualquer outro user, mas o sistema impede exclusão acidental.\n\nFallback de segurança: USERS hardcoded continua existindo no código pra casos extremos (Firebase fora do ar). Em runtime, getUser() prioriza users-config + users-profile.'}
