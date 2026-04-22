@@ -112,7 +112,7 @@
     </div>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.48.1</div>
+    <div class="login-foot">Sistema interno · v3.48.2</div>
   </div>
 </div>
 
@@ -277,7 +277,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.48.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.48.2</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -1600,14 +1600,14 @@ function renderGuList(){
     const initials = nomeShow.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
     const isAdmin = u.role === 'admin';
     const turno = u.turno ? ('turno ' + u.turno) : '';
-    const temSenha = (u.senha !== null && u.senha !== undefined) || !!p.senhaHash;
-    const senhaSrc = (u.senha !== null && u.senha !== undefined) ? 'fixa' : (p.senhaHash ? 'definida' : 'sem senha');
+    // v3.48.2: pós-eliminação de hardcode, toda senha vem do Firebase (senhaPlain/senhaHash).
+    // Admin pode resetar QUALQUER senha. Não existe mais conceito de senha "fixa".
+    const temSenha = !!(p.senhaPlain || p.senhaHash);
+    const senhaSrc = temSenha ? 'definida' : 'sem senha';
     const senhaIcon = temSenha ? 'i-lock' : 'i-alert-triangle';
     const senhaCls = temSenha ? 'tag tag--sm tag--success' : 'tag tag--sm tag--warning';
-    // v3.21.5: senha plain salva pra admin visualizar (botão de olho)
-    const senhaPlain = p.senhaPlain || (u.senha !== null && u.senha !== undefined ? u.senha : null);
-    // Admin com senha fixa não permite reset; outros sim
-    const podeResetar = !(u.senha !== null && u.senha !== undefined) && !!p.senhaHash;
+    const senhaPlain = p.senhaPlain || null;
+    const podeResetar = temSenha;
     // v3.10.0: usar role/turno effective (override do profile)
     const effRole = getEffectiveRole(key);
     const effTurno = getEffectiveTurno(key);
@@ -2240,13 +2240,12 @@ window.resetarSenhaUser = (userKey) => {
   if(window._userRole !== 'admin'){ toast('Sem permissão','err'); return; }
   const u = getUser(userKey); if(!u){ toast('Usuário inválido','err'); return; }
   if(!confirm('Resetar a senha de ' + u.nome + '? Ele(a) vai precisar criar uma nova no próximo login.')) return;
-  const profile = Object.assign({}, (window._usersProfile || {})[userKey] || {});
-  delete profile.senhaHash;
-  delete profile.senhaPlain;
-  if(window._salvarUserProfile) window._salvarUserProfile(userKey, profile);
+  // v3.48.2: update() merge — pra REMOVER do Firebase precisa setar null explicitamente
+  if(window._salvarUserProfile) window._salvarUserProfile(userKey, { senhaHash: null, senhaPlain: null });
   // Atualiza cache local enquanto Firebase não retorna
-  if(window._usersProfile) {
-    window._usersProfile[userKey] = profile;
+  if(window._usersProfile && window._usersProfile[userKey]) {
+    delete window._usersProfile[userKey].senhaHash;
+    delete window._usersProfile[userKey].senhaPlain;
   }
   logAudit('user.resetSenha', userKey, { nome: u.nome });
   toast('Senha resetada — ' + u.nome + ' vai criar nova no próximo login');
@@ -2655,7 +2654,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.48.1';
+const CURRENT_VERSION = '3.48.2';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.

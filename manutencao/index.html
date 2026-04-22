@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.48.1">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.48.2">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3311,7 +3311,7 @@ window.getCurrentUser = function(){
 
 // v3.32.3 — Avatar helpers (sistema unificado). Foto se cadastrada, senão iniciais+gradient.
 // v3.48.0 — popula <select> de responsável dinamicamente da fonte única (Firebase).
-// Substitui os 23 <option> hardcoded que existiam em 4 modais.
+// v3.48.2 — filtra só users com ACESSO ao módulo Manutenção
 window._popUserSelect = function(selectId, opts) {
   const sel = document.getElementById(selectId);
   if (!sel) return;
@@ -3322,11 +3322,18 @@ window._popUserSelect = function(selectId, opts) {
   const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
   const users = Array.from(allKeys)
     .filter(k => {
-      if (k === 'admin') return false; // admin não vira responsável de demanda/preventiva
       const c = cfg[k] || {};
       const p = profs[k] || {};
       if (c.active === false || p.active === false) return false;
-      return !!(p.nomeCompleto || c.nome || p.nome);
+      const nome = p.nomeCompleto || c.nome || p.nome;
+      if (!nome) return false;
+      // Exclui entry "admin" SEM nomeCompleto (genérica)
+      if (k === 'admin' && nome.toLowerCase() === 'admin') return false;
+      // v3.48.2 — só users com acesso ao Manutenção
+      const role = p.roleOverride || c.role || 'producao';
+      if (role === 'admin' || role === 'gerente') return true;
+      const mods = p.modulesAllowedOverride || [];
+      return mods.includes('manutencao');
     })
     .map(k => {
       const c = cfg[k] || {};
@@ -4341,19 +4348,58 @@ function abrirModalReatribuir(cardKey) {
     (card.equip || card.titulo || '—') + (card.tipo ? '  ·  ' + card.tipo : '');
   document.getElementById('reatrib-atual').textContent = card.resp || 'Não atribuído';
 
-  // Monta grid de técnicos (excluindo admins)
-  const tecnicos = Object.entries(USERS).filter(([,u]) => !u.isAdmin);
+  // v3.48.2 — filtra users que têm ACESSO ao módulo Manutenção:
+  //   - admin/gerente: acesso automático a tudo
+  //   - producao: só se tem 'manutencao' em modulesAllowedOverride
+  // Lista vem do Firebase (users-config + users-profile), não de USERS hardcoded.
+  const cfg = state.usersConfig || {};
+  const profs = state.userProfiles || {};
+  const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
+  const tecnicos = Array.from(allKeys)
+    .filter(k => {
+      const c = cfg[k] || {};
+      const p = profs[k] || {};
+      if (c.active === false || p.active === false) return false;
+      if (!(p.nomeCompleto || c.nome || p.nome)) return false;
+      const role = p.roleOverride || c.role || 'producao';
+      // admin/gerente sempre acessam Manutenção
+      if (role === 'admin' || role === 'gerente') return true;
+      // user comum: só se tem 'manutencao' nos módulos liberados
+      const mods = p.modulesAllowedOverride || [];
+      return mods.includes('manutencao');
+    })
+    .map(k => {
+      const c = cfg[k] || {};
+      const p = profs[k] || {};
+      const role = p.roleOverride || c.role || 'producao';
+      const roleLbl = role === 'admin' ? 'Administrador' : (role === 'gerente' ? 'Gerente' : 'Técnico');
+      return {
+        key: k,
+        nome: p.nomeCompleto || c.nome || p.nome || k,
+        foto: p.foto || null,
+        roleLbl,
+      };
+    })
+    .sort((a, b) => a.nome.localeCompare(b.nome));
+
   const grid = document.getElementById('reatrib-user-grid');
-  grid.innerHTML = tecnicos.map(([key, u]) => {
-    const ini = u.nome.charAt(0).toUpperCase();
-    const isCurrent = u.nome === card.resp;
-    return '<button class="reatrib-user-btn' + (isCurrent ? ' selected' : '') + '" ' +
-      'onclick="selecionarReatrib(\x27' + u.nome + '\x27,this)">' +
-      '<div class="reatrib-avatar" style="background:' + (isCurrent ? 'var(--green)' : 'var(--blue)') + '">' + ini + '</div>' +
-      '<div><div class="reatrib-nome">' + u.nome + '</div>' +
-      '<div class="reatrib-role">' + (isCurrent ? 'Atual' : 'Técnico') + '</div></div>' +
+  if (!tecnicos.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.75rem;padding:20px">Nenhum usuário com acesso ao Manutenção. Libere o módulo no painel admin do HUB.</div>';
+  } else {
+    grid.innerHTML = tecnicos.map(t => {
+      const ini = t.nome.charAt(0).toUpperCase();
+      const isCurrent = t.nome === card.resp;
+      const avBg = t.foto
+        ? `background-image:url('${t.foto.replace(/'/g, "%27")}');background-size:cover;background-position:center;color:transparent`
+        : `background:${isCurrent ? 'var(--green)' : 'var(--blue)'}`;
+      return '<button class="reatrib-user-btn' + (isCurrent ? ' selected' : '') + '" ' +
+        'onclick="selecionarReatrib(\x27' + t.nome.replace(/'/g, "\\x27") + '\x27,this)">' +
+        '<div class="reatrib-avatar" style="' + avBg + '">' + (t.foto ? '' : ini) + '</div>' +
+        '<div><div class="reatrib-nome">' + t.nome + '</div>' +
+        '<div class="reatrib-role">' + (isCurrent ? 'Atual' : t.roleLbl) + '</div></div>' +
       '</button>';
-  }).join('');
+    }).join('');
+  }
 
   document.getElementById('modal-reatribuir').classList.add('open');
 }

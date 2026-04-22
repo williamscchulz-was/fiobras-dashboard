@@ -2,8 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.48.1', d:'22 abr 2026', current:true,
+    v:'3.48.2', d:'22 abr 2026', current:true,
     items:[
+      {type:'fix', title:'Pós-ZERO HARDCODE · 3 fixes (senha "FIXA" · modal Reatribuir · William sumido).',
+        desc:'Bugs reportados após v3.48.0 (eliminação de USERS hardcoded):\n\n1) HUB · Painel "Gerenciar usuários" mostrava tag "FIXA" e desabilitava botão Resetar pra users que vieram do seed antigo (admin/joacir). Causa: `getAllUsers()` agora retorna `senha: p.senhaPlain` pra TODOS os users (não tem mais conceito de hardcoded), mas a lógica de tag ainda checava `u.senha !== null` como sinal de "fixa". Fix: tag virou só "definida" / "sem senha", e admin pode resetar QUALQUER senha. resetarSenhaUser passa `{senhaHash:null, senhaPlain:null}` (Firebase update merge precisa de null explícito pra remover campo).\n\n2) Manutenção · Modal "Reatribuir Responsável" mostrava TODOS os users do HUB (incluindo CRM, Produção, etc). Devia mostrar só users com acesso ao módulo Manutenção. Fix: `abrirModalReatribuir()` filtra por `role === admin || gerente || modulesAllowedOverride.includes(manutencao)`. Mesmo filtro aplicado em `_popUserSelect()` (selects de demanda/preventiva/máquina). Modal agora também mostra foto, label do role (Admin/Gerente/Técnico) e estado vazio.\n\n3) Manutenção · William Schulz (admin) não aparecia em listas. Causa: filtros excluíam role admin/gerente. Fix: incluídos explicitamente.'}
+    ]
+  },
+  {
+    v:'3.48.1', d:'22 abr 2026', items:[
       {type:'fix', title:'Manutenção · avatar com foto cinza (background-size: auto vs cover).',
         desc:'BUG: William reportou avatar do Vorlei cinza no card de máquina mesmo com foto cadastrada. Não era hardcode (suspeita inicial), era um BUG SUTIL DE CSS.\n\nDiagnóstico via preview/eval:\n  cs.backgroundImage = url(data:image/jpeg;...) ✓ foto carregada\n  cs.backgroundSize = "auto" ❌ deveria ser "cover"\n\nCausa: a regra `.av.u-vorlei { background: linear-gradient(...) }` usa SHORTHAND `background:`. Shorthand RESETA todas as sub-propriedades, incluindo `background-size: auto` (default). Quando o JS adiciona `style="background-image:url(...)"` inline, o background-size do CSS da regra .u-vorlei (auto) ganha por especificidade — daí a foto carrega mas é renderizada no tamanho original (centenas de pixels) e só uma esquina aparece nos 32x32 do avatar.\n\nFix: função avatar() do Manutenção adiciona inline `background-size:cover; background-position:center` junto com `background-image`. Especificidade inline ganha do shorthand da classe.\n\nHUB e CRM não tinham o bug porque usam `<img>` element em vez de background-image.\n\nValidado: backgroundSize agora "cover", foto preenche o avatar.'}
     ]
