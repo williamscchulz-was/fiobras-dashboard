@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.54.1', d:'23 abr 2026', current:true,
+    v:'3.54.2', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Preço · admin/gerente conseguem editar percentuais dos derivados (CV/PAC/PES) + botão "Editar %" mais limpo.',
+        desc:'Bug: ao clicar no cadeado da tabela de fios derivados, nada acontecia. `__hubBootPreco` (bootstrap do iframe) não setava `isAdmin=true` quando admin/gerente abria o módulo. Daí `toggleMultEdit()` retornava no `if(!isAdmin)return;` e a edição nunca destravava.\n\nFix: bootstrap agora lê `localStorage["fiobras-dash-auth"]` (mesmo padrão da v3.52.5 do CRM), resolve role real via cache de users-profile e seta `isAdmin = (role === "admin" || role === "gerente")`.\n\nVisual: substituído o cadeado emoji 🔒/🔓 por botão "Editar %" / "Salvar" estilizado (verde Fiobras, padding adequado, bordas e estados claros). A barra superior dos derivados ganhou flex-wrap pra não quebrar em mobile estreito.'}
+    ]
+  },
+  {
+    v:'3.54.1', d:'23 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · técnico e gerente sem flag só veem aba Kanban (mockup aprovado).',
         desc:'Mockup mockup-abas-por-role.html aprovado.\n\nAntes: qualquer user com módulo Manutenção via 6 abas (Dashboard, Kanban, Preventiva, Máquinas, Histórico, Relatórios). Técnico via Dashboard/Kanban/Histórico, admin via tudo.\n\nAgora:\n• Admin → vê TODAS as 6 abas\n• Gerente COM supervisaoManutencao=true (Joacir) → vê TODAS\n• Gerente SEM flag (Edilson, Jairo) → SÓ Kanban\n• Producao com módulo Manutenção (Vorlei, Pedro) → SÓ Kanban\n\nNovo body class `is-mn-superv` adicionado ao body se admin ou gerente com flag. CSS:\n  body:not(.is-mn-superv) .tab-btn.admin-only { display: none; }\n\nDashboard ganhou class `admin-only` (antes era visível pra todos). Mesmo critério aplicado no bottom-nav mobile.\n\nReusa o flag supervisaoManutencao da v3.52.7 (Editar Usuário no HUB → toggle "Supervisiona Manutenção" pra gerentes). Quem você marcar como supervisor lá já ganha acesso completo às abas.\n\nDoLogout limpa body.is-mn-superv também.'}
