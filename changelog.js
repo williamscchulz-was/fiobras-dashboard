@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.51.0', d:'23 abr 2026', current:true,
+    v:'3.51.1', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · Kanban: técnico não via os próprios cards (filtro por nome literal vs canônico).',
+        desc:'BUG: William reportou que após v3.50.4 o Kanban do Vorlei (técnico) ficou vazio mesmo tendo cards atribuídos a ele.\n\nCausa: o filtro `eMeu` comparava `card.resp` com `state.user` por string literal. Mas:\n• state.user = profile.nomeCompleto (ex: "Vorlei Gomes")\n• card.resp = nome curto na preventiva (ex: "Vorlei")\n→ "Vorlei Gomes" !== "Vorlei" → filtro retornava false → todos os cards sumiam.\n\nFix: passa a usar `_resolveUserKey()` em ambos os lados pra resolver pra chave canônica ("vorlei") antes de comparar. Match correto independente de qual variação do nome esteja gravada. Mesma correção aplicada em moverCard().'}
+    ]
+  },
+  {
+    v:'3.51.0', d:'23 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · 2 melhorias: mover card smart por role + 4 dados de contexto no detalhe da preventiva.',
         desc:'Mockups aprovados em mockup-mover-card-smart.html e mockup-card-detalhe-completo.html.\n\n═══ Melhoria 1 · Mover card smart por role ═══\n\nAntes: TODO clique em ▶ ou ✓ (exceto preventiva→done) abria modal "Registrar Movimentação" pedindo "Quem está executando" — redundante pra técnico (só pode ser ele mesmo).\n\nAgora:\n• Card é do próprio user (resp/respKey/autor/autorKey === você) → MOVE DIRETO sem modal\n• Card de outro (admin/gerente movendo no lugar) → abre modal pra escolher quem executou\n• Preventiva → done: continua abrindo modal de assinatura digital (regra antiga, prova de execução)\n\nResultado: técnico só vê modal quando há real ambiguidade. Admin/gerente decide quem registra.\n\n═══ Melhoria 2 · 4 dados de contexto no modal Editar (preventiva only) ═══\n\nAo clicar num card de preventiva, o modal Editar agora mostra 4 seções extras destacadas em verde, ANTES da descrição:\n\n• 🔧 Status da máquina — bolinha colorida (verde Ativa · amarelo Em manutenção · vermelho Parada). Lê de manutencao/maquinas/{key}/status.\n\n• 🔄 Próxima execução prevista — calcula hoje + freq da preventiva. Mostra "DD/MM/YYYY (em N dias)" + frequência.\n\n• ⚡ Tarefas absorvidas pela cascata — lista preventivas da MESMA máquina com freq menor que estão vencidas. Reflete a regra v3.50.0 (concluir essa também marca elas). Só aparece se há absorvidas.\n\n• 📅 Últimas execuções — top 3 do histórico filtrando por equip+tarefa similar. Mostra avatar (foto se cadastrada), nome de quem fez, observação e data. Se nada, mostra "Sem execuções anteriores registradas".\n\nTodos os dados vêm de paths que JÁ EXISTEM (manutencao/maquinas, manutencao/preventivas, manutencao/historico). Sem campo novo no schema.\n\nNovo card (sem prevId) e cards de demanda/instalação NÃO mostram essas seções.'}

@@ -4319,37 +4319,42 @@ function updateHeaderStats() {
   }
 }
 function renderKanban() {
-  // v3.50.4 — Filtro de visibilidade:
-  // • Técnico (producao): SEMPRE só vê os próprios. Sem toggle.
-  // • Admin/Gerente: toggle de avatar pra escolher quem ver. Default = "meus".
-  //   Estado em localStorage["fio_kb_view_<userKey>"]: "meus" | "<userKey>" | "todos"
-  // Usa _ehGerenteOuAdmin() (lê role atual do HUB) pra ser à prova de bug
-  // de state.isAdmin desatualizado.
+  // v3.51.1 — Filtro de visibilidade COM resolução de chave canônica:
+  // Compara card.resp/autor → chave (via _resolveUserKey) com a chave do user
+  // alvo. Resolve o problema de "Vorlei" (card) vs "Vorlei Gomes" (state.user
+  // se profile.nomeCompleto for o nome completo).
   const ehAdminGer = (typeof _ehGerenteOuAdmin === 'function') ? _ehGerenteOuAdmin() : !!state.isAdmin;
   const meK = state.userKey || '';
   const meN = state.user || '';
-  // Renderiza a barra de toggle (só pra admin/gerente)
   if (typeof renderViewBar === 'function') renderViewBar();
-  // Lê modo atual
   let viewMode = 'meus';
   if (ehAdminGer) {
     try { viewMode = localStorage.getItem('fio_kb_view_' + (state.userKey||'__')) || 'meus'; } catch(e) {}
   }
-  const eMeu = (c, alvoKey, alvoNome) => {
-    if (c.respKey && alvoKey && c.respKey === alvoKey) return true;
-    if (c.autorKey && alvoKey && c.autorKey === alvoKey) return true;
-    if (c.resp && alvoNome && c.resp === alvoNome) return true;
-    if (c.autor && alvoNome && c.autor === alvoNome) return true;
+  // Helper: resolve nome → chave OU usa lower como fallback
+  const _toK = (nomeOuKey) => {
+    if (!nomeOuKey) return '';
+    if (typeof _resolveUserKey === 'function') {
+      const k = _resolveUserKey(nomeOuKey);
+      if (k) return k;
+    }
+    return String(nomeOuKey).toLowerCase().trim();
+  };
+  // Card é do user com chave alvoKey?
+  const eDoUser = (c, alvoKey) => {
+    if (!alvoKey) return false;
+    if (c.respKey && c.respKey === alvoKey) return true;
+    if (c.autorKey && c.autorKey === alvoKey) return true;
+    if (c.resp && _toK(c.resp) === alvoKey) return true;
+    if (c.autor && _toK(c.autor) === alvoKey) return true;
     return false;
   };
+  const meKResolved = meK || _toK(meN);
   const passaFiltro = (c) => {
-    if (!ehAdminGer) return eMeu(c, meK, meN); // técnico: sempre só os dele
+    if (!ehAdminGer) return eDoUser(c, meKResolved);
     if (viewMode === 'todos') return true;
-    if (viewMode === 'meus')  return eMeu(c, meK, meN);
-    // viewMode === '<userKey>' — vê do user específico. Resolve pro nome via state.userProfiles
-    const prof = state.userProfiles?.[viewMode] || state.usersConfig?.[viewMode] || {};
-    const alvoNome = prof.nomeCompleto || prof.nome || viewMode;
-    return eMeu(c, viewMode, alvoNome);
+    if (viewMode === 'meus')  return eDoUser(c, meKResolved);
+    return eDoUser(c, viewMode);
   };
   ['todo','doing','done'].forEach(col => {
     let cards = state.cards.filter(c => c.col === col);
@@ -4948,16 +4953,25 @@ function moverCard(key, col) {
     });
     return;
   }
-  // v3.51.0 — Move smart por role:
-  // • Card é do próprio user (resp/autor === state.user) → move direto, sem modal
-  // • Card é de outro (admin/gerente movendo no lugar) → abre modal pra escolher quem executou
+  // v3.51.1 — Move smart por role com resolução de chave canônica
+  // (resolve "Vorlei" vs "Vorlei Gomes" via _resolveUserKey).
   const meK = state.userKey || '';
   const meN = state.user || '';
-  const ehMeu =
-    (card.respKey  && meK && card.respKey  === meK) ||
-    (card.autorKey && meK && card.autorKey === meK) ||
-    (card.resp     && meN && card.resp     === meN) ||
-    (card.autor    && meN && card.autor    === meN);
+  const _toK = (n) => {
+    if (!n) return '';
+    if (typeof _resolveUserKey === 'function') {
+      const k = _resolveUserKey(n);
+      if (k) return k;
+    }
+    return String(n).toLowerCase().trim();
+  };
+  const meKResolved = meK || _toK(meN);
+  const ehMeu = !!meKResolved && (
+    card.respKey === meKResolved ||
+    card.autorKey === meKResolved ||
+    (card.resp  && _toK(card.resp)  === meKResolved) ||
+    (card.autor && _toK(card.autor) === meKResolved)
+  );
   if (ehMeu) {
     _executarMove(key, col, state.user);
     return;
