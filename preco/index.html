@@ -697,6 +697,183 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
   .container { padding:22px 22px 60px !important; max-width:1280px !important; }
   @media(max-width:640px){ .container { padding:14px 14px 40px !important; } }
 </style>
+<!-- v3.55.0 — Redesign minimal aprovado pelo William (mockup-preco-minimal-completo.html) -->
+<style>
+/* ====== MINIMAL REDESIGN v3.55.0 — escopado em .panel pra não vazar ====== */
+.panel .container{max-width:760px !important;padding:24px 22px 60px !important}
+.panel#panel-custos .container,
+.panel#panel-historico .container{max-width:920px !important}
+
+/* Hero superior */
+.mn-hero{margin-bottom:32px}
+.mn-hero-eye{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.mn-hero-h{font-family:'Outfit',sans-serif !important;font-weight:700;font-size:1.4rem;letter-spacing:-.01em;color:var(--text)}
+
+/* Section base */
+.mn-sec{margin-bottom:26px}
+.mn-sec-h{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+
+/* Toggle com/sem tingimento */
+.mn-toggle{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px;gap:0}
+.mn-toggle button{padding:9px 18px;background:transparent;border:none;color:var(--muted);font-family:'Inter','Poppins',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;border-radius:999px;transition:all .15s;letter-spacing:.2px}
+.mn-toggle button.active{background:var(--text);color:var(--bg);font-weight:600}
+[data-theme="dark"] .mn-toggle button.active{background:#F5F5F5;color:#000}
+
+/* Grid de inputs */
+.mn-row{display:grid;gap:10px}
+.mn-row.c2{grid-template-columns:1fr 1fr}
+.mn-row.c3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:520px){.mn-row.c2,.mn-row.c3{grid-template-columns:1fr}}
+
+.mn-field{position:relative}
+.mn-field label{display:block;font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:400}
+.mn-field .mn-input,
+.mn-field select.mn-select,
+.mn-field input.mn-text{
+  width:100%;background:var(--surface);border:1.5px solid var(--border) !important;border-radius:8px !important;padding:0 14px;height:46px;
+  color:var(--text);font-family:'Outfit',sans-serif !important;font-size:.95rem !important;font-weight:500;
+  display:flex;align-items:center;outline:none;transition:border-color .12s;
+  appearance:none;-webkit-appearance:none;
+}
+.mn-field input.mn-text:focus,.mn-field select.mn-select:focus,.mn-field .mn-input:focus-within{border-color:var(--green) !important}
+.mn-field .mn-input{padding:0;overflow:hidden}
+.mn-field .mn-input .pre{padding:0 0 0 14px;color:var(--muted);font-family:'DM Mono',monospace;font-size:.75rem;flex-shrink:0}
+.mn-field .mn-input .suf{padding:0 14px 0 0;color:var(--muted);font-family:'DM Mono',monospace;font-size:.75rem;flex-shrink:0}
+.mn-field .mn-input input{flex:1;background:transparent !important;border:none !important;outline:none;color:inherit;font:inherit;padding:0 14px;height:100%;width:100%;border-radius:0 !important;font-family:'Outfit',sans-serif !important;font-size:.95rem !important;font-weight:500}
+.mn-field select.mn-select{cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1L5 5L9 1' stroke='%23636366' stroke-width='1.5' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+.mn-field select.mn-select option{background:var(--surface);color:var(--text)}
+.mn-field.lock .mn-input{opacity:.7}
+.mn-field.lock .mn-input input{color:var(--muted)}
+
+/* Botões ICMS — 5 inline */
+.mn-icms{display:flex;gap:6px;flex-wrap:wrap}
+.mn-icms button{flex:1;min-width:60px;padding:10px 0;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--muted);font-family:'DM Mono',monospace;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .12s}
+.mn-icms button:hover{border-color:var(--border2);color:var(--text)}
+.mn-icms button.active{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
+[data-theme="dark"] .mn-icms button.active{background:#3ECF6E;border-color:#3ECF6E;color:#000}
+
+/* Custo real strip */
+.mn-creal{margin-top:10px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,136,53,.06);border:1px solid rgba(0,136,53,.18);border-radius:8px;font-family:'DM Mono',monospace;flex-wrap:wrap;gap:6px}
+.mn-creal .l{font-size:.62rem;color:var(--green);letter-spacing:1.2px;text-transform:uppercase;font-weight:500}
+[data-theme="dark"] .mn-creal .l{color:#3ECF6E}
+.mn-creal .v{font-size:.85rem;color:var(--text);font-weight:500}
+.mn-creal .v small{color:var(--muted);font-size:.6rem;margin-left:6px;letter-spacing:.5px;font-weight:400}
+
+/* Meta segmented */
+.mn-meta{display:flex;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:3px;flex-wrap:wrap;gap:2px}
+.mn-meta button{flex:1;min-width:78px;padding:9px 6px;background:transparent;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;cursor:pointer;border-radius:7px;transition:all .12s;white-space:nowrap;letter-spacing:.3px}
+.mn-meta button:hover{color:var(--text)}
+.mn-meta button.active{background:var(--green);color:#fff;font-weight:600}
+[data-theme="dark"] .mn-meta button.active{background:#3ECF6E;color:#000}
+
+/* Hero do resultado */
+.mn-result{margin-top:32px;background:linear-gradient(180deg,rgba(0,136,53,.07) 0%,var(--bg) 100%);border:1px solid rgba(0,136,53,.22);border-radius:14px;padding:24px 26px}
+[data-theme="dark"] .mn-result{background:linear-gradient(180deg,rgba(62,207,110,.06) 0%,#0F0F10 100%);border-color:#1C2C1A}
+.mn-result-eye{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:8px;font-weight:500}
+[data-theme="dark"] .mn-result-eye{color:#3ECF6E}
+.mn-result-row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.mn-big{font-family:'Outfit',sans-serif !important;font-weight:300 !important;font-size:3.4rem !important;letter-spacing:-.025em !important;line-height:1 !important;color:var(--text) !important;transition:color .15s}
+.mn-big.flash{color:var(--green) !important}
+[data-theme="dark"] .mn-big.flash{color:#3ECF6E !important}
+.mn-big small{font-size:1rem;color:var(--muted);margin-right:8px;font-weight:400}
+.mn-big .dec{color:var(--muted);font-weight:300}
+.mn-result-meta{display:flex;flex-direction:column;gap:6px;text-align:right;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted)}
+.mn-result-meta b{color:var(--green);font-weight:500;display:inline-block;margin-left:6px}
+[data-theme="dark"] .mn-result-meta b{color:#3ECF6E}
+
+.mn-result-foot{margin-top:18px;padding-top:18px;border-top:1px solid rgba(0,136,53,.15);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+[data-theme="dark"] .mn-result-foot{border-top-color:#1C2C1A}
+.mn-bd{display:flex;gap:18px;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);flex-wrap:wrap;letter-spacing:.5px;text-transform:uppercase}
+.mn-bd b{color:var(--text);font-weight:500;display:block;margin-top:2px;font-size:.78rem;text-transform:none;letter-spacing:0;font-family:'DM Mono',monospace}
+.mn-bd .neg{color:var(--green)}
+[data-theme="dark"] .mn-bd .neg{color:#3ECF6E}
+.mn-save{padding:11px 22px;background:var(--green);color:#fff;border:none;border-radius:999px;font-family:'Inter','Poppins',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:background .15s}
+.mn-save:hover{background:var(--green2)}
+[data-theme="dark"] .mn-save{background:#3ECF6E;color:#000}
+[data-theme="dark"] .mn-save:hover{background:#36b660}
+
+/* Custo hora editável (Preparação/Retorção) — substitui o cadeado emoji */
+.mn-edit-input{display:flex;align-items:center;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:0 0 0 14px;height:46px;overflow:hidden}
+.mn-edit-input.unlocked{border-color:var(--green)}
+.mn-edit-input .pre{color:var(--muted);font-family:'DM Mono',monospace;font-size:.75rem;margin-right:10px;flex-shrink:0}
+.mn-edit-input input{flex:1;background:transparent !important;border:none !important;outline:none;color:var(--text);font-family:'Outfit',sans-serif !important;font-size:.95rem !important;font-weight:500;padding:0 !important;height:100%}
+.mn-edit-input input:read-only{color:var(--muted)}
+.mn-edit-input .edit-btn{padding:0 14px;height:100%;background:transparent;border:none;border-left:1px solid var(--border);color:var(--green);font-family:'Inter','Poppins',sans-serif;font-size:.62rem;font-weight:600;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;transition:all .12s}
+.mn-edit-input .edit-btn:hover{background:rgba(0,136,53,.05)}
+.mn-edit-input.unlocked .edit-btn{background:var(--green);color:#fff;border-left-color:var(--green)}
+[data-theme="dark"] .mn-edit-input.unlocked .edit-btn{background:#3ECF6E;color:#000;border-left-color:#3ECF6E}
+
+/* Histórico minimal: KPIs + cards */
+.mn-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+@media(max-width:520px){.mn-kpis{grid-template-columns:1fr}}
+.mn-kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.mn-kpi .l{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.mn-kpi .v{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:-.01em;color:var(--text)}
+.mn-kpi .v.green{color:var(--green)}
+[data-theme="dark"] .mn-kpi .v.green{color:#3ECF6E}
+
+.mn-search-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.mn-search{flex:1;min-width:160px;background:var(--surface);border:1.5px solid var(--border);border-radius:999px;padding:9px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:.72rem;outline:none}
+.mn-search:focus{border-color:var(--green)}
+
+.mn-hist-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .12s}
+.mn-hist-card:hover{border-color:var(--border2)}
+.mn-hist-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:.78rem;flex-shrink:0}
+.mn-hist-mid{flex:1;min-width:0}
+.mn-hist-name{font-family:'Outfit',sans-serif;font-weight:700;font-size:.88rem;color:var(--text)}
+.mn-hist-meta{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:2px;letter-spacing:.5px}
+.mn-hist-val{font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;color:var(--green)}
+[data-theme="dark"] .mn-hist-val{color:#3ECF6E}
+.mn-hist-val small{font-size:.55rem;color:var(--muted);margin-right:3px;font-weight:400}
+.mn-hist-actions{display:flex;gap:6px;flex-shrink:0}
+.mn-hist-actions button{background:transparent;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center}
+.mn-hist-actions button:hover{color:var(--text);border-color:var(--border2)}
+.mn-hist-actions button.danger:hover{color:#fff;background:#FF453A;border-color:#FF453A}
+
+.mn-empty{padding:28px;text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:.72rem}
+
+/* Custos — pills + tabela limpa */
+.mn-fios-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.mn-fio-pill{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:999px;cursor:pointer;color:var(--muted);font-family:'DM Mono',monospace;font-size:.72rem;transition:all .12s}
+.mn-fio-pill:hover{color:var(--text)}
+.mn-fio-pill.active{background:rgba(0,136,53,.08);border-color:var(--green);color:var(--green)}
+[data-theme="dark"] .mn-fio-pill.active{background:rgba(62,207,110,.1);border-color:#3ECF6E;color:#3ECF6E}
+.mn-fio-pill .auto-tag{font-size:.5rem;letter-spacing:1.2px;background:var(--surface2);padding:2px 6px;border-radius:4px;color:var(--muted);text-transform:uppercase}
+.mn-fio-pill.active .auto-tag{background:rgba(0,136,53,.12);color:var(--green)}
+.mn-fio-pill .x{margin-left:4px;color:var(--muted);font-size:.85rem;cursor:pointer;line-height:1}
+.mn-fio-pill .x:hover{color:#FF453A}
+.mn-btn-add{padding:9px 16px;background:var(--green);color:#fff;border:none;border-radius:999px;font-family:'Inter','Poppins',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;letter-spacing:.3px}
+.mn-btn-add.outline{background:transparent;border:1.5px solid var(--green);color:var(--green)}
+[data-theme="dark"] .mn-btn-add{background:#3ECF6E;color:#000}
+[data-theme="dark"] .mn-btn-add.outline{background:transparent;color:#3ECF6E;border-color:#3ECF6E}
+
+.mn-tbl{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.mn-tbl-row{display:grid;gap:14px;padding:13px 16px;align-items:center;border-bottom:1px solid var(--border)}
+.mn-tbl-row.head{background:var(--surface2)}
+.mn-tbl-row:last-child{border-bottom:none}
+.mn-tbl-row.head div{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.mn-tbl-row .nome{font-family:'Outfit',sans-serif;font-weight:600;font-size:.88rem;color:var(--text)}
+.mn-tbl-row .nome input{background:transparent !important;border:none !important;outline:none;color:var(--text) !important;font:inherit;width:100%;padding:0 !important;font-family:'Outfit',sans-serif !important}
+.mn-tbl-row .num{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--muted);text-align:right}
+.mn-tbl-row .num input{background:transparent !important;border:none !important;outline:none;color:inherit !important;font:inherit;width:100%;text-align:right;padding:0 !important}
+.mn-tbl-row .mult{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--green);background:rgba(0,136,53,.08);padding:4px 10px;border-radius:6px;text-align:center}
+[data-theme="dark"] .mn-tbl-row .mult{color:#3ECF6E;background:rgba(62,207,110,.1)}
+.mn-tbl-row .mult input{background:transparent !important;border:none !important;outline:none;color:inherit !important;width:36px;text-align:right;font-family:'DM Mono',monospace !important;padding:0 !important;font-size:.7rem !important}
+.mn-tbl-row .calc{font-family:'DM Mono',monospace;font-size:.85rem;color:var(--text);font-weight:600;text-align:right}
+.mn-tbl-row .del{color:var(--muted);cursor:pointer;font-size:.95rem;text-align:center;background:none;border:none;line-height:1}
+.mn-tbl-row .del:hover{color:#FF453A}
+.mn-tbl-base .mn-tbl-row{grid-template-columns:1fr 110px 40px}
+.mn-tbl-deriv .mn-tbl-row{grid-template-columns:1fr 100px 80px 110px}
+
+.mn-tbl-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:10px}
+.mn-tbl-foot .left{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.5px}
+
+/* Hide stuff que não vamos mais usar (mas que existe no DOM antigo se sobrar) */
+.panel .step,.panel .step-header,.panel .icms-selector:not(.mn-icms),
+.panel .input-row,.panel .field-row,.panel .target-row,
+.panel .section-label,.panel .price-card,.panel .resultado-card,
+.panel .fix-chips,.panel .custo-result,.panel .divider{display:none !important}
+</style>
 <!-- Stubs pra não quebrar JS do price que referencia esses IDs -->
 <div id="splash" style="display:none"></div>
 <div id="loginScreen" style="display:none"></div>
@@ -787,246 +964,304 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
 <!-- ===== RETORÇÃO ===== -->
 <div class="panel" id="panel-retorcao">
 <div class="container">
+  <div class="mn-hero"><div class="mn-hero-eye">Formação de preço · Retorção</div><h1 class="mn-hero-h">Calcular preço da retorção</h1></div>
 
-  <div class="step">
-    <div class="step-header"><div class="step-num">1</div><div class="step-title">Parâmetros</div></div>
-    <div class="input-row cols-auto">
-      <div class="field">
-        <label>Custo Hora / Retorção (R$)
-          <button id="r-lockBtn" onclick="toggleCustoHora()" title="Clique para editar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.85rem;margin-left:6px;vertical-align:middle;transition:color 0.2s;padding:0;line-height:1;">🔒</button>
-        </label>
-        <div class="field-row locked" id="r-custoHoraRow">
-          <span class="field-prefix">R$</span>
+  <div class="mn-sec">
+    <div class="mn-sec-h">Parâmetros</div>
+    <div class="mn-row c3">
+      <div class="mn-field">
+        <label>Custo hora · editável</label>
+        <div class="mn-edit-input" id="r-custoHoraRow">
+          <span class="pre">R$</span>
           <input type="number" id="r-custoHora" value="55.12" readonly step="0.01" min="0" onchange="salvarCustoHora(this.value)" oninput="calcRetorcao()">
-          <button id="r-saveHora" onclick="salvarCustoHora(document.getElementById('r-custoHora').value)" style="display:none;margin-right:8px;padding:4px 10px;background:var(--accent);border:none;border-radius:4px;color:#fff;font-family:'Poppins',sans-serif;font-size:0.6rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background 0.2s;">Salvar</button>
+          <button class="edit-btn" id="r-lockBtn" onclick="toggleCustoHora()">EDITAR</button>
+          <button id="r-saveHora" onclick="salvarCustoHora(document.getElementById('r-custoHora').value)" style="display:none">Salvar</button>
         </div>
       </div>
-      <div class="field">
-        <label>Produção Mensal Total (kg)</label>
-        <div class="field-row"><span class="field-prefix">kg</span><input type="number" id="r-producao" value="" placeholder="0" step="1" min="0" oninput="calcRetorcao()"></div>
-      </div>
-      <div class="field">
-        <label>Fator Mensal (horas)</label>
-        <div class="field-row locked"><span class="field-prefix">h</span><input type="number" id="r-fatorMensal" value="566" readonly></div>
+      <div class="mn-field"><label>Produção mensal</label><div class="mn-input"><input type="number" id="r-producao" placeholder="0" step="1" min="0" oninput="calcRetorcao()"><span class="suf">kg</span></div></div>
+      <div class="mn-field lock"><label>Fator mensal</label><div class="mn-input"><input type="number" id="r-fatorMensal" value="566" readonly><span class="suf">h</span></div></div>
+    </div>
+    <div class="mn-creal"><span class="l">Custo operacional</span><span class="v"><span id="r-custoOpDisplay">R$ 0,00</span><small id="r-custoOpSub">por kg produzido</small></span></div>
+    <input type="hidden" id="r-custoOp" value="0">
+  </div>
+
+  <div class="mn-sec">
+    <div class="mn-sec-h">Outros custos e meta</div>
+    <div class="mn-row c2">
+      <div class="mn-field"><label>Outros custos</label><div class="mn-input"><span class="pre">R$</span><input type="number" id="r-outros" value="0" step="0.01" min="0" oninput="calcRetorcao()"></div></div>
+      <div class="mn-field"><label>Meta de margem</label>
+        <div class="mn-meta" id="r-meta-seg">
+          <button id="rtb-0" onclick="setRetTarget('0',this)">0%</button>
+          <button id="rtb-jcp" onclick="setRetTarget('jcp',this)">JCP + 0%</button>
+          <button id="rtb-jcp3" onclick="setRetTarget('jcp3',this)">JCP + 3%</button>
+          <button class="active" id="rtb-jcp5" onclick="setRetTarget('jcp5',this)">JCP + 5%</button>
+          <button id="rtb-jcp10" onclick="setRetTarget('jcp10',this)">JCP + 10%</button>
+          <button id="rtb-jcp25" onclick="setRetTarget('jcp25',this)">JCP + 25%</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="divider"></div>
+  <span id="r-lucro" data-value="0" hidden>0</span>
+  <span id="r-despOp" data-value="10" hidden>10</span>
+  <span id="r-jcp" data-value="4.6" hidden>4,6</span>
 
-  <div class="step">
-    <div class="step-header"><div class="step-num">2</div><div class="step-title">Outros custos</div></div>
-    <div class="input-row cols-fixed">
-      <div class="field">
-        <label>Custo Operacional (R$/kg)</label>
-        <div class="field-row locked"><span class="field-prefix">R$</span><input type="number" id="r-custoOp" value="0" readonly></div>
-      </div>
-      <div class="field">
-        <label>Outros Custos</label>
-        <div class="field-row"><span class="field-prefix">R$</span><input type="number" id="r-outros" value="0" step="0.01" min="0" oninput="calcRetorcao()"></div>
+  <div class="mn-result" id="r-result-card">
+    <div class="mn-result-eye">Preço da retorção · cenário SP-SP</div>
+    <div class="mn-result-row">
+      <div class="mn-big" id="r-bigPreco"><small>R$</small><span id="r-bigInt">0</span><span class="dec" id="r-bigDec">,00</span></div>
+      <div class="mn-result-meta">
+        <div>Margem consolidada<b id="r-margemConsol">0,00%</b></div>
+        <div>Lucro líquido<b id="r-lucroLiq">R$ 0,00</b></div>
       </div>
     </div>
-    <div class="fix-chips" title="Margens fixas — não editáveis">
-      <span class="fix-chip"><i>%</i>Lucro op <b id="r-lucro" data-value="0">0</b></span>
-      <span class="fix-chip"><i>%</i>Desp op <b id="r-despOp" data-value="10">10</b></span>
-      <span class="fix-chip"><i>%</i>JCP <b id="r-jcp" data-value="4.6">4,6</b></span>
-      <span class="fix-chip"><i>%</i>IRPJ + CSLL <b data-value="34">34</b></span>
+    <div class="mn-result-foot">
+      <div class="mn-bd">
+        <div>Custo total<b id="r-bdCusto">R$ 0,00</b></div>
+        <div>Tributos<b id="r-bdTrib">R$ 0,00</b></div>
+        <div>Lucro<b class="neg" id="r-bdLucro">+R$ 0,00</b></div>
+      </div>
+      <button class="mn-save" onclick="abrirSalvarCotacao('retorcao')">Salvar cotação</button>
     </div>
   </div>
 
-  <div class="divider"></div>
-
-  <div class="section-label">Custo operacional</div>
-  <div id="r-custoArea"></div>
-
-  <div class="section-label" style="margin-top:24px">Preço do serviço</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px" id="r-gridVenda"></div>
-
-  <div class="section-label">Resultado</div>
-  <div class="target-row">
-    <span class="target-label">Meta de margem</span>
-    <button class="target-btn" id="rtb-0" onclick="setRetTarget('0',this)">0%</button>
-    <button class="target-btn" id="rtb-jcp" onclick="setRetTarget('jcp',this)">JCP + 0%</button>
-    <button class="target-btn" id="rtb-jcp3" onclick="setRetTarget('jcp3',this)">JCP + 3%</button>
-    <button class="target-btn active" id="rtb-jcp5" onclick="setRetTarget('jcp5',this)">JCP + 5%</button>
-    <button class="target-btn" id="rtb-jcp10" onclick="setRetTarget('jcp10',this)">JCP + 10%</button>
-    <button class="target-btn" id="rtb-jcp25" onclick="setRetTarget('jcp25',this)">JCP + 25%</button>
-  </div>
-  <div class="resultado-card" id="r-resultado"></div>
+  <div id="r-custoArea" hidden></div>
+  <div id="r-gridVenda" hidden></div>
+  <div id="r-resultado" hidden></div>
 </div>
 </div>
 
 <!-- ===== VENDAS ===== -->
 <div class="panel" id="panel-vendas">
 <div class="container">
+  <div class="mn-hero"><div class="mn-hero-eye">Formação de preço · Vendas</div><h1 class="mn-hero-h">Calcular preço de venda</h1></div>
 
-  <div class="step">
-    <div class="step-header"><div class="step-num">1</div><div class="step-title">Selecionar fio</div></div>
-    <div class="icms-selector" style="margin-bottom:14px">
-      <button class="icms-btn active" id="v-modo-ting" onclick="setVModo('tingimento',this)">Com tingimento</button>
-      <button class="icms-btn" id="v-modo-prep" onclick="setVModo('preparacao',this)">Sem tingimento</button>
-    </div>
-    <div id="v-fio-selector">
-      <div class="input-row cols-3">
-        <div class="field"><label>Tipo</label><div class="field-row"><select id="v-tipo" onchange="onTipoChange()"></select></div></div>
-        <div class="field"><label>Cor</label><div class="field-row"><select id="v-cor" onchange="onCorChange()"></select></div></div>
-        <div class="field"><label>Custo Tingimento</label><div class="field-row locked"><span class="field-prefix">R$</span><input type="number" id="v-ting" value="0" step="0.01" min="0" readonly></div></div>
-      </div>
+  <div class="mn-sec">
+    <div class="mn-sec-h">Modo</div>
+    <div class="mn-toggle" id="v-modo-toggle">
+      <button class="active" id="v-modo-ting" onclick="setVModo('tingimento',this)">Com tingimento</button>
+      <button id="v-modo-prep" onclick="setVModo('preparacao',this)">Sem tingimento</button>
     </div>
   </div>
 
-  <div class="step">
-    <div class="step-header"><div class="step-num">2</div><div class="step-title">Custo do fio na compra</div></div>
-    <div class="input-row cols-2">
-      <div class="field"><label>Valor de compra (R$/kg)</label><div class="field-row"><span class="field-prefix">R$</span><input type="number" id="v-custoFio" value="0" step="0.01" min="0" oninput="calcVendas()"></div></div>
-      <div class="field">
-        <label>Alíquota ICMS do fornecedor</label>
-        <div class="icms-selector" id="v-icms-sel">
-          <button class="icms-btn" onclick="setICMS(0.17,this)">17%</button>
-          <button class="icms-btn" onclick="setICMS(0.12,this)">12%</button>
-          <button class="icms-btn" onclick="setICMS(0.07,this)">7%</button>
-          <button class="icms-btn" onclick="setICMS(0.04,this)">4%</button>
-          <button class="icms-btn active" onclick="setICMS(0.00,this)">0%</button>
+  <div class="mn-sec" id="v-fio-selector">
+    <div class="mn-sec-h">Fio</div>
+    <div class="mn-row c3">
+      <div class="mn-field"><label>Tipo</label><select id="v-tipo" class="mn-select" onchange="onTipoChange()"></select></div>
+      <div class="mn-field"><label>Cor</label><select id="v-cor" class="mn-select" onchange="onCorChange()"></select></div>
+      <div class="mn-field lock"><label>Custo tingimento</label><div class="mn-input"><span class="pre">R$</span><input type="text" id="v-ting" value="0" readonly></div></div>
+    </div>
+  </div>
+
+  <div class="mn-sec">
+    <div class="mn-sec-h">Compra do fio</div>
+    <div class="mn-row c2">
+      <div class="mn-field"><label>Valor de compra (R$/kg)</label><div class="mn-input"><span class="pre">R$</span><input type="number" id="v-custoFio" value="0" step="0.01" min="0" oninput="calcVendas()"></div></div>
+      <div class="mn-field"><label>ICMS do fornecedor</label>
+        <div class="mn-icms" id="v-icms-sel">
+          <button onclick="setICMS(0.17,this)">17%</button>
+          <button onclick="setICMS(0.12,this)">12%</button>
+          <button onclick="setICMS(0.07,this)">7%</button>
+          <button onclick="setICMS(0.04,this)">4%</button>
+          <button class="active" onclick="setICMS(0.00,this)">0%</button>
         </div>
       </div>
     </div>
-    <div class="custo-result">
-      <div><div class="cr-label">Custo real do fio</div><div class="cr-value" id="v-custoReal">R$ 0,00</div><div class="cr-sub">após recuperação PIS/COFINS</div></div>
-      <div class="cr-tag" id="v-custoTag">↓ 0.00% desconto efetivo</div>
+    <div class="mn-creal"><span class="l">Custo real</span><span class="v"><span id="v-custoReal">R$ 0,00</span><small id="v-custoTag">após recuperação PIS/COFINS</small></span></div>
+  </div>
+
+  <div class="mn-sec">
+    <div class="mn-sec-h">Outros custos e meta</div>
+    <div class="mn-row c2">
+      <div class="mn-field"><label>Outros custos</label><div class="mn-input"><span class="pre">R$</span><input type="number" id="v-outros" value="0" step="0.01" min="0" oninput="calcVendas()"></div></div>
+      <div class="mn-field"><label>Meta de margem</label>
+        <div class="mn-meta" id="v-meta-seg">
+          <button id="tb-0" onclick="setTarget('0',this)">0%</button>
+          <button id="tb-jcp" onclick="setTarget('jcp',this)">JCP + 0%</button>
+          <button id="tb-jcp3" onclick="setTarget('jcp3',this)">JCP + 3%</button>
+          <button class="active" id="tb-jcp5" onclick="setTarget('jcp5',this)">JCP + 5%</button>
+          <button id="tb-jcp10" onclick="setTarget('jcp10',this)">JCP + 10%</button>
+          <button id="tb-jcp25" onclick="setTarget('jcp25',this)">JCP + 25%</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="step">
-    <div class="step-header"><div class="step-num">3</div><div class="step-title">Outros custos e margens</div></div>
-    <div class="input-row cols-fixed">
-      <div class="field"><label>Retorção / Preparação</label><div class="field-row"><span class="field-prefix">R$</span><input type="number" id="v-prep" value="0" step="0.01" min="0" oninput="calcVendas()"></div></div>
-      <div class="field"><label>Outros Custos</label><div class="field-row"><span class="field-prefix">R$</span><input type="number" id="v-outros" value="0" step="0.01" min="0" oninput="calcVendas()"></div></div>
+  <!-- Hidden legacy state pra calc functions -->
+  <input type="hidden" id="v-prep" value="0">
+  <span id="v-lucro" data-value="14" hidden>14</span>
+  <span id="v-despOp" data-value="10" hidden>10</span>
+  <span id="v-jcp" data-value="4.6" hidden>4,6</span>
+
+  <!-- Hero resultado -->
+  <div class="mn-result" id="v-result-card">
+    <div class="mn-result-eye">Preço de venda</div>
+    <div class="mn-result-row">
+      <div class="mn-big" id="v-bigPreco"><small>R$</small><span id="v-bigInt">0</span><span class="dec" id="v-bigDec">,00</span></div>
+      <div class="mn-result-meta">
+        <div>Margem consolidada<b id="v-margemConsol">0,00%</b></div>
+        <div>Lucro líquido<b id="v-lucroLiq">R$ 0,00</b></div>
+      </div>
     </div>
-    <div class="fix-chips" title="Margens fixas — não editáveis">
-      <span class="fix-chip"><i>%</i>Lucro op <b id="v-lucro" data-value="14">14</b></span>
-      <span class="fix-chip"><i>%</i>Desp op <b id="v-despOp" data-value="10">10</b></span>
-      <span class="fix-chip"><i>%</i>JCP <b id="v-jcp" data-value="4.6">4,6</b></span>
-      <span class="fix-chip"><i>%</i>IRPJ + CSLL <b data-value="34">34</b></span>
+    <div class="mn-result-foot">
+      <div class="mn-bd">
+        <div>Custo total<b id="v-bdCusto">R$ 0,00</b></div>
+        <div>Tributos<b id="v-bdTrib">R$ 0,00</b></div>
+        <div>Lucro<b class="neg" id="v-bdLucro">+R$ 0,00</b></div>
+      </div>
+      <button class="mn-save" onclick="abrirSalvarCotacao('vendas')">Salvar cotação</button>
     </div>
   </div>
 
-  <div class="divider"></div>
-  <div class="section-label">Preço de venda</div>
-  <div id="v-gridVenda" style="margin-bottom:26px"></div>
-  <div class="section-label">Resultado</div>
-  <div class="target-row">
-    <span class="target-label">Meta de margem</span>
-    <button class="target-btn" id="tb-0" onclick="setTarget('0',this)">0%</button>
-    <button class="target-btn" id="tb-jcp" onclick="setTarget('jcp',this)">JCP + 0%</button>
-    <button class="target-btn" id="tb-jcp3" onclick="setTarget('jcp3',this)">JCP + 3%</button>
-    <button class="target-btn active" id="tb-jcp5" onclick="setTarget('jcp5',this)">JCP + 5%</button>
-    <button class="target-btn" id="tb-jcp10" onclick="setTarget('jcp10',this)">JCP + 10%</button>
-    <button class="target-btn" id="tb-jcp25" onclick="setTarget('jcp25',this)">JCP + 25%</button>
-  </div>
-  <div class="resultado-card" id="v-resultado"></div>
+  <!-- Targets escondidos pra compat (calc functions ainda escrevem aqui) -->
+  <div id="v-gridVenda" hidden></div>
+  <div id="v-resultado" hidden></div>
 </div>
 </div>
 
 <!-- ===== TINGIMENTO ===== -->
 <div class="panel" id="panel-tingimento">
 <div class="container">
-  <div class="step">
-    <div class="step-header"><div class="step-num">1</div><div class="step-title">Selecionar fio</div></div>
-    <div class="input-row cols-3">
-      <div class="field"><label>Tipo</label><div class="field-row"><select id="t-tipo" onchange="onTTipoChange()"></select></div></div>
-      <div class="field"><label>Cor</label><div class="field-row"><select id="t-cor" onchange="onTCorChange()"></select></div></div>
-      <div class="field"><label>Custo Tingimento</label><div class="field-row locked"><span class="field-prefix">R$</span><input type="number" id="t-ting" value="0" step="0.01" min="0" readonly></div></div>
+  <div class="mn-hero"><div class="mn-hero-eye">Formação de preço · Tingimento</div><h1 class="mn-hero-h">Calcular preço do serviço</h1></div>
+
+  <div class="mn-sec">
+    <div class="mn-sec-h">Fio</div>
+    <div class="mn-row c3">
+      <div class="mn-field"><label>Tipo</label><select id="t-tipo" class="mn-select" onchange="onTTipoChange()"></select></div>
+      <div class="mn-field"><label>Cor</label><select id="t-cor" class="mn-select" onchange="onTCorChange()"></select></div>
+      <div class="mn-field lock"><label>Custo tingimento</label><div class="mn-input"><span class="pre">R$</span><input type="text" id="t-ting" value="0" readonly></div></div>
     </div>
   </div>
-  <div class="step">
-    <div class="step-header"><div class="step-num">2</div><div class="step-title">Outros custos</div></div>
-    <div class="input-row cols-fixed">
-      <div class="field"><label>Outros Custos</label><div class="field-row"><span class="field-prefix">R$</span><input type="number" id="t-outros" value="0" step="0.01" min="0" oninput="calcTingimento()"></div></div>
-    </div>
-    <div class="fix-chips" title="Margens fixas — não editáveis">
-      <span class="fix-chip"><i>%</i>Lucro op <b id="t-lucro" data-value="0">0</b></span>
-      <span class="fix-chip"><i>%</i>Desp op <b id="t-despOp" data-value="10">10</b></span>
-      <span class="fix-chip"><i>%</i>JCP <b id="t-jcp" data-value="4.6">4,6</b></span>
-      <span class="fix-chip"><i>%</i>IRPJ + CSLL <b data-value="34">34</b></span>
+
+  <div class="mn-sec">
+    <div class="mn-sec-h">Outros custos e meta</div>
+    <div class="mn-row c2">
+      <div class="mn-field"><label>Outros custos</label><div class="mn-input"><span class="pre">R$</span><input type="number" id="t-outros" value="0" step="0.01" min="0" oninput="calcTingimento()"></div></div>
+      <div class="mn-field"><label>Meta de margem</label>
+        <div class="mn-meta" id="t-meta-seg">
+          <button id="ttb-0" onclick="setTingTarget('0',this)">0%</button>
+          <button id="ttb-jcp" onclick="setTingTarget('jcp',this)">JCP + 0%</button>
+          <button id="ttb-jcp3" onclick="setTingTarget('jcp3',this)">JCP + 3%</button>
+          <button class="active" id="ttb-jcp5" onclick="setTingTarget('jcp5',this)">JCP + 5%</button>
+          <button id="ttb-jcp10" onclick="setTingTarget('jcp10',this)">JCP + 10%</button>
+          <button id="ttb-jcp25" onclick="setTingTarget('jcp25',this)">JCP + 25%</button>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="divider"></div>
-  <div class="section-label">Preço do serviço</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px" id="t-gridVenda"></div>
-  <div class="section-label">Resultado</div>
-  <div class="target-row">
-    <span class="target-label">Meta de margem</span>
-    <button class="target-btn" id="ttb-0" onclick="setTingTarget('0',this)">0%</button>
-    <button class="target-btn" id="ttb-jcp" onclick="setTingTarget('jcp',this)">JCP + 0%</button>
-    <button class="target-btn" id="ttb-jcp3" onclick="setTingTarget('jcp3',this)">JCP + 3%</button>
-    <button class="target-btn active" id="ttb-jcp5" onclick="setTingTarget('jcp5',this)">JCP + 5%</button>
-    <button class="target-btn" id="ttb-jcp10" onclick="setTingTarget('jcp10',this)">JCP + 10%</button>
-    <button class="target-btn" id="ttb-jcp25" onclick="setTingTarget('jcp25',this)">JCP + 25%</button>
+
+  <span id="t-lucro" data-value="0" hidden>0</span>
+  <span id="t-despOp" data-value="10" hidden>10</span>
+  <span id="t-jcp" data-value="4.6" hidden>4,6</span>
+
+  <div class="mn-result" id="t-result-card">
+    <div class="mn-result-eye">Preço do serviço · cenário SP-SP</div>
+    <div class="mn-result-row">
+      <div class="mn-big" id="t-bigPreco"><small>R$</small><span id="t-bigInt">0</span><span class="dec" id="t-bigDec">,00</span></div>
+      <div class="mn-result-meta">
+        <div>Margem consolidada<b id="t-margemConsol">0,00%</b></div>
+        <div>Lucro líquido<b id="t-lucroLiq">R$ 0,00</b></div>
+      </div>
+    </div>
+    <div class="mn-result-foot">
+      <div class="mn-bd">
+        <div>Custo<b id="t-bdCusto">R$ 0,00</b></div>
+        <div>Tributos<b id="t-bdTrib">R$ 0,00</b></div>
+        <div>Lucro<b class="neg" id="t-bdLucro">+R$ 0,00</b></div>
+      </div>
+      <button class="mn-save" onclick="abrirSalvarCotacao('tingimento')">Salvar cotação</button>
+    </div>
   </div>
-  <div class="resultado-card" id="t-resultado"></div>
+
+  <div id="t-gridVenda" hidden></div>
+  <div id="t-resultado" hidden></div>
 </div>
 </div>
 
 <!-- ===== PREPARAÇÃO / REPASSE ===== -->
 <div class="panel" id="panel-preparacao">
 <div class="container">
-  <div class="step">
-    <div class="step-header"><div class="step-num">1</div><div class="step-title">Parâmetros da máquina</div></div>
-    <div class="input-row cols-auto">
-      <div class="field">
-        <label>Custo Hora / Preparação (R$)
-          <button id="pp-lockBtn" onclick="toggleCustoHoraPrep()" title="Clique para editar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.85rem;margin-left:6px;vertical-align:middle;transition:color 0.2s;padding:0;line-height:1;">🔒</button>
-        </label>
-        <div class="field-row locked" id="pp-custoHoraRow">
-          <span class="field-prefix">R$</span>
+  <div class="mn-hero"><div class="mn-hero-eye">Formação de preço · Preparação / Repasse</div><h1 class="mn-hero-h">Calcular preço por kg</h1></div>
+
+  <div class="mn-sec">
+    <div class="mn-sec-h">Parâmetros da máquina</div>
+    <div class="mn-row c3">
+      <div class="mn-field">
+        <label>Custo hora · editável</label>
+        <div class="mn-edit-input" id="pp-custoHoraRow">
+          <span class="pre">R$</span>
           <input type="number" id="pp-custoHora" value="38.50" readonly step="0.01" min="0" onchange="salvarCustoHoraPrep(this.value)" oninput="calcPreparacao()">
-          <button id="pp-saveHora" onclick="salvarCustoHoraPrep(document.getElementById('pp-custoHora').value)" style="display:none;margin-right:8px;padding:4px 10px;background:var(--accent);border:none;border-radius:4px;color:#fff;font-family:'Poppins',sans-serif;font-size:0.6rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background 0.2s;">Salvar</button>
+          <button class="edit-btn" id="pp-lockBtn" onclick="toggleCustoHoraPrep()">EDITAR</button>
+          <button id="pp-saveHora" onclick="salvarCustoHoraPrep(document.getElementById('pp-custoHora').value)" style="display:none">Salvar</button>
         </div>
       </div>
-      <div class="field"><label>Produção Mensal (kg)</label><div class="field-row"><span class="field-prefix">kg</span><input type="number" id="pp-producao" value="" placeholder="0" step="1" min="0" oninput="calcPreparacao()"></div></div>
-      <div class="field"><label>Fator Mensal (horas)</label><div class="field-row locked"><span class="field-prefix">h</span><input type="number" id="pp-fatorMensal" value="566" readonly></div></div>
+      <div class="mn-field"><label>Produção mensal</label><div class="mn-input"><input type="number" id="pp-producao" placeholder="0" step="1" min="0" oninput="calcPreparacao()"><span class="suf">kg</span></div></div>
+      <div class="mn-field lock"><label>Fator mensal</label><div class="mn-input"><input type="number" id="pp-fatorMensal" value="566" readonly><span class="suf">h</span></div></div>
+    </div>
+    <div class="mn-creal"><span class="l">Custo operacional</span><span class="v"><span id="pp-custoOpDisplay">R$ 0,00</span><small>por kg produzido</small></span></div>
+    <input type="hidden" id="pp-custoOp" value="0">
+  </div>
+
+  <div class="mn-sec">
+    <div class="mn-sec-h">Outros custos e meta</div>
+    <div class="mn-row c2">
+      <div class="mn-field"><label>Outros custos</label><div class="mn-input"><span class="pre">R$</span><input type="number" id="pp-outros" value="0" step="0.01" min="0" oninput="calcPreparacao()"></div></div>
+      <div class="mn-field"><label>Meta de margem</label>
+        <div class="mn-meta" id="pp-meta-seg">
+          <button id="pptb-0" onclick="setPrepTarget('0',this)">0%</button>
+          <button id="pptb-jcp" onclick="setPrepTarget('jcp',this)">JCP + 0%</button>
+          <button id="pptb-jcp3" onclick="setPrepTarget('jcp3',this)">JCP + 3%</button>
+          <button class="active" id="pptb-jcp5" onclick="setPrepTarget('jcp5',this)">JCP + 5%</button>
+          <button id="pptb-jcp10" onclick="setPrepTarget('jcp10',this)">JCP + 10%</button>
+          <button id="pptb-jcp25" onclick="setPrepTarget('jcp25',this)">JCP + 25%</button>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="step">
-    <div class="step-header"><div class="step-num">2</div><div class="step-title">Outros custos</div></div>
-    <div class="input-row cols-fixed">
-      <div class="field"><label>Custo Operacional (R$/kg)</label><div class="field-row locked"><span class="field-prefix">R$</span><input type="number" id="pp-custoOp" value="0" readonly></div></div>
-      <div class="field"><label>Outros Custos</label><div class="field-row"><span class="field-prefix">R$</span><input type="number" id="pp-outros" value="0" step="0.01" min="0" oninput="calcPreparacao()"></div></div>
+
+  <span id="pp-lucro" data-value="0" hidden>0</span>
+  <span id="pp-despOp" data-value="10" hidden>10</span>
+  <span id="pp-jcp" data-value="4.6" hidden>4,6</span>
+
+  <div class="mn-result" id="pp-result-card">
+    <div class="mn-result-eye">Preço da preparação · por kg</div>
+    <div class="mn-result-row">
+      <div class="mn-big" id="pp-bigPreco"><small>R$</small><span id="pp-bigInt">0</span><span class="dec" id="pp-bigDec">,00</span></div>
+      <div class="mn-result-meta">
+        <div>Margem consolidada<b id="pp-margemConsol">0,00%</b></div>
+        <div>Lucro líquido<b id="pp-lucroLiq">R$ 0,00</b></div>
+      </div>
     </div>
-    <div class="fix-chips" title="Margens fixas — não editáveis">
-      <span class="fix-chip"><i>%</i>Lucro op <b id="pp-lucro" data-value="0">0</b></span>
-      <span class="fix-chip"><i>%</i>Desp op <b id="pp-despOp" data-value="10">10</b></span>
-      <span class="fix-chip"><i>%</i>JCP <b id="pp-jcp" data-value="4.6">4,6</b></span>
-      <span class="fix-chip"><i>%</i>IRPJ + CSLL <b data-value="34">34</b></span>
+    <div class="mn-result-foot">
+      <div class="mn-bd">
+        <div>Custo total<b id="pp-bdCusto">R$ 0,00</b></div>
+        <div>Tributos<b id="pp-bdTrib">R$ 0,00</b></div>
+        <div>Lucro<b class="neg" id="pp-bdLucro">+R$ 0,00</b></div>
+      </div>
+      <button class="mn-save" onclick="abrirSalvarCotacao('preparacao')">Salvar cotação</button>
     </div>
   </div>
-  <div class="divider"></div>
-  <div class="section-label">Preço do serviço</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px" id="pp-gridVenda"></div>
-  <div class="section-label">Resultado</div>
-  <div class="target-row">
-    <span class="target-label">Meta de margem</span>
-    <button class="target-btn" id="pptb-0" onclick="setPrepTarget('0',this)">0%</button>
-    <button class="target-btn" id="pptb-jcp" onclick="setPrepTarget('jcp',this)">JCP + 0%</button>
-    <button class="target-btn" id="pptb-jcp3" onclick="setPrepTarget('jcp3',this)">JCP + 3%</button>
-    <button class="target-btn active" id="pptb-jcp5" onclick="setPrepTarget('jcp5',this)">JCP + 5%</button>
-    <button class="target-btn" id="pptb-jcp10" onclick="setPrepTarget('jcp10',this)">JCP + 10%</button>
-    <button class="target-btn" id="pptb-jcp25" onclick="setPrepTarget('jcp25',this)">JCP + 25%</button>
-  </div>
-  <div class="resultado-card" id="pp-resultado"></div>
+
+  <div id="pp-gridVenda" hidden></div>
+  <div id="pp-resultado" hidden></div>
 </div>
 </div>
 
 <!-- ===== CUSTOS ===== -->
 <div class="panel" id="panel-custos">
 <div class="container">
-  <div class="custos-header">
-    <div class="section-label" style="margin-bottom:0">Tipos de fio · Cores · Custos de tingimento</div>
+  <div class="mn-hero"><div class="mn-hero-eye">Formação de preço · Custos</div><h1 class="mn-hero-h">Tipos de fio · cores · custos de tingimento</h1></div>
+
+  <div class="mn-search-row">
+    <input class="mn-search" id="custos-search" placeholder="Buscar cor…" oninput="renderCustosTab()">
     <div id="custos-admin-btns" style="display:flex;gap:8px;align-items:center">
-      <button class="save-btn" id="btnSalvar" onclick="salvarManual()">Salvar alterações</button>
+      <button class="mn-btn-add" onclick="abrirModalCor()">+ Cor</button>
+      <button class="mn-btn-add outline" onclick="abrirModalTipo()">+ Tipo de fio</button>
+      <button class="mn-btn-add outline" id="btnSalvar" onclick="salvarManual()">Salvar alterações</button>
     </div>
   </div>
-  <div class="tipo-tabs" id="tipoTabs"></div>
+
+  <div class="mn-fios-strip" id="tipoTabs"></div>
   <div id="coresArea"></div>
 </div>
 </div>
@@ -1034,13 +1269,19 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
 <!-- ===== HISTÓRICO ===== -->
 <div class="panel" id="panel-historico">
 <div class="container">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-    <div class="section-label" style="margin-bottom:0">Histórico de cotações</div>
-    <button class="add-btn" id="hist-add-btn" onclick="abrirAdicionarManual()" style="display:none">+ Adicionar</button>
+  <div class="mn-hero"><div class="mn-hero-eye">Formação de preço · Histórico</div><h1 class="mn-hero-h">Cotações salvas</h1></div>
+
+  <div class="mn-kpis" id="hist-kpis">
+    <div class="mn-kpi"><div class="l">Cotações 30d</div><div class="v" id="kpi-count30">0</div></div>
+    <div class="mn-kpi"><div class="l">Ticket médio</div><div class="v green" id="kpi-ticket">R$ 0</div></div>
+    <div class="mn-kpi"><div class="l">Clientes</div><div class="v" id="kpi-clientes">0</div></div>
   </div>
-  <div class="hist-filters">
-    <input type="text" id="hist-search" placeholder="Buscar empresa ou produto..." oninput="renderHistorico()">
+
+  <div class="mn-search-row">
+    <input class="mn-search" id="hist-search" placeholder="Buscar cliente, fibra ou cor…" oninput="renderHistorico()">
+    <button class="mn-btn-add" id="hist-add-btn" onclick="abrirAdicionarManual()" style="display:none">+ Adicionar</button>
   </div>
+
   <div id="histArea"></div>
 </div>
 </div>
@@ -1457,6 +1698,325 @@ function toggleCustoHora(){const row=document.getElementById('r-custoHoraRow');c
 function salvarCustoHora(val){const btn=document.getElementById('r-saveHora');const lock=document.getElementById('r-lockBtn');const row=document.getElementById('r-custoHoraRow');const inp=document.getElementById('r-custoHora');if(!window._salvarCustoHora)return;if(btn){btn.textContent='...';btn.disabled=true;}window._salvarCustoHora(val).then(()=>{if(btn)btn.textContent='✓ Salvo';setTimeout(()=>{row.classList.add('locked');inp.setAttribute('readonly',true);lock.textContent='🔒';lock.style.color='var(--muted)';if(btn){btn.style.display='none';btn.textContent='Salvar';btn.disabled=false;}},1200);}).catch(()=>{if(btn){btn.textContent='Erro';btn.disabled=false;}});}
 
 window.addEventListener('DOMContentLoaded',()=>{const vEl=document.getElementById('app-version');if(vEl)vEl.textContent=APP_VERSION;const svEl=document.getElementById('splash-version');if(svEl)svEl.textContent=APP_VERSION;populaTipos();populaTingTipos();calcVendas();calcTingimento();calcRetorcao();calcPreparacao();});
+
+// ============================================================================
+// v3.55.0 — REDESIGN MINIMAL · overrides de seletores e renderização
+// As fórmulas (calcResultado, resolverLucroParaMeta, calcVendas/Tingimento/etc)
+// continuam intactas. Aqui só (a) atualizamos seletores de botões pro novo
+// layout (.mn-toggle/.mn-icms/.mn-meta) e (b) populamos a hero card minimal
+// quando o renderResultado original roda.
+// ============================================================================
+
+// Override setVModo (novo .mn-toggle button + .mn-icms button)
+window.setVModo = function(modo,btn){
+  vModo=modo;
+  document.querySelectorAll('#v-modo-toggle button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const fioSel=document.getElementById('v-fio-selector');
+  if(fioSel) fioSel.style.display = (modo==='tingimento')?'':'none';
+  if(modo==='preparacao'){
+    const t=document.getElementById('v-ting'); if(t) t.value='0';
+  }
+  calcVendas();
+};
+
+// Override setICMS (novo .mn-icms button)
+window.setICMS = function(aliq,btn){
+  document.querySelectorAll('#v-icms-sel button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  icmsV=aliq;
+  calcVendas();
+};
+
+// Override setTarget/setTingTarget/setPrepTarget/setRetTarget (novo .mn-meta button)
+window.setTarget = function(mode,btn){
+  targetMode=mode;
+  document.querySelectorAll('#v-meta-seg button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  calcVendas();
+};
+window.setTingTarget = function(mode,btn){
+  tingTargetMode=mode;
+  document.querySelectorAll('#t-meta-seg button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  calcTingimento();
+};
+window.setPrepTarget = function(mode,btn){
+  prepTargetMode=mode;
+  document.querySelectorAll('#pp-meta-seg button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  calcPreparacao();
+};
+window.setRetTarget = function(mode,btn){
+  retTargetMode=mode;
+  document.querySelectorAll('#r-meta-seg button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  calcRetorcao();
+};
+
+// Override toggleCustoHora / toggleCustoHoraPrep — novo botão "EDITAR" textual
+window.toggleCustoHora = function(){
+  const row=document.getElementById('r-custoHoraRow');
+  const inp=document.getElementById('r-custoHora');
+  const btn=document.getElementById('r-lockBtn');
+  const save=document.getElementById('r-saveHora');
+  const unlocked=row.classList.contains('unlocked');
+  if(!unlocked){
+    row.classList.add('unlocked'); inp.removeAttribute('readonly'); inp.focus(); inp.select();
+    btn.textContent='SALVAR'; if(save) save.style.display='none';
+  } else {
+    row.classList.remove('unlocked'); inp.setAttribute('readonly',true);
+    btn.textContent='EDITAR';
+    if(window._salvarCustoHora){ window._salvarCustoHora(inp.value); }
+  }
+};
+window.toggleCustoHoraPrep = function(){
+  const row=document.getElementById('pp-custoHoraRow');
+  const inp=document.getElementById('pp-custoHora');
+  const btn=document.getElementById('pp-lockBtn');
+  const save=document.getElementById('pp-saveHora');
+  const unlocked=row.classList.contains('unlocked');
+  if(!unlocked){
+    row.classList.add('unlocked'); inp.removeAttribute('readonly'); inp.focus(); inp.select();
+    btn.textContent='SALVAR'; if(save) save.style.display='none';
+  } else {
+    row.classList.remove('unlocked'); inp.setAttribute('readonly',true);
+    btn.textContent='EDITAR';
+    if(window._salvarCustoHoraPrep){ window._salvarCustoHoraPrep(inp.value); }
+  }
+};
+
+// Helper: popula hero minimal (chamado APÓS renderResultado original)
+function mnRenderHero(prefix, r, precoBase){
+  const root = document.getElementById(prefix+'-result-card');
+  if(!root) return;
+  const vLiq = r.vLiq;
+  const margemConsol = vLiq>0 ? (r.consol/vLiq*100) : 0;
+  const custoTotal = vLiq - r.lBruto;
+  const tributos = precoBase - vLiq;
+  const lucroFooter = r.consol; // lucro líquido + JCP (mesmo nº do card antigo)
+
+  const setTxt = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  const fmt = n => n.toFixed(2).replace('.',',');
+  const [int,dec] = fmt(precoBase).split(',');
+
+  const bigEl = document.getElementById(prefix+'-bigPreco');
+  const intEl = document.getElementById(prefix+'-bigInt');
+  if(bigEl && intEl){
+    if(intEl.textContent !== int){
+      bigEl.classList.add('flash');
+      setTimeout(()=>bigEl.classList.remove('flash'),300);
+    }
+    intEl.textContent = int;
+    setTxt(prefix+'-bigDec', ','+dec);
+  }
+  setTxt(prefix+'-margemConsol', margemConsol.toFixed(2).replace('.',',')+'%');
+  setTxt(prefix+'-lucroLiq', 'R$ '+fmt(r.lLiq));
+  setTxt(prefix+'-bdCusto', 'R$ '+fmt(custoTotal));
+  setTxt(prefix+'-bdTrib', 'R$ '+fmt(tributos));
+  setTxt(prefix+'-bdLucro', '+R$ '+fmt(lucroFooter));
+}
+
+// Wrap renderResultado pra também popular o hero minimal
+const _origRenderResultado = window.renderResultado;
+window.renderResultado = function(elId, r, abaName, precoVenda, margemKey){
+  _origRenderResultado.call(this, elId, r, abaName, precoVenda, margemKey);
+  // mapa elId → prefix do hero
+  const map = {'v-resultado':'v','t-resultado':'t','pp-resultado':'pp','r-resultado':'r'};
+  const prefix = map[elId];
+  if(prefix && precoVenda !== undefined){
+    mnRenderHero(prefix, r, precoVenda);
+  }
+};
+
+// Atualiza custo real do fio (Vendas) com texto cleaner — pisca ao mudar
+const _origCalcVendas = window.calcVendas;
+window.calcVendas = function(){
+  _origCalcVendas.call(this);
+  // o renderResultado original escreve em #v-custoReal/#v-custoTag — perfeito
+  // Mas vamos atualizar o texto do TAG pra ser mais limpo
+  const tag = document.getElementById('v-custoTag');
+  if(tag){
+    const t = tag.textContent || '';
+    // "↓ 9.25% desconto efetivo" → "↓ 9,25% recup. PIS/COFINS"
+    const m = t.match(/([\d.,]+)/);
+    if(m){
+      const pct = parseFloat(m[1].replace(',','.')) || 0;
+      tag.textContent = pct>0 ? `↓ ${pct.toFixed(2).replace('.',',')}% recup. PIS/COFINS` : 'sem recuperação';
+    }
+  }
+};
+
+// Atualiza custo operacional display (Preparação/Retorção)
+const _origCalcPrep = window.calcPreparacao;
+window.calcPreparacao = function(){
+  _origCalcPrep.call(this);
+  const op = parseFloat(document.getElementById('pp-custoOp')?.value)||0;
+  const disp = document.getElementById('pp-custoOpDisplay');
+  if(disp) disp.textContent = 'R$ '+op.toFixed(2).replace('.',',');
+};
+const _origCalcRet = window.calcRetorcao;
+window.calcRetorcao = function(){
+  _origCalcRet.call(this);
+  const op = parseFloat(document.getElementById('r-custoOp')?.value)||0;
+  const disp = document.getElementById('r-custoOpDisplay');
+  if(disp) disp.textContent = 'R$ '+op.toFixed(2).replace('.',',');
+  const prod = parseFloat(document.getElementById('r-producao')?.value)||0;
+  const sub = document.getElementById('r-custoOpSub');
+  if(sub) sub.textContent = prod>0 ? `${prod.toLocaleString('pt-BR')} kg/mês` : 'por kg produzido';
+};
+
+// Wrap renderHistorico pra calcular KPIs e usar cards minimal
+const _origRenderHist = window.renderHistorico;
+window.renderHistorico = function(){
+  _origRenderHist.call(this);
+  // Calcula KPIs a partir do state
+  const lista = (window._historicoData||[]).map(c=>({k:c._key, ...c}));
+  const now = Date.now();
+  const dia30 = 30*24*60*60*1000;
+  const recentes = lista.filter(c => c.timestamp && (now - c.timestamp) <= dia30);
+  const total = recentes.reduce((s,c)=>s+(parseFloat(c.preco)||0),0);
+  const ticket = recentes.length>0 ? total/recentes.length : 0;
+  const clientes = new Set(lista.map(c=>(c.empresa||'').trim().toLowerCase()).filter(Boolean)).size;
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('kpi-count30', recentes.length);
+  set('kpi-ticket', recentes.length ? ('R$ '+ticket.toFixed(0)) : 'R$ 0');
+  set('kpi-clientes', clientes);
+
+  // Substitui histArea por cards minimal
+  const area = document.getElementById('histArea');
+  if(!area) return;
+  const q = (document.getElementById('hist-search')?.value||'').toLowerCase().trim();
+  let filt = lista;
+  if(q) filt = filt.filter(c => (c.empresa||'').toLowerCase().includes(q) || (c.produto||'').toLowerCase().includes(q));
+  filt.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+  if(!filt.length){
+    area.innerHTML = '<div class="mn-empty">Nenhuma cotação ainda — salve sua primeira pelo botão "Salvar cotação" em qualquer cálculo.</div>';
+    return;
+  }
+  // Avatar gradient pool
+  const grads = ['#6E5BFF,#4D3FCC','#FF8A65,#E64A19','#26A69A,#00695C','#FFCB00,#E6A800','#EC407A,#AD1457','#5C6BC0,#283593','#66BB6A,#2E7D32'];
+  const grad = name => {
+    let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
+    return grads[h % grads.length];
+  };
+  const initials = name => (name||'').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase()||'?';
+  area.innerHTML = filt.map(c => {
+    const empresa = c.empresa || '—';
+    const meta = `${(c.fibra||'').toUpperCase()} · ${(c.cor||'').toUpperCase()} · ${c.titulo||''} · ${(c.tipofio||'').toUpperCase()} · ${c.data||''}`;
+    const preco = parseFloat(c.preco)||0;
+    const [pi,pd]=preco.toFixed(2).split('.');
+    const isAdmin = window.isAdmin;
+    const actions = isAdmin ? `<div class="mn-hist-actions">
+        <button onclick="event.stopPropagation();editarRegistro('${c.k}')" title="Editar">✎</button>
+        <button class="danger" onclick="event.stopPropagation();deletarRegistro('${c.k}')" title="Excluir">×</button>
+      </div>` : '';
+    return `<div class="mn-hist-card">
+      <div class="mn-hist-avatar" style="background:linear-gradient(135deg,${grad(empresa)})">${initials(empresa)}</div>
+      <div class="mn-hist-mid">
+        <div class="mn-hist-name">${empresa}</div>
+        <div class="mn-hist-meta">${meta}</div>
+      </div>
+      <div class="mn-hist-val"><small>R$</small>${pi},${pd}</div>
+      ${actions}
+    </div>`;
+  }).join('');
+};
+
+// Wrap renderCustosTab pra usar pills + tabela minimal
+const _origRenderCustos = window.renderCustosTab;
+window.renderCustosTab = function(){
+  // Re-render do zero usando o estilo minimal
+  const tipos = Object.keys(cadastro);
+  if(!tipoAtivo || !cadastro[tipoAtivo]) tipoAtivo = tipos[0] || null;
+  const ordem = ['CO',...Object.keys(MULTIPLICADORES).filter(t=>cadastro[t])];
+  const disponiveis = ordem.filter(t=>cadastro[t]);
+
+  // Pills
+  const tabsEl = document.getElementById('tipoTabs');
+  if(tabsEl){
+    tabsEl.innerHTML = disponiveis.length ? disponiveis.map(t=>{
+      const isBase = (t==='CO');
+      const tag = isBase ? '<span class="auto-tag">base</span>' : '<span class="auto-tag">auto</span>';
+      const x = (isBase || !window.isAdmin) ? '' : `<span class="x" onclick="event.stopPropagation();deletarTipo('${t}')">×</span>`;
+      return `<div class="mn-fio-pill ${t===tipoAtivo?'active':''}" onclick="selecionarTipo('${t}')">${t} ${tag}${x}</div>`;
+    }).join('') : '<span style="color:var(--muted);font-family:DM Mono,monospace;font-size:.7rem">Nenhum tipo cadastrado</span>';
+  }
+
+  const area = document.getElementById('coresArea');
+  if(!area) return;
+  if(!tipoAtivo){ area.innerHTML='<div class="mn-empty">Adicione um tipo de fio para começar.</div>'; return; }
+
+  const isDeriv = tipoAtivo!=='CO';
+  const cores = cadastro[tipoAtivo] || [];
+  const coBase = cadastro['CO'] || [];
+  const mults = MULTIPLICADORES[tipoAtivo] ? [...MULTIPLICADORES[tipoAtivo]] : [];
+  const search = (document.getElementById('custos-search')?.value||'').toLowerCase().trim();
+
+  let html;
+  if(isDeriv){
+    const linhas = cores.map((c,i)=>{
+      if(search && !c.cor.toLowerCase().includes(search)) return '';
+      const mult = mults[Math.min(i,mults.length-1)] || 1;
+      const custoCO = coBase[i] ? coBase[i].custo : 0;
+      const pct = (mult*100).toFixed(0);
+      const multCell = window.isAdmin
+        ? `<div class="mult"><input type="number" value="${pct}" min="1" max="999" step="1" oninput="previewMult(${i},this.value);_mnSaveMult(${i},this.value)">%</div>`
+        : `<div class="mult">${pct}%</div>`;
+      return `<div class="mn-tbl-row">
+        <div class="nome">${c.cor}</div>
+        <div class="num">R$ ${custoCO.toFixed(2).replace('.',',')}</div>
+        ${multCell}
+        <div class="calc" id="mult-val-${i}">R$ ${c.custo.toFixed(2).replace('.',',')}</div>
+      </div>`;
+    }).filter(Boolean).join('');
+    html = `<div class="mn-tbl mn-tbl-deriv">
+      <div class="mn-tbl-row head"><div>Cor</div><div style="text-align:right">Base CO</div><div style="text-align:center">Mult</div><div style="text-align:right">Custo final</div></div>
+      ${linhas || '<div class="mn-empty">Nenhuma cor encontrada</div>'}
+    </div>
+    <div class="mn-tbl-foot"><span class="left">${tipoAtivo} · ${cores.length} cores · derivado de CO</span></div>`;
+  } else {
+    const linhas = cores.map((c,i)=>{
+      if(search && !c.cor.toLowerCase().includes(search)) return '';
+      const del = window.isAdmin ? `<button class="del" onclick="deletarCor('CO',${i})" title="Excluir">×</button>` : '<span></span>';
+      return `<div class="mn-tbl-row">
+        <div class="nome"><input type="text" value="${c.cor}" onchange="editarCor('CO',${i},'cor',this.value)"></div>
+        <div class="num"><input type="number" value="${c.custo.toFixed(2)}" step="0.01" min="0" onchange="editarCor('CO',${i},'custo',this.value)"></div>
+        ${del}
+      </div>`;
+    }).filter(Boolean).join('');
+    html = `<div class="mn-tbl mn-tbl-base">
+      <div class="mn-tbl-row head"><div>Cor</div><div style="text-align:right">Custo tingimento (R$)</div><div></div></div>
+      ${linhas || '<div class="mn-empty">Nenhuma cor encontrada</div>'}
+    </div>
+    <div class="mn-tbl-foot"><span class="left">CO · ${cores.length} cores · base de cálculo</span></div>`;
+  }
+  area.innerHTML = html;
+  // Re-aplica permissions
+  if(typeof applyCustosPermissions === 'function') applyCustosPermissions();
+};
+
+// Helper pra salvar mult em tempo real (substitui o "modo edição" com cadeado)
+let _mnSaveMultTimer;
+window._mnSaveMult = function(idx, val){
+  if(!window.isAdmin) return;
+  const v = parseFloat(val)/100;
+  if(isNaN(v) || v<=0) return;
+  const arr = MULTIPLICADORES[tipoAtivo] || [];
+  arr[idx] = v;
+  MULTIPLICADORES[tipoAtivo] = arr;
+  clearTimeout(_mnSaveMultTimer);
+  _mnSaveMultTimer = setTimeout(()=>{
+    recalcularDerivados();
+    const dataToSave = {};
+    Object.keys(MULTIPLICADORES).forEach(k=>{ dataToSave[k]=[...MULTIPLICADORES[k]]; });
+    if(window._salvarMultiplicadores) window._salvarMultiplicadores(dataToSave);
+    salvarCadastro();
+  }, 600);
+};
+
+// Override selecionarTipo pra re-render minimal
+window.selecionarTipo = function(t){ tipoAtivo=t; renderCustosTab(); };
 </script>
 
 <footer class="footer" id="appFooter" style="display:none">
