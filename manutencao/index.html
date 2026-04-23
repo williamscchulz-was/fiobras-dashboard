@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.50.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.50.1">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3129,6 +3129,11 @@ display: none;
           <select id="ca-resp"></select>
         </div>
       </div>
+      <!-- v3.50.1 — campo readonly "Última execução" (só visível em cards de preventiva) -->
+      <div class="field" id="ca-ultima-field" style="display:none">
+        <label>Última execução desta preventiva</label>
+        <input id="ca-ultima" readonly style="background:var(--surface2,#2C2C2E);color:var(--muted,#9CA295);cursor:not-allowed;font-family:'DM Mono',monospace;font-size:.78rem">
+      </div>
       <div class="field"><label>Descrição</label><textarea id="ca-desc" placeholder="Detalhes do serviço..."></textarea></div>
       <div class="modal-row">
         <div class="field"><label>Urgência</label>
@@ -3963,10 +3968,10 @@ function gerarCardsPreventivas() {
       const respKey = p.resp && typeof _resolveUserKey === 'function' ? _resolveUserKey(p.resp) : null;
       const card = {
         titulo: p.tarefa,
-        desc:   (p.ultima
-          ? 'Vencida em ' + proxima.toLocaleDateString('pt-BR') + '.'
-          : 'Nunca executada — vencida desde o cadastro.')
-          + ' Responsável: ' + (p.resp || '—') + '. ' + (p.obs || ''),
+        // v3.50.1 — desc do card vai vazia (técnico preenche obs ao executar).
+        // A "última execução" vai num campo separado lido do preventiva direto.
+        desc:   p.obs || '',
+        ultimaExec: p.ultima || null, // metadado readonly mostrado no modal
         equip:  p.equip,
         setor:  p.setor,
         tipo:   'preventiva',
@@ -4138,8 +4143,23 @@ function updateHeaderStats() {
   }
 }
 function renderKanban() {
+  // v3.50.1 — Filtro de visibilidade: usuário comum (não admin/gerente) só vê
+  // cards onde ele é o responsável OU o autor. Admin/gerente veem tudo.
+  // Compara por chave canônica (state.userKey) com fallback pra nome (state.user)
+  // pra manter compat com cards antigos sem respKey/autorKey.
+  const eMeu = (c) => {
+    if (state.isAdmin) return true;
+    const meK = state.userKey || '';
+    const meN = state.user || '';
+    if (c.respKey && meK && c.respKey === meK) return true;
+    if (c.autorKey && meK && c.autorKey === meK) return true;
+    if (c.resp && meN && c.resp === meN) return true;
+    if (c.autor && meN && c.autor === meN) return true;
+    return false;
+  };
   ['todo','doing','done'].forEach(col => {
     let cards = state.cards.filter(c => c.col === col);
+    cards = cards.filter(eMeu);
 
     if (kFilters.setor) cards = cards.filter(c => c.setor === kFilters.setor);
     if (kFilters.tipo)  cards = cards.filter(c =>
@@ -4966,9 +4986,29 @@ function editarCard(key) {
   const horasEl = document.getElementById('ca-horas');
   if (horasEl) horasEl.value = card.diasEstimados || card.horasEstimadas || '';
   // v3.48.7 — Edit NÃO mostra Responsável (única fonte = avatar do card → Reatribuir).
-  // Evita 2 lugares pra mudar resp e o bug de updates dessincronizados.
   const respWrap = document.getElementById('ca-resp')?.closest('.field');
   if (respWrap) respWrap.style.display = 'none';
+  // v3.50.1 — campo readonly "última execução" só pra cards de preventiva
+  const ultimaField = document.getElementById('ca-ultima-field');
+  const ultimaInput = document.getElementById('ca-ultima');
+  if (ultimaField && ultimaInput) {
+    if (card.tipo === 'preventiva') {
+      // Pega ultimaExec do card OU busca direto na preventiva via prevId
+      let ultData = card.ultimaExec || null;
+      if (!ultData && card.prevId) {
+        const pv = state.preventivas.find(p => (p._key || p.id) === card.prevId);
+        if (pv) ultData = pv.ultima || null;
+      }
+      ultimaField.style.display = '';
+      ultimaInput.value = ultData
+        ? fmtDt(ultData) + (state.preventivas.find(p => (p._key||p.id)===card.prevId)?.ultimaAssin
+            ? ' por ' + state.preventivas.find(p => (p._key||p.id)===card.prevId).ultimaAssin
+            : '')
+        : 'Nunca executada';
+    } else {
+      ultimaField.style.display = 'none';
+    }
+  }
   document.getElementById('modal-card-admin').classList.add('open');
 }
 
@@ -4981,6 +5021,9 @@ function abrirModalCardAdmin() {
   // v3.48.7 — Novo card mostra Responsável (admin atribui na criação)
   const respWrap = document.getElementById('ca-resp')?.closest('.field');
   if (respWrap) respWrap.style.display = '';
+  // v3.50.1 — esconde campo "última execução" (só faz sentido em edit de preventiva)
+  const ultimaField = document.getElementById('ca-ultima-field');
+  if (ultimaField) ultimaField.style.display = 'none';
   // v3.48.0 — responsável dinâmico do Firebase
   if (typeof _popUserSelect === 'function') _popUserSelect('ca-resp');
   document.getElementById('modal-card-admin').classList.add('open');
