@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.50.4">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.51.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2110,6 +2110,44 @@ to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 @media(max-width:768px) {
 .btn-notif-label { display:none; }
 #btn-notif-test { padding:7px 9px !important; }
+
+/* v3.51.0 — Dados de contexto no modal Editar (cards de preventiva) */
+.field.ca-ctx { background: rgba(0,200,80,.05); border: 1px solid rgba(0,200,80,.2); border-radius: 8px; padding: 10px 12px; }
+.field.ca-ctx > label { color: #4ADE80 !important; font-family: 'DM Mono', monospace !important; font-size: .55rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; margin-bottom: 6px !important; display: block; }
+[data-theme="light"] .field.ca-ctx { background: rgba(0,136,53,.05); border-color: rgba(0,136,53,.2); }
+[data-theme="light"] .field.ca-ctx > label { color: #047857 !important; }
+
+/* Status da máquina */
+.ca-ctx-status-box { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,.2); border-radius: 6px; padding: 8px 12px; }
+.ca-ctx-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px rgba(16,185,129,.5); flex-shrink: 0; }
+.ca-ctx-status-dot.parado { background: #DC2626; }
+.ca-ctx-status-dot.manut { background: #F59E0B; }
+.ca-ctx-status-text { font-family: 'Poppins', sans-serif; font-size: .78rem; color: var(--text, #fff); font-weight: 600; }
+.ca-ctx-status-text small { display: block; color: var(--muted, #9CA295); font-weight: 400; font-size: .62rem; margin-top: 2px; }
+
+/* Próxima execução */
+.ca-ctx-next { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,.2); border-radius: 6px; padding: 8px 12px; }
+.ca-ctx-next-icon { font-size: 16px; color: #60A5FA; }
+.ca-ctx-next-info { font-size: .76rem; color: var(--text, #CFD3CB); font-weight: 600; }
+.ca-ctx-next-info small { display: block; color: var(--muted, #6B7166); font-weight: 400; font-size: .58rem; margin-top: 2px; font-family: 'DM Mono', monospace; letter-spacing: .5px; text-transform: uppercase; }
+
+/* Cascata absorvidas */
+.ca-ctx-absorb { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); border-radius: 6px; padding: 8px 12px; }
+.ca-ctx-absorb-warn { font-size: .65rem; color: #FCD34D; margin-bottom: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; }
+.ca-ctx-absorb-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: .68rem; color: var(--text, #CFD3CB); border-bottom: 1px dashed rgba(255,255,255,.08); }
+.ca-ctx-absorb-item:last-child { border-bottom: 0; }
+.ca-ctx-absorb-tag { font-family: 'DM Mono', monospace; font-size: .55rem; background: rgba(0,118,190,.18); color: #60A5FA; padding: 1px 6px; border-radius: 3px; flex-shrink: 0; }
+
+/* Histórico */
+.ca-ctx-hist { background: rgba(0,0,0,.2); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; gap: 5px; max-height: 200px; overflow-y: auto; }
+.ca-ctx-hist-item { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; padding: 6px 8px; background: rgba(255,255,255,.03); border-radius: 4px; font-size: .66rem; }
+.ca-ctx-hist-av { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg,#1B5E20,#43A047); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; background-size: cover; background-position: center; }
+.ca-ctx-hist-info { min-width: 0; }
+.ca-ctx-hist-quem { font-weight: 600; color: var(--text, #fff); font-size: .68rem; }
+.ca-ctx-hist-obs { color: var(--muted, #9CA295); font-size: .6rem; margin-top: 1px; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-ctx-hist-data { font-family: 'DM Mono', monospace; font-size: .58rem; color: var(--muted, #6B7166); white-space: nowrap; }
+.ca-ctx-empty { font-size: .65rem; color: var(--muted, #6B7166); font-style: italic; padding: 6px 0; text-align: center; }
+
 /* v3.50.2 — Toggle de técnico no Kanban (admin/gerente only) */
 #kb-view-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; margin-bottom: 14px; overflow-x: auto; }
 .kb-view-lbl { font-family: 'DM Mono', monospace; font-size: .58rem; color: var(--muted, #6B7166); text-transform: uppercase; letter-spacing: .7px; margin-right: 4px; flex-shrink: 0; }
@@ -3150,6 +3188,23 @@ display: none;
       <div class="field" id="ca-ultima-field" style="display:none">
         <label>Última execução desta preventiva</label>
         <input id="ca-ultima" readonly style="background:var(--surface2,#2C2C2E);color:var(--muted,#9CA295);cursor:not-allowed;font-family:'DM Mono',monospace;font-size:.78rem">
+      </div>
+      <!-- v3.51.0 — 4 dados de contexto (só pra cards de preventiva) -->
+      <div class="field ca-ctx" id="ca-ctx-status" style="display:none">
+        <label>Status da máquina</label>
+        <div class="ca-ctx-status-box" id="ca-ctx-status-box"></div>
+      </div>
+      <div class="field ca-ctx" id="ca-ctx-prox" style="display:none">
+        <label>Próxima execução prevista</label>
+        <div class="ca-ctx-next" id="ca-ctx-next-box"></div>
+      </div>
+      <div class="field ca-ctx" id="ca-ctx-cascata" style="display:none">
+        <label>Tarefas absorvidas pela cascata</label>
+        <div class="ca-ctx-absorb" id="ca-ctx-absorb-box"></div>
+      </div>
+      <div class="field ca-ctx" id="ca-ctx-hist" style="display:none">
+        <label>Últimas execuções</label>
+        <div class="ca-ctx-hist" id="ca-ctx-hist-box"></div>
       </div>
       <div class="field"><label>Descrição</label><textarea id="ca-desc" placeholder="Detalhes do serviço..."></textarea></div>
       <div class="modal-row">
@@ -4881,7 +4936,7 @@ function onDrop(e, col) {
 function moverCard(key, col) {
   const card = state.cards.find(c => c._key === key);
   if (!card) return;
-  // Cards preventivos indo para done: sempre usa assinatura
+  // Cards preventivos indo para done: sempre usa assinatura digital (prova de execução)
   if (col === 'done' && card.tipo === 'preventiva') {
     abrirModalAssinatura({
       tipo:         'preventiva',
@@ -4893,13 +4948,22 @@ function moverCard(key, col) {
     });
     return;
   }
-  // Admin: abre modal de registro
-  if (state.isAdmin) {
-    abrirModalMover(key, col, card);
+  // v3.51.0 — Move smart por role:
+  // • Card é do próprio user (resp/autor === state.user) → move direto, sem modal
+  // • Card é de outro (admin/gerente movendo no lugar) → abre modal pra escolher quem executou
+  const meK = state.userKey || '';
+  const meN = state.user || '';
+  const ehMeu =
+    (card.respKey  && meK && card.respKey  === meK) ||
+    (card.autorKey && meK && card.autorKey === meK) ||
+    (card.resp     && meN && card.resp     === meN) ||
+    (card.autor    && meN && card.autor    === meN);
+  if (ehMeu) {
+    _executarMove(key, col, state.user);
     return;
   }
-  // Usuário comum: executa diretamente com seu nome
-  _executarMove(key, col, state.user);
+  // Card de outro user → abre modal (só admin/gerente chega aqui pelo filtro de visibilidade)
+  abrirModalMover(key, col, card);
 }
 function _executarMove(key, col, responsavel) {
   const card = state.cards.find(c => c._key === key);
@@ -5130,25 +5194,155 @@ function editarCard(key) {
   // v3.50.1 — campo readonly "última execução" só pra cards de preventiva
   const ultimaField = document.getElementById('ca-ultima-field');
   const ultimaInput = document.getElementById('ca-ultima');
+  const isPreventiva = card.tipo === 'preventiva';
+  const pv = card.prevId ? state.preventivas.find(p => (p._key || p.id) === card.prevId) : null;
   if (ultimaField && ultimaInput) {
-    if (card.tipo === 'preventiva') {
-      // Pega ultimaExec do card OU busca direto na preventiva via prevId
-      let ultData = card.ultimaExec || null;
-      if (!ultData && card.prevId) {
-        const pv = state.preventivas.find(p => (p._key || p.id) === card.prevId);
-        if (pv) ultData = pv.ultima || null;
-      }
+    if (isPreventiva) {
+      const ultData = (pv && pv.ultima) || card.ultimaExec || null;
+      const ultAssin = (pv && pv.ultimaAssin) ? ' por ' + pv.ultimaAssin : '';
       ultimaField.style.display = '';
-      ultimaInput.value = ultData
-        ? fmtDt(ultData) + (state.preventivas.find(p => (p._key||p.id)===card.prevId)?.ultimaAssin
-            ? ' por ' + state.preventivas.find(p => (p._key||p.id)===card.prevId).ultimaAssin
-            : '')
-        : 'Nunca executada';
+      ultimaInput.value = ultData ? (fmtDt(ultData) + ultAssin) : 'Nunca executada';
     } else {
       ultimaField.style.display = 'none';
     }
   }
+  // v3.51.0 — Popula 4 dados de contexto (só pra preventiva)
+  _popularContextoPreventiva(card, pv);
   document.getElementById('modal-card-admin').classList.add('open');
+}
+
+// v3.51.0 — Helpers pra popular contexto da preventiva no modal Editar
+function _popularContextoPreventiva(card, pv) {
+  const ehPrev = card && card.tipo === 'preventiva';
+  const fields = ['ca-ctx-status','ca-ctx-prox','ca-ctx-cascata','ca-ctx-hist'];
+  if (!ehPrev) {
+    fields.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    return;
+  }
+
+  // ── #1 Status da máquina ──
+  const stEl = document.getElementById('ca-ctx-status');
+  const stBox = document.getElementById('ca-ctx-status-box');
+  if (stEl && stBox) {
+    const maq = card.maqKey ? state.maquinas.find(m => m._key === card.maqKey) :
+                (pv && pv.maqKey) ? state.maquinas.find(m => m._key === pv.maqKey) : null;
+    if (maq) {
+      const status = maq.status || 'ativa';
+      const cls   = status === 'manutencao' ? ' manut' : (status === 'parada' ? ' parado' : '');
+      const label = status === 'manutencao' ? 'Em manutenção' : (status === 'parada' ? 'Parada' : 'Ativa');
+      const sub   = status === 'manutencao' ? 'Cuidado · já tem trabalho em andamento' :
+                    status === 'parada'     ? 'Atenção · máquina não está produzindo' :
+                                              'Em produção · sem alertas';
+      stBox.innerHTML = '<span class="ca-ctx-status-dot' + cls + '"></span>' +
+                       '<div class="ca-ctx-status-text">' + label + '<small>' + sub + '</small></div>';
+      stEl.style.display = '';
+    } else { stEl.style.display = 'none'; }
+  }
+
+  // ── #4 Próxima execução (após executar) ──
+  const nxEl = document.getElementById('ca-ctx-prox');
+  const nxBox = document.getElementById('ca-ctx-next-box');
+  if (nxEl && nxBox && pv && pv.freq) {
+    const freqDays = parseInt(pv.freq);
+    const proxAposExec = addDays(today(), freqDays); // hoje + freq (após executar agora)
+    const freqLabel = freqDays === 1 ? 'DIÁRIA' : freqDays + ' DIAS';
+    nxBox.innerHTML = '<span class="ca-ctx-next-icon">→</span>' +
+      '<div class="ca-ctx-next-info">' + proxAposExec.toLocaleDateString('pt-BR') +
+        ' (em ' + freqDays + ' dia' + (freqDays>1?'s':'') + ')' +
+        '<small>FREQUÊNCIA · ' + freqLabel + '</small>' +
+      '</div>';
+    nxEl.style.display = '';
+  } else if (nxEl) { nxEl.style.display = 'none'; }
+
+  // ── #3 Tarefas absorvidas pela cascata ──
+  // Mostra preventivas da MESMA máquina com freq menor que essa, que estão vencidas.
+  // Reflete a regra v3.50.0: ao concluir essa, as menores vencidas viram done também.
+  const csEl = document.getElementById('ca-ctx-cascata');
+  const csBox = document.getElementById('ca-ctx-absorb-box');
+  if (csEl && csBox && pv && pv.freq) {
+    const freqExec = parseInt(pv.freq);
+    const maqExec = pv.maqKey || pv.maquinaKey;
+    const hoje = today();
+    const absorvidas = [];
+    if (maqExec && freqExec > 1) {
+      state.preventivas.forEach(p => {
+        if ((p._key || p.id) === (pv._key || pv.id)) return;
+        const pMaq = p.maqKey || p.maquinaKey;
+        const pFreq = parseInt(p.freq) || 0;
+        if (pMaq !== maqExec || pFreq <= 1 || pFreq >= freqExec) return;
+        // Vencida?
+        let vencida = false;
+        if (!p.ultima) vencida = true;
+        else {
+          const proxP = addDays(parseDt(p.ultima), pFreq);
+          if (diffDays(hoje, proxP) <= 0) vencida = true;
+        }
+        if (vencida) absorvidas.push({ tarefa: p.tarefa, freq: pFreq });
+      });
+    }
+    if (absorvidas.length > 0) {
+      const lbl = (f) => f===1?'DIÁRIA': f<=7?'SEMANAL': f<=15?'QUINZENAL': f<=35?'MENSAL': f<=100?'TRIMESTRAL': f<=200?'SEMESTRAL':'ANUAL';
+      csBox.innerHTML = '<div class="ca-ctx-absorb-warn">⚠ Concluir essa também marca como executadas:</div>' +
+        absorvidas.map(a =>
+          '<div class="ca-ctx-absorb-item"><span class="ca-ctx-absorb-tag">' + lbl(a.freq) + '</span><span style="flex:1">' + (a.tarefa || '—') + '</span></div>'
+        ).join('');
+      csEl.style.display = '';
+    } else { csEl.style.display = 'none'; }
+  } else if (csEl) { csEl.style.display = 'none'; }
+
+  // ── #2 Últimas 3 execuções (do histórico) ──
+  // Filtra por equip/tarefa pra achar execuções da mesma preventiva
+  const hsEl = document.getElementById('ca-ctx-hist');
+  const hsBox = document.getElementById('ca-ctx-hist-box');
+  if (hsEl && hsBox) {
+    const equipAlvo = (card.equip || '').toLowerCase();
+    const tarefaAlvo = (card.titulo || '').toLowerCase();
+    const histArr = Array.isArray(state.historico) ? state.historico : [];
+    // Match: mesmo equip + tarefa similar OU mesma desc base
+    const minhas = histArr
+      .filter(h => {
+        if (!h) return false;
+        const he = (h.equip || '').toLowerCase();
+        const hd = (h.desc || '').toLowerCase();
+        if (equipAlvo && he && (he === equipAlvo || he.includes(equipAlvo) || equipAlvo.includes(he.split(' · ')[0]||''))) {
+          // mesmo equip — agora confere tarefa (no titulo do hist OU na desc)
+          if (!tarefaAlvo) return true;
+          return hd.includes(tarefaAlvo) || tarefaAlvo.includes(hd.split(' · ')[0]||'');
+        }
+        return false;
+      })
+      .sort((a,b) => {
+        // Ordena por data desc (string ISO ou DD/MM/YYYY)
+        const ta = a.data ? Date.parse(a.data) || 0 : 0;
+        const tb = b.data ? Date.parse(b.data) || 0 : 0;
+        return tb - ta;
+      })
+      .slice(0, 3);
+    if (minhas.length > 0) {
+      hsBox.innerHTML = minhas.map(h => {
+        const nome = h.assinado || h.resp || 'Sistema';
+        const ini = (nome||'?').trim().split(/\s+/).slice(0,2).map(s=>(s[0]||'').toUpperCase()).join('') || '?';
+        // Foto se houver no users-profile
+        const k = (typeof _resolveUserKey === 'function') ? _resolveUserKey(nome) : null;
+        const prof = k ? (state.userProfiles||{})[k] : null;
+        const fotoStyle = (prof && prof.foto) ? ' style="background-image:url(\'' + prof.foto.replace(/'/g,'%27') + '\');color:transparent"' : '';
+        const obs = (h.desc || '').replace(/[<>]/g,'') || 'Sem observações';
+        const dt  = h.data ? (h.data.includes('-') ? h.data.split('-').reverse().join('/') : h.data) : '—';
+        return '<div class="ca-ctx-hist-item">' +
+          '<span class="ca-ctx-hist-av"' + fotoStyle + '>' + (prof && prof.foto ? '' : ini) + '</span>' +
+          '<div class="ca-ctx-hist-info">' +
+            '<div class="ca-ctx-hist-quem">' + nome + '</div>' +
+            '<div class="ca-ctx-hist-obs" title="' + obs.replace(/"/g,'&quot;') + '">' + obs + '</div>' +
+          '</div>' +
+          '<div class="ca-ctx-hist-data">' + dt + '</div>' +
+        '</div>';
+      }).join('');
+      hsEl.style.display = '';
+    } else {
+      hsBox.innerHTML = '<div class="ca-ctx-empty">Sem execuções anteriores registradas</div>';
+      hsEl.style.display = '';
+    }
+  }
 }
 
 // ── MODAL: CARD ADMIN ─────────────────────────────────
@@ -5163,6 +5357,10 @@ function abrirModalCardAdmin() {
   // v3.50.1 — esconde campo "última execução" (só faz sentido em edit de preventiva)
   const ultimaField = document.getElementById('ca-ultima-field');
   if (ultimaField) ultimaField.style.display = 'none';
+  // v3.51.0 — esconde os 4 dados de contexto de preventiva (novo card não tem prevId)
+  ['ca-ctx-status','ca-ctx-prox','ca-ctx-cascata','ca-ctx-hist'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
   // v3.48.0 — responsável dinâmico do Firebase
   if (typeof _popUserSelect === 'function') _popUserSelect('ca-resp');
   document.getElementById('modal-card-admin').classList.add('open');
