@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.50.2">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.50.4">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -4143,25 +4143,39 @@ function updateBanner() {
     '<div style="font-size:0.6rem;color:#c03030;margin-top:8px;opacity:0.7">Some automaticamente quando as preventivas forem concluidas</div>';
 }
 
-// v3.50.2 — Toggle de avatar dos técnicos (admin/gerente only)
+// v3.50.4 — Toggle de avatar dos técnicos (admin/gerente only)
+// Checagem robusta de role: lê via getCurrentUser do HUB (single source of truth).
+function _ehGerenteOuAdmin() {
+  // Tenta o helper centralizado primeiro
+  if (typeof window.getCurrentUser === 'function') {
+    const u = window.getCurrentUser();
+    if (u && u.role) return u.role === 'admin' || u.role === 'gerente';
+  }
+  // Fallback: lê do users-profile via state.userKey
+  const k = state.userKey;
+  if (!k) return false;
+  const p = (state.userProfiles || {})[k] || {};
+  const c = (state.usersConfig || {})[k] || {};
+  const role = p.roleOverride || c.role || 'producao';
+  return role === 'admin' || role === 'gerente';
+}
+
 function renderViewBar() {
   const bar = document.getElementById('kb-view-bar');
   if (!bar) return;
-  // Só admin/gerente vê
-  if (!state.isAdmin) { bar.style.display = 'none'; return; }
+  // v3.50.4 — só admin/gerente vê o toggle
+  if (!_ehGerenteOuAdmin()) { bar.style.display = 'none'; return; }
   const meK = state.userKey || '';
   let viewMode = 'meus';
   try { viewMode = localStorage.getItem('fio_kb_view_' + (meK||'__')) || 'meus'; } catch(e){}
 
-  // Lista de técnicos: users com acesso ao Manutenção (admin/gerente OU
-  // modulesAllowedOverride.includes('manutencao')). Exclui o próprio user
-  // (já tem botão "Meus").
+  // Lista de técnicos: users com acesso ao Manutenção. Exclui o próprio user.
   const cfg = state.usersConfig || {};
   const profs = state.userProfiles || {};
   const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
   const tecnicos = Array.from(allKeys)
     .filter(k => {
-      if (k === meK) return false; // próprio user vai no botão "Meus"
+      if (k === meK) return false;
       const c = cfg[k] || {};
       const p = profs[k] || {};
       if (c.active === false || p.active === false) return false;
@@ -4174,16 +4188,12 @@ function renderViewBar() {
     .map(k => {
       const c = cfg[k] || {};
       const p = profs[k] || {};
-      return {
-        key: k,
-        nome: p.nomeCompleto || c.nome || p.nome || k,
-        // primeiro nome só pra label do botão
-        primNome: (p.nomeCompleto || c.nome || p.nome || k).split(/\s+/)[0],
-      };
+      const nome = p.nomeCompleto || c.nome || p.nome || k;
+      return { key: k, nome, primNome: nome.split(/\s+/)[0] };
     })
     .sort((a, b) => a.primNome.localeCompare(b.primNome));
 
-  // Conta cards por escopo
+  // Conta cards por escopo (só não-concluídos)
   const cnt = (alvoKey, alvoNome) => state.cards.filter(c => {
     if (c.col === 'done') return false;
     if (c.respKey && alvoKey && c.respKey === alvoKey) return true;
@@ -4196,41 +4206,40 @@ function renderViewBar() {
   const cntMeus  = cnt(meK, state.user || '');
 
   const escAttr = s => String(s||'').replace(/[\\']/g, '\\$&');
-  // Ícone gen pra botão (foto se houver)
-  const avHtml = (p, key, fallback) => {
-    if (p?.foto) return '<span class="kb-view-circle" style="background-image:url(\''+p.foto.replace(/'/g,'%27')+'\');color:transparent">.</span>';
-    const ini = (p?.nomeCompleto || p?.nome || fallback || '?').trim().split(/\s+/).slice(0,2).map(s=>(s[0]||'').toUpperCase()).join('') || '?';
-    // cor por hash (pra ter cores variadas sem map)
-    let h = 0; for (let i=0;i<key.length;i++) h = ((h<<5)-h+key.charCodeAt(i))|0;
-    const hue = Math.abs(h) % 360;
-    return '<span class="kb-view-circle" style="background:linear-gradient(135deg,hsl('+hue+',45%,38%),hsl('+hue+',55%,52%))">' + ini + '</span>';
-  };
 
-  const meusBtn = '<button class="kb-view-pick special' + (viewMode==='meus'?' active':'') + '" onclick="_kbSetView(\'meus\')">' +
-    '<span class="kb-view-circle">★' + (cntMeus>0?'<span class="kb-view-cnt">'+cntMeus+'</span>':'') + '</span>' +
-    '<span class="kb-view-name">Meus</span>' +
-    '</button>';
+  // Helper que renderiza um item (div, não button — evita user-agent styles)
+  function pickItem(mode, label, isSpecial, contagem, fotoUrl, ini, key) {
+    const cls = 'kb-view-pick' + (isSpecial ? ' special' : '') + (viewMode === mode ? ' active' : '');
+    let circleStyle = '';
+    let circleContent = '';
+    if (isSpecial) {
+      circleContent = ini; // "★" ou "⊕"
+    } else if (fotoUrl) {
+      circleStyle = 'background-image:url(\'' + fotoUrl.replace(/'/g,'%27') + '\');background-size:cover;background-position:center;color:transparent';
+    } else {
+      // cor por hash do key
+      let h = 0; for (let i=0;i<key.length;i++) h = ((h<<5)-h+key.charCodeAt(i))|0;
+      const hue = Math.abs(h) % 360;
+      circleStyle = 'background:linear-gradient(135deg,hsl(' + hue + ',45%,38%),hsl(' + hue + ',55%,52%))';
+      circleContent = ini;
+    }
+    const badge = contagem > 0 ? '<span class="kb-view-cnt">' + contagem + '</span>' : '';
+    return '<div class="' + cls + '" role="button" tabindex="0" onclick="_kbSetView(\'' + escAttr(mode) + '\')" title="' + escAttr(label) + '">' +
+      '<span class="kb-view-circle" style="' + circleStyle + '">' + circleContent + badge + '</span>' +
+      '<span class="kb-view-name">' + escAttr(label) + '</span>' +
+    '</div>';
+  }
 
-  const todosBtn = '<button class="kb-view-pick special' + (viewMode==='todos'?' active':'') + '" onclick="_kbSetView(\'todos\')">' +
-    '<span class="kb-view-circle">⊕' + (cntTodos>0?'<span class="kb-view-cnt">'+cntTodos+'</span>':'') + '</span>' +
-    '<span class="kb-view-name">Time</span>' +
-    '</button>';
-
-  const tecBtns = tecnicos.map(t => {
+  const meusItem  = pickItem('meus',  'Meus',  true,  cntMeus,  null, '★', '');
+  const todosItem = pickItem('todos', 'Time',  true,  cntTodos, null, '⊕', '');
+  const tecItems = tecnicos.map(t => {
     const p = profs[t.key] || {};
-    const c = cnt(t.key, t.nome);
-    const av = avHtml(p, t.key, t.nome);
-    const cntBadge = c>0 ? '<span class="kb-view-cnt">'+c+'</span>' : '';
-    // injeta o badge dentro do circle
-    const avFinal = av.replace('</span>', cntBadge + '</span>');
-    return '<button class="kb-view-pick' + (viewMode===t.key?' active':'') + '" onclick="_kbSetView(\'' + escAttr(t.key) + '\')" title="' + escAttr(t.nome) + '">' +
-      avFinal +
-      '<span class="kb-view-name">' + escAttr(t.primNome) + '</span>' +
-      '</button>';
+    const ini = t.nome.trim().split(/\s+/).slice(0,2).map(s=>(s[0]||'').toUpperCase()).join('') || '?';
+    return pickItem(t.key, t.primNome, false, cnt(t.key, t.nome), p.foto || null, ini, t.key);
   }).join('');
 
   bar.style.display = 'flex';
-  bar.innerHTML = '<span class="kb-view-lbl">Ver cards de:</span>' + meusBtn + tecBtns + todosBtn;
+  bar.innerHTML = '<span class="kb-view-lbl">Ver cards de:</span>' + meusItem + tecItems + todosItem;
 }
 
 window._kbSetView = function(mode) {
@@ -4255,11 +4264,13 @@ function updateHeaderStats() {
   }
 }
 function renderKanban() {
-  // v3.50.2 — Filtro de visibilidade:
+  // v3.50.4 — Filtro de visibilidade:
   // • Técnico (producao): SEMPRE só vê os próprios. Sem toggle.
   // • Admin/Gerente: toggle de avatar pra escolher quem ver. Default = "meus".
   //   Estado em localStorage["fio_kb_view_<userKey>"]: "meus" | "<userKey>" | "todos"
-  const ehAdminGer = state.isAdmin; // state.isAdmin já cobre admin + gerente (v3.46.0)
+  // Usa _ehGerenteOuAdmin() (lê role atual do HUB) pra ser à prova de bug
+  // de state.isAdmin desatualizado.
+  const ehAdminGer = (typeof _ehGerenteOuAdmin === 'function') ? _ehGerenteOuAdmin() : !!state.isAdmin;
   const meK = state.userKey || '';
   const meN = state.user || '';
   // Renderiza a barra de toggle (só pra admin/gerente)

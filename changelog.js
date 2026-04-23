@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.50.3', d:'23 abr 2026', current:true,
+    v:'3.50.4', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · 2 bugs do toggle de técnico (visual quebrado + Vorlei vendo a barra).',
+        desc:'Bugs reportados pelo William na v3.50.2:\n\n1) AVATARES BUGADOS — barra renderizava como texto puro (sem círculos). Causa: usei <button> que tem default styles do user-agent (inline-block, padding/border bizarros) que sobrescreviam o flex/column do .kb-view-pick. Fix: trocado pra <div role="button" tabindex="0">. Layout volta ao normal.\n\n2) VORLEI (TÉCNICO) VENDO A BARRA — checagem usava `state.isAdmin` que pode estar desatualizado/incorreto. Fix: novo helper `_ehGerenteOuAdmin()` lê o role atual via `getCurrentUser()` do HUB (single source of truth com fallback pro state.userProfiles[key].roleOverride). Mais robusto, não depende de state legado.\n\nResultado: técnico nunca vê a barra. Admin/gerente vê com avatares redondos coloridos como esperado.'}
+    ]
+  },
+  {
+    v:'3.50.3', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Gerenciar Usuários · ordenação hierárquica (admin → gerente → usuário, alfabético).',
         desc:'Antes: lista vinha desordenada do Object.entries(getAllUsers()) — sem garantia de ordem.\n\nAgora: admin no topo, depois gerentes, depois usuários comuns. Dentro de cada grupo, ordenação alfabética por nome.\n\nUsa getEffectiveRole() pra pegar o role atual considerando overrides. Comparação caseinsensitive.'}
