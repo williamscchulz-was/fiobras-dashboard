@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.54.2', d:'23 abr 2026', current:true,
+    v:'3.54.3', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Preço · aba Custos com design alinhado ao HUB (sem pills brancas, headers DM Mono, save em verde).',
+        desc:'Bug visual: na aba Custos > CO os inputs apareciam com pill outline branco/cinza ao redor de cada célula da tabela, headers em ciano, botão "Salvar Alterações" em amarelo. Quebrava completamente o design system (verde Fiobras + Outfit/DM Mono).\n\nCausa: regra global `input[type="text"], input[type="number"] { border:1.5px solid var(--border2) !important }` (linha 678) aplicava nos inputs DENTRO da tabela, criando double border (linha-da-célula + pill do input).\n\nFix:\n• Override específico `.cores-table td input` com `border:none !important; padding:0 !important` — input volta a ser invisível dentro da célula.\n• Header `.cores-table th`: cyan (var(--blue)) → DM Mono var(--muted) uppercase, sem bg colorido.\n• Botão "Salvar Alterações" (.save-btn): yellow → green Fiobras com hover invertido (preenche verde).\n• Estado escuro do header (sem bg cinza, transparente).'}
+    ]
+  },
+  {
+    v:'3.54.2', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Preço · admin/gerente conseguem editar percentuais dos derivados (CV/PAC/PES) + botão "Editar %" mais limpo.',
         desc:'Bug: ao clicar no cadeado da tabela de fios derivados, nada acontecia. `__hubBootPreco` (bootstrap do iframe) não setava `isAdmin=true` quando admin/gerente abria o módulo. Daí `toggleMultEdit()` retornava no `if(!isAdmin)return;` e a edição nunca destravava.\n\nFix: bootstrap agora lê `localStorage["fiobras-dash-auth"]` (mesmo padrão da v3.52.5 do CRM), resolve role real via cache de users-profile e seta `isAdmin = (role === "admin" || role === "gerente")`.\n\nVisual: substituído o cadeado emoji 🔒/🔓 por botão "Editar %" / "Salvar" estilizado (verde Fiobras, padding adequado, bordas e estados claros). A barra superior dos derivados ganhou flex-wrap pra não quebrar em mobile estreito.'}
