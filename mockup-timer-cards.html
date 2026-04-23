@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Timer no card (A Fazer + Em Andamento)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*:before,*:after{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1A1D22;color:#fff;font-family:'Poppins',sans-serif;padding:32px;min-height:100vh}
+  h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:24px;margin-bottom:8px}
+  h2{font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;color:#9CA295;margin:36px 0 14px;letter-spacing:1px;text-transform:uppercase}
+  .col-label{font-family:'DM Mono',monospace;font-size:11px;color:#6B7166;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px}
+  .wrap{max-width:1200px;margin:0 auto}
+  .intro{color:#9CA295;font-size:.78rem;max-width:760px;margin-bottom:28px;line-height:1.6}
+
+  /* card kc3 (igual ao real) */
+  .col-section{margin-bottom:24px}
+  .col-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:0 4px}
+  .col-dot{width:8px;height:8px;border-radius:50%;background:#A855F7}
+  .col-dot.doing{background:#F59E0B}
+  .col-name{font-family:'Outfit';font-weight:900;font-size:14px;letter-spacing:.5px}
+  .col-count{background:rgba(255,255,255,.08);color:#9CA295;font-family:'DM Mono';font-size:11px;padding:2px 8px;border-radius:999px}
+
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .card{
+    background:#1A1D22;border:1px solid #24282E;border-radius:12px;padding:12px 14px;
+    color:#fff;display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;
+    border-left:3px solid #DC2626;cursor:pointer;
+  }
+  .av{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#1B5E20,#43A047);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Outfit';font-weight:900;font-size:14px;color:#fff;
+  }
+  .body{min-width:0}
+  .title{font-family:'Outfit';font-weight:700;font-size:.84rem;color:#fff;margin-bottom:4px;line-height:1.25}
+  .meta{font-family:'DM Mono';font-size:.56rem;color:#6B7166;text-transform:uppercase;letter-spacing:.6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .meta-tag{background:rgba(0,200,80,.12);color:#4ADE80;padding:1px 6px;border-radius:3px;font-weight:600}
+  .meta-sep{opacity:.4}
+  .right{display:flex;align-items:center;gap:6px}
+  .urg{font-size:.55rem;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:.3px;text-transform:uppercase;background:rgba(220,38,38,.15);color:#F87171}
+  .ab{width:26px;height:26px;border-radius:6px;border:0;background:rgba(255,255,255,.05);color:#9CA295;display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+  .ab.ok{color:#6EE7B7}
+
+  /* TIMER novo: dentro da meta, com cor por idade */
+  .timer{
+    font-family:'DM Mono';font-size:.58rem;font-weight:600;
+    padding:1px 6px;border-radius:3px;
+    display:inline-flex;align-items:center;gap:3px;
+  }
+  .timer.fresh{background:rgba(16,185,129,.12);color:#6EE7B7}    /* < 24h */
+  .timer.warn{background:rgba(245,158,11,.15);color:#FCD34D}     /* 24h-72h */
+  .timer.late{background:rgba(220,38,38,.15);color:#F87171}      /* > 72h */
+  .timer-pulse{
+    width:5px;height:5px;border-radius:50%;background:currentColor;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  @media(max-width:760px){.compare{grid-template-columns:1fr}}
+
+  /* Notas */
+  .notes{background:#1F2125;border:1px solid #2A2D33;border-radius:12px;padding:18px;color:#9CA295;font-size:.78rem;line-height:1.7;max-width:900px;margin:24px auto 0}
+  .notes h3{font-family:'Outfit';font-weight:700;font-size:.92rem;color:#fff;margin-bottom:10px}
+  .notes b{color:#fff}
+  .notes code{font-family:'DM Mono';font-size:.7rem;background:#0a0d0a;padding:2px 6px;border-radius:4px;color:#4ADE80}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mockup — Timer no card (A Fazer + Em Andamento)</h1>
+  <p class="intro">
+    <b style="color:#fff">Hoje:</b> "A Fazer" mostra só <b style="color:#fff">"ONTEM" / "HOJE" / "3d atrás"</b> (precisão de dias). "Em Andamento" mostra timer ativo "14H 42MIN".<br><br>
+    <b style="color:#fff">Proposta:</b> mostrar timer COM HORAS/MINUTOS também em "A Fazer" — assim dá pra ver "esse card tá há 5h esperando ser iniciado". Cor escala automática por idade: verde &lt; 24h · amarelo 24-72h · vermelho &gt; 72h.
+  </p>
+
+  <h2>▼ ATUAL vs NOVO</h2>
+  <div class="compare">
+    <div>
+      <div class="col-label">▼ ATUAL (precisão só dias)</div>
+      <div class="col-section">
+        <div class="col-head">
+          <span class="col-dot"></span>
+          <span class="col-name">A FAZER</span>
+          <span class="col-count">3</span>
+        </div>
+        <div class="stack">
+          <div class="card">
+            <div class="av">VL</div>
+            <div class="body">
+              <div class="title">Abrir tampas das cabeceiras</div>
+              <div class="meta">
+                <span class="meta-tag">RET-01</span>
+                <span class="meta-sep">·</span>
+                <span>Preventiva</span>
+                <span class="meta-sep">·</span>
+                <span>HOJE</span>
+              </div>
+            </div>
+            <div class="right"><span class="urg">Alta</span><button class="ab ok">▶</button></div>
+          </div>
+          <div class="card">
+            <div class="av">VL</div>
+            <div class="body">
+              <div class="title">Verificar vazamento de óleos</div>
+              <div class="meta">
+                <span class="meta-tag">RET-01</span>
+                <span class="meta-sep">·</span>
+                <span>Preventiva</span>
+                <span class="meta-sep">·</span>
+                <span>ONTEM</span>
+              </div>
+            </div>
+            <div class="right"><span class="urg">Alta</span><button class="ab ok">▶</button></div>
+          </div>
+          <div class="card">
+            <div class="av">VL</div>
+            <div class="body">
+              <div class="title">Lubrificar mancais</div>
+              <div class="meta">
+                <span class="meta-tag">RET-01</span>
+                <span class="meta-sep">·</span>
+                <span>Preventiva</span>
+                <span class="meta-sep">·</span>
+                <span>3d atrás</span>
+              </div>
+            </div>
+            <div class="right"><span class="urg">Alta</span><button class="ab ok">▶</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="col-label">▼ NOVO (timer com h/min + cor por idade)</div>
+      <div class="col-section">
+        <div class="col-head">
+          <span class="col-dot"></span>
+          <span class="col-name">A FAZER</span>
+          <span class="col-count">3</span>
+        </div>
+        <div class="stack">
+          <!-- Fresh: < 24h, verde -->
+          <div class="card">
+            <div class="av">VL</div>
+            <div class="body">
+              <div class="title">Abrir tampas das cabeceiras</div>
+              <div class="meta">
+                <span class="meta-tag">RET-01</span>
+                <span class="meta-sep">·</span>
+                <span>Preventiva</span>
+                <span class="meta-sep">·</span>
+                <span class="timer fresh"><span class="timer-pulse"></span>5h 12min esperando</span>
+              </div>
+            </div>
+            <div class="right"><span class="urg">Alta</span><button class="ab ok">▶</button></div>
+          </div>
+          <!-- Warn: 24h-72h, amarelo -->
+          <div class="card">
+            <div class="av">VL</div>
+            <div class="body">
+              <div class="title">Verificar vazamento de óleos</div>
+              <div class="meta">
+                <span class="meta-tag">RET-01</span>
+                <span class="meta-sep">·</span>
+                <span>Preventiva</span>
+                <span class="meta-sep">·</span>
+                <span class="timer warn"><span class="timer-pulse"></span>1d 8h esperando</span>
+              </div>
+            </div>
+            <div class="right"><span class="urg">Alta</span><button class="ab ok">▶</button></div>
+          </div>
+          <!-- Late: > 72h, vermelho -->
+          <div class="card">
+            <div class="av">VL</div>
+            <div class="body">
+              <div class="title">Lubrificar mancais</div>
+              <div class="meta">
+                <span class="meta-tag">RET-01</span>
+                <span class="meta-sep">·</span>
+                <span>Preventiva</span>
+                <span class="meta-sep">·</span>
+                <span class="timer late"><span class="timer-pulse"></span>3d 4h ⚠ urgente</span>
+              </div>
+            </div>
+            <div class="right"><span class="urg">Alta</span><button class="ab ok">▶</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>▼ Em Andamento (cor por tempo de execução)</h2>
+  <div class="col-section">
+    <div class="col-head">
+      <span class="col-dot doing"></span>
+      <span class="col-name">EM ANDAMENTO</span>
+      <span class="col-count">3</span>
+    </div>
+    <div class="stack">
+      <div class="card" style="border-left-color:#10B981">
+        <div class="av">VL</div>
+        <div class="body">
+          <div class="title">Abrir tampas das cabeceiras</div>
+          <div class="meta">
+            <span class="meta-tag">RET-01</span>
+            <span class="meta-sep">·</span>
+            <span>Preventiva</span>
+            <span class="meta-sep">·</span>
+            <span class="timer fresh"><span class="timer-pulse"></span>Em execução · 2h 15min</span>
+          </div>
+        </div>
+        <div class="right"><span class="urg">Alta</span><button class="ab">◀</button><button class="ab ok">✓</button></div>
+      </div>
+      <div class="card" style="border-left-color:#F59E0B">
+        <div class="av">VL</div>
+        <div class="body">
+          <div class="title">Conferir tensão das correias</div>
+          <div class="meta">
+            <span class="meta-tag">RET-01</span>
+            <span class="meta-sep">·</span>
+            <span>Preventiva</span>
+            <span class="meta-sep">·</span>
+            <span class="timer warn"><span class="timer-pulse"></span>Em execução · 5h 42min</span>
+          </div>
+        </div>
+        <div class="right"><span class="urg">Alta</span><button class="ab">◀</button><button class="ab ok">✓</button></div>
+      </div>
+      <div class="card" style="border-left-color:#DC2626">
+        <div class="av">JC</div>
+        <div class="body">
+          <div class="title">Calibrar sensores</div>
+          <div class="meta">
+            <span class="meta-tag">PRE-02</span>
+            <span class="meta-sep">·</span>
+            <span>Preventiva</span>
+            <span class="meta-sep">·</span>
+            <span class="timer late"><span class="timer-pulse"></span>Em execução · 14h 42min ⚠</span>
+          </div>
+        </div>
+        <div class="right"><span class="urg">Alta</span><button class="ab">◀</button><button class="ab ok">✓</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>Como funciona o timer</h3>
+    <p>
+      <b>A Fazer:</b> conta há quanto tempo o card APARECEU no Kanban (<code>card.ts</code>). Texto "X esperando" — verde até 24h, amarelo até 72h, vermelho acima.<br><br>
+      <b>Em Andamento:</b> conta há quanto tempo o card está em execução (do momento do click ▶). Texto "Em execução · X" — verde até 4h, amarelo até 8h, vermelho acima.<br><br>
+      <b>Atualização:</b> a cada minuto via <code>_tickTimers()</code> (já existe). Não precisa re-render do Kanban inteiro — só atualiza o texto + classe do <code>.kc3-meta-date</code>.<br><br>
+      <b>Pulse dot:</b> bolinha colorida pulsando ao lado do tempo (animação 2s ease-in-out). Indica que está "vivo" / contando.
+    </p>
+  </div>
+
+  <h2>Resumo</h2>
+  <ul style="color:#9CA295;font-size:.78rem;line-height:1.7;list-style:none;max-width:760px;margin:0 auto">
+    <li>✓ Timer com <b style="color:#fff">horas e minutos</b> também em "A Fazer" (não só dias)</li>
+    <li>✓ Cor escala por idade: verde · amarelo · vermelho</li>
+    <li>✓ Pulse dot pra indicar contagem ativa</li>
+    <li>✓ Atualização a cada minuto sem re-render</li>
+    <li>✓ "A Fazer" usa <code>card.ts</code> (data de criação) · "Em Andamento" usa último click ▶</li>
+  </ul>
+</div>
+</body>
+</html>
