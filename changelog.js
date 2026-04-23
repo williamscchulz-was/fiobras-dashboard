@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.52.4', d:'23 abr 2026', current:true,
+    v:'3.52.5', d:'23 abr 2026', current:true,
+    items:[
+      {type:'high', title:'Sub-apps · iframe agora respeita user logado no HUB (não força mais admin).',
+        desc:'BUG RAIZ: o iframe do Manutenção (e CRM) tinha um bootstrap que FORÇAVA login local como admin no boot, ignorando quem estava logado no HUB.\n\nDetecção: Vorlei (técnico) entrava no HUB → abria Manutenção → o iframe fazia auto-login como admin → state.isAdmin=true → toggle de técnicos aparecia + Kanban mostrava todos os cards (não só os do Vorlei).\n\nCausa: havia uma função _autoLoginViaHub() que tentava ler `window.getCurrentUser()` — função que vive NO PARENT (HUB), não dentro do iframe. Como `window.getCurrentUser` é undefined no iframe, a função sempre falhava → caía no force-admin do __hubBootManut.\n\nFIX (mockup-bug-iframe-login.html aprovado pelo William):\n\n• Manutenção: _autoLoginViaHub reescrita pra ler `localStorage["fiobras-dash-auth"]` DIRETO (compartilhado entre HUB e iframes do mesmo subdomain). Resolve role real via cache de users-profile/users-config.\n\n• Manutenção: __hubBootManut não força mais admin. Tenta _autoLoginViaHub primeiro. Só cai pra tela de login local se não houver sessão (ex: alguém abriu manutencao/ direto sem passar pelo HUB).\n\n• CRM: __hubBootCrm fazia `window._user.papel = "admin"` SEMPRE. Agora detecta role real do user (admin/gerente do HUB → papel admin no CRM; producao → papel comum).\n\n• Preço: já não tinha esse bug (não força admin), só revela a UI.\n\nResultado: Vorlei entra no Manutenção, vê SÓ os cards dele, sem toggle. William entra, vê tudo + toggle.'}
+    ]
+  },
+  {
+    v:'3.52.4', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · 2 bugs do toggle de técnico (CSS dentro de @media + default admin).',
         desc:'Diagnóstico via overlay v3.52.2:\n\n1) AVATARES VISUAIS BUGADOS: o CSS do toggle (.kb-view-pick, .kb-view-circle, etc) E dos campos de contexto (.ca-ctx) estavam dentro de `@media(max-width:768px)` desde v3.50.2/v3.51.0 (fui inserindo após .btn-notif-test que tava dentro do @media e não percebi). Resultado: estilos só aplicavam em mobile. Em desktop os botões viravam texto puro colado. FIX: bloco inteiro movido pra top-level.\n\n2) ADMIN VIA "MEUS" POR DEFAULT: William é admin mas não tem cards próprios → Kanban ficava vazio mesmo com toggle funcionando. FIX: admin/gerente agora abre default em "Time inteiro" (faz sentido — supervisor vê tudo). Técnico continua "meus" fixo.'}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auditoria — Bug do iframe sempre logando como admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*:before,*:after{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1A1D22;color:#fff;font-family:'Poppins',sans-serif;padding:24px;min-height:100vh}
+  h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;margin-bottom:6px}
+  h2{font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;color:#9CA295;margin:32px 0 14px;letter-spacing:1px;text-transform:uppercase}
+  .wrap{max-width:1200px;margin:0 auto}
+  .intro{color:#9CA295;font-size:.78rem;max-width:760px;margin-bottom:24px;line-height:1.6}
+
+  /* Diagrama: HUB → iframe */
+  .flow{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;margin-bottom:24px}
+  @media (max-width:760px){.flow{grid-template-columns:1fr}.flow-arrow{transform:rotate(90deg);height:auto;padding:8px}}
+  .frame{background:#1F2125;border:1px solid #2A2D33;border-radius:12px;padding:18px}
+  .frame.hub{border-color:rgba(0,118,190,.4)}
+  .frame.iframe{border-color:rgba(245,158,11,.4)}
+  .frame-tag{font-family:'DM Mono';font-size:.55rem;padding:3px 10px;border-radius:999px;letter-spacing:.5px;display:inline-block;margin-bottom:10px}
+  .frame.hub .frame-tag{background:rgba(0,118,190,.15);color:#60A5FA}
+  .frame.iframe .frame-tag{background:rgba(245,158,11,.15);color:#FCD34D}
+  .frame-title{font-family:'Outfit';font-weight:700;font-size:.92rem;color:#fff;margin-bottom:14px}
+  .flow-arrow{display:flex;align-items:center;justify-content:center;font-size:32px;color:#3A3F47;font-family:monospace}
+  .flow-arrow.bug{color:#F87171}
+  .flow-arrow.bug::after{content:'\A❌';white-space:pre;font-size:14px}
+
+  .box{background:#0d1014;border:1px solid #25282d;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.74rem;color:#CFD3CB;line-height:1.5}
+  .box code{font-family:'DM Mono';font-size:.65rem;background:#000;padding:2px 6px;border-radius:3px;color:#4ADE80}
+  .box.bad{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.25);color:#F87171}
+  .box.good{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:#6EE7B7}
+  .box-h{font-family:'DM Mono';font-size:.55rem;color:#6B7166;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+  .box.bad .box-h{color:#F87171}
+  .box.good .box-h{color:#6EE7B7}
+
+  /* Tela do user */
+  .tela{background:#0a0d0a;border:1px solid #25282d;border-radius:8px;padding:8px;margin-top:8px}
+  .tela-h{display:flex;justify-content:space-between;align-items:center;font-size:.65rem;color:#9CA295;padding:5px 8px}
+  .tela-user{display:flex;align-items:center;gap:6px;font-weight:600;color:#fff;font-size:.7rem}
+  .tela-user .av{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#1B5E20,#43A047);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+  .tela-user .av.adm{background:linear-gradient(135deg,#0D47A1,#1976D2)}
+  .tela-body{font-family:'DM Mono';font-size:.6rem;color:#6B7166;padding:8px;background:#16191c;border-radius:4px;text-align:center}
+
+  /* Solução blocks */
+  .sol{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:16px;margin-top:18px}
+  .sol h3{font-family:'Outfit';font-weight:700;font-size:.95rem;color:#6EE7B7;margin-bottom:10px}
+  .sol p{color:#CFD3CB;font-size:.78rem;line-height:1.6;margin-bottom:10px}
+  .sol code{background:#000;color:#4ADE80;font-family:'DM Mono';font-size:.7rem;padding:2px 6px;border-radius:3px}
+  .sol pre{background:#000;color:#9CA295;font-family:'DM Mono';font-size:.66rem;padding:12px;border-radius:6px;overflow-x:auto;line-height:1.5;margin-top:8px}
+
+  /* Steps */
+  .steps-fix{counter-reset:step;list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .steps-fix li{counter-increment:step;background:rgba(0,200,80,.04);border:1px solid rgba(0,200,80,.2);border-radius:6px;padding:10px 12px;font-size:.74rem;color:#CFD3CB;display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start}
+  .steps-fix li::before{content:counter(step);background:#00a241;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Outfit';font-weight:900;font-size:11px;line-height:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🐛 Bug — iframe do Manutenção SEMPRE loga como admin</h1>
+  <p class="intro">
+    Vorlei (técnico) abre HUB → entra no Manutenção → vê TODOS os cards + barra de toggle aparece pra ele. <b style="color:#fff">Diagnóstico:</b> o iframe do Manutenção tem um bootstrap que <b style="color:#FCD34D">FORÇA login local como admin</b>, ignorando quem está logado no HUB.
+  </p>
+
+  <h2>▼ O que tá acontecendo (fluxo atual)</h2>
+
+  <div class="flow">
+    <div class="frame hub">
+      <span class="frame-tag">HUB (parent)</span>
+      <div class="frame-title">hub.fiobras.com.br</div>
+
+      <div class="box">
+        <div class="box-h">Login</div>
+        Vorlei loga via tela de login do HUB.<br>
+        <code>localStorage["fiobras-dash-auth"]</code> grava sessão do Vorlei.
+      </div>
+      <div class="box good">
+        <div class="box-h">✓ HUB sabe quem é</div>
+        <code>state.user = "Vorlei"</code><br>
+        <code>state.userKey = "vorlei"</code><br>
+        <code>state.isAdmin = false</code>
+      </div>
+
+      <div class="tela">
+        <div class="tela-h">
+          <span>HUB</span>
+          <div class="tela-user"><span class="av">VL</span>Vorlei</div>
+        </div>
+        <div class="tela-body">USUÁRIO logado correto ✓</div>
+      </div>
+    </div>
+
+    <div class="flow-arrow bug">→</div>
+
+    <div class="frame iframe">
+      <span class="frame-tag">IFRAME &lt;iframe src="manutencao/"&gt;</span>
+      <div class="frame-title">manutencao/index.html</div>
+
+      <div class="box bad">
+        <div class="box-h">⚠ Bug · __hubBootManut()</div>
+        Linha 7006-7009 do manutencao/index.html:
+        <pre style="background:#000;color:#F87171;font-family:'DM Mono';font-size:.6rem;padding:8px;border-radius:4px;margin-top:6px;overflow-x:auto">if(sel) sel.value = '__admin__';
+if(senha) senha.value = 'admin';
+if(typeof doLogin === 'function'){
+  doLogin();   ← FORÇA login admin
+}</pre>
+      </div>
+
+      <div class="box bad">
+        <div class="box-h">✕ State errado</div>
+        <code style="color:#F87171">state.user = "Admin"</code><br>
+        <code style="color:#F87171">state.userKey = "admin"</code><br>
+        <code style="color:#F87171">state.isAdmin = true</code> ← errado pro Vorlei
+      </div>
+
+      <div class="tela">
+        <div class="tela-h">
+          <span>MANUTENÇÃO</span>
+          <div class="tela-user"><span class="av adm">A</span>Admin</div>
+        </div>
+        <div class="tela-body" style="color:#F87171">Cards de TODO mundo · toggle aparece ✕</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>▼ Por que isso acontece</h2>
+  <div class="box">
+    <p style="margin-bottom:10px"><b style="color:#fff">Histórico:</b> o sub-app Manutenção foi originalmente STANDALONE (rodava sozinho em <code>manutencao.fiobras.com.br</code>) com seu próprio sistema de login. Quando foi integrado como iframe no HUB v3.8.0, o bootstrap <b style="color:#FCD34D">__hubBootManut()</b> foi criado pra "auto-logar como admin" e pular a tela de login interna.</p>
+    <p style="margin-bottom:10px">Existe uma função <code>_autoLoginViaHub()</code> que TENTA pegar o usuário do HUB via <code>window.getCurrentUser()</code>. Mas <b style="color:#FCD34D">essa função vive no contexto do parent (HUB), não no iframe</b>. Dentro do iframe, <code>window.getCurrentUser</code> é <code>undefined</code>.</p>
+    <p>Resultado: <code>_autoLoginViaHub()</code> sempre falha → cai no <code>__hubBootManut()</code> que força admin. <b style="color:#FCD34D">QUALQUER user que entrar via HUB, dentro do Manutenção é tratado como admin.</b></p>
+  </div>
+
+  <h2>▼ Solução proposta</h2>
+  <div class="sol">
+    <h3>🔑 Iframe lê a sessão DIRETO do localStorage</h3>
+    <p>Iframes no MESMO domínio (subdomínio) compartilham o mesmo <code>localStorage</code>. Como HUB e Manutenção rodam em <code>hub.fiobras.com.br</code> (HUB) e <code>hub.fiobras.com.br/manutencao/</code> (iframe), o iframe pode ler <code>localStorage["fiobras-dash-auth"]</code> diretamente.</p>
+    <p>Substituir <code>_autoLoginViaHub()</code> por uma versão que lê localStorage:</p>
+    <pre>function _autoLoginViaHub() {
+  let sess = null;
+  try {
+    sess = JSON.parse(localStorage.getItem('fiobras-dash-auth'));
+  } catch(e) {}
+  if (!sess || !sess.user) return false;
+
+  // Pega role do users-config + users-profile (cache do localStorage)
+  const cfg = state.usersConfig || {};
+  const profs = state.userProfiles || {};
+  const c = cfg[sess.user] || {};
+  const p = profs[sess.user] || {};
+  const role = p.roleOverride || c.role || sess.role || 'producao';
+
+  state.user    = sess.nome || c.nome || p.nomeCompleto || sess.user;
+  state.userKey = sess.user;
+  state.isAdmin = (role === 'admin' || role === 'gerente');
+
+  // ... resto do init
+  return true;
+}</pre>
+    <p style="margin-top:10px">E remover o <code>force admin</code> do <code>__hubBootManut()</code>: se <code>_autoLoginViaHub()</code> retornar true, não faz mais nada. Só cai no fallback de admin se não houver sessão (ex: alguém abriu manutencao/ direto sem passar pelo HUB).</p>
+  </div>
+
+  <h2>▼ Fluxo após o fix</h2>
+  <div class="flow">
+    <div class="frame hub">
+      <span class="frame-tag">HUB</span>
+      <div class="frame-title">Vorlei loga</div>
+      <div class="box good">
+        <div class="box-h">✓ Sessão grava</div>
+        <code>localStorage["fiobras-dash-auth"]</code><br>
+        = <code>{user:"vorlei", nome:"Vorlei", role:"producao", ...}</code>
+      </div>
+    </div>
+
+    <div class="flow-arrow" style="color:#4ADE80">→<br><span style="font-size:14px;color:#6EE7B7">✓</span></div>
+
+    <div class="frame iframe" style="border-color:rgba(16,185,129,.4)">
+      <span class="frame-tag" style="background:rgba(16,185,129,.15);color:#6EE7B7">IFRAME</span>
+      <div class="frame-title">_autoLoginViaHub()</div>
+      <div class="box good">
+        <div class="box-h">✓ Lê do localStorage</div>
+        <code>state.user = "Vorlei"</code><br>
+        <code>state.userKey = "vorlei"</code><br>
+        <code>state.isAdmin = false</code>
+      </div>
+      <div class="tela">
+        <div class="tela-h">
+          <span>MANUTENÇÃO</span>
+          <div class="tela-user"><span class="av">VL</span>Vorlei</div>
+        </div>
+        <div class="tela-body" style="color:#6EE7B7">Só os cards do Vorlei · sem toggle ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>▼ Plano de implementação</h2>
+  <ul class="steps-fix">
+    <li>Reescrever <b style="color:#fff">_autoLoginViaHub()</b> pra ler <code>localStorage["fiobras-dash-auth"]</code> direto, sem depender de <code>window.getCurrentUser</code></li>
+    <li>Remover o force-admin do <b style="color:#fff">__hubBootManut()</b>. Só faz login local se sessão localStorage não existir.</li>
+    <li>Ler role real do <code>users-profile/&lt;userKey&gt;/roleOverride</code> + <code>users-config/&lt;userKey&gt;/role</code> (cache localStorage cobre o caso de Firebase ainda não carregado)</li>
+    <li>Setar <code>state.isAdmin</code> CORRETAMENTE baseado no role real (admin OU gerente → true; producao → false)</li>
+    <li>Sub-apps CRM e Preço também têm o mesmo problema potencial — auditar e aplicar mesmo fix se necessário</li>
+  </ul>
+
+  <h2>Resumo do bug</h2>
+  <ul style="color:#9CA295;font-size:.78rem;line-height:1.7;list-style:none;max-width:760px;margin:0 auto">
+    <li>✗ Iframe do Manutenção SEMPRE força login admin no boot</li>
+    <li>✗ <code>window.getCurrentUser()</code> não existe dentro do iframe — auto-login real falha</li>
+    <li>✓ <b style="color:#fff">Solução:</b> iframe lê <code>localStorage["fiobras-dash-auth"]</code> direto (compartilhado com HUB)</li>
+    <li>✓ Remover force-admin do bootstrap, só usar como fallback se não há sessão</li>
+  </ul>
+</div>
+</body>
+</html>

@@ -3932,11 +3932,27 @@ window.onSelectUser=onSelectUser;
 function __hubBootCrm(){
   if(window.__hubBlocked) return;
   try {
-    const sess = window.__hubSession;
-    const hubUser = sess?.user || 'admin';
-    let nome = (hubUser === 'admin') ? 'Admin' : hubUser;
-    // Mapeia HUB admin -> CRM admin; demais users HUB -> CRM admin por enquanto (granular vem depois)
-    window._user = { usuario: 'admin', nome: nome, papel: 'admin' };
+    // v3.52.5 — Lê sessão real do HUB via localStorage (não força mais admin)
+    let sess = null;
+    try { sess = JSON.parse(localStorage.getItem('fiobras-dash-auth') || 'null'); } catch(e){}
+    if (!sess) sess = window.__hubSession || null;
+    const hubUserKey = sess?.user || 'admin';
+    // Resolve role real (admin/gerente/producao) via cache localStorage de users-profile
+    let role = sess?.role;
+    try {
+      const profs = JSON.parse(localStorage.getItem('fiobras-users-profile-cache') || '{}');
+      const cfg   = JSON.parse(localStorage.getItem('fiobras-users-config-cache') || '{}');
+      const p = profs[hubUserKey] || {};
+      const c = cfg[hubUserKey] || {};
+      role = p.roleOverride || c.role || role;
+    } catch(e){}
+    if (!role && hubUserKey === 'admin') role = 'admin';
+    if (!role) role = 'producao';
+    // No CRM, "papel: admin" significa permissões totais. Mapeamos: admin/gerente do HUB
+    // → papel admin no CRM (vê tudo). producao do HUB → papel comum no CRM.
+    const papelCrm = (role === 'admin' || role === 'gerente') ? 'admin' : 'comum';
+    const nome = sess?.nome || (hubUserKey === 'admin' ? 'Admin' : hubUserKey);
+    window._user = { usuario: hubUserKey, nome: nome, papel: papelCrm };
     sessionStorage.setItem('crm_user', JSON.stringify(window._user));
     if(typeof mostrarApp === 'function') mostrarApp();
     else {

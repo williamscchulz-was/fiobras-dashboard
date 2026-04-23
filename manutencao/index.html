@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.52.4">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.52.5">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -3649,19 +3649,32 @@ function tentarAutoLogin() {
   if (senha === userEntry.senha) doLogin();
 }
 
-// v3.46.0 — auto-login via sessão do HUB. Chamado no boot quando há sessão válida.
-// Substitui a tela de login local quando user vem do HUB.
+// v3.52.5 — Auto-login lê sessão do HUB DIRETO do localStorage.
+// Antes tentava window.getCurrentUser que NÃO existe no iframe → falhava
+// → caía no force-admin do __hubBootManut. Agora lê fiobras-dash-auth
+// (compartilhado entre HUB e iframes do mesmo domínio).
 function _autoLoginViaHub() {
-  const u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
-  if (!u || !u.key) return false;
-  state.user    = u.nome;
-  state.userKey = u.key;
-  state.isAdmin = u.isAdmin || u.isGerente; // gerente vê tudo no Manutenção também
+  let sess = null;
+  try { sess = JSON.parse(localStorage.getItem('fiobras-dash-auth')); } catch(e) {}
+  if (!sess || !sess.user) return false;
+  // Resolve role real lendo de cache localStorage (users-config + users-profile)
+  const cfg = state.usersConfig || {};
+  const profs = state.userProfiles || {};
+  const c = cfg[sess.user] || {};
+  const p = profs[sess.user] || {};
+  // Prioridade: roleOverride do profile > role do users-config > role da sessão > admin (sess.user='admin') > 'producao'
+  let role = p.roleOverride || c.role || sess.role;
+  if (!role && sess.user === 'admin') role = 'admin'; // admin master sem c.role
+  if (!role) role = 'producao';
+  const ehAdminGer = (role === 'admin' || role === 'gerente');
+  state.user    = sess.nome || p.nomeCompleto || c.nome || sess.user;
+  state.userKey = sess.user;
+  state.isAdmin = ehAdminGer;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('h-nome').textContent = u.nome;
-  document.getElementById('h-role').textContent = u.isAdmin ? 'Administrador' : (u.isGerente ? 'Gerente' : 'Usuário');
-  if (state.isAdmin) document.body.classList.add('is-admin');
+  document.getElementById('h-nome').textContent = state.user;
+  document.getElementById('h-role').textContent = role === 'admin' ? 'Administrador' : (role === 'gerente' ? 'Gerente' : 'Usuário');
+  if (ehAdminGer) document.body.classList.add('is-admin');
   document.body.classList.add('logged-in');
   const vEl = document.getElementById('app-version');
   if (vEl) vEl.textContent = ' ' + VERSION;
@@ -3670,7 +3683,6 @@ function _autoLoginViaHub() {
   if (typeof updateHeaderStats === 'function') updateHeaderStats();
   if (typeof initKChips === 'function') initKChips();
   if (typeof aplicarQRSeExistir === 'function') aplicarQRSeExistir();
-  // v3.52.0 — Notificações REMOVIDAS. Init/agenda/reset/verificar/digest/FCM tudo fora.
   return true;
 }
 
@@ -7000,17 +7012,14 @@ function __hubBootManut(){
     // Esconde splash explicitamente caso tenha alguma transição pendente
     const sp = document.getElementById('splash-screen');
     if(sp) sp.style.display = 'none';
-    const sel = document.getElementById('login-user-sel');
-    const senha = document.getElementById('login-senha');
-    // O select tem opção '__admin__' (mapeada pra USERS.admin no doLogin); setar 'admin' direto vira string vazia
-    if(sel) sel.value = '__admin__';
-    if(senha) senha.value = 'admin';
-    if(typeof doLogin === 'function'){
-      try { doLogin(); }
-      catch(e){ console.warn('[manut] doLogin parcial:', e && e.message); }
-    } else {
-      console.warn('[manut] doLogin não encontrada');
+    // v3.52.5 — PRIORIDADE: tenta auto-login via sessão do HUB (localStorage).
+    // Se rolar, usuário entra como ele mesmo (Vorlei/Joacir/etc), não admin.
+    if (typeof _autoLoginViaHub === 'function' && _autoLoginViaHub()) {
+      return; // sucesso — não força admin
     }
+    // FALLBACK: sem sessão → fica na tela de login local. NÃO força mais admin.
+    // (alguém abriu manutencao/ direto sem passar pelo HUB)
+    console.warn('[manut] sem sessão do HUB · tela de login local');
   } catch(e){ console.error('[manut bootstrap]', e); }
   // v3.21.3: força tabs direto no body com position:fixed
   // Algumas regras CSS internas estavam ganhando do override; mover pro body resolve.
