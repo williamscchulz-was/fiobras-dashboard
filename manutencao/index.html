@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.52.7">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.53.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2109,6 +2109,44 @@ to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 .ca-ctx-hist-data { font-family: 'DM Mono', monospace; font-size: .58rem; color: var(--muted, #6B7166); white-space: nowrap; }
 .ca-ctx-empty { font-size: .65rem; color: var(--muted, #6B7166); font-style: italic; padding: 6px 0; text-align: center; }
 
+/* v3.53.0 — Card-grupo no Kanban (badge + progress bar) */
+.kc3-group-badge { background: rgba(0,118,190,.18); color: #60A5FA; padding: 2px 8px; border-radius: 999px; font-family: 'DM Mono', monospace; font-size: .55rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+.kc3-group-progress { height: 3px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; margin-top: 6px; }
+.kc3-group-progress-fill { height: 100%; background: linear-gradient(90deg,#10B981,#34D399); transition: width .3s; }
+
+/* v3.53.0 — Modal Checklist de preventivas agrupadas */
+.modal-x-btn { background: transparent; border: 0; color: var(--muted, #6B7166); cursor: pointer; font-size: 18px; padding: 4px 8px; }
+.modal-x-btn:hover { color: var(--text, #fff); }
+.ck-modal-h { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 10px; }
+.ck-modal-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; color: var(--text, #fff); line-height: 1.2; }
+.ck-modal-sub { font-family: 'DM Mono', monospace; font-size: .6rem; color: var(--muted, #6B7166); text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
+.ck-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+@media (max-width: 480px) { .ck-info-grid { grid-template-columns: 1fr; } }
+.ck-info-item { background: var(--surface2, #16191c); border: 1px solid var(--border, #25282d); border-radius: 8px; padding: 8px 12px; }
+.ck-info-lbl { font-family: 'DM Mono', monospace; font-size: .5rem; color: var(--muted, #6B7166); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+.ck-info-val { font-family: 'Poppins', sans-serif; font-size: .74rem; color: var(--text, #fff); font-weight: 600; }
+.ck-info-val small { display: block; color: var(--muted, #9CA295); font-weight: 400; font-size: .58rem; margin-top: 2px; font-family: 'DM Mono', monospace; }
+.ck-list-wrap { flex: 1; overflow-y: auto; background: var(--surface2, #16191c); border: 1px solid var(--border, #25282d); border-radius: 10px; padding: 8px; margin-bottom: 14px; }
+.ck-list-h { font-family: 'DM Mono', monospace; font-size: .55rem; color: var(--muted, #9CA295); text-transform: uppercase; letter-spacing: .7px; padding: 6px 10px 8px; display: flex; justify-content: space-between; align-items: center; }
+.ck-list-h b { color: var(--text, #fff); }
+.ck-item { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: .1s; border-bottom: 1px solid #1c1f23; }
+.ck-item:last-child { border-bottom: 0; }
+.ck-item:hover { background: rgba(255,255,255,.04); }
+.ck-item.done { opacity: .55; }
+.ck-item.done .ck-tarefa { text-decoration: line-through; }
+.ck-cb { width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border2, #3A3F47); display: flex; align-items: center; justify-content: center; background: var(--bg, #0d1014); transition: .15s; flex-shrink: 0; }
+.ck-item.done .ck-cb { background: #10B981; border-color: #10B981; color: #fff; font-size: 12px; font-weight: 700; }
+.ck-tarefa { font-family: 'Poppins', sans-serif; font-size: .74rem; color: var(--text, #CFD3CB); line-height: 1.4; }
+.ck-meta { font-family: 'DM Mono', monospace; font-size: .55rem; color: var(--muted, #6B7166); display: flex; gap: 6px; align-items: center; margin-top: 2px; }
+.ck-foot { background: var(--surface2, #16191c); border: 1px solid var(--border, #25282d); border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 12px; }
+.ck-progress-info { flex: 1; min-width: 0; }
+.ck-progress-num { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.4rem; color: var(--text, #fff); line-height: 1; }
+.ck-progress-num small { font-size: .7rem; color: var(--muted, #9CA295); font-weight: 600; }
+.ck-progress-bar { height: 6px; background: var(--bg, #0d1014); border-radius: 999px; overflow: hidden; margin-top: 6px; }
+.ck-progress-fill { height: 100%; background: linear-gradient(90deg,#10B981,#34D399); transition: width .3s; }
+.btn-concluir-tudo { background: linear-gradient(180deg,#10B981,#059669); color: #fff; border: 0; padding: 10px 18px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: .7rem; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; flex-shrink: 0; }
+.btn-concluir-tudo:disabled { background: #3A3F47; color: var(--muted, #6B7166); cursor: not-allowed; }
+
 /* v3.52.6 — Toggle de técnicos no Kanban: pills SÓ COM NOME (sem avatar) */
 #kb-view-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 10px 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; margin-bottom: 14px; overflow-x: auto; }
 .kb-view-lbl { font-family: 'DM Mono', monospace; font-size: .58rem; color: var(--muted, #6B7166); text-transform: uppercase; letter-spacing: .7px; margin-right: 4px; flex-shrink: 0; }
@@ -3097,6 +3135,36 @@ display: none;
     <div class="modal-actions">
       <button class="modal-btn cancel" onclick="fecharModal('modal-card-admin')">Cancelar</button>
       <button class="modal-btn confirm" onclick="salvarCardAdmin()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- v3.53.0 — MODAL CHECKLIST DE PREVENTIVAS AGRUPADAS -->
+<div class="modal-bg" id="modal-pv-checklist">
+  <div class="modal" style="width:560px;max-width:94vw;max-height:85vh;display:flex;flex-direction:column">
+    <div class="ck-modal-h">
+      <div>
+        <div class="ck-modal-title" id="ck-title">Preventiva</div>
+        <div class="ck-modal-sub" id="ck-sub">—</div>
+      </div>
+      <button class="modal-x-btn" onclick="fecharModal('modal-pv-checklist')" aria-label="Fechar">✕</button>
+    </div>
+    <div class="ck-info-grid">
+      <div class="ck-info-item"><div class="ck-info-lbl">Em execução há</div><div class="ck-info-val" id="ck-info-tempo">—</div></div>
+      <div class="ck-info-item"><div class="ck-info-lbl">Responsável</div><div class="ck-info-val" id="ck-info-resp">—</div></div>
+      <div class="ck-info-item"><div class="ck-info-lbl">Status da máquina</div><div class="ck-info-val" id="ck-info-status">—</div></div>
+      <div class="ck-info-item"><div class="ck-info-lbl">Próxima desta freq</div><div class="ck-info-val" id="ck-info-prox">—</div></div>
+    </div>
+    <div class="ck-list-wrap">
+      <div class="ck-list-h"><b id="ck-progress-text">Checklist (0 / 0)</b><span>Marque conforme for executando</span></div>
+      <div id="ck-list" class="ck-list"></div>
+    </div>
+    <div class="ck-foot">
+      <div class="ck-progress-info">
+        <div class="ck-progress-num" id="ck-progress-num">0<small> / 0 concluídas</small></div>
+        <div class="ck-progress-bar"><div class="ck-progress-fill" id="ck-progress-fill" style="width:0%"></div></div>
+      </div>
+      <button class="btn-concluir-tudo" id="ck-btn-concluir-tudo" onclick="_concluirTodasGrupo()">✓ Concluir todas</button>
     </div>
   </div>
 </div>
@@ -4255,8 +4323,15 @@ function renderKanban() {
       return (urgOrdFull[keyA] ?? 3) - (urgOrdFull[keyB] ?? 3);
     });
 
-    document.getElementById(`cards-${col}`).innerHTML = cards.map(c => buildCard(c)).join('');
-    document.getElementById(`cnt-${col}`).textContent = cards.length;
+    // v3.53.0 — Agrupa preventivas por (máquina, frequência, responsável). Demais cards: solo.
+    const grupos = _agruparCardsKanban(cards);
+    // Acumula no cache global (todos os cols) pra modal achar o grupo
+    if (col === 'todo') _ultimoGrupoRender = [];
+    grupos.forEach(g => _ultimoGrupoRender.push(g));
+    document.getElementById(`cards-${col}`).innerHTML = grupos.map(g =>
+      g.grupo ? buildCardGrupo(g) : buildCard(g.repr)
+    ).join('');
+    document.getElementById(`cnt-${col}`).textContent = grupos.length;
 
     // Drag events
     document.querySelectorAll(`#cards-${col} .kanban-card`).forEach(el => {
@@ -4476,6 +4551,286 @@ window.abrirDetalheCard = function(key) {
   if (canEdit) editarCard(key);
   else _kcToggleExtras(key);
 };
+
+// v3.53.0 — Helpers de agrupamento de cards de preventiva no Kanban
+function _freqLabelKey(f) {
+  if (!f || f < 1) return 'preventiva';
+  if (f === 1)   return 'diaria';
+  if (f <= 7)    return 'semanal';
+  if (f <= 15)   return 'quinzenal';
+  if (f <= 35)   return 'mensal';
+  if (f <= 100)  return 'trimestral';
+  if (f <= 200)  return 'semestral';
+  return 'anual';
+}
+function _freqLabelHuman(f) {
+  const k = _freqLabelKey(f);
+  return ({ diaria:'Diária', semanal:'Semanal', quinzenal:'Quinzenal', mensal:'Mensal', trimestral:'Trimestral', semestral:'Semestral', anual:'Anual', preventiva:'Preventiva' })[k];
+}
+
+// Agrupa cards visualmente por (tipo=preventiva, maqKey, freqLabel, respKey, col).
+// Não-preventiva: cada card é seu próprio "grupo de 1".
+function _agruparCardsKanban(cards) {
+  const grupos = [];
+  const visto = new Set();
+  cards.forEach(c => {
+    if (visto.has(c._key)) return;
+    if (c.tipo !== 'preventiva') {
+      grupos.push({ chave: 'solo|' + c._key, repr: c, cards: [c], grupo: false });
+      visto.add(c._key);
+      return;
+    }
+    const pv = state.preventivas.find(p => (p._key || p.id) === c.prevId);
+    const freqK = pv && pv.freq ? _freqLabelKey(parseInt(pv.freq)) : 'preventiva';
+    const maqK  = c.maqKey || (pv && (pv.maqKey || pv.maquinaKey)) || ('eq:' + (c.equip||'__').toLowerCase());
+    const respK = c.respKey || (c.resp ? (typeof _resolveUserKey === 'function' ? _resolveUserKey(c.resp) || c.resp.toLowerCase() : c.resp.toLowerCase()) : '__sem__');
+    const gkey  = 'pv|' + maqK + '|' + freqK + '|' + respK + '|' + c.col;
+    const irmaos = cards.filter(x => {
+      if (x._key === c._key) return false;
+      if (visto.has(x._key)) return false;
+      if (x.tipo !== 'preventiva') return false;
+      if (x.col !== c.col) return false;
+      const pvx = state.preventivas.find(p => (p._key || p.id) === x.prevId);
+      const fx  = pvx && pvx.freq ? _freqLabelKey(parseInt(pvx.freq)) : 'preventiva';
+      const mx  = x.maqKey || (pvx && (pvx.maqKey || pvx.maquinaKey)) || ('eq:' + (x.equip||'__').toLowerCase());
+      const rx  = x.respKey || (x.resp ? (typeof _resolveUserKey === 'function' ? _resolveUserKey(x.resp) || x.resp.toLowerCase() : x.resp.toLowerCase()) : '__sem__');
+      return mx === maqK && fx === freqK && rx === respK;
+    });
+    const todos = [c, ...irmaos];
+    todos.forEach(x => visto.add(x._key));
+    if (todos.length === 1) {
+      grupos.push({ chave: 'solo|' + c._key, repr: c, cards: todos, grupo: false });
+    } else {
+      grupos.push({
+        chave: gkey, repr: c, cards: todos, grupo: true,
+        maqKey: maqK, freqK, freqLabel: _freqLabelHuman(parseInt(pv.freq)),
+      });
+    }
+  });
+  return grupos;
+}
+
+// Constrói o card-grupo (visual de um grupo de N preventivas)
+function buildCardGrupo(grupo) {
+  const repr = grupo.repr;
+  const total = grupo.cards.length;
+  const eqTag = (() => {
+    const maq = repr.maqKey ? state.maquinas.find(m => m._key === repr.maqKey) : null;
+    if (maq && maq.tag) return maq.tag;
+    return repr.equip ? (repr.equip.split(' · ')[0] || '') : '';
+  })();
+  const eqTagHtml = eqTag ? `<span class="kc3-eqtag">${eqTag}</span>` : '';
+  const respKey = repr.respKey || repr.resp || '';
+  const isAdminClick = state.isAdmin;
+  const avHtml = respKey
+    ? `<span class="kc3-av-wrap" ${isAdminClick ? `onclick="event.stopPropagation();abrirModalReatribuir('${repr._key}')"` : ''}>${avatar(respKey, 'lg')}</span>`
+    : `<span class="av sz-lg u-default" aria-label="Sem responsável">—</span>`;
+  const urgChip = repr.urg ? `<span class="kc3-urg u-${repr.urg}">${({alta:'Alta',media:'Média',baixa:'Baixa',prev:'Prev'})[repr.urg]||repr.urg}</span>` : '';
+  // Timer (idêntico ao buildCard normal)
+  const ts = repr.ts || (repr.data ? (() => {
+    const m = (repr.data || '').match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/);
+    if (m) return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]).getTime();
+    return null;
+  })() : null);
+  let dateTxt = '', dateCls = '', dateMode = '';
+  if (ts) {
+    const ageH = (Date.now() - ts) / 3600000;
+    if (repr.col === 'doing') {
+      dateMode = 'doing';
+      const { txt } = _tempoDecorrido(ts);
+      dateTxt = 'Em execução · ' + txt;
+      dateCls = ageH < 4 ? 'timer-fresh' : (ageH < 8 ? 'timer-warn' : 'timer-late');
+    } else if (repr.col === 'todo') {
+      dateMode = 'todo';
+      const { txt } = _tempoDecorrido(ts);
+      dateTxt = txt + ' esperando';
+      if      (ageH < 24) dateCls = 'timer-fresh';
+      else if (ageH < 72) dateCls = 'timer-warn';
+      else                { dateCls = 'timer-late'; dateTxt = txt + ' ⚠ urgente'; }
+    } else {
+      dateMode = 'done';
+      dateTxt = _relativeDate(ts);
+    }
+  }
+  const pulseDot = (dateMode === 'todo' || dateMode === 'doing') ? '<span class="kc3-pulse"></span>' : '';
+  const dateHtml = dateTxt ? `<span class="kc3-meta-date kc2-date ${dateCls}" data-ts="${ts||''}" data-col="${repr.col}" data-mode="${dateMode}">${pulseDot}${dateTxt}</span>` : '';
+  // Badge de checklist + progresso
+  const concluidos = grupo.cards.filter(c => c.checklistDone).length;
+  const groupBadge = `<span class="kc3-group-badge">📋 ${total} tarefa${total>1?'s':''}</span>`;
+  const progPct = Math.round((concluidos / total) * 100);
+  const groupProgress = `<div class="kc3-group-progress"><div class="kc3-group-progress-fill" style="width:${progPct}%"></div></div>`;
+  const titulo = 'Preventiva ' + (grupo.freqLabel || 'agrupada') + (eqTag ? ' · ' + eqTag : '');
+  const metaParts = [];
+  if (eqTagHtml) metaParts.push(eqTagHtml);
+  metaParts.push(groupBadge);
+  if (dateHtml)  metaParts.push(dateHtml);
+  const metaHtml = `<div class="kc3-meta">${metaParts.join('<span class="kc3-meta-sep">·</span>')}</div>`;
+  // Botões de ação
+  const actBtns = [];
+  if (repr.col === 'todo')  actBtns.push(`<button class="kc3-ab ok" onclick="event.stopPropagation();_moverGrupo('${grupo.chave}','doing')" title="Iniciar"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3l8 5-8 5z"/></svg></button>`);
+  if (repr.col === 'doing') {
+    actBtns.push(`<button class="kc3-ab" onclick="event.stopPropagation();_moverGrupo('${grupo.chave}','todo')" title="Voltar"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M11 3L3 8l8 5z"/></svg></button>`);
+    actBtns.push(`<button class="kc3-ab ok" onclick="event.stopPropagation();_moverGrupo('${grupo.chave}','done')" title="Concluir todas"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 8 7 12 13 4"/></svg></button>`);
+  }
+  const cardCls = 'kanban-card kc3 kc-' + (repr.col || 'todo') + ' urg-' + (repr.urg || 'baixa');
+  return `<div class="${cardCls}" data-id="${grupo.chave}" data-urg="${repr.urg||'baixa'}" draggable="true"
+    ondragstart="onDragStart(event,'${grupo.chave}')" ondragend="onDragEnd(event)"
+    onclick="abrirChecklistGrupo('${grupo.chave}')">
+    <div class="kc3-grid">
+      <div class="kc3-av">${avHtml}</div>
+      <div class="kc3-body">
+        <div class="kc3-title">${titulo}</div>
+        ${metaHtml}
+        ${groupProgress}
+      </div>
+      <div class="kc3-right">
+        ${urgChip}
+        ${actBtns.length ? `<div class="kc3-actions">${actBtns.join('')}</div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Modal Checklist (v3.53.0) ──
+let _grupoAtual = null;
+window.abrirChecklistGrupo = function(grupoKey) {
+  // Reagrupa do state e acha o grupo (filtrado pelo render atual)
+  const grupos = _ultimoGrupoRender || [];
+  const grupo = grupos.find(g => g.chave === grupoKey);
+  if (!grupo) return;
+  _grupoAtual = grupo;
+  const repr = grupo.repr;
+  const pv = state.preventivas.find(p => (p._key || p.id) === repr.prevId);
+  // Header
+  document.getElementById('ck-title').textContent = 'Preventiva ' + (grupo.freqLabel || '') + (grupo.cards.length ? ' · ' + grupo.cards.length + ' tarefas' : '');
+  document.getElementById('ck-sub').textContent = (repr.equip || '—') + ' · ' + ((repr.setor === 'eletrica') ? 'Elétrica' : 'Mecânica') + ' · ' + (repr.urg||'').toUpperCase();
+  // Info grid
+  const ts = repr.ts;
+  const tempoEl = document.getElementById('ck-info-tempo');
+  if (ts && repr.col === 'doing') {
+    const { txt } = _tempoDecorrido(ts);
+    tempoEl.innerHTML = txt + '<small>Iniciada ' + new Date(ts).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) + '</small>';
+  } else if (ts && repr.col === 'todo') {
+    const { txt } = _tempoDecorrido(ts);
+    tempoEl.innerHTML = txt + ' esperando<small>Apareceu ' + new Date(ts).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) + '</small>';
+  } else {
+    tempoEl.innerHTML = '—';
+  }
+  document.getElementById('ck-info-resp').innerHTML = (repr.resp || '—') + '<small>' + (grupo.cards.length === 1 ? 'Único técnico' : grupo.cards.length + ' tarefas atribuídas') + '</small>';
+  // Status máquina
+  const maq = repr.maqKey ? state.maquinas.find(m => m._key === repr.maqKey) : null;
+  const statusEl = document.getElementById('ck-info-status');
+  if (maq) {
+    const st = maq.status || 'ativa';
+    const lbl = st === 'manutencao' ? 'Em manutenção' : (st === 'parada' ? 'Parada' : 'Ativa');
+    const cor = st === 'manutencao' ? '#FCD34D' : (st === 'parada' ? '#F87171' : '#6EE7B7');
+    statusEl.innerHTML = '<span style="color:' + cor + '">' + lbl + '</span><small>' + (st === 'ativa' ? 'Em produção' : 'Atenção') + '</small>';
+  } else { statusEl.innerHTML = '—'; }
+  // Próxima execução (após executar)
+  const proxEl = document.getElementById('ck-info-prox');
+  if (pv && pv.freq) {
+    const f = parseInt(pv.freq);
+    const prox = addDays(today(), f);
+    proxEl.innerHTML = prox.toLocaleDateString('pt-BR') + '<small>+' + f + ' dia' + (f>1?'s':'') + ' após executar</small>';
+  } else { proxEl.innerHTML = '—'; }
+  // Lista de itens
+  _renderChecklistGrupo();
+  document.getElementById('modal-pv-checklist').classList.add('open');
+};
+
+function _renderChecklistGrupo() {
+  if (!_grupoAtual) return;
+  const list = document.getElementById('ck-list');
+  const cards = _grupoAtual.cards;
+  list.innerHTML = cards.map(c => {
+    const done = !!c.checklistDone;
+    const pv = state.preventivas.find(p => (p._key || p.id) === c.prevId);
+    const ultUlt = pv && pv.ultima ? fmtDt(pv.ultima) : '—';
+    const respN = c.resp || '—';
+    return '<div class="ck-item' + (done ? ' done' : '') + '" onclick="_toggleChecklistItem(\'' + c._key + '\')">' +
+      '<div class="ck-cb">' + (done ? '✓' : '') + '</div>' +
+      '<div>' +
+        '<div class="ck-tarefa">' + (c.titulo || '—') + '</div>' +
+        '<div class="ck-meta">' + (done ? '✓ Concluída agora' : ('Última: ' + ultUlt)) + ' · Resp: ' + respN + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  const total = cards.length;
+  const concl = cards.filter(c => c.checklistDone).length;
+  const pct = Math.round((concl / total) * 100);
+  document.getElementById('ck-progress-text').textContent = 'Checklist (' + concl + ' / ' + total + ')';
+  document.getElementById('ck-progress-num').innerHTML = concl + '<small> / ' + total + ' concluídas</small>';
+  document.getElementById('ck-progress-fill').style.width = pct + '%';
+  const btn = document.getElementById('ck-btn-concluir-tudo');
+  btn.disabled = (concl >= total);
+  btn.textContent = concl >= total ? '✓ Todas concluídas' : '✓ Concluir todas';
+}
+
+window._toggleChecklistItem = function(cardKey) {
+  if (!_grupoAtual) return;
+  const card = _grupoAtual.cards.find(c => c._key === cardKey);
+  if (!card) return;
+  // Toggle local (UI imediato)
+  card.checklistDone = !card.checklistDone;
+  // Re-render lista
+  _renderChecklistGrupo();
+  // AUTO MOVER: se todos checados → move grupo pra done (sem modal)
+  const total = _grupoAtual.cards.length;
+  const concl = _grupoAtual.cards.filter(c => c.checklistDone).length;
+  if (concl === total) {
+    setTimeout(() => {
+      _moverGrupo(_grupoAtual.chave, 'done', { silent: true });
+      document.getElementById('modal-pv-checklist').classList.remove('open');
+      _grupoAtual = null;
+    }, 600);
+  }
+};
+
+window._concluirTodasGrupo = function() {
+  if (!_grupoAtual) return;
+  // Marca todos
+  _grupoAtual.cards.forEach(c => { c.checklistDone = true; });
+  _renderChecklistGrupo();
+  // Move pra done
+  setTimeout(() => {
+    _moverGrupo(_grupoAtual.chave, 'done', { silent: true });
+    document.getElementById('modal-pv-checklist').classList.remove('open');
+    _grupoAtual = null;
+  }, 400);
+};
+
+// Move TODOS os cards do grupo (ou grupo de 1)
+window._moverGrupo = function(grupoKey, col, opts) {
+  opts = opts || {};
+  const grupos = _ultimoGrupoRender || [];
+  const grupo = grupos.find(g => g.chave === grupoKey);
+  if (!grupo) return;
+  // Pra cada card, executa moverCard (que cuida da assinatura se for preventiva→done)
+  grupo.cards.forEach(c => {
+    if (col === 'done' && c.tipo === 'preventiva') {
+      // Pra evitar 1 modal de assinatura POR card, executa direto via _executarMove
+      // (state.user já está logado como o técnico)
+      _executarMove(c._key, 'done', state.user);
+      // Atualiza ultima da preventiva
+      if (c.prevId && window._fbUpdatePrev) {
+        window._fbUpdatePrev(c.prevId, {
+          ultima: todayStr(),
+          ultimaAssin: state.user,
+          ultimaAssinTs: nowStr(),
+          ultimaObs: '[checklist] concluída via card agrupado',
+        });
+      }
+    } else {
+      _executarMove(c._key, col, state.user);
+    }
+  });
+  if (!opts.silent && typeof toast === 'function') {
+    toast(grupo.cards.length + ' tarefa' + (grupo.cards.length>1?'s':'') + ' movida' + (grupo.cards.length>1?'s':'') + ' pra ' + ({todo:'A Fazer',doing:'Em Andamento',done:'Concluído'})[col], 'ok');
+  }
+};
+
+// Cache do último agrupamento renderizado (pra modal achar o grupo)
+let _ultimoGrupoRender = [];
 
 // Helpers v3.36.0
 function _relativeDate(ts) {

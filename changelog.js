@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.52.7', d:'23 abr 2026', current:true,
+    v:'3.53.0', d:'23 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · Cards de preventiva agrupados por máquina+freq+resp + checklist com auto-mover.',
+        desc:'Demanda do Joacir aprovada via mockup-card-agrupado-checklist.html.\n\nAGRUPAMENTO: 5 cards "Semanal RET-01" → 1 card só "Preventiva Semanal · RET-01" com badge "5 tarefas". Agrupa por (tipo=preventiva, máquina, frequência, responsável, coluna). Cada user vê só o agrupamento dos cards onde é resp.\n\nCARD AGRUPADO mostra:\n• Avatar do responsável\n• Título: "Preventiva Semanal · RET-01"\n• Badge azul: 📋 5 tarefas\n• Timer + barra de progresso (% checklist)\n• Botões ▶ Iniciar / ◀ Voltar / ✓ Concluir todas\n\nCLICK no card agrupador abre modal-pv-checklist com:\n• Info da máquina (status, próxima execução, tempo em execução, responsável)\n• Checklist de cada tarefa (checkbox + nome + última execução)\n• Footer: progresso (X/Y) + botão "Concluir todas"\n\nAÇÕES NO CHECKLIST:\n• Click no item → toggle done (sem modal de assinatura por item, agiliza UX)\n• Quando 100% checados → AUTO MOVE pra "Concluído" + fecha modal\n• Botão "Concluir todas" → marca todos + move pra done\n\nATALHOS NO CARD KANBAN:\n• ▶ Iniciar: move TODAS as tarefas do grupo pra "Em Andamento"\n• ✓ Concluir todas: marca todas + move pra "Concluído" (cascata pras menores roda automático)\n• ◀ Voltar: volta todas pra "A Fazer"\n\nCASCATA: ao concluir o grupo, cada tarefa atualiza ultima=hoje na sua preventiva (Firebase). A regra de cascata pra freqs menores (v3.50.0) continua valendo — concluir mensal de RET-01 fecha cards menores absorvidos.\n\nCards não-preventiva (demanda/instalação/corretiva): continuam soltos, sem agrupamento. Preventiva única: vira card normal (grupo de 1 → render normal).'}
+    ]
+  },
+  {
+    v:'3.52.7', d:'23 abr 2026',
     items:[
       {type:'feat', title:'Filtro de técnicos por gerência: novo flag "supervisiona Manutenção" no painel admin.',
         desc:'Resolve o caso do William: Edilson e Jairo são gerentes mas não atuam na Manutenção; Joacir é gerente E supervisiona Manutenção. Antes todos apareciam (admin/gerente entram no toggle por default).\n\nNovo campo: <code>users-profile/{user}/supervisaoManutencao</code> (boolean).\n\nUI no HUB:\n• Gerenciar Usuários → Editar usuário\n• Quando role = Gerente, aparece toggle "Supervisiona Manutenção"\n• Marca/desmarca por user. Salva no users-profile.\n• Outros roles: campo escondido (admin sempre supervisiona implicitamente; producao usa modulesAllowedOverride).\n\nFiltro do toggle no Kanban da Manutenção:\n• producao com módulo manutencao → aparece (técnicos)\n• gerente COM supervisaoManutencao=true → aparece (Joacir)\n• gerente sem flag → some (Edilson, Jairo)\n• admin master → some (William supervisiona via "Time")\n\nWilliam: pra fazer Joacir aparecer, vai em Gerenciar Usuários → editar Joacir → marcar "Supervisiona Manutenção" → Salvar.'}
