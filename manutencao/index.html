@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.52.5">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.52.6">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2109,20 +2109,25 @@ to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 .ca-ctx-hist-data { font-family: 'DM Mono', monospace; font-size: .58rem; color: var(--muted, #6B7166); white-space: nowrap; }
 .ca-ctx-empty { font-size: .65rem; color: var(--muted, #6B7166); font-style: italic; padding: 6px 0; text-align: center; }
 
-/* v3.50.2 — Toggle de técnico no Kanban (admin/gerente only) */
-#kb-view-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; margin-bottom: 14px; overflow-x: auto; }
+/* v3.52.6 — Toggle de técnicos no Kanban: pills SÓ COM NOME (sem avatar) */
+#kb-view-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 10px 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; margin-bottom: 14px; overflow-x: auto; }
 .kb-view-lbl { font-family: 'DM Mono', monospace; font-size: .58rem; color: var(--muted, #6B7166); text-transform: uppercase; letter-spacing: .7px; margin-right: 4px; flex-shrink: 0; }
-.kb-view-pick { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 6px; border-radius: 8px; transition: .1s; min-width: 50px; flex-shrink: 0; background: transparent; border: 0; font-family: inherit; }
-.kb-view-pick:hover { background: rgba(255,255,255,.04); }
-.kb-view-pick.active { background: rgba(0,200,80,.12); }
-.kb-view-circle { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#1B5E20,#43A047); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 13px; color: #fff; border: 2px solid transparent; position: relative; background-size: cover; background-position: center; }
-.kb-view-pick.active .kb-view-circle { border-color: #4ADE80; }
-.kb-view-pick.special .kb-view-circle { background: linear-gradient(135deg,#1F2125,#2C2C2E); color: #9CA295; font-size: 18px; }
-.kb-view-name { font-family: 'Poppins'; font-size: .55rem; font-weight: 600; color: var(--muted, #9CA295); line-height: 1; }
-.kb-view-pick.active .kb-view-name { color: var(--text, #fff); }
-.kb-view-cnt { position: absolute; top: -3px; right: -3px; background: #DC2626; color: #fff; font-family: 'DM Mono', monospace; font-size: .5rem; font-weight: 700; min-width: 14px; height: 14px; border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
-.kb-view-pick.special .kb-view-cnt { background: #6B7166; }
+.kb-view-pill {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+  color: var(--text, #CFD3CB); padding: 6px 12px; border-radius: 999px;
+  cursor: pointer; font-family: 'Poppins', sans-serif; font-size: .68rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 6px; transition: .1s;
+  flex-shrink: 0; line-height: 1.2;
+}
+.kb-view-pill:hover { border-color: rgba(255,255,255,.18); color: var(--text, #fff); }
+.kb-view-pill.active { background: rgba(0,200,80,.18); border-color: rgba(0,200,80,.4); color: #4ADE80; }
+.kb-view-pill.special { background: rgba(0,118,190,.1); border-color: rgba(0,118,190,.3); color: #60A5FA; }
+.kb-view-pill.special.active { background: rgba(0,118,190,.3); border-color: #60A5FA; color: #fff; }
+.kb-view-cnt { background: rgba(255,255,255,.1); color: var(--muted, #9CA295); font-family: 'DM Mono', monospace; font-size: .55rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; min-width: 18px; text-align: center; }
+.kb-view-pill.active .kb-view-cnt { background: rgba(0,200,80,.3); color: #6EE7B7; }
+.kb-view-pill.special.active .kb-view-cnt { background: rgba(0,118,190,.5); color: #fff; }
 [data-theme="light"] #kb-view-bar { background: rgba(0,0,0,.025); border-color: rgba(0,0,0,.06); }
+[data-theme="light"] .kb-view-pill { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.08); color: var(--text, #1A2E1E); }
 /* v3.52.0 — CSS de display:none de notif removido (HTML não existe mais) */
 /* (fim do bloco que estava erroneamente dentro de @media — v3.52.4) */
 
@@ -4022,12 +4027,22 @@ function renderDashboard() {
 // v3.52.0 — updateBanner DELETADA (banner de preventivas vencidas era parte
 // do sistema de notificações, fora agora).
 
+// v3.52.6 — Limpeza one-shot: remove localStorage["fio_kb_view_*"] antigos.
+// A partir desta versão admin/gerente abre default "todos" (Time).
+(function _resetKbViewDefault(){
+  try {
+    if (localStorage.getItem('fio_kb_view_reset_v1') === '1') return;
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf('fio_kb_view_') === 0) toRemove.push(k);
+    }
+    toRemove.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('fio_kb_view_reset_v1', '1');
+  } catch(e){}
+})();
+
 // v3.52.3 — Checagem robusta de role.
-// state.isAdmin é setado em _autoLoginViaHub como `u.isAdmin || u.isGerente`,
-// que já cobre admin E gerente. É a fonte mais confiável dentro do iframe.
-// (Antes priorizava window.getCurrentUser que não existe no iframe → caía no
-// fallback fraco do users-profile que pode ter roleOverride undefined → 'producao'
-// → retornava false pra admin. Bug confirmado v3.52.2.)
 function _ehGerenteOuAdmin() {
   if (state.isAdmin) return true;
   // Tenta helper centralizado (caso esteja exposto no iframe via postMessage no futuro)
@@ -4047,11 +4062,11 @@ function _ehGerenteOuAdmin() {
 function renderViewBar() {
   const bar = document.getElementById('kb-view-bar');
   if (!bar) return;
-  // v3.50.4 — só admin/gerente vê o toggle
   if (!_ehGerenteOuAdmin()) { bar.style.display = 'none'; return; }
   const meK = state.userKey || '';
-  let viewMode = 'meus';
-  try { viewMode = localStorage.getItem('fio_kb_view_' + (meK||'__')) || 'meus'; } catch(e){}
+  // v3.52.6 — default = "todos" (Time) pra admin/gerente
+  let viewMode = 'todos';
+  try { viewMode = localStorage.getItem('fio_kb_view_' + (meK||'__')) || 'todos'; } catch(e) { viewMode = 'todos'; }
 
   // Lista de técnicos: users com acesso ao Manutenção. Exclui o próprio user.
   const cfg = state.usersConfig || {};
@@ -4077,13 +4092,12 @@ function renderViewBar() {
     })
     .sort((a, b) => a.primNome.localeCompare(b.primNome));
 
-  // Conta cards por escopo (só não-concluídos)
+  // v3.52.6 — Conta cards SÓ por RESPONSÁVEL (ignora autor).
+  // Antes contava também autor, daí Edilson aparecia com 1 só por ter criado uma demanda pro Joacir.
   const cnt = (alvoKey, alvoNome) => state.cards.filter(c => {
     if (c.col === 'done') return false;
     if (c.respKey && alvoKey && c.respKey === alvoKey) return true;
-    if (c.autorKey && alvoKey && c.autorKey === alvoKey) return true;
     if (c.resp && alvoNome && c.resp === alvoNome) return true;
-    if (c.autor && alvoNome && c.autor === alvoNome) return true;
     return false;
   }).length;
   const cntTodos = state.cards.filter(c => c.col !== 'done').length;
@@ -4091,36 +4105,19 @@ function renderViewBar() {
 
   const escAttr = s => String(s||'').replace(/[\\']/g, '\\$&');
 
-  // Helper que renderiza um item (div, não button — evita user-agent styles)
-  function pickItem(mode, label, isSpecial, contagem, fotoUrl, ini, key) {
-    const cls = 'kb-view-pick' + (isSpecial ? ' special' : '') + (viewMode === mode ? ' active' : '');
-    let circleStyle = '';
-    let circleContent = '';
-    if (isSpecial) {
-      circleContent = ini; // "★" ou "⊕"
-    } else if (fotoUrl) {
-      circleStyle = 'background-image:url(\'' + fotoUrl.replace(/'/g,'%27') + '\');background-size:cover;background-position:center;color:transparent';
-    } else {
-      // cor por hash do key
-      let h = 0; for (let i=0;i<key.length;i++) h = ((h<<5)-h+key.charCodeAt(i))|0;
-      const hue = Math.abs(h) % 360;
-      circleStyle = 'background:linear-gradient(135deg,hsl(' + hue + ',45%,38%),hsl(' + hue + ',55%,52%))';
-      circleContent = ini;
-    }
+  // v3.52.6 — Pill simples: só nome (sem avatar)
+  function pillItem(mode, label, isSpecial, contagem) {
+    const cls = 'kb-view-pill' + (isSpecial ? ' special' : '') + (viewMode === mode ? ' active' : '');
+    const prefix = isSpecial ? (mode === 'meus' ? '★ ' : '⊕ ') : '';
     const badge = contagem > 0 ? '<span class="kb-view-cnt">' + contagem + '</span>' : '';
-    return '<div class="' + cls + '" role="button" tabindex="0" onclick="_kbSetView(\'' + escAttr(mode) + '\')" title="' + escAttr(label) + '">' +
-      '<span class="kb-view-circle" style="' + circleStyle + '">' + circleContent + badge + '</span>' +
-      '<span class="kb-view-name">' + escAttr(label) + '</span>' +
-    '</div>';
+    return '<button class="' + cls + '" onclick="_kbSetView(\'' + escAttr(mode) + '\')">' +
+      prefix + escAttr(label) + badge +
+    '</button>';
   }
 
-  const meusItem  = pickItem('meus',  'Meus',  true,  cntMeus,  null, '★', '');
-  const todosItem = pickItem('todos', 'Time',  true,  cntTodos, null, '⊕', '');
-  const tecItems = tecnicos.map(t => {
-    const p = profs[t.key] || {};
-    const ini = t.nome.trim().split(/\s+/).slice(0,2).map(s=>(s[0]||'').toUpperCase()).join('') || '?';
-    return pickItem(t.key, t.primNome, false, cnt(t.key, t.nome), p.foto || null, ini, t.key);
-  }).join('');
+  const meusItem  = pillItem('meus',  'Meus',  true,  cntMeus);
+  const todosItem = pillItem('todos', 'Time',  true,  cntTodos);
+  const tecItems = tecnicos.map(t => pillItem(t.key, t.primNome, false, cnt(t.key, t.nome))).join('');
 
   bar.style.display = 'flex';
   bar.innerHTML = '<span class="kb-view-lbl">Ver cards de:</span>' + meusItem + tecItems + todosItem;
@@ -4267,57 +4264,10 @@ function renderKanban() {
   // Inicia tick dos timers
   _iniciarTimers();
 
-  // v3.52.2 — DEBUG ON-SCREEN: se Kanban tá vazio MAS tem cards no banco,
-  // mostra um quadrinho com diagnóstico DIRETO NA TELA pra investigar bug.
-  // (William reportou que não conseguia digitar no console)
-  _debugKanbanOnScreen(passaFiltro, _toK, meKResolved, ehAdminGer);
-}
-
-function _debugKanbanOnScreen(passaFiltro, _toK, meKResolved, ehAdminGer) {
-  const host = document.getElementById('panel-kanban');
+  // v3.52.6 — Caixa de debug on-screen REMOVIDA (era pra dev).
+  // Limpa qualquer overlay residual.
   const existing = document.getElementById('kb-debug-overlay');
   if (existing) existing.remove();
-  const totalCards = state.cards.length;
-  const visiveis = state.cards.filter(passaFiltro).length;
-  // Só mostra se tem cards mas nenhum visível pro user atual
-  if (totalCards === 0 || visiveis > 0) return;
-  if (!host) return;
-  const sample = state.cards.slice(0, 6).map((c, i) => {
-    const matches = {
-      respKey: c.respKey === meKResolved,
-      autorKey: c.autorKey === meKResolved,
-      resp: c.resp && _toK(c.resp) === meKResolved,
-      autor: c.autor && _toK(c.autor) === meKResolved,
-    };
-    const passa = Object.values(matches).some(Boolean);
-    return `[${i}] "${(c.titulo||'?').slice(0,40)}"
-        col=${c.col}
-        resp="${c.resp||'—'}" → ${_toK(c.resp||'')}
-        respKey=${c.respKey||'—'}
-        autor="${c.autor||'—'}" → ${_toK(c.autor||'')}
-        autorKey=${c.autorKey||'—'}
-        passa=${passa}`;
-  }).join('\n');
-  const overlay = document.createElement('div');
-  overlay.id = 'kb-debug-overlay';
-  overlay.style.cssText = 'position:fixed;bottom:20px;right:20px;width:520px;max-height:60vh;overflow-y:auto;z-index:99999;background:#1a1a1a;border:1px solid #FCD34D;border-radius:10px;padding:14px 16px;color:#FCD34D;font-family:monospace;font-size:11px;box-shadow:0 8px 24px rgba(0,0,0,.6)';
-  overlay.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
-      '<b style="color:#fff;font-size:13px">⚠ DEBUG: Kanban vazio (filtro)</b>' +
-      '<button onclick="this.parentElement.parentElement.remove()" style="background:transparent;border:0;color:#FCD34D;cursor:pointer;font-size:14px">✕</button>' +
-    '</div>' +
-    '<div style="white-space:pre-wrap;line-height:1.5">' +
-    'state.user      = "' + (state.user||'') + '"\n' +
-    'state.userKey   = "' + (state.userKey||'') + '"\n' +
-    'meKResolved     = "' + meKResolved + '"\n' +
-    'ehAdminGer      = ' + ehAdminGer + '\n' +
-    'state.isAdmin   = ' + state.isAdmin + '\n' +
-    'Total cards     = ' + totalCards + '\n' +
-    'Visiveis        = ' + visiveis + '\n\n' +
-    '── Primeiros 6 cards ──\n' +
-    sample +
-    '</div>' +
-    '<div style="margin-top:10px;font-size:10px;color:#9CA295">Manda print desta caixa pro William.</div>';
-  host.appendChild(overlay);
 }
 
 function _tempoDecorrido(ts) {

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Toggle clean (5 ajustes)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*:before,*:after{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1A1D22;color:#fff;font-family:'Poppins',sans-serif;padding:24px;min-height:100vh}
+  h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;margin-bottom:6px}
+  h2{font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;color:#9CA295;margin:32px 0 14px;letter-spacing:1px;text-transform:uppercase}
+  .wrap{max-width:1200px;margin:0 auto}
+  .intro{color:#9CA295;font-size:.78rem;max-width:760px;margin-bottom:24px;line-height:1.6}
+
+  /* Comparison */
+  .row{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px}
+  .label-tag{font-family:'DM Mono';font-size:.55rem;color:#6B7166;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .label-tag.bad{color:#F87171}
+  .label-tag.good{color:#6EE7B7}
+
+  /* OLD toggle (atual) - com avatares */
+  .toggle-old{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px}
+  .toggle-old-lbl{font-family:'DM Mono';font-size:.58rem;color:#6B7166;text-transform:uppercase;letter-spacing:.7px;margin-right:4px;flex-shrink:0}
+  .toggle-old-pick{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 6px;border-radius:8px;min-width:50px}
+  .toggle-old-pick.active{background:rgba(0,200,80,.12)}
+  .toggle-old-circle{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#1B5E20,#43A047);display:flex;align-items:center;justify-content:center;font-family:'Outfit';font-weight:900;font-size:13px;color:#fff;border:2px solid transparent;position:relative}
+  .toggle-old-pick.active .toggle-old-circle{border-color:#4ADE80}
+  .toggle-old-pick.special .toggle-old-circle{background:linear-gradient(135deg,#1F2125,#2C2C2E);color:#9CA295;font-size:18px}
+  .toggle-old-name{font-family:'Poppins';font-size:.55rem;font-weight:600;color:#9CA295}
+  .toggle-old-cnt{position:absolute;top:-3px;right:-3px;background:#DC2626;color:#fff;font-family:'DM Mono';font-size:.5rem;font-weight:700;min-width:14px;height:14px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+  /* NEW toggle - só nomes pills */
+  .toggle-new{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px}
+  .toggle-new-lbl{font-family:'DM Mono';font-size:.58rem;color:#6B7166;text-transform:uppercase;letter-spacing:.7px;margin-right:4px;flex-shrink:0}
+  .toggle-new-pill{
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+    color:#CFD3CB;padding:6px 12px;border-radius:999px;cursor:pointer;
+    font-family:'Poppins';font-size:.66rem;font-weight:600;
+    display:inline-flex;align-items:center;gap:6px;transition:.1s;
+  }
+  .toggle-new-pill:hover{border-color:rgba(255,255,255,.15);color:#fff}
+  .toggle-new-pill.active{background:rgba(0,200,80,.18);border-color:rgba(0,200,80,.4);color:#4ADE80}
+  .toggle-new-pill.special{background:rgba(0,118,190,.1);border-color:rgba(0,118,190,.3);color:#60A5FA}
+  .toggle-new-pill.special.active{background:rgba(0,118,190,.25);border-color:#60A5FA;color:#fff}
+  .toggle-new-cnt{
+    background:rgba(255,255,255,.1);color:#9CA295;
+    font-family:'DM Mono';font-size:.55rem;padding:1px 6px;border-radius:999px;
+    min-width:18px;text-align:center;
+  }
+  .toggle-new-pill.active .toggle-new-cnt{background:rgba(0,200,80,.3);color:#6EE7B7}
+  .toggle-new-pill.special.active .toggle-new-cnt{background:rgba(0,118,190,.4);color:#fff}
+
+  /* Annotations */
+  .anote{background:#0d1014;border:1px solid #25282d;border-radius:8px;padding:10px 12px;font-size:.7rem;color:#9CA295;line-height:1.5;margin-top:6px}
+  .anote b{color:#fff}
+  .anote code{font-family:'DM Mono';background:#000;color:#4ADE80;padding:1px 5px;border-radius:3px;font-size:.65rem}
+
+  .x{color:#F87171;font-weight:700}
+  .ok{color:#6EE7B7;font-weight:700}
+
+  /* List of fixes */
+  .fixes{display:grid;gap:12px;margin-top:14px}
+  .fix-item{
+    background:#1F2125;border:1px solid #2A2D33;border-radius:10px;padding:14px 16px;
+    display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start;
+  }
+  .fix-num{
+    background:linear-gradient(135deg,#00a241,#007a2e);color:#fff;
+    width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Outfit';font-weight:900;font-size:14px;
+  }
+  .fix-h{font-family:'Outfit';font-weight:700;font-size:.85rem;color:#fff;margin-bottom:6px}
+  .fix-d{font-size:.74rem;color:#9CA295;line-height:1.55}
+  .fix-d code{font-family:'DM Mono';font-size:.65rem;background:#000;color:#4ADE80;padding:1px 5px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mockup — Toggle clean + 4 fixes</h1>
+  <p class="intro">William reportou 5 problemas no toggle de técnicos do Kanban. Mockup mostrando o resultado proposto antes de aplicar.</p>
+
+  <h2>▼ ATUAL — toggle com avatares</h2>
+  <div class="row">
+    <div class="label-tag bad">▼ COM AVATARES (poluído + Edilson com badge errado)</div>
+    <div class="toggle-old">
+      <span class="toggle-old-lbl">Ver cards de:</span>
+      <div class="toggle-old-pick special active">
+        <div class="toggle-old-circle">★</div>
+        <span class="toggle-old-name">Meus</span>
+      </div>
+      <div class="toggle-old-pick">
+        <div class="toggle-old-circle" style="background:linear-gradient(135deg,#0D47A1,#1976D2)">ED<span class="toggle-old-cnt">1</span></div>
+        <span class="toggle-old-name">Edilson</span>
+      </div>
+      <div class="toggle-old-pick">
+        <div class="toggle-old-circle" style="background:linear-gradient(135deg,#1B5E20,#43A047)">HR</div>
+        <span class="toggle-old-name">Hernandes</span>
+      </div>
+      <div class="toggle-old-pick">
+        <div class="toggle-old-circle" style="background:linear-gradient(135deg,#7B2D9F,#A855F7)">I</div>
+        <span class="toggle-old-name">Ivonei</span>
+      </div>
+      <div class="toggle-old-pick">
+        <div class="toggle-old-circle">JR</div>
+        <span class="toggle-old-name">Jairo</span>
+      </div>
+      <div class="toggle-old-pick">
+        <div class="toggle-old-circle">JC<span class="toggle-old-cnt">1</span></div>
+        <span class="toggle-old-name">Joacir</span>
+      </div>
+      <div class="toggle-old-pick">
+        <div class="toggle-old-circle">PD</div>
+        <span class="toggle-old-name">Pedro</span>
+      </div>
+      <div class="toggle-old-pick">
+        <div class="toggle-old-circle">R</div>
+        <span class="toggle-old-name">Roland</span>
+      </div>
+      <div class="toggle-old-pick">
+        <div class="toggle-old-circle">VL<span class="toggle-old-cnt">6</span></div>
+        <span class="toggle-old-name">Vorlei</span>
+      </div>
+      <div class="toggle-old-pick special">
+        <div class="toggle-old-circle">⊕<span class="toggle-old-cnt">6</span></div>
+        <span class="toggle-old-name">Time</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>▼ NOVO — pills só com nome</h2>
+  <div class="row">
+    <div class="label-tag good">▼ CLEAN (só nomes + Edilson/Jairo escondidos + Time default)</div>
+    <div class="toggle-new">
+      <span class="toggle-new-lbl">Ver cards de:</span>
+      <button class="toggle-new-pill special">★ Meus</button>
+      <button class="toggle-new-pill">Hernandes</button>
+      <button class="toggle-new-pill">Ivonei</button>
+      <button class="toggle-new-pill">Joacir <span class="toggle-new-cnt">1</span></button>
+      <button class="toggle-new-pill">Pedro</button>
+      <button class="toggle-new-pill">Roland</button>
+      <button class="toggle-new-pill">Vorlei <span class="toggle-new-cnt">6</span></button>
+      <button class="toggle-new-pill special active">⊕ Time <span class="toggle-new-cnt">6</span></button>
+    </div>
+    <div class="anote">
+      <b>O que mudou:</b><br>
+      • Avatares (foto/iniciais coloridas) <span class="x">REMOVIDOS</span> — só pill com nome<br>
+      • <b>Edilson</b> e <b>Jairo</b> <span class="x">SUMIRAM</span> (são gerentes, não operadores)<br>
+      • Badge de contagem só pra quem TEM cards (Vorlei: 6, Joacir: 1)<br>
+      • <b>"Time"</b> está SELECIONADO por default (admin/gerente)<br>
+      • Pills "Meus" e "Time" em azul (especiais), técnicos em cinza/verde
+    </div>
+  </div>
+
+  <h2>▼ Os 5 ajustes detalhados</h2>
+  <div class="fixes">
+    <div class="fix-item">
+      <div class="fix-num">1</div>
+      <div>
+        <div class="fix-h">Tela de debug não aparece mais pra admin</div>
+        <div class="fix-d">A caixa amarela do <code>__debugKanban</code> só aparecia quando Kanban ficava vazio E tinha cards no banco. Como vou setar default = "Time" pra admin (e ele vê tudo), Kanban nunca mais ficará vazio pra ele → caixa não dispara. Caso fique vazio em algum cenário extremo, removo a caixa de vez (era pra debug temporário).</div>
+      </div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-num">2</div>
+      <div>
+        <div class="fix-h">Toggle só com nome (sem avatar)</div>
+        <div class="fix-d">Pills horizontais com nome simples. Mais clean, escala melhor com muitos técnicos. Avatares só fazem sentido se a foto realmente identificar a pessoa rapidamente — em tela pequena viram um borrão.</div>
+      </div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-num">3</div>
+      <div>
+        <div class="fix-h">Contagem só por RESPONSÁVEL (ignora autor)</div>
+        <div class="fix-d">Antes contava cards onde resp OU autor === user. Edilson criou uma demanda pro Joacir → tava aparecendo "1" pra Edilson (autor) E pra Joacir (resp). Agora conta SÓ pelo responsável. Edilson não tem mais "1" se ele só foi criador.</div>
+      </div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-num">4</div>
+      <div>
+        <div class="fix-h">Default = "Time" pra admin/gerente (forçado)</div>
+        <div class="fix-d">Já era default na v3.52.4 mas o localStorage antigo (<code>fio_kb_view_admin = "meus"</code>) podia sobrescrever. Vou limpar a chave antiga uma vez via flag <code>fio_kb_view_reset_v1</code> pra garantir que admin abra em "Time".</div>
+      </div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-num">5</div>
+      <div>
+        <div class="fix-h">Esconder admin/gerente do toggle (só técnicos aparecem)</div>
+        <div class="fix-d">Edilson e Jairo são <b>gerentes</b>, não operadores da manutenção. Não faz sentido aparecerem como "técnico filtrável". <b>Filtro novo:</b> só usuários com role <code>producao</code> que tenham acesso ao módulo Manutenção aparecem como pill. Admin e gerente são supervisores — não viram filtro de técnico (só veem via "Time").</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Resumo</h2>
+  <ul style="color:#9CA295;font-size:.78rem;line-height:1.7;list-style:none;max-width:760px;margin:0 auto">
+    <li>✓ Toggle <b style="color:#fff">só nome</b> (sem avatar) — escala melhor, mais clean</li>
+    <li>✓ Só <b style="color:#fff">técnicos (producao)</b> aparecem — gerentes/admin escondidos</li>
+    <li>✓ Contagem só por <b style="color:#fff">responsável</b> (não autor)</li>
+    <li>✓ <b style="color:#fff">"Time"</b> default pra admin/gerente (limpa cache antigo via flag)</li>
+    <li>✓ Caixa de debug não dispara mais (admin com Time = sempre tem cards)</li>
+  </ul>
+</div>
+</body>
+</html>

@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.52.5', d:'23 abr 2026', current:true,
+    v:'3.52.6', d:'23 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · Toggle de técnicos clean (4 ajustes aprovados).',
+        desc:'Mockup mockup-toggle-cleanup.html aprovado, fixes 1-4:\n\n1) CAIXA DE DEBUG REMOVIDA do canto inferior direito (era pra dev temporário). _debugKanbanOnScreen deletada. window.__debugKanban no console mantido caso precise debug futuro.\n\n2) PILLS SÓ COM NOME (sem avatar/foto/iniciais coloridas). Mais clean, escala melhor com vários técnicos. Pills "Meus" e "Time" em azul (especiais), técnicos em cinza/verde.\n\n3) CONTAGEM SÓ POR RESPONSÁVEL (ignora autor). Antes Edilson aparecia com badge "1" porque criou uma demanda pro Joacir — agora conta só quem é responsável. Edilson sem badge se ele só criou.\n\n4) DEFAULT "TIME" FORÇADO pra admin/gerente. Limpeza one-shot do localStorage["fio_kb_view_*"] antigo via flag fio_kb_view_reset_v1 (roda 1x). Admin abre sempre vendo tudo.\n\n#5 ADIADO: ocultar gerentes do toggle. William quer entender melhor o role producao vs gerente — Joacir é gerente de manutenção, deve aparecer; Edilson/Jairo são gerentes de outras áreas. Vai auditar role na próxima rodada.'}
+    ]
+  },
+  {
+    v:'3.52.5', d:'23 abr 2026',
     items:[
       {type:'high', title:'Sub-apps · iframe agora respeita user logado no HUB (não força mais admin).',
         desc:'BUG RAIZ: o iframe do Manutenção (e CRM) tinha um bootstrap que FORÇAVA login local como admin no boot, ignorando quem estava logado no HUB.\n\nDetecção: Vorlei (técnico) entrava no HUB → abria Manutenção → o iframe fazia auto-login como admin → state.isAdmin=true → toggle de técnicos aparecia + Kanban mostrava todos os cards (não só os do Vorlei).\n\nCausa: havia uma função _autoLoginViaHub() que tentava ler `window.getCurrentUser()` — função que vive NO PARENT (HUB), não dentro do iframe. Como `window.getCurrentUser` é undefined no iframe, a função sempre falhava → caía no force-admin do __hubBootManut.\n\nFIX (mockup-bug-iframe-login.html aprovado pelo William):\n\n• Manutenção: _autoLoginViaHub reescrita pra ler `localStorage["fiobras-dash-auth"]` DIRETO (compartilhado entre HUB e iframes do mesmo subdomain). Resolve role real via cache de users-profile/users-config.\n\n• Manutenção: __hubBootManut não força mais admin. Tenta _autoLoginViaHub primeiro. Só cai pra tela de login local se não houver sessão (ex: alguém abriu manutencao/ direto sem passar pelo HUB).\n\n• CRM: __hubBootCrm fazia `window._user.papel = "admin"` SEMPRE. Agora detecta role real do user (admin/gerente do HUB → papel admin no CRM; producao → papel comum).\n\n• Preço: já não tinha esse bug (não força admin), só revela a UI.\n\nResultado: Vorlei entra no Manutenção, vê SÓ os cards dele, sem toggle. William entra, vê tudo + toggle.'}
