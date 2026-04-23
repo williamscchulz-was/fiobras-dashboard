@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#008835"><!-- v3.48.1: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
-<link rel="stylesheet" href="css/hub.css?v=3.48.8">
+<link rel="stylesheet" href="css/hub.css?v=3.49.0">
 
 <!-- v3.32.6: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
@@ -88,8 +88,8 @@
   </defs>
 </svg>
 
-<!-- ── Login (v3.32.6 — Glass + Aurora) ── -->
-<div class="login-screen" id="loginScreen">
+<!-- ── Login (v3.32.6 — Glass + Aurora · v3.49.0 — hidden por default contra flash) ── -->
+<div class="login-screen hide" id="loginScreen">
   <div class="login-card">
     <div class="login-mark">
       <div class="aurora-icon aurora-sm" aria-hidden="true">
@@ -117,19 +117,29 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.48.9</div>
+    <div class="login-foot">Sistema interno · v3.49.0</div>
   </div>
 </div>
 
-<!-- ── Splash (v3.32.6 — Aurora) ── -->
+<!-- ── Splash (v3.32.6 — Aurora · v3.49.0 — modo "welcome back") ── -->
 <div class="splash hide" id="splash">
   <div class="aurora-icon aurora-lg" aria-hidden="true">
     <svg viewBox="0 0 60 68"><use href="#i-fiobras-symbol-inv"/></svg>
   </div>
   <div class="splash-name">Fiobras <b>HUB</b></div>
+  <!-- Modo normal: barra de loading -->
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
   <div class="splash-user" id="splashUser"></div>
+  <!-- Modo welcome back (v3.49.0): "Bem-vindo de volta" + avatar + nome grande + spinner -->
+  <div class="splash-welcome" id="splashWelcome" style="display:none">
+    <div class="splash-welcome-av" id="splashWelcomeAv">?</div>
+    <div class="splash-welcome-greet">Bem-vindo de volta</div>
+    <div class="splash-welcome-name" id="splashWelcomeName">—</div>
+    <div class="splash-welcome-pulse"></div>
+  </div>
   <div class="splash-version" id="splashVersion">v2.8.1</div>
+  <!-- "Não é você? Trocar conta" — só aparece no modo welcome back -->
+  <button class="splash-switch" id="splashSwitch" style="display:none" onclick="trocarConta()">Não é você? Trocar conta</button>
 </div>
 
 <!-- ── App principal ── -->
@@ -282,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.48.9</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.49.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -1342,7 +1352,9 @@ window._checkForceLogout = () => {
   }
 };
 
-function showSplash(nome, role){
+function showSplash(nome, role, opts){
+  opts = opts || {};
+  const isWelcomeBack = !!opts.welcomeBack;
   window._currentUserName = nome;
   // Guardar turno do líder (1,2,3) ou null se chefe/admin
   const sessUser = getSession()?.user;
@@ -1356,11 +1368,44 @@ function showSplash(nome, role){
   if (svEl && typeof CURRENT_VERSION !== 'undefined') svEl.textContent = 'v' + CURRENT_VERSION;
   // v2.8.0: popula topbar + dropdown user
   populateUserShell(nome, role);
-  bar.style.animation='none';
+
+  // v3.49.0 — modo "Bem-vindo de volta" (auto-login via cache)
+  const welcomeEl = document.getElementById('splashWelcome');
+  const switchEl  = document.getElementById('splashSwitch');
+  if (isWelcomeBack && welcomeEl) {
+    sp.classList.add('welcome-mode');
+    welcomeEl.style.display = '';
+    if (switchEl) switchEl.style.display = '';
+    // Avatar: foto do users-profile ou iniciais
+    const av = document.getElementById('splashWelcomeAv');
+    const profile = sessUser ? ((window._usersProfile||{})[sessUser] || {}) : {};
+    const foto = profile.foto || null;
+    if (av) {
+      if (foto) {
+        av.style.backgroundImage = "url('" + foto.replace(/'/g,'%27') + "')";
+        av.textContent = '';
+      } else {
+        av.style.backgroundImage = '';
+        const ini = (nome||'?').trim().split(/\s+/).slice(0,2).map(s => (s[0]||'').toUpperCase()).join('') || '?';
+        av.textContent = ini;
+      }
+    }
+    document.getElementById('splashWelcomeName').textContent = nome;
+  } else {
+    sp.classList.remove('welcome-mode');
+    if (welcomeEl) welcomeEl.style.display = 'none';
+    if (switchEl) switchEl.style.display = 'none';
+    bar.style.animation='none';
+  }
   sp.classList.remove('hide');
-  requestAnimationFrame(()=>{bar.style.animation='splashLoad 2.2s ease-in-out forwards';});
+  if (!isWelcomeBack) {
+    requestAnimationFrame(()=>{bar.style.animation='splashLoad 2.2s ease-in-out forwards';});
+  }
+  // Welcome back: 800ms (curto, só pra registrar visualmente). Login normal: 2400ms.
+  const splashMs = isWelcomeBack ? 800 : 2400;
   setTimeout(()=>{
     sp.classList.add('hide');
+    sp.classList.remove('welcome-mode');
     document.getElementById('app').classList.add('visible');
     setupTabs(role);
     checkChangelog();
@@ -1371,8 +1416,17 @@ function showSplash(nome, role){
     if(ddGu) ddGu.style.display = (role === 'admin') ? '' : 'none';
     // v3.13.0: inicia heartbeat de sessão ativa
     iniciarHeartbeat();
-  },2400);
+  }, splashMs);
 }
+
+// v3.49.0 — "Não é você? Trocar conta" (no splash welcome back)
+window.trocarConta = function(){
+  if (typeof clearSession === 'function') clearSession();
+  // Limpa preferência de "manter conectado" pra próxima sessão
+  try { localStorage.removeItem('fiobras-remember'); } catch(e){}
+  // Recarrega — o checkAuth não vai achar sessão e mostra o login
+  location.reload();
+};
 
 // ── v2.8.0: user shell (topbar + dropdown) ─────────────────────────────────
 function populateUserShell(nome, role){
@@ -2690,10 +2744,28 @@ function updateCrumbFromState(){
 }
 
 function checkAuth(){
-  const s=getSession();
-  if(s && getUser(s.user)){
-    document.getElementById('loginScreen').classList.add('hide');
-    showSplash(getUser(s.user).nome, getEffectiveRole(s.user));
+  const s = getSession();
+  const loginScr = document.getElementById('loginScreen');
+  if (s && getUser(s.user)) {
+    // v3.49.0 — verifica se user tá ativo (boot detect)
+    const profile = (window._usersProfile || {})[s.user] || {};
+    if (profile.active === false) {
+      clearSession();
+      try { localStorage.removeItem('fiobras-remember'); } catch(e){}
+      if (loginScr) loginScr.classList.remove('hide');
+      setTimeout(() => alert('Usuário inativo. Contate um administrador.'), 100);
+      return;
+    }
+    // Auto-login: NUNCA mostra login screen + usa splash "welcome back"
+    if (loginScr) loginScr.classList.add('hide');
+    // v3.49.0 — renova TTL no boot bem-sucedido (user ativo nunca expira)
+    setSession(s.user);
+    const userObj = getUser(s.user);
+    const nomeAtual = profile.nomeCompleto || userObj.nome;
+    showSplash(nomeAtual, getEffectiveRole(s.user), { welcomeBack: true });
+  } else {
+    // Sem sessão → mostra login. Limpa qualquer cache antigo de sessão expirada.
+    if (loginScr) loginScr.classList.remove('hide');
   }
 }
 
@@ -2719,7 +2791,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.48.9';
+const CURRENT_VERSION = '3.49.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.

@@ -126,6 +126,37 @@
 .splash-version{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1.5px;}
 @keyframes splashBar{from{transform:translateX(-100%)}to{transform:translateX(200%)}}
 
+/* v3.49.0 — Splash modo "Bem-vindo de volta" (auto-login) */
+.splash.welcome-mode .splash-bar-wrap,
+.splash.welcome-mode .splash-user{display:none;}
+.splash-welcome{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;margin-top:6px;}
+.splash-welcome-av{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,#1B5E20,#43A047);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;color:#fff;
+  background-size:cover;background-position:center;
+  border:2px solid rgba(255,255,255,.12);
+  box-shadow:0 6px 20px rgba(0,200,80,.18);
+  margin-bottom:6px;
+}
+.splash-welcome-greet{font-family:'Outfit',sans-serif;font-weight:300;font-size:.92rem;color:rgba(255,255,255,.6);letter-spacing:.01em;}
+.splash-welcome-name{font-family:'Outfit',sans-serif;font-weight:700;font-size:1.45rem;color:#fff;letter-spacing:-.01em;line-height:1.1;margin-top:-2px;}
+.splash-welcome-pulse{
+  width:22px;height:22px;border-radius:50%;
+  border:2px solid rgba(0,200,80,.25);border-top-color:#00b347;
+  animation:spin 1s linear infinite;margin-top:14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.splash-switch{
+  position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+  background:transparent;border:0;color:rgba(255,255,255,.45);
+  font-family:'Poppins',sans-serif;font-size:.68rem;cursor:pointer;
+  text-decoration:underline;text-underline-offset:4px;
+  padding:8px 16px;border-radius:8px;transition:color .15s,background .15s;
+}
+.splash-switch:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.04);}
+
 /* ═══ Botão "Instalar app" · v3.24.0 ════════════════════════════════════ */
 .hdr-install-btn{
   display:inline-flex;align-items:center;gap:6px;
