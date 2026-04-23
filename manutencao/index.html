@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.52.2">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.52.3">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -4008,15 +4008,20 @@ function renderDashboard() {
 // v3.52.0 — updateBanner DELETADA (banner de preventivas vencidas era parte
 // do sistema de notificações, fora agora).
 
-// v3.50.4 — Toggle de avatar dos técnicos (admin/gerente only)
-// Checagem robusta de role: lê via getCurrentUser do HUB (single source of truth).
+// v3.52.3 — Checagem robusta de role.
+// state.isAdmin é setado em _autoLoginViaHub como `u.isAdmin || u.isGerente`,
+// que já cobre admin E gerente. É a fonte mais confiável dentro do iframe.
+// (Antes priorizava window.getCurrentUser que não existe no iframe → caía no
+// fallback fraco do users-profile que pode ter roleOverride undefined → 'producao'
+// → retornava false pra admin. Bug confirmado v3.52.2.)
 function _ehGerenteOuAdmin() {
-  // Tenta o helper centralizado primeiro
+  if (state.isAdmin) return true;
+  // Tenta helper centralizado (caso esteja exposto no iframe via postMessage no futuro)
   if (typeof window.getCurrentUser === 'function') {
     const u = window.getCurrentUser();
     if (u && u.role) return u.role === 'admin' || u.role === 'gerente';
   }
-  // Fallback: lê do users-profile via state.userKey
+  // Fallback final: lê do users-profile/users-config
   const k = state.userKey;
   if (!k) return false;
   const p = (state.userProfiles || {})[k] || {};

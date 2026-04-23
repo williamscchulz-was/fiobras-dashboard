@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.52.2', d:'23 abr 2026', current:true,
+    v:'3.52.3', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · admin/gerente perdeu o toggle e via Kanban vazio.',
+        desc:'BUG diagnosticado via overlay v3.52.2:\n  state.user="William" · state.userKey="admin"\n  ehAdminGer=false (deveria true)\n  state.isAdmin=true (correto)\n\nCausa: _ehGerenteOuAdmin priorizava window.getCurrentUser() — função que NÃO existe dentro do iframe do Manutenção. Caía no fallback que lê users-profile/admin/roleOverride. Como William não tem roleOverride explícito (role vem hardcoded como admin via USERS), a leitura retornava undefined → role default "producao" → função retornava false.\n\nFix: prioridade pra state.isAdmin que já é setado em _autoLoginViaHub como `u.isAdmin || u.isGerente` (cobre admin + gerente, fonte mais confiável dentro do iframe).\n\nResultado: admin volta a ver toggle de técnicos + Kanban populado. Vorlei (técnico) continua só vendo os dele.'}
+    ]
+  },
+  {
+    v:'3.52.2', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · debug ON-SCREEN do Kanban vazio (sem precisar console).',
         desc:'William reportou que não conseguia digitar no console pra rodar __debugKanban().\n\nAgora: quando o Kanban renderiza vazio MAS tem cards no banco, aparece automaticamente uma caixa amarela no canto inferior direito com:\n• state.user, state.userKey, resolved\n• ehAdminGer, state.isAdmin\n• Total cards × visíveis\n• Os 6 primeiros cards com seus campos resp/respKey/autor/autorKey\n• Resultado do filtro pra cada um\n\nWilliam: print da caixinha amarela quando aparecer.'}
