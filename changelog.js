@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.55.1', d:'23 abr 2026', current:true,
+    v:'3.55.2', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Preço · polish visual + fontes do design system (Outfit/Poppins/DM Mono).',
+        desc:'Ajuste fino do redesign minimal v3.55.0 — observação do William sobre fontes fora do padrão e light/dark mode.\n\n• FONTES: removido Inter (não é do design system do HUB). Tudo agora usa Outfit (display/títulos), Poppins (UI/botões) e DM Mono (eyebrows/números/IDs) conforme CLAUDE.md.\n\n• TOGGLE Com/Sem tingimento: ativo era branco-em-preto invertido (estranho em light). Agora usa verde Fiobras (#008835 light, #3ECF6E dark) — consistente com ICMS/Meta/Save.\n\n• HERO RESULT: gradient sutil que sumia em light mode → trocado por surface sólido com border + barra verde no topo (3px gradient verde→bright). Funciona igual nos dois temas.\n\n• INPUTS: border 1.5px → 1px (mais clean). Border-radius 8 → 10. Height 46 → 48. Focus glow verde adicionado (box-shadow 3px). Mesma melhoria no .mn-edit-input (custo hora editável).\n\n• ICMS / META / FIO PILLS: hover state verde antes era inexistente em mn-icms — agora pinta border+texto verde no hover.\n\n• TIPOGRAFIA: hero h1 1.4 → 1.25rem (menos ego, mais ar). Eyebrows DM Mono com mais letter-spacing (2.2px). Hist-card name +Outfit weight, KPI value 1.4 → 1.45rem.\n\n• CARDS HISTÓRICO: hover translateX 2px verde + avatar 38 → 40px.\n\n• EMPTY STATE: bg surface + border dashed (era texto solto).\n\n• BUTTONS save/add: text-transform uppercase + transform translateY(-1px) no hover.\n\n• SPACING: container padding 24/22/60 → 28/24/64 (mais respirável). Sections 26 → 28px gap.'}
+    ]
+  },
+  {
+    v:'3.55.1', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Preço · hotfix tela em branco (SyntaxError quebrava o script principal).',
         desc:'Bug crítico do v3.55.0: tela do Preço carregava completamente em branco (só mostrava o header e as tabs). Causa: na linha 1927 das overrides v3.55.0 redeclarei `const _origRenderCustos` que JÁ existia desde v3.54.2 (linha 1666 — wrap do applyCustosPermissions). SyntaxError "Identifier _origRenderCustos has already been declared" parava o parse do script INTEIRO, então NENHUMA função (switchTab, calcVendas, applyTheme, etc) era declarada → tela branca + console silencioso (Firebase callbacks ainda rodavam mas as functions não existiam).\n\nFix: renomeado pra `_mnOrigRenderCustos`. node --check passa, switchTab/calcVendas existem no window, panel-vendas ativa corretamente, hero render OK.\n\nLição: na próxima vez que adicionar `const _origXxx`, grep antes pra ver se já existe.'}
