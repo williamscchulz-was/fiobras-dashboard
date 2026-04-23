@@ -11,7 +11,7 @@
  * Cliente detecta nova versão via 'controllerchange' e mostra toast "Atualizar".
  */
 
-const VERSION = '3.52.0';
+const VERSION = '3.52.1';
 const CACHE_NAME = `fiobras-hub-v${VERSION}`;
 
 const PRECACHE = [
@@ -128,7 +128,10 @@ async function staleWhileRevalidate(req) {
   const cached = await caches.match(req);
   const fetchPromise = fetch(req).then(res => {
     if (res && res.status === 200) {
-      caches.open(CACHE_NAME).then(cache => cache.put(req, res.clone()));
+      // v3.52.1 — clone IMEDIATO. Antes o clone era dentro do .then(cache=>...),
+      // que rodava async depois do return; aí o body já tinha sido consumido.
+      const cloneForCache = res.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put(req, cloneForCache));
     }
     return res;
   }).catch(() => cached);
