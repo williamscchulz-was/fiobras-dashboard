@@ -1924,7 +1924,8 @@ window.renderHistorico = function(){
 };
 
 // Wrap renderCustosTab pra usar pills + tabela minimal
-const _origRenderCustos = window.renderCustosTab;
+// (já existe um _origRenderCustos na linha 1666 — usamos prefix mn pra evitar redeclare)
+const _mnOrigRenderCustos = window.renderCustosTab;
 window.renderCustosTab = function(){
   // Re-render do zero usando o estilo minimal
   const tipos = Object.keys(cadastro);
