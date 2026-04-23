@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.49.0', d:'23 abr 2026', current:true,
+    v:'3.49.1', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Auto-login não funcionava (race condition Firebase × checkAuth).',
+        desc:'BUG: William reportou que mesmo com sessão válida em localStorage, a tela de login aparecia ao reabrir.\n\nCausa: checkAuth() no boot exigia `getUser(s.user)` retornar dados, mas getUser depende de `window._usersConfig` e `window._usersProfile` que carregam ASYNC do Firebase. No boot, esses objetos estão vazios → getUser retorna null → fallback mostrava login screen mesmo com cache válido.\n\nFix: checkAuth agora confia no cache do localStorage (que já tem nome+role+expires). Mostra splash "Bem-vindo de volta" IMEDIATAMENTE sem esperar Firebase. Validação de "user ativo" + renovação de TTL acontecem em background quando Firebase chegar (1s/3s/6s).\n\nResultado: ao reabrir o app com sessão válida, splash welcome aparece em <100ms sem flash de login.'}
+    ]
+  },
+  {
+    v:'3.49.0', d:'23 abr 2026',
     items:[
       {type:'feat', title:'Auto-login perfeito · cache local + splash personalizado + trocar conta.',
         desc:'Mockup aprovado em mockup-autologin.html.\n\nMUDANÇAS:\n\n1) SEM FLASH DE LOGIN\n   • #loginScreen agora vem com class="hide" no HTML por default\n   • checkAuth() roda no boot e remove .hide SÓ se cache ausente/expirado\n   • Antes: tela de login aparecia brevemente antes do checkAuth esconder. Agora: nunca aparece se há sessão válida.\n\n2) SPLASH PERSONALIZADO "Bem-vindo de volta, <Nome>"\n   • Avatar grande (foto ou iniciais) + greeting + nome em destaque + spinner\n   • Duração 800ms (vs 2400ms do login normal) — rápido o suficiente pra não atrasar, lento o suficiente pra registrar visualmente\n   • Modo ativado via showSplash(nome, role, {welcomeBack:true})\n   • CSS .splash.welcome-mode esconde a barra de loading e o splash-user genérico\n\n3) BOTÃO "Não é você? Trocar conta"\n   • Discreto no rodapé do splash welcome (só visível no modo welcome back)\n   • Click chama trocarConta() → clearSession + remove fiobras-remember + reload\n   • Crucial pra device compartilhado (PC do laboratório, tablet do chão)\n\n4) RENOVAÇÃO AUTOMÁTICA DO TTL NO BOOT\n   • Cada checkAuth() bem-sucedido chama setSession(s.user) → renova TTL pra +30d\n   • User ativo nunca expira; user inativo por 30d cai no login\n\n5) DETECÇÃO DE USER INATIVO NO BOOT\n   • Se profile.active === false ao carregar com sessão válida → limpa cache + mostra login + alert "Usuário inativo. Contate o admin."\n   • Antes: user inativo entrava direto e travava em telas vazias.\n\nSchema do cache (localStorage["fiobras-dash-auth"]) inalterado: {user, role, nome, ts, expires, remember}. Zero migração.\n\nFluxo: App abre → lê cache (5ms) → splash "Bem-vindo, William" (800ms) → dashboard.'}

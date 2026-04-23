@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.49.0</div>
+    <div class="login-foot">Sistema interno · v3.49.1</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.49.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.49.1</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -2746,27 +2746,40 @@ function updateCrumbFromState(){
 function checkAuth(){
   const s = getSession();
   const loginScr = document.getElementById('loginScreen');
-  if (s && getUser(s.user)) {
-    // v3.49.0 — verifica se user tá ativo (boot detect)
-    const profile = (window._usersProfile || {})[s.user] || {};
+  if (!s) {
+    // Sem sessão → mostra login.
+    if (loginScr) loginScr.classList.remove('hide');
+    return;
+  }
+  // v3.49.1 — Confia no cache do localStorage. Firebase carrega async, então
+  // getUser(s.user) provavelmente retorna null no boot (users-config ainda
+  // vazio). Usa nome/role direto da sessão. Validação de "user ativo" e
+  // refresh de nome/role acontecem DEPOIS quando Firebase chegar.
+  if (loginScr) loginScr.classList.add('hide');
+  const nomeAtual = s.nome || s.user;
+  const roleAtual = s.role || 'producao';
+  showSplash(nomeAtual, roleAtual, { welcomeBack: true });
+  // Valida user ativo + renova TTL DEPOIS que Firebase carregar (até 6s)
+  let _validated = false;
+  const _check = () => {
+    if (_validated) return;
+    const profs = window._usersProfile;
+    if (!profs || !Object.keys(profs).length) return; // ainda não carregou
+    _validated = true;
+    const profile = profs[s.user] || {};
     if (profile.active === false) {
       clearSession();
       try { localStorage.removeItem('fiobras-remember'); } catch(e){}
-      if (loginScr) loginScr.classList.remove('hide');
-      setTimeout(() => alert('Usuário inativo. Contate um administrador.'), 100);
+      alert('Usuário inativo. Contate um administrador.');
+      location.reload();
       return;
     }
-    // Auto-login: NUNCA mostra login screen + usa splash "welcome back"
-    if (loginScr) loginScr.classList.add('hide');
-    // v3.49.0 — renova TTL no boot bem-sucedido (user ativo nunca expira)
-    setSession(s.user);
-    const userObj = getUser(s.user);
-    const nomeAtual = profile.nomeCompleto || userObj.nome;
-    showSplash(nomeAtual, getEffectiveRole(s.user), { welcomeBack: true });
-  } else {
-    // Sem sessão → mostra login. Limpa qualquer cache antigo de sessão expirada.
-    if (loginScr) loginScr.classList.remove('hide');
-  }
+    // v3.49.1 — agora sim renova TTL com dados frescos do Firebase
+    try { setSession(s.user); } catch(e){ console.warn('renew TTL', e); }
+  };
+  setTimeout(_check, 1000);
+  setTimeout(_check, 3000);
+  setTimeout(_check, 6000);
 }
 
 // ── Tema ─────────────────────────────────────────────────────────────────
@@ -2791,7 +2804,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.49.0';
+const CURRENT_VERSION = '3.49.1';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
