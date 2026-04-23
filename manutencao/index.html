@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.48.9">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.50.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -723,9 +723,22 @@ cursor: default;
 }
 .kc3-eqtag { background: rgba(0,200,80,.12); color: #4ADE80; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
 .kc3-meta-tipo { color: #9CA295; }
-.kc3-meta-date { color: #6B7166; }
+.kc3-meta-date { color: #6B7166; font-weight: 500; padding: 1px 6px; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px; }
 .kc3-meta-date.overdue { color: #F87171; font-weight: 600; }
 .kc3-meta-date.overdue::before { content: '⚠ '; }
+/* v3.50.0 — Timer com cor por idade */
+.kc3-meta-date.timer-fresh  { background: rgba(16,185,129,.12); color: #6EE7B7; }
+.kc3-meta-date.timer-warn   { background: rgba(245,158,11,.15); color: #FCD34D; }
+.kc3-meta-date.timer-late   { background: rgba(220,38,38,.15); color: #F87171; }
+.kc3-meta-date.timer-active { background: rgba(245,158,11,.15); color: #FCD34D; } /* legado: pré-existente */
+.kc3-pulse {
+  width: 5px; height: 5px; border-radius: 50%; background: currentColor;
+  animation: kc3PulseAnim 2s ease-in-out infinite;
+}
+@keyframes kc3PulseAnim { 0%,100%{opacity:1} 50%{opacity:.3} }
+[data-theme="light"] .kc3-meta-date.timer-fresh { color: #047857; }
+[data-theme="light"] .kc3-meta-date.timer-warn  { color: #92400E; }
+[data-theme="light"] .kc3-meta-date.timer-late  { color: #991B1B; }
 .kc3-meta-sep { opacity: .4; }
 .kc3-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .kc3-urg {
@@ -2097,6 +2110,10 @@ to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 @media(max-width:768px) {
 .btn-notif-label { display:none; }
 #btn-notif-test { padding:7px 9px !important; }
+/* v3.50.0 — Esconde TODA UI de notificações (push, in-app, banner, modais admin) */
+#btn-notif-test, #btn-ver-notifs, #btn-notif-toggle,
+#kanban-banner, #inapp-notif,
+#modal-notif-admin, #modal-notif-historico { display: none !important; }
 }
 
 /* ── LOGIN CARDS ── */
@@ -3240,36 +3257,9 @@ const prevRef      = ref(db, 'manutencao/preventivas');
 const pecasRef     = ref(db, 'manutencao/pecas');
 const historicoRef = ref(db, 'manutencao/historico');
 
-// ── Sync Firebase → state
-// Monitora notificações FCM pendentes — dispara em todos os devices
-onValue(ref(db, 'manutencao/fcmPending'), snap => {
-  if (!snap.val()) return;
-  state._lastFcmPending = snap.val(); // guardar para notificações perdidas
-  if (!state.user) return;
-  const items = Object.entries(snap.val());
-  const agora = Date.now();
-  items.forEach(([key, payload]) => {
-    const visto = sessionStorage.getItem('fcm_' + key);
-    if (visto) return;
-    if (!payload.ts || (agora - payload.ts) >= 60000) return;
-    sessionStorage.setItem('fcm_' + key, '1');
-
-    // Verifica destinatário
-    const dest = payload.dest || 'todos';
-    if (dest !== 'todos') {
-      const destNome = USERS[dest] ? USERS[dest].nome : dest;
-      if (destNome !== state.user) return;
-    }
-
-    // Filtra preventivas por responsável (notif automáticas)
-    if (payload.tipo !== 'manual' && !state.isAdmin && payload.resp && payload.resp !== state.user) return;
-
-    // Mostra push + in-app
-    mostrarNotif(payload.titulo, payload.corpo, 'fcm-' + key);
-    exibirInAppNotif(payload.titulo, payload.corpo, payload.de || '');
-    if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
-  });
-});
+// v3.50.0 — TODAS as notificações foram removidas (push, in-app, banner, digest).
+// Será recriado depois com regras claras. O listener de fcmPending foi removido.
+// Resta apenas a infraestrutura de Firebase pra eventual recriação.
 
 onValue(kanbanRef, snap => {
   const val = snap.val();
@@ -3400,7 +3390,7 @@ onValue(maquinasRef, snap => {
 window._fbPushMaquina  = (m) => push(maquinasRef, m);
 window._fbUpdateMaquina = (key, data) => update(ref(db, `manutencao/maquinas/${key}`), data);
 window._fbRemoveMaquina = (key) => remove(ref(db, `manutencao/maquinas/${key}`));
-window._fbPushFCMPending = (payload) => push(ref(db, 'manutencao/fcmPending'), payload);
+window._fbPushFCMPending = (_payload) => { /* v3.50.0 — no-op: notificações removidas */ };
 window._fbReady = true;
 window._fbSaveToken = (usuario, token) => {
   const tokenRef = ref(db, 'manutencao/fcmTokens/' + btoa(usuario).replace(/=/g,''));
@@ -3937,93 +3927,68 @@ function limparCardsFantasma() {
 function gerarCardsPreventivas() {
   if (!window._fbReady) return;
 
-  // v3.32.7 — Supressão visual no Kanban: só gera card da MAIOR hierarquia da
-  // semana por máquina, mas MANTÉM TODAS as preventivas daquela freq máxima
-  // (tarefas distintas com mesma freq devem gerar cards separados).
-  const grupos = {}; // gkey: { maxFreq, prevKeys:Set }
+  // v3.50.0 — Regra nova de hierarquia (Opção B aprovada pelo William):
+  // Pra CADA MÁQUINA, identifica a maior frequência VENCIDA (sem janela semanal).
+  // Todas as preventivas vencidas dessa máquina com freq menor são absorvidas
+  // (não viram cards). Ex: anual vencida absorve semanal pendente da mesma
+  // máquina, mesmo que a semanal tenha vencido há 3 semanas.
+  // Preventivas diárias (freq=1) NUNCA viram card (regra mantida).
+  // Preventivas SEM `ultima` viram card (vencidas desde sempre — fix v3.50.0).
+
+  const hoje = today();
+  // Mapa: maqKey → { maxFreq, vencidas:[{p, proxima}] }
+  const porMaq = {};
   state.preventivas.forEach(p => {
-    if (!p.ultima || !p.freq) return;
-    if (parseInt(p.freq) === 1) return; // diária fora
-    const prox = addDays(parseDt(p.ultima), parseInt(p.freq));
-    const maq = p.maqKey || p.maquinaKey || '__sem_maq__';
-    const gkey = _weekKey(prox) + '|' + maq;
+    if (!p.freq) return;
     const freq = parseInt(p.freq);
-    const pk = p._key || p.id;
-    if (!grupos[gkey]) grupos[gkey] = { maxFreq: freq, prevKeys: new Set([pk]) };
-    else if (freq > grupos[gkey].maxFreq) grupos[gkey] = { maxFreq: freq, prevKeys: new Set([pk]) };
-    else if (freq === grupos[gkey].maxFreq) grupos[gkey].prevKeys.add(pk);
+    if (freq === 1) return; // diária fora
+    // v3.50.0 — sem `ultima` = vencida desde sempre. Próxima = hoje.
+    const proxima = p.ultima ? addDays(parseDt(p.ultima), freq) : hoje;
+    const dr = diffDays(hoje, proxima);
+    if (dr > 0) return; // não venceu ainda
+    const maq = p.maqKey || p.maquinaKey || ('__eq:' + (p.equip||'__sem__').toLowerCase());
+    if (!porMaq[maq]) porMaq[maq] = { maxFreq: 0, vencidas: [] };
+    porMaq[maq].vencidas.push({ p, proxima, freq });
+    if (freq > porMaq[maq].maxFreq) porMaq[maq].maxFreq = freq;
   });
-  const prevIdsQueGeraCard = new Set();
-  Object.values(grupos).forEach(g => g.prevKeys.forEach(k => prevIdsQueGeraCard.add(k)));
 
-  state.preventivas.forEach(p => {
-    if (!p.ultima) return;
-    if (parseInt(p.freq) === 1) return;
-    // v3.32.4 — só gera card se é o vencedor da semana+máquina
-    if (!prevIdsQueGeraCard.has(p._key || p.id)) return;
-    const proxima = addDays(parseDt(p.ultima), parseInt(p.freq));
-    const dr = diffDays(today(), proxima);
-    if (dr <= 0) {
-      // Verifica se já existe card ativo para esta preventiva
-      const jaExiste = state.cards.some(c => c.prevId === (p._key || p.id) && c.col !== 'done');
-      if (!jaExiste) {
-        const card = {
-          titulo: p.tarefa,
-          desc:   'Vencida em ' + proxima.toLocaleDateString('pt-BR') + '. Responsável: ' + (p.resp || '—') + '. ' + (p.obs || ''),
-          equip:  p.equip,
-          setor:  p.setor,
-          tipo:   'preventiva',
-          urg:    'alta',
-          col:    'todo',
-          data:   nowStr(),
-          autor:  'Sistema',
-          prevId: p._key || p.id,
-          resp:   p.resp || '',
-        };
-        window._fbPushCard(card);
-        // Notifica responsável + Joacir + Admin
-        notificarPreventiva(p, card);
-      }
-    }
+  // Pra cada máquina, só geram card as preventivas com freq === maxFreq da máquina.
+  // As menores ficam "absorvidas" (entram no histórico ao concluir o card maior).
+  Object.values(porMaq).forEach(g => {
+    g.vencidas.forEach(({ p, proxima, freq }) => {
+      if (freq !== g.maxFreq) return; // absorvida pela maior
+      const prevId = p._key || p.id;
+      const jaExiste = state.cards.some(c => c.prevId === prevId && c.col !== 'done');
+      if (jaExiste) return;
+      const respKey = p.resp && typeof _resolveUserKey === 'function' ? _resolveUserKey(p.resp) : null;
+      const card = {
+        titulo: p.tarefa,
+        desc:   (p.ultima
+          ? 'Vencida em ' + proxima.toLocaleDateString('pt-BR') + '.'
+          : 'Nunca executada — vencida desde o cadastro.')
+          + ' Responsável: ' + (p.resp || '—') + '. ' + (p.obs || ''),
+        equip:  p.equip,
+        setor:  p.setor,
+        tipo:   'preventiva',
+        urg:    'alta',
+        col:    'todo',
+        data:   nowStr(),
+        ts:     Date.now(),
+        autor:  'Sistema',
+        prevId: prevId,
+        resp:   p.resp || '',
+        respKey: respKey,
+        maqKey: p.maqKey || p.maquinaKey || null,
+      };
+      window._fbPushCard(card);
+    });
   });
 }
 
-// Envia notificação FCM para resp + Joacir + Admin
-function notificarPreventiva(prev, card) {
-  if (!window._fbPushFCMPending) return;
-  var titulo = 'Preventiva vencida: ' + (card.equip || prev.tarefa);
-  var corpo  = prev.tarefa + (prev.resp ? ' | Resp: ' + prev.resp : '');
-  // Notificação para todos (admin/Joacir filtram por isAdmin, resp filtra por nome)
-  window._fbPushFCMPending({
-    titulo: titulo,
-    corpo:  corpo,
-    ts:     Date.now(),
-    resp:   prev.resp || '',
-    de:     'Sistema',
-    tipo:   'preventiva',
-    dest:   'todos',
-    prevId: prev._key || prev.id,
-  });
-}
-
-// Re-notificação diária de preventivas pendentes
-function reNotificarPreventivasPendentes() {
-  if (!window._fbReady || !state.isAdmin) return;
-  var chaveHoje = 'prev_renotif_' + todayStr();
-  if (sessionStorage.getItem(chaveHoje)) return;
-  sessionStorage.setItem(chaveHoje, '1');
-  state.preventivas.forEach(function(p) {
-    if (!p.ultima) return;
-    var proxima = addDays(parseDt(p.ultima), parseInt(p.freq));
-    var dr = diffDays(today(), proxima);
-    if (dr <= 0) {
-      var jaResolvido = state.cards.some(function(c) { return c.prevId === (p._key || p.id) && c.col === 'done'; });
-      if (!jaResolvido) {
-        notificarPreventiva(p, { equip: p.equip, titulo: p.tarefa });
-      }
-    }
-  });
-}
+// v3.50.0 — notificarPreventiva + reNotificarPreventivasPendentes removidas.
+// Stubs mantidos pra não quebrar callers que ainda apontem pra elas.
+function notificarPreventiva(_prev, _card) { /* no-op */ }
+function reNotificarPreventivasPendentes() { /* no-op */ }
 
 // ── DASHBOARD ─────────────────────────────────────────
 let _dashDirty = false;
@@ -4246,22 +4211,32 @@ function _tickTimers() {
     el.style.borderColor = cor + '40';
     el.style.background = cor + '12';
   });
-  // v3.36.0 — novo seletor: .kc2-date em cards em "doing" mostra tempo ativo
-  // v3.38.0 — cards em "todo" com age > 7d ganham classe .overdue (vermelho)
+  // v3.50.0 — Timer com h/min em A FAZER e EM ANDAMENTO. Cor escala por tempo.
+  // Lê data-mode (todo/doing/done) e atualiza texto + classe sem re-renderizar.
   document.querySelectorAll('.kc2-date[data-ts]').forEach(el => {
     const ts = parseInt(el.dataset.ts);
-    const col = el.dataset.col;
+    const mode = el.dataset.mode || el.dataset.col || 'done';
     if (!ts) return;
-    el.classList.remove('timer-active', 'overdue');
-    if (col === 'doing') {
-      const { txt } = _tempoDecorrido(ts);
-      el.textContent = txt;
-      el.classList.add('timer-active');
+    el.classList.remove('timer-active','overdue','timer-fresh','timer-warn','timer-late');
+    const ageH = (Date.now() - ts) / 3600000;
+    const { txt } = _tempoDecorrido(ts);
+    let novoTxt = '', novaCls = '';
+    if (mode === 'doing') {
+      novoTxt = 'Em execução · ' + txt;
+      novaCls = ageH < 4 ? 'timer-fresh' : (ageH < 8 ? 'timer-warn' : 'timer-late');
+    } else if (mode === 'todo') {
+      novoTxt = txt + ' esperando';
+      if (ageH < 24) novaCls = 'timer-fresh';
+      else if (ageH < 72) novaCls = 'timer-warn';
+      else { novaCls = 'timer-late'; novoTxt = txt + ' ⚠ urgente'; }
     } else {
-      el.textContent = _relativeDate(ts);
-      const ageDays = Math.floor((Date.now() - ts) / 86400000);
-      if (col !== 'done' && ageDays > 7) el.classList.add('overdue');
+      novoTxt = _relativeDate(ts);
     }
+    if (novaCls) el.classList.add(novaCls);
+    // Preserva o pulse dot se existir
+    const pulse = el.querySelector('.kc3-pulse');
+    el.textContent = novoTxt;
+    if (pulse && (mode === 'todo' || mode === 'doing')) el.prepend(pulse);
   });
 }
 
@@ -4292,18 +4267,34 @@ function buildCard(c) {
         return null;
       })() : null);
 
-  // v3.38.0 — Data vai pro footer (antes sobrepunha os botões de ação).
-  // Cor vermelha quando: col=doing (timer ativo) OU passou 7d desde criação (overdue).
+  // v3.50.0 — Timer com h/min em A FAZER e EM ANDAMENTO. Cor escala por tempo:
+  // - A FAZER: verde <24h "esperando" · amarelo 24h-72h · vermelho >72h ⚠
+  // - EM ANDAMENTO: verde <4h · amarelo 4-8h · vermelho >8h
+  // - DONE: data simples, sem cor
+  // Atualizado a cada 60s via _tickTimers (lê data-ts + data-col + data-mode)
   let dateTxt = '';
   let dateCls = '';
+  let dateMode = '';
   if (ts) {
-    const ageDays = Math.floor((Date.now() - ts) / 86400000);
+    const ageMs = Date.now() - ts;
+    const ageH = ageMs / 3600000;
     if (c.col === 'doing') {
+      dateMode = 'doing';
       const { txt } = _tempoDecorrido(ts);
-      dateTxt = txt; dateCls = 'timer-active';
+      dateTxt = 'Em execução · ' + txt;
+      if      (ageH < 4)  dateCls = 'timer-fresh';
+      else if (ageH < 8)  dateCls = 'timer-warn';
+      else                dateCls = 'timer-late';
+    } else if (c.col === 'todo') {
+      dateMode = 'todo';
+      const { txt } = _tempoDecorrido(ts);
+      dateTxt = txt + ' esperando';
+      if      (ageH < 24)  dateCls = 'timer-fresh';
+      else if (ageH < 72)  dateCls = 'timer-warn';
+      else                 { dateCls = 'timer-late'; dateTxt = txt + ' ⚠ urgente'; }
     } else {
+      dateMode = 'done';
       dateTxt = _relativeDate(ts);
-      if (c.col !== 'done' && ageDays > 7) dateCls = 'overdue';
     }
   }
   // Equipamento — tag verde curta (RET-01) na meta line
@@ -4348,7 +4339,9 @@ function buildCard(c) {
   const tipoTxt = tipoLabel[c.tipo] || c.tipo || '';
 
   // Date com classe overdue compartilhada com kc2-date pra _tickTimers continuar funcionando
-  const dateHtml = dateTxt ? `<span class="kc3-meta-date kc2-date ${dateCls}" data-ts="${ts||''}" data-col="${c.col}">${dateTxt}</span>` : '';
+  // v3.50.0 — span com data-mode (todo/doing/done) pra _tickTimers reavaliar cor
+  const pulseDot = (dateMode === 'todo' || dateMode === 'doing') ? '<span class="kc3-pulse"></span>' : '';
+  const dateHtml = dateTxt ? `<span class="kc3-meta-date kc2-date ${dateCls}" data-ts="${ts||''}" data-col="${c.col}" data-mode="${dateMode}">${pulseDot}${dateTxt}</span>` : '';
 
   // Meta line: RET-01 · Tipo · Data
   const metaParts = [];
@@ -5522,30 +5515,54 @@ function confirmarAssinatura() {
     };
     window._fbUpdatePrev(prevKey, updatePv);
 
-    // v3.32.4 — Cascata: executar maior também executa as menores da MESMA máquina
-    // Ex: Anual (365) → Semestral (180), Trimestral (90), Mensal (30), Quinzenal (15), Semanal (7)
-    // Diária (freq=1) fica fora — tem ciclo próprio de notificação.
+    // v3.50.0 — Cascata REFINADA: executar maior cascateia ultima=hoje SÓ
+    // nas menores VENCIDAS da mesma máquina. Antes atualizava TODAS as
+    // menores (mesmo as ainda dentro do ciclo), o que "queimava" preventivas
+    // que tinham folga.
+    // Ex: anual venceu hoje. Mensal venceu há 2 dias. Quinzenal foi feita há
+    //     5 dias (não venceu ainda). Concluir anual → cascateia mensal SIM,
+    //     quinzenal NÃO (mantém o ciclo dela intacto).
+    // Diária (freq=1) fica de fora.
     const pvExec = state.preventivas.find(p => (p._key || p.id) === prevKey);
     if (pvExec && pvExec.freq && parseInt(pvExec.freq) > 1) {
       const freqExec = parseInt(pvExec.freq);
       const maqExec = pvExec.maqKey || pvExec.maquinaKey;
+      const _hojeMid = today();
       if (maqExec) {
+        // Inclui também a executada nos cards a fechar (cascata absorve cards menores)
+        const cardsParaFechar = [];
         state.preventivas.forEach(p => {
           if ((p._key || p.id) === prevKey) return; // skip a própria
           const pMaq = p.maqKey || p.maquinaKey;
           const pFreq = parseInt(p.freq) || 0;
           // Mesma máquina + freq menor que a executada + maior que diária (1)
-          if (pMaq === maqExec && pFreq > 1 && pFreq < freqExec) {
-            const pKey = p._key || p.id;
-            if (pKey && window._fbUpdatePrev) {
-              window._fbUpdatePrev(pKey, {
-                ultima:        hoje,
-                ultimaAssin:   tecnico,
-                ultimaAssinTs: agora,
-                ultimaObs:     '[cascata] executada junto com ' + (pvExec.tarefa || 'freq ' + freqExec + 'd'),
-              });
-            }
+          if (pMaq !== maqExec || pFreq <= 1 || pFreq >= freqExec) return;
+          // Filtro novo: só cascateia se estiver VENCIDA (proxima <= hoje)
+          // OU se nunca foi executada (sem `ultima` = vencida desde sempre).
+          let estaVencida = false;
+          if (!p.ultima) {
+            estaVencida = true;
+          } else {
+            const proxP = addDays(parseDt(p.ultima), pFreq);
+            if (diffDays(_hojeMid, proxP) <= 0) estaVencida = true;
           }
+          if (!estaVencida) return;
+          const pKey = p._key || p.id;
+          if (pKey && window._fbUpdatePrev) {
+            window._fbUpdatePrev(pKey, {
+              ultima:        hoje,
+              ultimaAssin:   tecnico,
+              ultimaAssinTs: agora,
+              ultimaObs:     '[cascata] executada junto com ' + (pvExec.tarefa || 'freq ' + freqExec + 'd'),
+            });
+          }
+          // Se essa preventiva absorvida tem card ativo no Kanban, fecha junto
+          const cardAbsor = state.cards.find(c => c.prevId === pKey && c.col !== 'done');
+          if (cardAbsor) cardsParaFechar.push(cardAbsor._key);
+        });
+        // Fecha cards das preventivas absorvidas
+        cardsParaFechar.forEach(ck => {
+          if (window._fbUpdateCard) window._fbUpdateCard(ck, { col: 'done' });
         });
       }
     }
@@ -6010,217 +6027,23 @@ function renderCalendario() {
 }
 
 
-// ── NOTIFICAÇÕES ───────────────────────────────────────────
+// ── NOTIFICAÇÕES ── v3.50.0 — REMOVIDAS COMPLETAMENTE
+// Push, in-app, banner, switch de permissão, digest worker, FCM token —
+// tudo desligado. Stubs no-op pra preservar callers. Será reconstruído depois
+// com regras claras (ver AUDIT-PREVENTIVAS-NOTIF.md).
 let notifPermission = 'default';
-
-// v3.32.2 — popup automático removido. Agora só sincroniza estado atual
-// do SO com o switch na UI. User ativa manualmente via switch no header.
-function initNotificacoes() {
-  if (!('Notification' in window)) return;
-  notifPermission = Notification.permission;
-  // Atualiza visual do switch (se já tá no DOM)
-  if (typeof _atualizarNotifSwitch === 'function') _atualizarNotifSwitch();
-  // Se user já disse "sim" antes, tá tudo ok — nada a fazer
-  // Se user disse "não", respeita (não pede de novo)
-  // Se 'default' — user nunca viu — NÃO pede automaticamente
-}
-
-// v3.32.2 — Switch de notificações (chamado pelo toggle no header)
-function toggleNotifPermission() {
-  if (!('Notification' in window)) {
-    toast('Seu dispositivo não suporta notificações.', 'err');
-    return;
-  }
-  const atual = Notification.permission;
-
-  if (atual === 'granted') {
-    // Já ativo — oferece desligar (localStorage flag; não dá pra revogar permissão do SO via JS)
-    const silenciar = localStorage.getItem('fio_notif_silenciar') === '1';
-    if (silenciar) {
-      localStorage.removeItem('fio_notif_silenciar');
-      toast('Notificações reativadas', 'ok');
-    } else {
-      localStorage.setItem('fio_notif_silenciar', '1');
-      toast('Notificações silenciadas (pra reativar, clique no sino)', 'ok');
-    }
-    _atualizarNotifSwitch();
-    return;
-  }
-
-  if (atual === 'denied') {
-    toast('Notificações bloqueadas no navegador. Libere em Configurações do site.', 'err', 5000);
-    return;
-  }
-
-  // 'default' — pede permissão agora
-  Notification.requestPermission().then(p => {
-    notifPermission = p;
-    if (p === 'granted') {
-      localStorage.removeItem('fio_notif_silenciar');
-      toast('Notificações ativadas!', 'ok');
-      initFCMToken();
-    } else if (p === 'denied') {
-      toast('Permissão negada. Libere em Configurações do site se mudar de ideia.', 'err');
-    }
-    _atualizarNotifSwitch();
-  });
-}
+function initNotificacoes() { /* no-op */ }
+function toggleNotifPermission() { /* no-op */ }
+function _atualizarNotifSwitch() { /* no-op */ }
 window.toggleNotifPermission = toggleNotifPermission;
-
-// Atualiza ícone/estado visual do botão de notif no header
-function _atualizarNotifSwitch() {
-  const btn = document.getElementById('btn-notif-toggle');
-  if (!btn) return;
-  const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
-  const silenciar = localStorage.getItem('fio_notif_silenciar') === '1';
-  let icon, title;
-  if (perm === 'unsupported') {
-    icon = '🔕'; title = 'Notificações não suportadas neste dispositivo';
-    btn.disabled = true;
-  } else if (perm === 'granted' && !silenciar) {
-    icon = '🔔'; title = 'Notificações ativas · clique pra silenciar';
-  } else if (perm === 'granted' && silenciar) {
-    icon = '🔕'; title = 'Notificações silenciadas · clique pra reativar';
-  } else if (perm === 'denied') {
-    icon = '🔕'; title = 'Notificações bloqueadas no navegador';
-  } else {
-    icon = '🔔'; title = 'Ativar notificações';
-  }
-  btn.textContent = icon;
-  btn.title = title;
-}
 window._atualizarNotifSwitch = _atualizarNotifSwitch;
-
-function mostrarBannerNotif(msg, showBtn) {
-  let banner = document.getElementById('notif-banner');
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'notif-banner';
-    banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:420px;background:#1a2e20;border-radius:12px;padding:12px 16px;z-index:500;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,0.25)';
-    document.body.appendChild(banner);
-  }
-  const bellSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
-  const ativarBtn = showBtn ? '<button onclick="pedirPermissaoNotif()" style="background:#0076BE;border:none;border-radius:8px;color:#fff;font-family:Poppins,sans-serif;font-size:0.65rem;font-weight:600;padding:8px 14px;cursor:pointer;white-space:nowrap">Ativar</button>' : '';
-  const closeBtn = '<button onclick="esconderBannerNotif()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:1rem;cursor:pointer;padding:0;flex-shrink:0">&#10005;</button>';
-  banner.innerHTML = bellSvg +
-    '<span style="flex:1;font-size:0.7rem;color:rgba(255,255,255,0.85);line-height:1.4">' + msg + '</span>' +
-    ativarBtn + closeBtn;
-  banner.style.display = 'flex';
-  if (!showBtn) setTimeout(function() { esconderBannerNotif(); }, 6000);
-}
-
-
-function esconderBannerNotif() {
-  const b = document.getElementById('notif-banner');
-  if (b) b.style.display = 'none';
-}
-
-function pedirPermissaoNotif() {
-  Notification.requestPermission().then(p => {
-    notifPermission = p;
-    if (p === 'granted') {
-      esconderBannerNotif();
-      mostrarNotif('Fiobras Manutenção', 'Notificações ativadas!', null);
-      initFCMToken();
-    } else {
-      mostrarBannerNotif('Permissão negada. Ative nas configurações do navegador.', false);
-    }
-  });
-}
-
-function mostrarNotif(titulo, corpo, tag) {
-  if (!('Notification' in window)) return;
-  notifPermission = Notification.permission;
-  if (notifPermission !== 'granted') return;
-  // v3.32.2 — respeita flag "silenciar" (user desligou via switch)
-  if (localStorage.getItem('fio_notif_silenciar') === '1') return;
-  if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
-
-  const opts = {
-    body:    corpo || '',
-    tag:     tag || 'fiobras-manut',
-    renotify: true,
-    requireInteraction: false,
-    silent:  false,
-  };
-
-  // Usa SW para notificação nativa no celular (funciona em background)
-  if (window._swRegistration && window._swRegistration.active) {
-    window._swRegistration.showNotification(titulo, opts)
-      .catch(() => { try { new Notification(titulo, opts); } catch(e) {} });
-  } else {
-    try {
-      const n = new Notification(titulo, opts);
-      n.onclick = () => { window.focus(); n.close(); };
-    } catch(e) { console.warn('Notif:', e.message); }
-  }
-}
-
-// Detecta cards preventivos de urgência alta — notifica repetidamente enquanto pendente
-let prevCardIds = null;
-let notifIntervals = {}; // key -> intervalId — renotifica a cada 5 min
-
-function checkNotifNovosCards(cards) {
-  // Apenas preventivas com urgência alta que não estão concluídas
-  const altaCards = cards.filter(c =>
-    c.tipo === 'preventiva' && c.urg === 'alta' && c.col !== 'done'
-  );
-  const currentAltaIds = new Set(altaCards.map(c => c._key));
-  const currentAllIds  = new Set(cards.map(c => c._key));
-
-  if (prevCardIds === null) {
-    // Primeira carga: inicializa sem notificar cards antigos
-    prevCardIds = currentAllIds;
-    // Mas agenda renotificação para preventivas alta já existentes
-    altaCards.forEach(c => agendarRenotif(c));
-    return;
-  }
-
-  // Novos cards preventivos alta
-  altaCards.forEach(c => {
-    if (!prevCardIds.has(c._key)) {
-      dispararNotif(c);
-      agendarRenotif(c);
-    }
-  });
-
-  // Cancela intervalos de cards que foram concluídos ou removidos
-  Object.keys(notifIntervals).forEach(key => {
-    if (!currentAltaIds.has(key)) {
-      clearInterval(notifIntervals[key]);
-      delete notifIntervals[key];
-    }
-  });
-
-  prevCardIds = currentAllIds;
-  atualizarBadgeNotif();
-}
-
-function dispararNotif(card) {
-  if (notifPermission !== 'granted') return;
-  // Filtra por responsável — usuário só recebe notif das suas preventivas
-  if (!state.isAdmin && state.user) {
-    const pv = state.preventivas.find(p => (p._key || p.id) === card.prevId);
-    if (pv && pv.resp && pv.resp !== state.user) return; // não é responsável
-  }
-  const titulo = 'Alerta: Preventiva urgente — ' + (card.equip || 'Equipamento');
-  const corpo  = card.titulo || 'Manutenção preventiva pendente';
-  mostrarNotif(titulo, corpo, 'prev-' + card._key);
-}
-
-function agendarRenotif(card) {
-  if (notifIntervals[card._key]) return; // já agendado
-  // Renotifica a cada 5 minutos enquanto o card estiver pendente
-  notifIntervals[card._key] = setInterval(() => {
-    const ainda = state.cards.find(c => c._key === card._key && c.col !== 'done');
-    if (ainda) {
-      dispararNotif(ainda);
-    } else {
-      clearInterval(notifIntervals[card._key]);
-      delete notifIntervals[card._key];
-    }
-  }, 24 * 60 * 60 * 1000); // 24 horas
-}
+function mostrarBannerNotif(_m, _s) { /* no-op */ }
+function esconderBannerNotif() { /* no-op */ }
+function pedirPermissaoNotif() { /* no-op */ }
+function mostrarNotif(_t,_c,_tag){ /* no-op */ }
+function checkNotifNovosCards(_cards){ /* no-op */ }
+function dispararNotif(_card){ /* no-op */ }
+function agendarRenotif(_card){ /* no-op */ }
 
 
 // ── MÁQUINAS ─────────────────────────────────────────────
@@ -6651,266 +6474,28 @@ function aplicarQRSeExistir() {
 }
 
 
-// ── NOTIFICAÇÃO ADMIN ──────────────────────────────────────
-function abrirModalNotifAdmin() {
-  document.getElementById('notif-msg').value = '';
-  document.getElementById('notif-titulo').value = 'Fiobras Manutenção';
-  document.getElementById('modal-notif-admin').classList.add('open');
-  setTimeout(() => document.getElementById('notif-msg').focus(), 100);
-}
+// v3.50.0 — Modal de notif admin removido. Stubs no-op.
+function abrirModalNotifAdmin() { /* no-op */ }
+function enviarNotifAdmin() { /* no-op */ }
 
-function enviarNotifAdmin() {
-  const dest   = document.getElementById('notif-dest').value;
-  const titulo = document.getElementById('notif-titulo').value.trim() || 'Fiobras Manutenção';
-  const msg    = document.getElementById('notif-msg').value.trim();
-  if (!msg) { alert('Escreva uma mensagem.'); return; }
-
-  // Salva no Firebase — todos os devices monitoram e exibem
-  window._fbPushFCMPending({
-    titulo,
-    corpo:   msg,
-    ts:      Date.now(),
-    dest,               // 'todos' ou nome específico
-    resp:    '',
-    de:      state.user,
-    tipo:    'manual',
-  });
-
-  fecharModal('modal-notif-admin');
-
-  // Exibe também in-app para o próprio admin
-  exibirInAppNotif(titulo, msg, state.user);
-}
-
+// v3.50.0 — In-app notif removida. exibirInAppNotif vira no-op.
 let inAppTimer = null;
-function exibirInAppNotif(titulo, msg, de) {
-  const el = document.getElementById('inapp-notif');
-  document.getElementById('inapp-titulo').textContent = titulo;
-  document.getElementById('inapp-msg').textContent    = msg;
-  document.getElementById('inapp-de').textContent     = de ? de : '';
-  el.style.display = 'block';
-  el.style.animation = 'none';
-  el.offsetHeight; // force reflow
-  el.style.animation = 'slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
-  if (inAppTimer) clearTimeout(inAppTimer);
-  inAppTimer = setTimeout(fecharInAppNotif, 6000);
-  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-}
-
-function fecharInAppNotif() {
-  const el = document.getElementById('inapp-notif');
-  el.style.animation = 'slideUp 0.3s cubic-bezier(0.4, 0, 1, 1)';
-  setTimeout(() => { el.style.display = 'none'; }, 280);
-}
+function exibirInAppNotif(_titulo, _msg, _de) { /* no-op */ }
+function fecharInAppNotif() { /* no-op */ }
 
 
-// ── NOTIFICAÇÕES PERDIDAS ──────────────────────────────────
-// Quando o app abre, verifica notificações não vistas dos últimos 7 dias
-// v3.31.3 — filtra pelo último "visto" salvo em localStorage, e mostra
-// no máx 1x por dia por usuário (flag fio_resumo_last_ts)
-async function verificarNotificacoesPerdidas() {
-  if (!state.user) return;
-  try {
-    const agora = Date.now();
-    const sete_dias = 7 * 24 * 60 * 60 * 1000;
-    const pending = state._lastFcmPending || {};
-    const perdidas = [];
-
-    // v3.31.3 — last-seen do usuário atual (por usuário, separadamente)
-    const lastSeenKey = 'fio_resumo_last_ts_' + (state.user || '').replace(/\s+/g, '_');
-    const lastSeenTs  = parseInt(localStorage.getItem(lastSeenKey) || '0') || 0;
-
-    Object.entries(pending).forEach(([key, payload]) => {
-      if (!payload.ts) return;
-      if ((agora - payload.ts) > sete_dias) return; // muito antiga
-      if (payload.ts <= lastSeenTs) return;          // já vista (antes do último resumo)
-      if (payload.fcmSent && sessionStorage.getItem('fcm_' + key)) return; // já viu na sessão
-
-      // Verifica se é para este usuário
-      const dest = payload.dest || 'todos';
-      if (dest !== 'todos') {
-        const destNome = USERS[dest] ? USERS[dest].nome : dest;
-        if (destNome !== state.user) return;
-      }
-      if (payload.tipo !== 'manual' && !state.isAdmin && payload.resp && payload.resp !== state.user) return;
-
-      perdidas.push(payload);
-    });
-
-    if (perdidas.length === 0) return;
-
-    // Mostrar resumo de notificações perdidas
-    const qtd = perdidas.length;
-    const titulo = qtd === 1 ? '1 notificação não vista' : (qtd + ' notificações não vistas');
-    const corpo  = perdidas.slice(0,2).map(p => p.titulo + (p.corpo ? ': ' + p.corpo.substring(0,40) : '')).join(' | ');
-    exibirInAppNotif(titulo, corpo, 'Enquanto você estava fora');
-
-    // v3.31.3 — marca esse momento como "visto" (próximo boot não mostra de novo)
-    try { localStorage.setItem(lastSeenKey, String(agora)); } catch(e){}
-  } catch(e) {
-    console.warn('Notif perdidas:', e);
-  }
-}
+// v3.50.0 — Notificações perdidas removidas. Stub no-op.
+async function verificarNotificacoesPerdidas() { /* no-op */ }
 
 
-// ── HISTÓRICO DE NOTIFICAÇÕES ──────────────────────────────
-function abrirModalNotifHistorico() {
-  const pending = state._lastFcmPending || {};
-  const agora = Date.now();
-  const inicioHoje = new Date(); inicioHoje.setHours(0,0,0,0);
-  const lista = document.getElementById('notif-hist-list');
-
-  const itens = Object.entries(pending)
-    .filter(([,p]) => {
-      if (!p.ts || p.ts < inicioHoje.getTime()) return false; // só hoje
-      const dest = p.dest || 'todos';
-      if (dest !== 'todos') {
-        const destNome = USERS[dest] ? USERS[dest].nome : dest;
-        if (destNome !== state.user) return false;
-      }
-      return true;
-    })
-    .sort((a,b) => (b[1].ts||0) - (a[1].ts||0));
-
-  if (!itens.length) {
-    lista.innerHTML = '<div class="empty-state">Nenhuma notificação recente.</div>';
-  } else {
-    lista.innerHTML = itens.map(([key, p]) => {
-      const lida = sessionStorage.getItem('fcm_' + key);
-      const dt = p.ts ? new Date(p.ts).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
-      const bg  = lida ? 'var(--bg)' : 'var(--blue-lt)';
-      const brd = lida ? 'var(--border)' : 'var(--blue-md)';
-      return '<div style="background:' + bg + ';border:1.5px solid ' + brd + ';border-radius:8px;padding:12px 14px">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px">' +
-        '<div style="font-size:0.78rem;font-weight:600;color:var(--text)">' + (p.titulo || 'Notificação') + '</div>' +
-        '<div style="font-size:0.58rem;color:var(--muted);white-space:nowrap">' + dt + '</div>' +
-        '</div>' +
-        '<div style="font-size:0.7rem;color:var(--text2)">' + (p.corpo || '') + '</div>' +
-        (p.de ? '<div style="font-size:0.6rem;color:var(--muted);margin-top:4px">De: ' + p.de + '</div>' : '') +
-        '</div>';
-    }).join('');
-  }
-
-  document.getElementById('modal-notif-historico').classList.add('open');
-}
-
-function marcarTodasLidas() {
-  const pending = state._lastFcmPending || {};
-  Object.keys(pending).forEach(key => sessionStorage.setItem('fcm_' + key, '1'));
-  atualizarBadgeNotif();
-  fecharModal('modal-notif-historico');
-}
-
-function atualizarBadgeNotif() {
-  const pending = state._lastFcmPending || {};
-  const agora   = Date.now();
-  // Só conta notificações de HOJE (desde 00:00 de hoje)
-  const inicioHoje = new Date(); inicioHoje.setHours(0,0,0,0);
-  let naoLidas = 0;
-  Object.entries(pending).forEach(([key, p]) => {
-    if (!p.ts || p.ts < inicioHoje.getTime()) return; // ignora de dias anteriores
-    const dest = p.dest || 'todos';
-    if (dest !== 'todos') {
-      const destNome = USERS[dest] ? USERS[dest].nome : dest;
-      if (destNome !== state.user) return;
-    }
-    if (!sessionStorage.getItem('fcm_' + key)) naoLidas++;
-  });
-
-  const btn = document.getElementById('btn-ver-notifs');
-  const cnt = document.getElementById('btn-notif-count');
-  if (btn) btn.style.display = 'flex';
-  if (cnt) {
-    cnt.style.display = naoLidas > 0 ? 'flex' : 'none';
-    cnt.textContent = naoLidas > 9 ? '9+' : naoLidas;
-  }
-}
-
-// ── RESET DIÁRIO DE NOTIFICAÇÕES ──────────────────────
-// Remove entradas do Firebase mais antigas que hoje e limpa sessionStorage
-
-function resetNotificacoesDiarias() {
-  // 1. Limpa sessionStorage de chaves fcm_ (badge volta a zero)
-  const keysToRemove = [];
-  for (let i = 0; i < sessionStorage.length; i++) {
-    const k = sessionStorage.key(i);
-    if (k && k.startsWith('fcm_')) keysToRemove.push(k);
-  }
-  keysToRemove.forEach(k => sessionStorage.removeItem(k));
-
-  // 2. Remove entradas antigas do Firebase (admin executa a limpeza)
-  if (!state.isAdmin || !window._fbReady) { atualizarBadgeNotif(); return; }
-  const pending = state._lastFcmPending || {};
-  const inicioHoje = new Date(); inicioHoje.setHours(0,0,0,0);
-  const { remove, ref: fbRef } = window._fbModules || {};
-  if (!remove || !fbRef) { atualizarBadgeNotif(); return; }
-  Object.entries(pending).forEach(([key, p]) => {
-    if (!p.ts || p.ts < inicioHoje.getTime()) {
-      remove(fbRef(window._fbDb, 'manutencao/fcmPending/' + key)).catch(() => {});
-    }
-  });
-  atualizarBadgeNotif();
-  console.log('[Digest] Reset diário executado:', new Date().toLocaleString('pt-BR'));
-}
-
-function agendarResetMeiaNoite() {
-  const agora  = new Date();
-  const meianoite = new Date(agora);
-  meianoite.setDate(agora.getDate() + 1);
-  meianoite.setHours(0, 0, 5, 0); // 00:00:05 do dia seguinte
-  const ms = meianoite.getTime() - agora.getTime();
-  setTimeout(() => {
-    resetNotificacoesDiarias();
-    agendarResetMeiaNoite(); // reagenda para a próxima meia-noite
-  }, ms);
-  console.log('[Digest] Reset agendado para', meianoite.toLocaleString('pt-BR'), '(em', Math.round(ms/60000), 'min)');
-}
-
-// ── DIGEST DIÁRIO ─────────────────────────────────────
-// Envia resumo de fim de tarde (só admin dispara, 1x por dia)
-
-function enviarDigestDiario() {
-  if (!state.isAdmin || !window._fbPushFCMPending) return;
-  const chave = 'digest_' + todayStr();
-  if (sessionStorage.getItem(chave)) return; // já enviou hoje
-  sessionStorage.setItem(chave, '1');
-
-  const abertas    = state.cards.filter(c => c.col !== 'done').length;
-  const concluidas = state.cards.filter(c => c.col === 'done' &&
-    (c.data || '').includes(new Date().toLocaleDateString('pt-BR').split('/').reverse().join('-').slice(8))).length;
-  const prevAtraso = state.cards.filter(c => c.tipo === 'preventiva' && c.urg === 'alta' && c.col !== 'done').length;
-  const urgentes   = state.cards.filter(c => c.urg === 'alta' && c.col !== 'done').length;
-
-  const partes = [];
-  if (concluidas > 0)  partes.push(concluidas + ' concluída' + (concluidas > 1 ? 's' : ''));
-  if (abertas > 0)     partes.push(abertas + ' em aberto');
-  if (prevAtraso > 0)  partes.push(prevAtraso + ' preventiva' + (prevAtraso > 1 ? 's' : '') + ' em atraso');
-  if (urgentes > 0)    partes.push(urgentes + ' urgente' + (urgentes > 1 ? 's' : ''));
-
-  if (!partes.length) return; // nada a reportar
-
-  window._fbPushFCMPending({
-    titulo: 'Resumo do dia — Fiobras',
-    corpo:  partes.join(' · '),
-    ts:     Date.now(),
-    de:     'Sistema',
-    tipo:   'digest',
-    dest:   'todos',
-  });
-}
-
-// Agenda digest para 17h (se ainda não enviou hoje)
-function agendarDigestDiario() {
-  const agora  = new Date();
-  const alvo   = new Date(agora);
-  alvo.setHours(17, 0, 0, 0);
-  if (agora >= alvo) alvo.setDate(alvo.getDate() + 1); // já passou das 17h → amanhã
-  const ms = alvo.getTime() - agora.getTime();
-  setTimeout(() => {
-    enviarDigestDiario();
-    agendarDigestDiario(); // reagenda para o dia seguinte
-  }, ms);
-}
+// v3.50.0 — Tudo de notif (histórico, badge, reset, digest, agendamento) → no-op
+function abrirModalNotifHistorico() { /* no-op */ }
+function marcarTodasLidas() { /* no-op */ }
+function atualizarBadgeNotif() { /* no-op */ }
+function resetNotificacoesDiarias() { /* no-op */ }
+function agendarResetMeiaNoite() { /* no-op */ }
+function enviarDigestDiario() { /* no-op */ }
+function agendarDigestDiario() { /* no-op */ }
 
 // ── MODAL UTIL ────────────────────────────────────────
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -7161,38 +6746,8 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-async function initFCMToken() {
-  if (!state.user) return;
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
-
-  try {
-    // Registrar SW do Firebase Messaging via CDN (HTTPS apenas)
-    const swResp = await fetch('https://fiobras-fcm.williamscchulz.workers.dev/', { method: 'GET' });
-    console.log('FCM Worker ping:', swResp.ok);
-  } catch(e) {
-    console.warn('FCM Worker:', e.message);
-  }
-
-  // Salvar token via Firebase — usa push token do browser
-  try {
-    const { getMessaging, getToken } = await import(
-      'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js'
-    );
-    // Precisamos de um SW registrado com scope correto para FCM no HTTPS
-    // O token é salvo no Firebase e o Worker o usa para enviar push
-    const VAPID = 'BEG44TK4LwIReQajBvPnR0eFid3DKVNScpxzqNu3J6CJYBuPOjq80EG6AOmRVaeS4A-8ZtGzYVFo8Aza_GMEQoI';
-    const messaging = getMessaging();
-    const token = await getToken(messaging, { vapidKey: VAPID });
-    if (token && window._fbSaveToken) {
-      window._fbSaveToken(state.user, token);
-      window._fcmToken = token;
-      console.log('FCM token salvo para', state.user);
-    }
-  } catch(e) {
-    console.warn('FCM token:', e.message);
-  }
-}
+// v3.50.0 — initFCMToken removida. FCM desligado por completo.
+async function initFCMToken() { /* no-op */ }
 </script>
 
 

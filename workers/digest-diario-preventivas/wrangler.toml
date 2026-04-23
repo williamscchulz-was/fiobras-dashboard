@@ -2,9 +2,10 @@ name = "fiobras-digest-diario"
 main = "src/index.js"
 compatibility_date = "2024-10-01"
 
-# Cron: segunda a sexta, 07:30 BRT = 10:30 UTC (v3.48.3)
+# v3.50.0 — Cron DESATIVADO. Notificações foram removidas em massa pra rebuild.
+# Reativar quando o sistema novo de notif estiver pronto.
 [triggers]
-crons = ["30 10 * * 1-5"]
+crons = []
 
 # Secrets (setados via: wrangler secret put <NOME>):
 #   FIREBASE_SERVICE_ACCOUNT = JSON inteiro da service account
