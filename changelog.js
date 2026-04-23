@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.52.3', d:'23 abr 2026', current:true,
+    v:'3.52.4', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · 2 bugs do toggle de técnico (CSS dentro de @media + default admin).',
+        desc:'Diagnóstico via overlay v3.52.2:\n\n1) AVATARES VISUAIS BUGADOS: o CSS do toggle (.kb-view-pick, .kb-view-circle, etc) E dos campos de contexto (.ca-ctx) estavam dentro de `@media(max-width:768px)` desde v3.50.2/v3.51.0 (fui inserindo após .btn-notif-test que tava dentro do @media e não percebi). Resultado: estilos só aplicavam em mobile. Em desktop os botões viravam texto puro colado. FIX: bloco inteiro movido pra top-level.\n\n2) ADMIN VIA "MEUS" POR DEFAULT: William é admin mas não tem cards próprios → Kanban ficava vazio mesmo com toggle funcionando. FIX: admin/gerente agora abre default em "Time inteiro" (faz sentido — supervisor vê tudo). Técnico continua "meus" fixo.'}
+    ]
+  },
+  {
+    v:'3.52.3', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · admin/gerente perdeu o toggle e via Kanban vazio.',
         desc:'BUG diagnosticado via overlay v3.52.2:\n  state.user="William" · state.userKey="admin"\n  ehAdminGer=false (deveria true)\n  state.isAdmin=true (correto)\n\nCausa: _ehGerenteOuAdmin priorizava window.getCurrentUser() — função que NÃO existe dentro do iframe do Manutenção. Caía no fallback que lê users-profile/admin/roleOverride. Como William não tem roleOverride explícito (role vem hardcoded como admin via USERS), a leitura retornava undefined → role default "producao" → função retornava false.\n\nFix: prioridade pra state.isAdmin que já é setado em _autoLoginViaHub como `u.isAdmin || u.isGerente` (cobre admin + gerente, fonte mais confiável dentro do iframe).\n\nResultado: admin volta a ver toggle de técnicos + Kanban populado. Vorlei (técnico) continua só vendo os dele.'}

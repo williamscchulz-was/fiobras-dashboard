@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.52.3">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.52.4">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2069,7 +2069,9 @@ to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
 from { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
 to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 }
-@media(max-width:768px) {
+/* v3.52.4 — Bloco que estava ERRONEAMENTE dentro de @media(max-width:768px)
+   desde v3.50.2/v3.51.0. CSS dos toggles e ca-ctx só vinha em mobile. Movido
+   pra top-level. Inclui: ca-ctx, kb-view-bar/pick/circle/etc. */
 /* v3.51.0 — Dados de contexto no modal Editar (cards de preventiva) */
 .field.ca-ctx { background: rgba(0,200,80,.05); border: 1px solid rgba(0,200,80,.2); border-radius: 8px; padding: 10px 12px; }
 .field.ca-ctx > label { color: #4ADE80 !important; font-family: 'DM Mono', monospace !important; font-size: .55rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; margin-bottom: 6px !important; display: block; }
@@ -2122,7 +2124,7 @@ to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 .kb-view-pick.special .kb-view-cnt { background: #6B7166; }
 [data-theme="light"] #kb-view-bar { background: rgba(0,0,0,.025); border-color: rgba(0,0,0,.06); }
 /* v3.52.0 — CSS de display:none de notif removido (HTML não existe mais) */
-}
+/* (fim do bloco que estava erroneamente dentro de @media — v3.52.4) */
 
 /* ── LOGIN CARDS ── */
 .login-user-card {
@@ -4177,9 +4179,11 @@ function renderKanban() {
   const meK = state.userKey || '';
   const meN = state.user || '';
   if (typeof renderViewBar === 'function') renderViewBar();
+  // v3.52.4 — Admin/gerente default = "todos" (faz mais sentido: ele supervisiona).
+  // Técnico default = "meus" (e fica fixo, sem toggle).
   let viewMode = 'meus';
   if (ehAdminGer) {
-    try { viewMode = localStorage.getItem('fio_kb_view_' + (state.userKey||'__')) || 'meus'; } catch(e) {}
+    try { viewMode = localStorage.getItem('fio_kb_view_' + (state.userKey||'__')) || 'todos'; } catch(e) { viewMode = 'todos'; }
   }
   // Helper: resolve nome → chave OU usa lower como fallback
   const _toK = (nomeOuKey) => {
