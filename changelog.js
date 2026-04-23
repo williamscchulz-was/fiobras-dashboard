@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.52.1', d:'23 abr 2026', current:true,
+    v:'3.52.2', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Manutenção · debug ON-SCREEN do Kanban vazio (sem precisar console).',
+        desc:'William reportou que não conseguia digitar no console pra rodar __debugKanban().\n\nAgora: quando o Kanban renderiza vazio MAS tem cards no banco, aparece automaticamente uma caixa amarela no canto inferior direito com:\n• state.user, state.userKey, resolved\n• ehAdminGer, state.isAdmin\n• Total cards × visíveis\n• Os 6 primeiros cards com seus campos resp/respKey/autor/autorKey\n• Resultado do filtro pra cada um\n\nWilliam: print da caixinha amarela quando aparecer.'}
+    ]
+  },
+  {
+    v:'3.52.1', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · 4 erros após cleanup v3.52.0 (refs órfãs + SW clone bug).',
         desc:'William reportou 4 erros no console após v3.52.0:\n\n1) `initNotificacoes is not defined` — chamada residual em doLogin (não removida na limpeza). FIX: removida.\n\n2) `renderPecas is not defined` — função stub jamais implementada que ficou sendo chamada no onValue de pecas. FIX: removida a chamada.\n\n3) `onPvTarefaChange is not defined` — função obsoleta exportada na lista mas já tinha sido removida há tempos. FIX: tirada do export.\n\n4) `Failed to execute clone on Response: Response body is already used` no sw.js — bug do staleWhileRevalidate. O clone era chamado dentro de `caches.open().then(cache => cache.put(req, res.clone()))`, async DEPOIS do `return res`. O browser já tinha começado a consumir o body. FIX: clone IMEDIATO antes de schedule do put.'}

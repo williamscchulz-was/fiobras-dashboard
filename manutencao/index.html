@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.52.1">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.52.2">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -4245,6 +4245,58 @@ function renderKanban() {
   });
   // Inicia tick dos timers
   _iniciarTimers();
+
+  // v3.52.2 — DEBUG ON-SCREEN: se Kanban tá vazio MAS tem cards no banco,
+  // mostra um quadrinho com diagnóstico DIRETO NA TELA pra investigar bug.
+  // (William reportou que não conseguia digitar no console)
+  _debugKanbanOnScreen(passaFiltro, _toK, meKResolved, ehAdminGer);
+}
+
+function _debugKanbanOnScreen(passaFiltro, _toK, meKResolved, ehAdminGer) {
+  const host = document.getElementById('panel-kanban');
+  const existing = document.getElementById('kb-debug-overlay');
+  if (existing) existing.remove();
+  const totalCards = state.cards.length;
+  const visiveis = state.cards.filter(passaFiltro).length;
+  // Só mostra se tem cards mas nenhum visível pro user atual
+  if (totalCards === 0 || visiveis > 0) return;
+  if (!host) return;
+  const sample = state.cards.slice(0, 6).map((c, i) => {
+    const matches = {
+      respKey: c.respKey === meKResolved,
+      autorKey: c.autorKey === meKResolved,
+      resp: c.resp && _toK(c.resp) === meKResolved,
+      autor: c.autor && _toK(c.autor) === meKResolved,
+    };
+    const passa = Object.values(matches).some(Boolean);
+    return `[${i}] "${(c.titulo||'?').slice(0,40)}"
+        col=${c.col}
+        resp="${c.resp||'—'}" → ${_toK(c.resp||'')}
+        respKey=${c.respKey||'—'}
+        autor="${c.autor||'—'}" → ${_toK(c.autor||'')}
+        autorKey=${c.autorKey||'—'}
+        passa=${passa}`;
+  }).join('\n');
+  const overlay = document.createElement('div');
+  overlay.id = 'kb-debug-overlay';
+  overlay.style.cssText = 'position:fixed;bottom:20px;right:20px;width:520px;max-height:60vh;overflow-y:auto;z-index:99999;background:#1a1a1a;border:1px solid #FCD34D;border-radius:10px;padding:14px 16px;color:#FCD34D;font-family:monospace;font-size:11px;box-shadow:0 8px 24px rgba(0,0,0,.6)';
+  overlay.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+      '<b style="color:#fff;font-size:13px">⚠ DEBUG: Kanban vazio (filtro)</b>' +
+      '<button onclick="this.parentElement.parentElement.remove()" style="background:transparent;border:0;color:#FCD34D;cursor:pointer;font-size:14px">✕</button>' +
+    '</div>' +
+    '<div style="white-space:pre-wrap;line-height:1.5">' +
+    'state.user      = "' + (state.user||'') + '"\n' +
+    'state.userKey   = "' + (state.userKey||'') + '"\n' +
+    'meKResolved     = "' + meKResolved + '"\n' +
+    'ehAdminGer      = ' + ehAdminGer + '\n' +
+    'state.isAdmin   = ' + state.isAdmin + '\n' +
+    'Total cards     = ' + totalCards + '\n' +
+    'Visiveis        = ' + visiveis + '\n\n' +
+    '── Primeiros 6 cards ──\n' +
+    sample +
+    '</div>' +
+    '<div style="margin-top:10px;font-size:10px;color:#9CA295">Manda print desta caixa pro William.</div>';
+  host.appendChild(overlay);
 }
 
 function _tempoDecorrido(ts) {
