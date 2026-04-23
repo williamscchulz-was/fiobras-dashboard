@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.54.0', d:'23 abr 2026', current:true,
+    v:'3.54.1', d:'23 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · técnico e gerente sem flag só veem aba Kanban (mockup aprovado).',
+        desc:'Mockup mockup-abas-por-role.html aprovado.\n\nAntes: qualquer user com módulo Manutenção via 6 abas (Dashboard, Kanban, Preventiva, Máquinas, Histórico, Relatórios). Técnico via Dashboard/Kanban/Histórico, admin via tudo.\n\nAgora:\n• Admin → vê TODAS as 6 abas\n• Gerente COM supervisaoManutencao=true (Joacir) → vê TODAS\n• Gerente SEM flag (Edilson, Jairo) → SÓ Kanban\n• Producao com módulo Manutenção (Vorlei, Pedro) → SÓ Kanban\n\nNovo body class `is-mn-superv` adicionado ao body se admin ou gerente com flag. CSS:\n  body:not(.is-mn-superv) .tab-btn.admin-only { display: none; }\n\nDashboard ganhou class `admin-only` (antes era visível pra todos). Mesmo critério aplicado no bottom-nav mobile.\n\nReusa o flag supervisaoManutencao da v3.52.7 (Editar Usuário no HUB → toggle "Supervisiona Manutenção" pra gerentes). Quem você marcar como supervisor lá já ganha acesso completo às abas.\n\nDoLogout limpa body.is-mn-superv também.'}
+    ]
+  },
+  {
+    v:'3.54.0', d:'23 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · Templates de preventiva por frequência (cadastro de máquina) + +Preventiva puxa templates.',
         desc:'Mockup mockup-templates-preventiva.html aprovado.\n\nNOVO SCHEMA: manutencao/maquinas/{key}/prevsTemplate = { diaria:[], semanal:[{tarefa,obs}], quinzenal:[], mensal:[], trimestral:[], semestral:[], anual:[] }\n\nMODAL "EDITAR MÁQUINA":\n• Antes: textarea único pra todas preventivas (uma por linha)\n• Agora: TABS por frequência com bullet colorido + contador. Cada tarefa: nome + observação opcional + botão remover. "+ Adicionar tarefa [freq]" no fim.\n• Migração automática: se a máquina tem prevs (string/array antigos) mas não tem prevsTemplate, joga tudo na aba "Semanal" pra admin recategorizar.\n• Salva mantém prevs (legacy) sincronizado pra retrocompat.\n\nMODAL "+ NOVA PREVENTIVA":\n• Quando muda a frequência selecionada → recarrega templates daquela freq da máquina selecionada\n• Cada item template mostra nome + observação (em itálico embaixo)\n• Multi-select continua igual (marca várias → cria todas de uma vez)\n• Obs do template entra como obs da preventiva criada (junta com obs do form se ambos preenchidos)\n• Custom continua disponível pra adicionar tarefa fora do template\n\nINTEGRAÇÃO COM v3.53.0: cadastrar 5 anuais via templates → no Kanban viram 1 card só "Preventiva Anual · RET-02 · 5 tarefas" automaticamente (agrupamento natural).'}

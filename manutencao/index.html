@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.54.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.54.1">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -198,8 +198,11 @@ margin-bottom: -1.5px;
 }
 .tab-btn:hover { color: var(--blue); }
 .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+/* v3.54.1 — Abas extras só pra admin OU gerente com supervisaoManutencao */
 .tab-btn.admin-only { display: none; }
-body.is-admin .tab-btn.admin-only { display: block; }
+body.is-mn-superv .tab-btn.admin-only { display: block; }
+.bnav-btn.admin-only { display: none; }
+body.is-mn-superv .bnav-btn.admin-only { display: flex; }
 .tab-btn.user-visible { display: block !important; }
 
 .panel { display: none; }
@@ -2597,7 +2600,8 @@ display: none;
   </div>
 
   <div class="tabs" id="main-tabs">
-    <button class="tab-btn" onclick="switchTab('dashboard',this)" id="tab-dashboard">Dashboard</button>
+    <!-- v3.54.1 — Dashboard, Histórico viram admin-only (técnico/gerente sem flag só vê Kanban) -->
+    <button class="tab-btn admin-only" onclick="switchTab('dashboard',this)" id="tab-dashboard">Dashboard</button>
     <button class="tab-btn active" onclick="switchTab('kanban',this)" id="tab-kanban">Kanban</button>
     <button class="tab-btn admin-only" onclick="switchTab('preventiva',this)">Preventiva</button>
     <button class="tab-btn admin-only" onclick="switchTab('maquinas',this)">Máquinas</button>
@@ -2878,7 +2882,7 @@ display: none;
 <!-- Bottom nav flutuante mobile -->
 
 <nav class="bottom-nav" id="bottom-nav" style="display:none">
-  <button class="bnav-btn" id="bnav-dashboard" onclick="switchTabMobile('dashboard',this)">
+  <button class="bnav-btn admin-only" id="bnav-dashboard" onclick="switchTabMobile('dashboard',this)">
     <div class="bnav-pill">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
@@ -3782,14 +3786,19 @@ function _autoLoginViaHub() {
   if (!role && sess.user === 'admin') role = 'admin'; // admin master sem c.role
   if (!role) role = 'producao';
   const ehAdminGer = (role === 'admin' || role === 'gerente');
+  // v3.54.1 — Acesso completo ao Manutenção: admin OU gerente com supervisaoManutencao=true.
+  // Quem não cair aqui (técnico ou gerente sem flag) só vê a aba Kanban.
+  const ehMnSuperv = (role === 'admin') || (role === 'gerente' && p.supervisaoManutencao === true);
   state.user    = sess.nome || p.nomeCompleto || c.nome || sess.user;
   state.userKey = sess.user;
   state.isAdmin = ehAdminGer;
+  state.ehMnSuperv = ehMnSuperv;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('h-nome').textContent = state.user;
   document.getElementById('h-role').textContent = role === 'admin' ? 'Administrador' : (role === 'gerente' ? 'Gerente' : 'Usuário');
   if (ehAdminGer) document.body.classList.add('is-admin');
+  if (ehMnSuperv) document.body.classList.add('is-mn-superv');
   document.body.classList.add('logged-in');
   const vEl = document.getElementById('app-version');
   if (vEl) vEl.textContent = ' ' + VERSION;
@@ -3848,52 +3857,23 @@ function doLogin() {
   initKChips();
   aplicarQRSeExistir();
   // v3.52.0 — Notificações REMOVIDAS (reset/digest/verificar/re-notif/FCM).
-  // ── Visibilidade de abas por perfil ──────────────────
-  // Admin/Joacir: tudo visível
-  // Outros: Kanban + Histórico visíveis, mais nada
-  document.querySelectorAll('.tab-btn').forEach(el => {
-    const isAdminOnly = el.classList.contains('admin-only');
-    if (isAdmin) {
-      el.style.display = '';
-    } else {
-      // Para usuários comuns: só dashboard, kanban e historico
-      const onclick = el.getAttribute('onclick') || '';
-      const isAllowed = onclick.includes("'dashboard'") || onclick.includes("'kanban'") || onclick.includes("'historico'");
-      el.style.display = isAllowed ? '' : 'none';
-    }
-  });
-
-  // Bottom nav — mesmo critério
-  const btnNotif = document.getElementById('btn-notif-test');
-  if (btnNotif) btnNotif.style.display = isAdmin ? 'flex' : 'none';
-  const btnVerNotifs = document.getElementById('btn-ver-notifs');
-  if (btnVerNotifs) btnVerNotifs.style.display = 'flex';
+  // v3.54.1 — Visibilidade de abas: só admin OU gerente com supervisaoManutencao
+  // veem todas. Outros (técnicos, gerentes sem flag) só veem KANBAN.
+  // Tudo controlado via CSS (body.is-mn-superv .tab-btn.admin-only). Aqui só limpa
+  // qualquer style.display residual deixado pelo doLogin antigo.
+  document.querySelectorAll('.tab-btn, .bnav-btn').forEach(el => { el.style.removeProperty('display'); });
   const bnav = document.getElementById('bottom-nav');
   if (bnav) {
     bnav.style.removeProperty('display');
-    if (window.innerWidth <= 768) {
-      bnav.style.display = 'flex';
-    } else {
-      bnav.style.display = 'none';
-    }
-    // Oculta itens admin no bottom nav para usuários comuns
-    bnav.querySelectorAll('.bnav-btn').forEach(el => {
-      const onclick = el.getAttribute('onclick') || '';
-      const isAdminNav = el.classList.contains('admin-only');
-      if (!isAdmin && isAdminNav) {
-        // Para usuários comuns: só dashboard, kanban, historico
-        const isAllowed = onclick.includes("'dashboard'") || onclick.includes("'kanban'") || onclick.includes("'historico'");
-        el.style.display = isAllowed ? '' : 'none';
-      } else {
-        el.style.display = '';
-      }
-    });
+    if (window.innerWidth <= 768) bnav.style.display = 'flex';
+    else bnav.style.display = 'none';
   }
 }
 
 function doLogout() {
-  state.user = null; state.isAdmin = false;
+  state.user = null; state.isAdmin = false; state.ehMnSuperv = false;
   document.body.classList.remove('is-admin');
+  document.body.classList.remove('is-mn-superv'); // v3.54.1
   document.body.classList.remove('logged-in');
   try { localStorage.removeItem('fio_sel'); localStorage.removeItem('fio_senha'); localStorage.removeItem('fio_lembrar'); } catch(e) {}
   try { const cb = document.getElementById('lembrar-check'); if(cb) cb.checked = false; } catch(e) {}
