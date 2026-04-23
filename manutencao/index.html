@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.51.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.52.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -440,31 +440,7 @@ white-space: nowrap;
 }
 
 /* v3.31.0 — Cards mobile pra Preventivas (substitui tabela em ≤640px) */
-.prev-cards-mobile { display: none; }
-@media (max-width: 640px) {
-  .prev-table-wrap { display: none; }
-  .prev-cards-mobile { display: flex; flex-direction: column; gap: 10px; }
-}
-.prev-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
-.prev-card::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; background: var(--green); border-radius: 0 3px 3px 0; }
-.prev-card-atrasada::before { background: var(--red); }
-.prev-card-proxima::before { background: #D97706; }
-.prev-card-sem::before { background: var(--muted2); }
-.prev-card-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-.prev-card-t { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 14px; line-height: 1.2; color: var(--text); }
-.prev-card-eq { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.prev-card-status { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 600; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0; white-space: nowrap; }
-.prev-card-status-ok { background: var(--green-lt); color: var(--green); }
-.prev-card-status-atrasada { background: #FEE2E2; color: var(--red); }
-.prev-card-status-proxima { background: #FEF3C7; color: #D97706; }
-.prev-card-status-sem { background: var(--gray); color: var(--muted); }
-.prev-card-meta { display: flex; flex-wrap: wrap; gap: 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
-.prev-card-meta b { color: var(--text); font-weight: 500; }
-.prev-card-actions { display: flex; gap: 6px; margin-top: 4px; }
-.prev-card-btn { flex: 1; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 36px; }
-.prev-card-btn.primary { background: var(--green); color: #fff; border-color: var(--green); flex: 2; }
-.prev-card-btn.danger { color: var(--red); border-color: var(--red-md, #fecaca); }
-.prev-card-btn svg { width: 12px; height: 12px; }
+/* v3.52.0 — CSS de prev-cards-mobile + prev-card REMOVIDO (substituído por pv-machine-list v3.48.9) */
 
 .table-wrap { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; }
 .data-table { width: 100%; border-collapse: collapse; }
@@ -643,15 +619,8 @@ cursor: default;
 .prev-search { width:100%; padding:9px 12px 9px 36px; border:1.5px solid var(--border2); border-radius:8px; font-family:'Poppins',sans-serif; font-size:.8rem; color:var(--text); background:var(--surface); outline:none; transition:border-color .15s; }
 .prev-search:focus { border-color:var(--green); }
 .prev-count { font-family:'DM Mono',monospace; font-size:.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; white-space:nowrap; }
-.prev-pagination { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:14px; flex-wrap:wrap; }
-.prev-page-btn { min-width:32px; height:32px; padding:0 10px; border:1.5px solid var(--border2); background:var(--surface); color:var(--text); font-family:'Poppins',sans-serif; font-size:.7rem; font-weight:600; border-radius:6px; cursor:pointer; transition:.15s; display:inline-flex; align-items:center; justify-content:center; }
-.prev-page-btn:hover:not(:disabled) { border-color:var(--green); color:var(--green); }
-.prev-page-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
-.prev-page-btn:disabled { opacity:.35; cursor:not-allowed; }
-.prev-page-info { font-family:'DM Mono',monospace; font-size:.62rem; color:var(--muted); margin:0 8px; }
+/* v3.52.0 — CSS de prev-pagination REMOVIDO (paginação saiu na v3.48.9) */
 [data-theme="dark"] .prev-search { background:#2C2C2E; border-color:#3A3A3C; color:#fff; }
-[data-theme="dark"] .prev-page-btn { background:#2C2C2E; border-color:#3A3A3C; color:#fff; }
-[data-theme="dark"] .prev-page-btn:hover:not(:disabled) { border-color:var(--green); }
 
 /* v3.36.0 — Kanban redesign (Ajuste 4) · board dark sempre · cards premium */
 .kanban-board.board-v2 {
@@ -1640,8 +1609,6 @@ to { opacity: 1; }
 [data-theme="dark"] .demanda-title { color: #F2F2F7; }
 [data-theme="dark"] .urg-btn { background: #2C2C2E; border-color: #3A3A3C; color: #636366; }
 [data-theme="dark"] #foto-wrap { border-color: #3A3A3C; }
-/* Kanban banner */
-[data-theme="dark"] #kanban-banner { background: rgba(217,64,64,0.1) !important; border-color: rgba(217,64,64,0.3) !important; }
 /* Filter tags */
 [data-theme="dark"] .filter-tag { background: #2C2C2E; border-color: #3A3A3C; color: #636366; }
 /* Scrollbar dark */
@@ -1961,11 +1928,6 @@ body.is-offline .header { top: 36px; }
   #panel-relatorios { display: block !important; }
 }
 
-/* Toast / banner entrance */
-#kanban-banner {
-animation: cardSlideUp 0.3s ease-out;
-}
-
 /* Header stats subtle entrance */
 .header-stats {
 transition: opacity 0.4s ease !important;
@@ -2108,9 +2070,6 @@ from { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
 to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 }
 @media(max-width:768px) {
-.btn-notif-label { display:none; }
-#btn-notif-test { padding:7px 9px !important; }
-
 /* v3.51.0 — Dados de contexto no modal Editar (cards de preventiva) */
 .field.ca-ctx { background: rgba(0,200,80,.05); border: 1px solid rgba(0,200,80,.2); border-radius: 8px; padding: 10px 12px; }
 .field.ca-ctx > label { color: #4ADE80 !important; font-family: 'DM Mono', monospace !important; font-size: .55rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; margin-bottom: 6px !important; display: block; }
@@ -2162,10 +2121,7 @@ to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 .kb-view-cnt { position: absolute; top: -3px; right: -3px; background: #DC2626; color: #fff; font-family: 'DM Mono', monospace; font-size: .5rem; font-weight: 700; min-width: 14px; height: 14px; border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
 .kb-view-pick.special .kb-view-cnt { background: #6B7166; }
 [data-theme="light"] #kb-view-bar { background: rgba(0,0,0,.025); border-color: rgba(0,0,0,.06); }
-/* v3.50.0 — Esconde TODA UI de notificações (push, in-app, banner, modais admin) */
-#btn-notif-test, #btn-ver-notifs, #btn-notif-toggle,
-#kanban-banner, #inapp-notif,
-#modal-notif-admin, #modal-notif-historico { display: none !important; }
+/* v3.52.0 — CSS de display:none de notif removido (HTML não existe mais) */
 }
 
 /* ── LOGIN CARDS ── */
@@ -2530,16 +2486,7 @@ display: none;
           <div class="role" id="h-role"></div>
         </div>
         <button id="btn-instalar" onclick="window._instalarApp()" class="btn-instalar" style="display:none">Instalar</button>
-        <button id="btn-ver-notifs" onclick="abrirModalNotifHistorico()" style="display:none;align-items:center;gap:5px;padding:7px 10px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.25);border-radius:8px;color:rgba(255,255,255,0.8);font-family:'Poppins',sans-serif;font-size:0.62rem;cursor:pointer;position:relative" title="Notificações">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span id="btn-notif-count" style="background:#d94040;color:#fff;font-size:0.5rem;font-weight:700;min-width:14px;height:14px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px">0</span>
-    </button>
-    <button id="btn-notif-test" onclick="abrirModalNotifAdmin()" style="display:none;align-items:center;gap:5px;padding:7px 12px;background:rgba(255,203,0,0.15);border:1.5px solid rgba(255,203,0,0.4);border-radius:8px;color:#FFCB00;font-family:'Poppins',sans-serif;font-size:0.62rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Enviar notificação">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span class="btn-notif-label">Notificar</span>
-    </button>
-    <!-- v3.32.2 — switch de notificações (substitui popup automático) -->
-    <button class="btn-dark-toggle" id="btn-notif-toggle" onclick="toggleNotifPermission()" title="Notificações" style="font-size:15px;padding:0;min-width:34px">🔔</button>
+    <!-- v3.52.0 — botões de notificação removidos (#btn-ver-notifs, #btn-notif-test, #btn-notif-toggle) -->
     <button class="btn-dark-toggle" id="btn-dark-toggle" onclick="toggleDarkMode()" title="Alternar tema">
       <svg id="icon-dark" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
       <svg id="icon-light" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -2603,7 +2550,7 @@ display: none;
 
   <div class="panel active" id="panel-kanban">
     <div class="kanban-wrap">
-      <div id="kanban-banner" style="display:none;background:#fdeaea;border:1.5px solid #f0b0b0;border-radius:8px;padding:14px 16px;margin-bottom:14px"></div>
+      <!-- v3.52.0 — kanban-banner removido (notificações fora) -->
       <!-- v3.39.0: toolbar simplificada — só o botão + Demanda proeminente -->
       <div class="kanban-toolbar" style="display:flex;justify-content:flex-end;margin-bottom:14px">
         <button class="btn-primary" onclick="abrirModalDemanda()">+ Demanda</button>
@@ -2656,12 +2603,6 @@ display: none;
     <!-- v3.48.9 — Preventivas agrupadas POR MÁQUINA (mockup aprovado).
          Click no card expande mostrando tarefas agrupadas por frequência. -->
     <div class="pv-machine-list" id="pv-machine-list" aria-label="Preventivas agrupadas por máquina"></div>
-    <!-- Hosts legados mantidos pra não quebrar refs externas (escondidos via display:none) -->
-    <div style="display:none">
-      <table><tbody id="prev-tbody"></tbody></table>
-      <div id="prev-cards-mobile"></div>
-      <div id="prev-pagination"></div>
-    </div>
     <!-- CALENDÁRIO APRIMORADO -->
     <div class="cal-wrap" style="margin-top:28px">
       <!-- Header: nav + view tabs + legenda -->
@@ -2922,83 +2863,7 @@ display: none;
   </div>
 </div>
 
-<!-- MODAL NOTIFICAÇÃO ADMIN -->
-
-<div class="modal-bg" id="modal-notif-admin">
-  <div class="modal" style="width:460px">
-    <div class="modal-title">Enviar Notificação</div>
-    <div class="modal-grid">
-      <div class="field">
-        <label>Destinatário</label>
-        <select id="notif-dest" style="background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Poppins',sans-serif;font-size:0.8rem;padding:9px 12px;outline:none;width:100%">
-          <option value="todos"> Todos os usuários</option>
-          <option value="hernandes">Hernandes</option>
-          <option value="vorlei">Vorlei</option>
-          <option value="pedro">Pedro</option>
-          <option value="ivonei">Ivonei</option>
-          <option value="roland">Roland</option>
-          <option value="joacir">Joacir</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Título</label>
-        <input id="notif-titulo" placeholder="Ex: Atenção equipe!" value="Fiobras Manutenção">
-      </div>
-      <div class="field">
-        <label>Mensagem</label>
-        <textarea id="notif-msg" placeholder="Digite sua mensagem aqui..." style="min-height:80px"></textarea>
-      </div>
-    </div>
-    <div style="background:var(--blue-lt);border:1px solid var(--blue-md);border-radius:8px;padding:10px 14px;font-size:0.68rem;color:var(--blue);margin-top:12px">
-      Será exibido como notificação push nos celulares e popup na versão web
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn cancel" onclick="fecharModal('modal-notif-admin')">Cancelar</button>
-      <button class="modal-btn confirm" onclick="enviarNotifAdmin()" style="background:#FFCB00;color:#1a2e20">Enviar</button>
-    </div>
-  </div>
-</div>
-
-<!-- POPUP NOTIFICAÇÃO IN-APP -->
-
-<div id="inapp-notif" style="
-  display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);
-  width:calc(100% - 32px);max-width:420px;
-  background:linear-gradient(135deg, #0076BE 0%, #005fa0 100%);
-  border:1.5px solid rgba(255,255,255,0.15);
-  border-radius:16px;
-  padding:16px 18px;z-index:999;
-  box-shadow:0 12px 40px rgba(0,95,160,0.35), 0 4px 12px rgba(0,0,0,0.15);
-  animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  backdrop-filter:blur(12px);
-">
-  <div style="display:flex;align-items:flex-start;gap:12px">
-    <div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    </div>
-    <div style="flex:1;min-width:0">
-      <div id="inapp-titulo" style="font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;color:#fff;margin-bottom:3px;line-height:1.3"></div>
-      <div id="inapp-msg" style="font-family:'Poppins',sans-serif;font-size:0.68rem;color:rgba(255,255,255,0.8);line-height:1.45;font-weight:300"></div>
-      <div id="inapp-de" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:rgba(255,255,255,0.45);margin-top:5px"></div>
-    </div>
-    <button onclick="fecharInAppNotif()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:rgba(255,255,255,0.7);cursor:pointer;padding:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
-</div>
-
-<!-- MODAL HISTÓRICO NOTIFICAÇÕES -->
-
-<div class="modal-bg" id="modal-notif-historico">
-  <div class="modal" style="width:480px;max-height:80vh">
-    <div class="modal-title">Notificações</div>
-    <div id="notif-hist-list" style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;padding-right:4px"></div>
-    <div class="modal-actions" style="margin-top:14px">
-      <button class="modal-btn cancel" onclick="fecharModal('modal-notif-historico')">Fechar</button>
-      <button class="modal-btn confirm" onclick="marcarTodasLidas()" style="background:var(--muted);max-width:160px">Marcar como lidas</button>
-    </div>
-  </div>
-</div>
+<!-- v3.52.0 — Modal Notif Admin, Inapp Notif, Modal Histórico Notif REMOVIDOS -->
 
 <!-- MODAL ASSINATURA DE EXECUÇÃO -->
 <div class="modal-bg" id="modal-assinatura">
@@ -3343,7 +3208,7 @@ onValue(kanbanRef, snap => {
   state.cards = val ? Object.entries(val).map(([k,v]) => ({...v, _key:k})) : [];
   gerarCardsPreventivas();
   limparCardsOrfaos();
-  checkNotifNovosCards(state.cards);
+  // v3.52.0 — checkNotifNovosCards REMOVIDO (notificações fora)
   renderKanban();
   renderDashboard();
   _atualizarModalPecasSeLiveMounted();
@@ -3467,14 +3332,8 @@ onValue(maquinasRef, snap => {
 window._fbPushMaquina  = (m) => push(maquinasRef, m);
 window._fbUpdateMaquina = (key, data) => update(ref(db, `manutencao/maquinas/${key}`), data);
 window._fbRemoveMaquina = (key) => remove(ref(db, `manutencao/maquinas/${key}`));
-window._fbPushFCMPending = (_payload) => { /* v3.50.0 — no-op: notificações removidas */ };
+// v3.52.0 — _fbPushFCMPending e _fbSaveToken DELETADAS (cleanup notificações).
 window._fbReady = true;
-window._fbSaveToken = (usuario, token) => {
-  const tokenRef = ref(db, 'manutencao/fcmTokens/' + btoa(usuario).replace(/=/g,''));
-  set(tokenRef, { usuario, token, ts: Date.now() })
-    .then(() => console.log('Token FCM salvo para', usuario))
-    .catch(e => console.warn('Erro ao salvar token:', e));
-};
 
 // Para limpar dados de teste: abra o console e execute window._resetDB()
 window._resetDB = () => {
@@ -3807,15 +3666,9 @@ function _autoLoginViaHub() {
   const statsEl = document.getElementById('header-stats');
   if (statsEl) { statsEl.style.opacity = '1'; statsEl.style.display = 'flex'; }
   if (typeof updateHeaderStats === 'function') updateHeaderStats();
-  if (typeof initNotificacoes === 'function') initNotificacoes();
   if (typeof initKChips === 'function') initKChips();
-  if (typeof agendarResetMeiaNoite === 'function') agendarResetMeiaNoite();
-  if (typeof agendarDigestDiario === 'function') agendarDigestDiario();
-  if (typeof resetNotificacoesDiarias === 'function') resetNotificacoesDiarias();
   if (typeof aplicarQRSeExistir === 'function') aplicarQRSeExistir();
-  setTimeout(() => { if (typeof verificarNotificacoesPerdidas === 'function') verificarNotificacoesPerdidas(); }, 3000);
-  setTimeout(() => { if (typeof reNotificarPreventivasPendentes === 'function') reNotificarPreventivasPendentes(); }, 5000);
-  if (window._swRegistration && typeof initFCMToken === 'function') initFCMToken(window._swRegistration);
+  // v3.52.0 — Notificações REMOVIDAS. Init/agenda/reset/verificar/digest/FCM tudo fora.
   return true;
 }
 
@@ -3865,15 +3718,8 @@ function doLogin() {
   } catch(e) {}
   initNotificacoes();
   initKChips();
-  agendarResetMeiaNoite();    // agenda reset de notificações à meia-noite
-  agendarDigestDiario();      // agenda digest diário às 17h (só admin envia)
-  resetNotificacoesDiarias(); // limpa notificações de dias anteriores ao abrir
   aplicarQRSeExistir();
-  setTimeout(verificarNotificacoesPerdidas, 3000);
-  // Re-notifica preventivas pendentes (1x por dia, só admin dispara)
-  setTimeout(reNotificarPreventivasPendentes, 5000);
-  // FCM: registra token deste dispositivo
-  if (window._swRegistration) initFCMToken(window._swRegistration);
+  // v3.52.0 — Notificações REMOVIDAS (reset/digest/verificar/re-notif/FCM).
   // ── Visibilidade de abas por perfil ──────────────────
   // Admin/Joacir: tudo visível
   // Outros: Kanban + Histórico visíveis, mais nada
@@ -4062,10 +3908,7 @@ function gerarCardsPreventivas() {
   });
 }
 
-// v3.50.0 — notificarPreventiva + reNotificarPreventivasPendentes removidas.
-// Stubs mantidos pra não quebrar callers que ainda apontem pra elas.
-function notificarPreventiva(_prev, _card) { /* no-op */ }
-function reNotificarPreventivasPendentes() { /* no-op */ }
+// v3.52.0 — notificarPreventiva + reNotificarPreventivasPendentes DELETADAS.
 
 // ── DASHBOARD ─────────────────────────────────────────
 let _dashDirty = false;
@@ -4163,40 +4006,8 @@ function renderDashboard() {
 
 // ── KANBAN RENDER ─────────────────────────────────────
 
-function updateBanner() {
-  const banner = document.getElementById('kanban-banner');
-  if (!banner) return;
-  // v3.48.3 — banner só aparece (a) entre 07:30 e 08:00 BRT (b) pro user responsável.
-  // Fora dessa janela, ou pra outros users, fica só o card no Kanban (não polui a tela).
-  const now = new Date();
-  const minsAgora = now.getHours() * 60 + now.getMinutes();
-  const dentroJanela = minsAgora >= (7 * 60 + 30) && minsAgora <= (8 * 60); // 07:30 → 08:00
-  const userAtual = (state.user || '').toLowerCase();
-  let pendentes = state.cards.filter(c => c.tipo === 'preventiva' && c.urg === 'alta' && c.col === 'todo');
-  // Filtra só as do user logado (compara contra resp da preventiva)
-  pendentes = pendentes.filter(c => {
-    const pv = state.preventivas.find(p => (p._key || p.id) === c.prevId);
-    const resp = (pv ? pv.resp : c.resp) || '';
-    return resp.toLowerCase() === userAtual;
-  });
-  if (!dentroJanela || !pendentes.length) { banner.style.display = 'none'; return; }
-  banner.style.display = 'block';
-  const qtd = pendentes.length;
-  const titulo = qtd === 1 ? 'Alta: 1 preventiva vencida pendente' : ('Alta: ' + qtd + ' preventivas vencidas pendentes');
-  const itens = pendentes.map(c => {
-    const pv = state.preventivas.find(p => (p._key || p.id) === c.prevId);
-    const resp = pv ? pv.resp : '—';
-    const maquina = c.equip || c.titulo || '—';
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(217,64,64,0.15)">' +
-      '<span style="font-size:0.72rem;font-weight:600;color:#c03030">' + maquina + '</span>' +
-      '<span style="font-size:0.65rem;color:#d94040">' + resp + '</span>' +
-      '</div>';
-  }).join('');
-  banner.innerHTML =
-    '<div style="font-size:0.72rem;font-weight:700;color:#d94040;margin-bottom:8px">' + titulo + '</div>' +
-    '<div>' + itens + '</div>' +
-    '<div style="font-size:0.6rem;color:#c03030;margin-top:8px;opacity:0.7">Some automaticamente quando as preventivas forem concluidas</div>';
-}
+// v3.52.0 — updateBanner DELETADA (banner de preventivas vencidas era parte
+// do sistema de notificações, fora agora).
 
 // v3.50.4 — Toggle de avatar dos técnicos (admin/gerente only)
 // Checagem robusta de role: lê via getCurrentUser do HUB (single source of truth).
@@ -4318,6 +4129,41 @@ function updateHeaderStats() {
     document.getElementById('hs-atraso').textContent = pct + '%';
   }
 }
+// v3.52.0 — Debug helper. Rodar `__debugKanban()` no console pra investigar
+// porque um técnico não vê seus cards. Mostra state.user, state.userKey,
+// resultado do filtro pra cada card.
+window.__debugKanban = function() {
+  const meK = state.userKey || '';
+  const meN = state.user || '';
+  const _toK = (n) => {
+    if (!n) return '';
+    if (typeof _resolveUserKey === 'function') { const k = _resolveUserKey(n); if (k) return k; }
+    return String(n).toLowerCase().trim();
+  };
+  const meKResolved = meK || _toK(meN);
+  const ehAdminGer = (typeof _ehGerenteOuAdmin === 'function') ? _ehGerenteOuAdmin() : !!state.isAdmin;
+  console.log('━━━ DEBUG KANBAN ━━━');
+  console.log('state.user:', meN, '· state.userKey:', meK, '· resolved:', meKResolved);
+  console.log('isAdminGer:', ehAdminGer, '· state.isAdmin:', state.isAdmin);
+  console.log('Total cards:', state.cards.length);
+  state.cards.slice(0, 10).forEach((c, i) => {
+    const matches = {
+      respKey: c.respKey === meKResolved,
+      autorKey: c.autorKey === meKResolved,
+      resp: c.resp && _toK(c.resp) === meKResolved,
+      autor: c.autor && _toK(c.autor) === meKResolved,
+    };
+    const passa = Object.values(matches).some(Boolean);
+    console.log('  [' + i + ']', c.titulo || '?',
+      '· col:', c.col,
+      '· resp:', c.resp || '—', '(→' + _toK(c.resp||'') + ')',
+      '· respKey:', c.respKey || '—',
+      '· autor:', c.autor || '—',
+      '· passa:', passa, matches);
+  });
+  if (state.cards.length > 10) console.log('  ... +' + (state.cards.length - 10) + ' cards');
+};
+
 function renderKanban() {
   // v3.51.1 — Filtro de visibilidade COM resolução de chave canônica:
   // Compara card.resp/autor → chave (via _resolveUserKey) com a chave do user
@@ -4370,7 +4216,6 @@ function renderKanban() {
     if (kFilters.resp) cards = cards.filter(c => c.resp === kFilters.resp);
 
     updateHeaderStats();
-    updateBanner();
     // Badge no nav com contagem de cards urgentes pendentes
     const urgentes = state.cards.filter(c => c.urg === 'alta' && c.col !== 'done').length;
     const badge = document.getElementById('kanban-badge');
@@ -4463,11 +4308,7 @@ function _tickTimers() {
 let _timerInterval = null;
 function _iniciarTimers() {
   if (_timerInterval) clearInterval(_timerInterval);
-  _timerInterval = setInterval(() => {
-    _tickTimers();
-    // v3.48.3 — re-avalia banner pra esconder/aparecer fora da janela 07:30-08:00
-    if (typeof updateBanner === 'function') updateBanner();
-  }, 60000);
+  _timerInterval = setInterval(_tickTimers, 60000);
 }
 
 // v3.36.0 — Kanban redesign (Ajuste 4): card novo estilo Linear/Trello dark
@@ -5426,10 +5267,7 @@ window._prevOnSearch = function(val) {
   _prevPage = 1;
   renderPreventiva();
 };
-window._prevGoPage = function(p) {
-  _prevPage = p;
-  renderPreventiva();
-};
+// v3.52.0 — _prevGoPage REMOVIDA (paginação foi tirada na v3.48.9)
 
 // v3.48.9 — Preventivas agrupadas POR MÁQUINA (mockup aprovado).
 // Cada máquina vira um card com contadores. Click expande mostrando tarefas
@@ -6421,23 +6259,9 @@ function renderCalendario() {
 }
 
 
-// ── NOTIFICAÇÕES ── v3.50.0 — REMOVIDAS COMPLETAMENTE
-// Push, in-app, banner, switch de permissão, digest worker, FCM token —
-// tudo desligado. Stubs no-op pra preservar callers. Será reconstruído depois
-// com regras claras (ver AUDIT-PREVENTIVAS-NOTIF.md).
-let notifPermission = 'default';
-function initNotificacoes() { /* no-op */ }
-function toggleNotifPermission() { /* no-op */ }
-function _atualizarNotifSwitch() { /* no-op */ }
-window.toggleNotifPermission = toggleNotifPermission;
-window._atualizarNotifSwitch = _atualizarNotifSwitch;
-function mostrarBannerNotif(_m, _s) { /* no-op */ }
-function esconderBannerNotif() { /* no-op */ }
-function pedirPermissaoNotif() { /* no-op */ }
-function mostrarNotif(_t,_c,_tag){ /* no-op */ }
-function checkNotifNovosCards(_cards){ /* no-op */ }
-function dispararNotif(_card){ /* no-op */ }
-function agendarRenotif(_card){ /* no-op */ }
+// v3.52.0 — TODO o sistema de notificações foi DELETADO (push, in-app, banner,
+// switch, digest worker, FCM token, modais, badges). Quando voltar a fazer
+// notificações, recriar do zero com regra documentada.
 
 
 // ── MÁQUINAS ─────────────────────────────────────────────
@@ -6868,28 +6692,7 @@ function aplicarQRSeExistir() {
 }
 
 
-// v3.50.0 — Modal de notif admin removido. Stubs no-op.
-function abrirModalNotifAdmin() { /* no-op */ }
-function enviarNotifAdmin() { /* no-op */ }
-
-// v3.50.0 — In-app notif removida. exibirInAppNotif vira no-op.
-let inAppTimer = null;
-function exibirInAppNotif(_titulo, _msg, _de) { /* no-op */ }
-function fecharInAppNotif() { /* no-op */ }
-
-
-// v3.50.0 — Notificações perdidas removidas. Stub no-op.
-async function verificarNotificacoesPerdidas() { /* no-op */ }
-
-
-// v3.50.0 — Tudo de notif (histórico, badge, reset, digest, agendamento) → no-op
-function abrirModalNotifHistorico() { /* no-op */ }
-function marcarTodasLidas() { /* no-op */ }
-function atualizarBadgeNotif() { /* no-op */ }
-function resetNotificacoesDiarias() { /* no-op */ }
-function agendarResetMeiaNoite() { /* no-op */ }
-function enviarDigestDiario() { /* no-op */ }
-function agendarDigestDiario() { /* no-op */ }
+// v3.52.0 — Notificações COMPLETAMENTE REMOVIDAS. Sem stubs.
 
 // ── MODAL UTIL ────────────────────────────────────────
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -7071,13 +6874,8 @@ Object.assign(window, {
   abrirModalPreventiva, salvarPreventiva, executarPreventiva, deletarPreventiva,
   fecharModal,
   renderCalendario, setCalView, calNavegar, calHoje, _abrirDiaDetail,
-  initNotificacoes, mostrarNotif,
-  pedirPermissaoNotif, esconderBannerNotif, verificarNotificacoesPerdidas,
-  enviarDigestDiario, resetNotificacoesDiarias,
-  abrirModalNotifHistorico, marcarTodasLidas, atualizarBadgeNotif,
-  renderMaquinas, abrirModalMaquina, salvarMaquina, deletarMaquina, updateBanner,
+  renderMaquinas, abrirModalMaquina, salvarMaquina, deletarMaquina,
   abrirQR, imprimirQR,
-  abrirModalNotifAdmin, enviarNotifAdmin, fecharInAppNotif,
   populatePvMaquinaSelect, onPvMaquinaChange, onPvTarefaChange,
   renderDashboard, setRelPeriodo, exportarRelPDF,
   abrirModalPecas, adicionarPeca, removerPeca,
@@ -7127,21 +6925,8 @@ const manifestURL = URL.createObjectURL(blob);
 document.getElementById('pwa-manifest').setAttribute('href', manifestURL);
 
 
-// ── SERVICE WORKER (Firebase Messaging — arquivo externo) ──
-if ('serviceWorker' in navigator) {
-  // Registra o SW externo que permite FCM em background
-  navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' })
-    .then(reg => {
-      window._swRegistration = reg;
-      console.log('SW FCM registrado:', reg.scope);
-    })
-    .catch(e => {
-      console.warn('SW falhou (normal em localhost):', e.message);
-    });
-}
-
-// v3.50.0 — initFCMToken removida. FCM desligado por completo.
-async function initFCMToken() { /* no-op */ }
+// v3.52.0 — Service Worker FCM e initFCMToken DELETADOS (cleanup notificações).
+// Quando voltar a ter notificações, recriar do zero com regra documentada.
 </script>
 
 
