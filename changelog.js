@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.51.1', d:'23 abr 2026', current:true,
+    v:'3.51.2', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'HUB · 2 bugs no auto-login: pedia senha de novo + abria módulo errado.',
+        desc:'BUGS reportados pelo William após Ctrl+Shift+R com Vorlei (técnico):\n\n1) POPUP "DEFINIR SENHA" aparecia mesmo com senha já cadastrada.\n2) App abria no módulo Produção, mas Vorlei só tem Manutenção liberado.\n\nCausa raiz comum: o splash de auto-login dura 800ms e dispara setupTabs + checkDefinirSenha em 600ms. Mas o Firebase pode levar 1-3s pra carregar `window._usersProfile`. Sem o profile:\n• checkDefinirSenha vê profile.senhaHash undefined → mostra popup\n• setupTabs vê modulesAllowedOverride undefined → cai no DEFAULT_MODULES_BY_ROLE.producao = [producao,manutencao,crm] → abre Produção\n\nFix: ambas as funções agora detectam se _usersProfile foi populado. Se não, fazem retry a cada 500ms (até 8s). Quando Firebase chegar com os dados reais, executam com o profile correto.\n\nResultado: técnico abre direto no único módulo liberado e não vê popup de senha desnecessário.'}
+    ]
+  },
+  {
+    v:'3.51.1', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · Kanban: técnico não via os próprios cards (filtro por nome literal vs canônico).',
         desc:'BUG: William reportou que após v3.50.4 o Kanban do Vorlei (técnico) ficou vazio mesmo tendo cards atribuídos a ele.\n\nCausa: o filtro `eMeu` comparava `card.resp` com `state.user` por string literal. Mas:\n• state.user = profile.nomeCompleto (ex: "Vorlei Gomes")\n• card.resp = nome curto na preventiva (ex: "Vorlei")\n→ "Vorlei Gomes" !== "Vorlei" → filtro retornava false → todos os cards sumiam.\n\nFix: passa a usar `_resolveUserKey()` em ambos os lados pra resolver pra chave canônica ("vorlei") antes de comparar. Match correto independente de qual variação do nome esteja gravada. Mesma correção aplicada em moverCard().'}
