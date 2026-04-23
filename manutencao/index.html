@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.52.6">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.52.7">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -4068,7 +4068,12 @@ function renderViewBar() {
   let viewMode = 'todos';
   try { viewMode = localStorage.getItem('fio_kb_view_' + (meK||'__')) || 'todos'; } catch(e) { viewMode = 'todos'; }
 
-  // Lista de técnicos: users com acesso ao Manutenção. Exclui o próprio user.
+  // v3.52.7 — Lista de técnicos do toggle:
+  //  • producao com módulo manutencao liberado (técnicos clássicos)
+  //  • gerente COM flag supervisaoManutencao=true (Joacir)
+  //  • admin master FORA (William supervisiona via Time)
+  //  • gerente sem flag FORA (Edilson, Jairo — outras áreas)
+  // Exclui o próprio user (já tem botão "Meus")
   const cfg = state.usersConfig || {};
   const profs = state.userProfiles || {};
   const allKeys = new Set([...Object.keys(cfg), ...Object.keys(profs)]);
@@ -4080,7 +4085,9 @@ function renderViewBar() {
       if (c.active === false || p.active === false) return false;
       if (!(p.nomeCompleto || c.nome || p.nome)) return false;
       const role = p.roleOverride || c.role || 'producao';
-      if (role === 'admin' || role === 'gerente') return true;
+      if (role === 'admin') return false; // admin master nunca aparece
+      if (role === 'gerente') return p.supervisaoManutencao === true; // só com flag
+      // role === 'producao': aparece se tem módulo manutencao
       const mods = p.modulesAllowedOverride || [];
       return mods.includes('manutencao');
     })

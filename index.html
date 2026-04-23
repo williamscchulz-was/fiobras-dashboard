@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.52.6</div>
+    <div class="login-foot">Sistema interno · v3.52.7</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.52.6</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.52.7</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -1029,6 +1029,20 @@
       <div class="mc-hint" style="margin-top:6px">Marque os módulos que esse usuário enxerga. Os não marcados ficam com cadeado.</div>
     </div>
     <div class="mc-hint" id="geuRoleHint" style="display:none;background:rgba(0,136,53,.06);border:1px solid rgba(0,136,53,.2);padding:9px 12px;border-radius:8px;color:var(--text);font-style:normal;margin-bottom:4px"></div>
+    <!-- v3.52.7 — Flag "supervisiona Manutenção" (só pra gerente). Define se aparece no toggle de técnicos do Kanban. -->
+    <div class="tl-form-field" id="geuSupervManutField" style="display:none">
+      <label>Áreas que supervisiona</label>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px">
+        <label class="geu-switch" style="margin:0">
+          <input type="checkbox" id="geuSupervManut">
+          <span class="geu-switch-slider"></span>
+        </label>
+        <div style="flex:1">
+          <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:.78rem;color:var(--text)">Supervisiona Manutenção</div>
+          <div style="font-size:.65rem;color:var(--muted);margin-top:2px">Aparece no filtro de técnicos do Kanban da Manutenção. Marque pra gerentes que acompanham as demandas dessa área.</div>
+        </div>
+      </div>
+    </div>
     <div class="tl-form-field" id="geuTabsField">
       <label>Abas restritas</label>
       <div id="geuTabs" class="geu-mods"></div>
@@ -1992,6 +2006,9 @@ window.abrirEditarUsuario = (userKey) => {
   // v3.48.1 — campo active (default true se não setado)
   const profileAtual = (window._usersProfile||{})[userKey] || {};
   const ativo = profileAtual.active !== false; // default true
+  // v3.52.7 — flag "supervisiona Manutenção" (gerente)
+  const supervEl = document.getElementById('geuSupervManut');
+  if (supervEl) supervEl.checked = !!profileAtual.supervisaoManutencao;
   const activeEl = document.getElementById('geuActive');
   if(activeEl){
     activeEl.checked = ativo;
@@ -2283,6 +2300,9 @@ window.geuOnRoleChange = () => {
   const role = document.getElementById('geuRole').value;
   const modField = document.getElementById('geuModulosField');
   const hint = document.getElementById('geuRoleHint');
+  // v3.52.7 — campo "supervisiona Manutenção" só pra gerente
+  const supervField = document.getElementById('geuSupervManutField');
+  if (supervField) supervField.style.display = (role === 'gerente') ? '' : 'none';
   if(role === 'admin' || role === 'gerente'){
     if(modField) modField.style.display = 'none';
     if(hint){
@@ -2329,6 +2349,9 @@ window.salvarEditarUsuario = () => {
   // v3.48.1 — salva active (default true se checkbox não existe)
   const activeEl = document.getElementById('geuActive');
   profile.active = activeEl ? !!activeEl.checked : true;
+  // v3.52.7 — salva supervisaoManutencao (só pra gerente; outros roles limpa)
+  const supervEl = document.getElementById('geuSupervManut');
+  profile.supervisaoManutencao = (role === 'gerente' && supervEl && supervEl.checked) ? true : null;
   // v3.48.1: coleta poderes (só pra user comum — admin/gerente têm tudo automático)
   if(!isFullAccess){
     const powers = {};
@@ -2833,7 +2856,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.52.6';
+const CURRENT_VERSION = '3.52.7';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.

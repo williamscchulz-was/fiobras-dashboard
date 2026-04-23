@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.52.6', d:'23 abr 2026', current:true,
+    v:'3.52.7', d:'23 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Filtro de técnicos por gerência: novo flag "supervisiona Manutenção" no painel admin.',
+        desc:'Resolve o caso do William: Edilson e Jairo são gerentes mas não atuam na Manutenção; Joacir é gerente E supervisiona Manutenção. Antes todos apareciam (admin/gerente entram no toggle por default).\n\nNovo campo: <code>users-profile/{user}/supervisaoManutencao</code> (boolean).\n\nUI no HUB:\n• Gerenciar Usuários → Editar usuário\n• Quando role = Gerente, aparece toggle "Supervisiona Manutenção"\n• Marca/desmarca por user. Salva no users-profile.\n• Outros roles: campo escondido (admin sempre supervisiona implicitamente; producao usa modulesAllowedOverride).\n\nFiltro do toggle no Kanban da Manutenção:\n• producao com módulo manutencao → aparece (técnicos)\n• gerente COM supervisaoManutencao=true → aparece (Joacir)\n• gerente sem flag → some (Edilson, Jairo)\n• admin master → some (William supervisiona via "Time")\n\nWilliam: pra fazer Joacir aparecer, vai em Gerenciar Usuários → editar Joacir → marcar "Supervisiona Manutenção" → Salvar.'}
+    ]
+  },
+  {
+    v:'3.52.6', d:'23 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · Toggle de técnicos clean (4 ajustes aprovados).',
         desc:'Mockup mockup-toggle-cleanup.html aprovado, fixes 1-4:\n\n1) CAIXA DE DEBUG REMOVIDA do canto inferior direito (era pra dev temporário). _debugKanbanOnScreen deletada. window.__debugKanban no console mantido caso precise debug futuro.\n\n2) PILLS SÓ COM NOME (sem avatar/foto/iniciais coloridas). Mais clean, escala melhor com vários técnicos. Pills "Meus" e "Time" em azul (especiais), técnicos em cinza/verde.\n\n3) CONTAGEM SÓ POR RESPONSÁVEL (ignora autor). Antes Edilson aparecia com badge "1" porque criou uma demanda pro Joacir — agora conta só quem é responsável. Edilson sem badge se ele só criou.\n\n4) DEFAULT "TIME" FORÇADO pra admin/gerente. Limpeza one-shot do localStorage["fio_kb_view_*"] antigo via flag fio_kb_view_reset_v1 (roda 1x). Admin abre sempre vendo tudo.\n\n#5 ADIADO: ocultar gerentes do toggle. William quer entender melhor o role producao vs gerente — Joacir é gerente de manutenção, deve aparecer; Edilson/Jairo são gerentes de outras áreas. Vai auditar role na próxima rodada.'}
