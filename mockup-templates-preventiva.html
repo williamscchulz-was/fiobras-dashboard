@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Templates de preventiva por máquina</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*:before,*:after{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1A1D22;color:#fff;font-family:'Poppins',sans-serif;padding:24px;min-height:100vh}
+  h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;margin-bottom:6px}
+  h2{font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;color:#9CA295;margin:32px 0 14px;letter-spacing:1px;text-transform:uppercase}
+  h3{font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;color:#fff;margin-bottom:8px}
+  .wrap{max-width:1180px;margin:0 auto}
+  .intro{color:#9CA295;font-size:.78rem;max-width:760px;margin-bottom:24px;line-height:1.6}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:14px;align-items:start}
+  @media (max-width:880px){.row{grid-template-columns:1fr}}
+
+  /* Modal */
+  .mdl{background:#1F2125;border:1px solid #2A2D33;border-radius:14px;padding:20px;color:#CFD3CB}
+  .mdl-h{font-family:'Outfit';font-weight:700;font-size:.95rem;color:#60A5FA;margin-bottom:14px;letter-spacing:.5px;text-transform:uppercase;font-size:.7rem}
+  .field{margin-bottom:12px}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .lbl{font-family:'DM Mono';font-size:.55rem;color:#6B7166;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;display:block}
+  .ipt{background:#16191c;border:1px solid #2a2d33;border-radius:6px;padding:7px 10px;color:#CFD3CB;font-family:'Poppins';font-size:.7rem;width:100%}
+
+  /* Tabs por frequência */
+  .freq-tabs{display:flex;gap:4px;flex-wrap:wrap;background:#0d1014;border:1px solid #25282d;border-radius:8px;padding:4px;margin-bottom:10px}
+  .freq-tab{
+    background:transparent;border:0;color:#9CA295;cursor:pointer;
+    padding:7px 12px;border-radius:6px;
+    font-family:'Poppins';font-size:.65rem;font-weight:600;
+    display:inline-flex;align-items:center;gap:6px;transition:.1s;
+  }
+  .freq-tab:hover{background:rgba(255,255,255,.04);color:#fff}
+  .freq-tab.active{background:rgba(0,200,80,.18);color:#4ADE80}
+  .freq-tab .freq-cnt{background:rgba(255,255,255,.1);font-family:'DM Mono';font-size:.5rem;padding:1px 5px;border-radius:999px;min-width:16px;text-align:center}
+  .freq-tab.active .freq-cnt{background:rgba(0,200,80,.3);color:#6EE7B7}
+  .freq-dot{width:6px;height:6px;border-radius:50%}
+  .freq-dot.diaria{background:#A855F7}
+  .freq-dot.semanal{background:#3B82F6}
+  .freq-dot.quinzenal{background:#0EA5E9}
+  .freq-dot.mensal{background:#10B981}
+  .freq-dot.trimestral{background:#F59E0B}
+  .freq-dot.semestral{background:#EC4899}
+  .freq-dot.anual{background:#EF4444}
+
+  /* Container das tarefas */
+  .tasks-wrap{background:#0d1014;border:1px solid #25282d;border-radius:8px;padding:8px;min-height:140px;display:flex;flex-direction:column;gap:6px}
+  .task-row{display:grid;grid-template-columns:1fr 1.2fr 26px;gap:8px;align-items:center;background:#16191c;border-radius:6px;padding:8px}
+  .task-row input{background:#0d1014;border:1px solid #25282d;border-radius:5px;padding:6px 9px;color:#CFD3CB;font-size:.7rem;font-family:'Poppins'}
+  .task-row input:focus{border-color:#3A3F47;outline:0}
+  .task-row .obs-ipt{color:#9CA295;font-style:italic}
+  .task-rm{background:transparent;border:0;color:#6B7166;cursor:pointer;font-size:14px;border-radius:5px;padding:4px}
+  .task-rm:hover{color:#F87171;background:rgba(220,38,38,.1)}
+  .task-add{
+    background:rgba(0,200,80,.06);border:1px dashed rgba(0,200,80,.3);
+    color:#4ADE80;cursor:pointer;
+    padding:8px;border-radius:6px;
+    font-family:'Poppins';font-size:.66rem;font-weight:600;text-align:center;margin-top:4px;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .task-add:hover{background:rgba(0,200,80,.12);border-style:solid}
+
+  .empty{text-align:center;color:#6B7166;font-size:.7rem;font-style:italic;padding:20px 8px}
+
+  /* Side note */
+  .anote{background:rgba(0,118,190,.06);border:1px solid rgba(0,118,190,.25);border-radius:8px;padding:10px 12px;font-size:.7rem;color:#60A5FA;line-height:1.5}
+  .anote b{color:#fff}
+
+  /* Modal +Preventiva (mockup pequeno) */
+  .pv-mdl{background:#1F2125;border:1px solid #2A2D33;border-radius:14px;padding:18px}
+  .pv-mdl-h{font-family:'Outfit';font-weight:700;font-size:.78rem;color:#60A5FA;margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+  .maq-pick{background:#16191c;border:1px solid #25282d;border-radius:6px;padding:8px 10px;color:#CFD3CB;font-size:.74rem;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+  .maq-pick small{color:#6B7166;font-family:'DM Mono';font-size:.55rem;text-transform:uppercase;letter-spacing:.5px}
+
+  .templates-section{background:#0d1014;border:1px solid #25282d;border-radius:8px;padding:10px;margin-bottom:10px}
+  .templates-h{font-family:'DM Mono';font-size:.55rem;color:#9CA295;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+  .templates-h b{color:#fff;font-family:'Outfit';font-weight:700;font-size:.78rem;text-transform:none;letter-spacing:0;display:flex;align-items:center;gap:6px}
+  .pre-task{display:grid;grid-template-columns:18px 1fr;gap:8px;padding:5px 4px;border-radius:4px;align-items:flex-start;cursor:pointer;font-size:.7rem}
+  .pre-task:hover{background:rgba(255,255,255,.03)}
+  .pre-task.selected{background:rgba(0,200,80,.06)}
+  .pre-task-cb{width:14px;height:14px;border:1.5px solid #3A3F47;border-radius:3px;display:flex;align-items:center;justify-content:center;background:#0d1014;margin-top:2px}
+  .pre-task.selected .pre-task-cb{background:#10B981;border-color:#10B981;color:#fff;font-size:9px}
+  .pre-task-name{font-weight:600;color:#CFD3CB}
+  .pre-task-obs{color:#6B7166;font-size:.6rem;margin-top:1px;font-style:italic}
+
+  .btn-criar{background:linear-gradient(180deg,#10B981,#059669);color:#fff;border:0;padding:10px 18px;border-radius:8px;font-family:'Poppins';font-weight:700;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;width:100%;margin-top:6px}
+
+  .schema{background:#0d1014;border:1px solid #25282d;border-radius:8px;padding:14px;margin-top:14px;font-family:'DM Mono';font-size:.65rem;color:#9CA295;line-height:1.6;overflow-x:auto;white-space:pre}
+  .schema b{color:#4ADE80;font-weight:normal}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mockup — Templates de preventiva por máquina</h1>
+  <p class="intro">
+    Hoje o campo "Preventivas padrão" no cadastro de máquina é uma lista textual única (uma linha por tarefa, sem freq nem observação). Proposta: organizar por <b style="color:#fff">frequência</b> (anual, semestral, trimestral, mensal, semanal, diária) com uma <b style="color:#fff">observação opcional</b> em cada tarefa. Quando for criar uma preventiva nova daquela máquina, as templates ficam pré-prontas.
+  </p>
+
+  <h2>▼ Tela 1 — Editar Máquina (cadastro de templates)</h2>
+  <div class="row">
+    <div>
+      <h3 style="color:#9CA295;font-size:.65rem;font-family:'DM Mono';text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">▼ ATUAL · textarea único</h3>
+      <div class="mdl">
+        <div class="mdl-h">EDITAR MÁQUINA</div>
+        <div class="field-row">
+          <div class="field"><label class="lbl">Nome</label><input class="ipt" value="Retorcedeira VTS 07 2001"></div>
+          <div class="field"><label class="lbl">Tag</label><input class="ipt" value="RET-01"></div>
+        </div>
+        <div class="field">
+          <label class="lbl">Preventivas padrão (uma linha — ex: Troca de óleo)</label>
+          <textarea class="ipt" rows="6">Inspeção fusos improdutivo
+Verificar dispositivo anti-imagem
+Verificar fluxo de óleo da caixa no visor
+Verificar anomalias de funcionamento
+Abrir tampas das cabeceiras e efetuar limpeza</textarea>
+        </div>
+        <p style="color:#F87171;font-size:.65rem;font-style:italic;margin-top:8px">⚠ Sem freq · Sem observação · Sem ordem por categoria</p>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="color:#4ADE80;font-size:.65rem;font-family:'DM Mono';text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">▼ NOVO · tabs por frequência + observação</h3>
+      <div class="mdl">
+        <div class="mdl-h">EDITAR MÁQUINA · TEMPLATES DE PREVENTIVA</div>
+        <div class="field-row">
+          <div class="field"><label class="lbl">Nome</label><input class="ipt" value="Retorcedeira VTS 07 2001"></div>
+          <div class="field"><label class="lbl">Tag</label><input class="ipt" value="RET-01"></div>
+        </div>
+        <label class="lbl">Templates de preventiva (por frequência)</label>
+        <div class="freq-tabs">
+          <button class="freq-tab"><span class="freq-dot diaria"></span>Diária<span class="freq-cnt">0</span></button>
+          <button class="freq-tab active"><span class="freq-dot semanal"></span>Semanal<span class="freq-cnt">5</span></button>
+          <button class="freq-tab"><span class="freq-dot quinzenal"></span>Quinzenal<span class="freq-cnt">0</span></button>
+          <button class="freq-tab"><span class="freq-dot mensal"></span>Mensal<span class="freq-cnt">2</span></button>
+          <button class="freq-tab"><span class="freq-dot trimestral"></span>Trimestral<span class="freq-cnt">1</span></button>
+          <button class="freq-tab"><span class="freq-dot semestral"></span>Semestral<span class="freq-cnt">0</span></button>
+          <button class="freq-tab"><span class="freq-dot anual"></span>Anual<span class="freq-cnt">3</span></button>
+        </div>
+        <div class="tasks-wrap">
+          <div class="task-row">
+            <input value="Inspeção fusos improdutivo" placeholder="Nome da tarefa">
+            <input class="obs-ipt" value="Verificar com o dispositivo de teste antes" placeholder="Observação (opcional)">
+            <button class="task-rm" title="Remover">🗑</button>
+          </div>
+          <div class="task-row">
+            <input value="Verificar dispositivo anti-imagem" placeholder="Nome da tarefa">
+            <input class="obs-ipt" value="" placeholder="Observação (opcional)">
+            <button class="task-rm" title="Remover">🗑</button>
+          </div>
+          <div class="task-row">
+            <input value="Verificar fluxo de óleo da caixa no visor" placeholder="Nome da tarefa">
+            <input class="obs-ipt" value="Nível mínimo na marca azul" placeholder="Observação (opcional)">
+            <button class="task-rm" title="Remover">🗑</button>
+          </div>
+          <div class="task-row">
+            <input value="Abrir tampas das cabeceiras e efetuar limpeza" placeholder="Nome da tarefa">
+            <input class="obs-ipt" value="Cuidado com correia de transmissão" placeholder="Observação (opcional)">
+            <button class="task-rm" title="Remover">🗑</button>
+          </div>
+          <div class="task-row">
+            <input value="Conferir tensão e condição das correias" placeholder="Nome da tarefa">
+            <input class="obs-ipt" value="" placeholder="Observação (opcional)">
+            <button class="task-rm" title="Remover">🗑</button>
+          </div>
+          <div class="task-add">＋ Adicionar tarefa semanal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anote" style="margin-top:14px">
+    <b>Como funciona:</b> tabs por frequência (cada uma com contador). Click numa tab → mostra as tarefas daquela freq. Cada tarefa tem nome + observação opcional. Botão "+ Adicionar tarefa" no final pra incluir nova. Lixeira pra remover. <b>Migração automática:</b> tarefas do textarea antigo entram como "Sem freq" (Joacir vai e categoriza depois).
+  </div>
+
+  <h2>▼ Tela 2 — Cadastrar nova preventiva (puxando templates)</h2>
+  <div class="row">
+    <div>
+      <h3 style="color:#9CA295;font-size:.65rem;font-family:'DM Mono';text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">▼ ATUAL · digitar tudo do zero</h3>
+      <div class="pv-mdl">
+        <div class="pv-mdl-h">+ NOVA PREVENTIVA</div>
+        <div class="field"><label class="lbl">Máquina</label>
+          <select class="ipt"><option>RET-02 · Retorcedeira</option></select>
+        </div>
+        <div class="field"><label class="lbl">Frequência</label>
+          <select class="ipt"><option>Anual (365 dias)</option></select>
+        </div>
+        <div class="field"><label class="lbl">Tarefa</label>
+          <input class="ipt" placeholder="Digite o nome da tarefa...">
+        </div>
+        <div class="field"><label class="lbl">Última execução</label>
+          <input class="ipt" type="date">
+        </div>
+        <div class="field"><label class="lbl">Responsável</label>
+          <select class="ipt"><option>Vorlei</option></select>
+        </div>
+        <button class="btn-criar" style="background:linear-gradient(180deg,#0076BE,#005d96)">SALVAR (1 preventiva)</button>
+        <p style="color:#F87171;font-size:.65rem;font-style:italic;margin-top:10px">⚠ Pra cadastrar 5 anuais, repete o processo 5x.</p>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="color:#4ADE80;font-size:.65rem;font-family:'DM Mono';text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">▼ NOVO · puxa templates da máquina</h3>
+      <div class="pv-mdl">
+        <div class="pv-mdl-h">+ NOVA PREVENTIVA</div>
+        <div class="maq-pick">
+          <span><b style="color:#fff">RET-02</b> · Retorcedeira VTS 09</span>
+          <small>3 templates anuais cadastradas ↓</small>
+        </div>
+        <div class="field"><label class="lbl">Frequência</label>
+          <select class="ipt"><option>Anual (365 dias)</option></select>
+        </div>
+        <div class="field"><label class="lbl">Última execução (será aplicada em todas)</label>
+          <input class="ipt" type="date" value="2025-04-23">
+        </div>
+        <div class="field"><label class="lbl">Responsável</label>
+          <select class="ipt"><option>Vorlei</option></select>
+        </div>
+
+        <div class="templates-section">
+          <div class="templates-h">
+            <b><span class="freq-dot anual" style="margin-right:4px"></span>Templates anuais da RET-02</b>
+            <span style="font-family:'DM Mono';font-size:.55rem;color:#6B7166">CLIQUE PARA SELECIONAR</span>
+          </div>
+          <div class="pre-task selected">
+            <div class="pre-task-cb">✓</div>
+            <div>
+              <div class="pre-task-name">Trocar rolamento principal</div>
+              <div class="pre-task-obs">Usar peça XYZ-12345, torque 80Nm</div>
+            </div>
+          </div>
+          <div class="pre-task selected">
+            <div class="pre-task-cb">✓</div>
+            <div>
+              <div class="pre-task-name">Inspeção geral do sistema hidráulico</div>
+              <div class="pre-task-obs">Verificar vedações e mangueiras</div>
+            </div>
+          </div>
+          <div class="pre-task">
+            <div class="pre-task-cb"></div>
+            <div>
+              <div class="pre-task-name">Calibração dos sensores de tensão</div>
+              <div class="pre-task-obs">Equipamento Fluke necessário</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field"><label class="lbl">Adicionar tarefa avulsa (opcional)</label>
+          <input class="ipt" placeholder="Ou digita uma extra que não tá no template...">
+        </div>
+
+        <button class="btn-criar">SALVAR · 2 preventivas selecionadas + 0 avulsas</button>
+        <p style="color:#6EE7B7;font-size:.65rem;font-style:italic;margin-top:10px">✓ Cria as 2 selecionadas de uma vez · obs do template entra como obs da preventiva</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>▼ Schema Firebase</h2>
+  <div class="schema">manutencao/maquinas/{key}/
+  nome:        "Retorcedeira VTS 07 2001"
+  tag:         "RET-01"
+  setor:       "mecanica"
+  status:      "ativa"
+  responsavel: "vorlei"
+  // <b>NOVO</b> — substitui prevs (string) por estrutura por frequência
+  prevsTemplate: {
+    diaria:     [],
+    semanal:    [
+      { tarefa: "Limpar tampas",     obs: "Cuidado com correia" },
+      { tarefa: "Conferir correias", obs: "" }
+    ],
+    mensal:     [...],
+    trimestral: [...],
+    anual:      [...]
+  }
+  prevs: "..."  // <b>MANTIDO</b> pra retrocompat (migração 1x ao salvar nova estrutura)</div>
+
+  <h2>Resumo</h2>
+  <ul style="color:#9CA295;font-size:.78rem;line-height:1.7;list-style:none;max-width:760px;margin:0 auto">
+    <li>✓ <b style="color:#fff">Tabs por frequência</b> no Editar Máquina (anual/semestral/trimestral/mensal/semanal/quinzenal/diária)</li>
+    <li>✓ Cada tarefa: <b style="color:#fff">nome + observação opcional</b></li>
+    <li>✓ Contador na tab mostra quantas tarefas em cada freq</li>
+    <li>✓ Modal "+ Nova preventiva" puxa templates da máquina selecionada</li>
+    <li>✓ Multi-select: marca várias de uma vez → cria todas no banco com a mesma data</li>
+    <li>✓ Pode adicionar tarefa avulsa pra casos fora do template</li>
+    <li>✓ Migração automática: textarea antigo (prevs) vira "sem freq" no novo schema (Joacir categoriza depois)</li>
+    <li>✓ Cards no Kanban (v3.53.0) já agrupam por freq → tudo vai funcionar junto naturalmente</li>
+  </ul>
+</div>
+</body>
+</html>

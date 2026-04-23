@@ -56,7 +56,7 @@ v0.1    27/03/2026  Versão inicial — Kanban, Preventiva, Máquinas, Históric
 <meta name="app-changelog" content="v3.0.0:dashboard-home|v2.7.0:notif-redesign+prev-notif+demanda-notif|v2.6.3:auto-login-senha+fix-preventiva-render|v2.6.2:fix-syntax+ui-polish|v2.6:fix-notif-sw+changelog|v2.5.1:login-cards|v2.5:missed-notif+badge|v2.4:login-UI+banner|v2.3:no-emoji+icon|v2.2:FCM-SW|v2.1:FCM-token|v2.0:admin-notif|v1.9:cloudflare-worker|v1.8:bottom-nav|v1.7:viewport|v1.6:qr-no-cdn|v1.5:qr-code|v1.4:floating-nav|v1.3:splash|v1.2:login-fix|v1.1:foto+comments|v1.0:users|v0.9:fcm|v0.8:ordering|v0.1:initial">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- v3.27.0: design tokens compartilhados -->
-  <link rel="stylesheet" href="../css/tokens.css?v=3.53.0">
+  <link rel="stylesheet" href="../css/tokens.css?v=3.54.0">
 <style>
 /* v3.22.2 — reduced motion (vestibular/epilepsia) */
 @media (prefers-reduced-motion: reduce) {
@@ -2147,6 +2147,44 @@ to   { opacity:0; transform:translateX(-50%) translateY(-24px) scale(0.96); }
 .btn-concluir-tudo { background: linear-gradient(180deg,#10B981,#059669); color: #fff; border: 0; padding: 10px 18px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: .7rem; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; flex-shrink: 0; }
 .btn-concluir-tudo:disabled { background: #3A3F47; color: var(--muted, #6B7166); cursor: not-allowed; }
 
+/* v3.54.0 — Templates de preventiva no Editar Máquina */
+.freq-tabs { display: flex; gap: 4px; flex-wrap: wrap; background: var(--bg, #0d1014); border: 1px solid var(--border, #25282d); border-radius: 8px; padding: 4px; margin-bottom: 8px; }
+.freq-tab { background: transparent; border: 0; color: var(--muted, #9CA295); cursor: pointer; padding: 7px 12px; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: .65rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: .1s; }
+.freq-tab:hover { background: rgba(255,255,255,.04); color: var(--text, #fff); }
+.freq-tab.active { background: rgba(0,200,80,.18); color: #4ADE80; }
+.freq-tab .freq-cnt { background: rgba(255,255,255,.1); font-family: 'DM Mono', monospace; font-size: .5rem; padding: 1px 5px; border-radius: 999px; min-width: 16px; text-align: center; }
+.freq-tab.active .freq-cnt { background: rgba(0,200,80,.3); color: #6EE7B7; }
+.freq-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.freq-dot.diaria { background: #A855F7; }
+.freq-dot.semanal { background: #3B82F6; }
+.freq-dot.quinzenal { background: #0EA5E9; }
+.freq-dot.mensal { background: #10B981; }
+.freq-dot.trimestral { background: #F59E0B; }
+.freq-dot.semestral { background: #EC4899; }
+.freq-dot.anual { background: #EF4444; }
+.tasks-wrap { background: var(--bg, #0d1014); border: 1px solid var(--border, #25282d); border-radius: 8px; padding: 8px; min-height: 100px; display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+.task-row { display: grid; grid-template-columns: 1fr 1.2fr 26px; gap: 8px; align-items: center; background: var(--surface2, #16191c); border-radius: 6px; padding: 8px; }
+.task-row input { background: var(--bg, #0d1014); border: 1px solid var(--border, #25282d); border-radius: 5px; padding: 6px 9px; color: var(--text, #CFD3CB); font-size: .7rem; font-family: 'Poppins', sans-serif; min-width: 0; width: 100%; }
+.task-row input:focus { border-color: var(--border2, #3A3F47); outline: 0; }
+.task-row .obs-ipt { color: var(--muted, #9CA295); font-style: italic; }
+.task-rm { background: transparent; border: 0; color: var(--muted, #6B7166); cursor: pointer; font-size: 14px; border-radius: 5px; padding: 4px; }
+.task-rm:hover { color: #F87171; background: rgba(220,38,38,.1); }
+.task-add { background: rgba(0,200,80,.06); border: 1px dashed rgba(0,200,80,.3); color: #4ADE80; cursor: pointer; padding: 8px; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: .66rem; font-weight: 600; text-align: center; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.task-add:hover { background: rgba(0,200,80,.12); border-style: solid; }
+.tasks-empty { text-align: center; color: var(--muted, #6B7166); font-size: .7rem; font-style: italic; padding: 16px 8px; }
+
+/* Templates section in +Preventiva modal */
+.templates-section { background: var(--bg, #0d1014); border: 1px solid var(--border, #25282d); border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+.templates-h { font-family: 'DM Mono', monospace; font-size: .55rem; color: var(--muted, #9CA295); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.templates-h b { color: var(--text, #fff); font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .78rem; text-transform: none; letter-spacing: 0; display: flex; align-items: center; gap: 6px; }
+.pre-task { display: grid; grid-template-columns: 18px 1fr; gap: 8px; padding: 5px 4px; border-radius: 4px; align-items: flex-start; cursor: pointer; font-size: .7rem; }
+.pre-task:hover { background: rgba(255,255,255,.03); }
+.pre-task.selected { background: rgba(0,200,80,.06); }
+.pre-task-cb { width: 14px; height: 14px; border: 1.5px solid var(--border2, #3A3F47); border-radius: 3px; display: flex; align-items: center; justify-content: center; background: var(--bg, #0d1014); margin-top: 2px; flex-shrink: 0; }
+.pre-task.selected .pre-task-cb { background: #10B981; border-color: #10B981; color: #fff; font-size: 9px; font-weight: 700; }
+.pre-task-name { font-weight: 600; color: var(--text, #CFD3CB); }
+.pre-task-obs { color: var(--muted, #6B7166); font-size: .6rem; margin-top: 1px; font-style: italic; }
+
 /* v3.52.6 — Toggle de técnicos no Kanban: pills SÓ COM NOME (sem avatar) */
 #kb-view-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 10px 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; margin-bottom: 14px; overflow-x: auto; }
 .kb-view-lbl { font-family: 'DM Mono', monospace; font-size: .58rem; color: var(--muted, #6B7166); text-transform: uppercase; letter-spacing: .7px; margin-right: 4px; flex-shrink: 0; }
@@ -2815,10 +2853,14 @@ display: none;
         <div class="field"><label>Fabricante / Modelo</label><input id="maq-modelo" placeholder="Saurer Allma CC3"></div>
         <div class="field"><label>Ano de aquisição</label><input id="maq-ano" type="number" placeholder="2020"></div>
       </div>
+      <!-- v3.54.0 — Templates de preventiva por frequência (substitui textarea único) -->
       <div class="field">
-        <label>Preventivas padrão <span style="font-weight:300;text-transform:none;letter-spacing:0">(uma por linha — ex: Troca de óleo)</span></label>
-        <textarea id="maq-prevs" placeholder="Troca de óleo lubrificante&#10;Limpeza geral&#10;Verificação de correias&#10;Inspeção elétrica" style="min-height:100px"></textarea>
+        <label>Templates de preventiva <span style="font-weight:300;text-transform:none;letter-spacing:0">(por frequência)</span></label>
+        <div id="maq-tpl-tabs" class="freq-tabs"></div>
+        <div id="maq-tpl-tasks" class="tasks-wrap"></div>
       </div>
+      <!-- Mantém textarea legacy hidden (read-only) pra retrocompat — migração 1x quando salvar -->
+      <textarea id="maq-prevs" style="display:none"></textarea>
     </div>
     <div class="modal-actions">
       <button class="modal-btn cancel" onclick="fecharModal('modal-maquina')">Cancelar</button>
@@ -3216,8 +3258,8 @@ display: none;
           </select>
         </div>
         <div class="field"><label>Frequência</label>
-          <select id="pv-freq">
-            <option value="1">Diária (1d · só notificação, não aparece no calendário/Kanban)</option>
+          <select id="pv-freq" onchange="if(typeof _pvRenderTarefas==='function')_pvRenderTarefas()">
+            <option value="1">Diária (1d · só notificação)</option>
             <option value="7">Semanal (7d)</option>
             <option value="15">Quinzenal (15d)</option>
             <option value="30" selected>Mensal (30d)</option>
@@ -5927,39 +5969,63 @@ function abrirModalPreventiva(key) {
   modal.classList.add('open');
 }
 
-// Render da lista de tarefas (prevs padrão da máquina + customs adicionadas)
+// v3.54.0 — Cache: tarefa → obs do template (pra usar ao salvar)
+let _pvTarefaObs = {};
+
+// Render da lista de tarefas (templates da máquina filtrados pela freq selecionada + customs)
 function _pvRenderTarefas() {
   const list = document.getElementById('pv-ts-list');
   const count = document.getElementById('pv-ts-count');
   if (!list) return;
   const maqKey = document.getElementById('pv-maquina').value;
   if (!maqKey) {
-    list.innerHTML = '<div class="ts-empty">Selecione uma máquina pra ver as tarefas padrão cadastradas.</div>';
+    list.innerHTML = '<div class="ts-empty">Selecione uma máquina pra ver as tarefas cadastradas.</div>';
     if (count) count.textContent = 'Selecione uma máquina primeiro';
     return;
   }
   const m = state.maquinas.find(x => x._key === maqKey);
   if (!m) { list.innerHTML = ''; return; }
-  const prevs = Array.isArray(m.prevs) ? m.prevs : (m.prevs ? m.prevs.split('\n').filter(Boolean) : []);
-  const all = [
-    ...prevs.map(t => ({ t, kind: 'padrao' })),
-    ..._pvTarefasCustom.map(t => ({ t, kind: 'custom' })),
-  ];
-  if (count) count.textContent = prevs.length
-    ? (prevs.length + ' tarefa' + (prevs.length===1?'':'s') + ' cadastrada' + (prevs.length===1?'':'s') + ' pra essa máquina' + (_pvTarefasCustom.length ? ' · +' + _pvTarefasCustom.length + ' custom' : ''))
-    : 'Nenhuma tarefa padrão · adicione uma abaixo';
+  // v3.54.0 — Filtra templates pela frequência selecionada
+  const freqVal = parseInt(document.getElementById('pv-freq').value);
+  const freqK = (freqVal === 1) ? 'diaria' : (freqVal <= 7) ? 'semanal' : (freqVal <= 15) ? 'quinzenal' : (freqVal <= 35) ? 'mensal' : (freqVal <= 100) ? 'trimestral' : (freqVal <= 200) ? 'semestral' : 'anual';
+  const freqLbl = ({ diaria:'diárias', semanal:'semanais', quinzenal:'quinzenais', mensal:'mensais', trimestral:'trimestrais', semestral:'semestrais', anual:'anuais' })[freqK] || '';
+  let templates = [];
+  if (m.prevsTemplate && Array.isArray(m.prevsTemplate[freqK])) {
+    templates = m.prevsTemplate[freqK].map(it => typeof it === 'string'
+      ? { tarefa: it, obs: '' }
+      : { tarefa: it.tarefa || '', obs: it.obs || '' });
+  } else {
+    // Fallback legacy: prevs (string) — mostra TUDO independente da freq (compat)
+    const prevs = Array.isArray(m.prevs) ? m.prevs : (m.prevs ? m.prevs.split('\n').filter(Boolean) : []);
+    templates = prevs.map(t => ({ tarefa: t, obs: '' }));
+  }
+  // Cache obs pra recuperar ao salvar
+  _pvTarefaObs = {};
+  templates.forEach(it => { if (it.tarefa) _pvTarefaObs[it.tarefa] = it.obs; });
+
+  const customs = _pvTarefasCustom.map(t => ({ tarefa: t, obs: '', kind: 'custom' }));
+  const padrao  = templates.filter(it => it.tarefa).map(it => ({ tarefa: it.tarefa, obs: it.obs, kind: 'padrao' }));
+  const all = [...padrao, ...customs];
+
+  if (count) {
+    const cntPad = padrao.length;
+    if (cntPad === 0 && customs.length === 0) count.textContent = 'Nenhuma tarefa ' + freqLbl + ' cadastrada · adicione uma abaixo';
+    else count.textContent = cntPad + ' tarefa' + (cntPad===1?'':'s') + ' ' + freqLbl + ' cadastrada' + (cntPad===1?'':'s') + (customs.length ? ' · +' + customs.length + ' custom' : '');
+  }
   if (!all.length) {
-    list.innerHTML = '<div class="ts-empty">Nenhuma tarefa padrão pra essa máquina. Use "Adicionar outra tarefa" abaixo.</div>';
+    list.innerHTML = '<div class="ts-empty">Nenhum template ' + freqLbl + ' pra essa máquina. Adicione uma tarefa avulsa abaixo.</div>';
     return;
   }
-  list.innerHTML = all.map((item, i) => {
-    const checked = _pvTarefasMarcadas.has(item.t) ? 'checked' : '';
+  const escA = s => String(s||'').replace(/"/g, '&quot;');
+  list.innerHTML = all.map(item => {
+    const checked = _pvTarefasMarcadas.has(item.tarefa) ? 'checked' : '';
     const rowCls = checked ? 'ts-row sel' : 'ts-row';
     const badgeCls = item.kind === 'custom' ? 'ts-badge custom' : 'ts-badge';
     const badgeTxt = item.kind === 'custom' ? '+ADIC.' : 'PADRÃO';
+    const obsHtml = item.obs ? '<div style="font-size:.6rem;color:var(--muted);font-style:italic;margin-top:2px;padding-left:0">' + escA(item.obs) + '</div>' : '';
     return '<label class="' + rowCls + '">' +
-      '<input type="checkbox" ' + checked + ' data-tarefa="' + item.t.replace(/"/g, '&quot;') + '" onchange="_pvTarefaToggle(this)">' +
-      '<span class="ts-name">' + item.t + '</span>' +
+      '<input type="checkbox" ' + checked + ' data-tarefa="' + escA(item.tarefa) + '" onchange="_pvTarefaToggle(this)">' +
+      '<span class="ts-name"><span>' + item.tarefa + '</span>' + obsHtml + '</span>' +
       '<span class="' + badgeCls + '">' + badgeTxt + '</span>' +
     '</label>';
   }).join('');
@@ -6059,11 +6125,16 @@ async function salvarPreventiva() {
     if (!tarefas.length) { toast('Selecione ao menos 1 tarefa', 'err'); return; }
     if (!window._fbPushPrev) { toast('Firebase não pronto', 'err'); return; }
     for (const tarefa of tarefas) {
+      // v3.54.0 — obs final = obs do template + obs comum do form (se ambos preenchidos, junta)
+      const obsTpl = (_pvTarefaObs && _pvTarefaObs[tarefa]) || '';
+      const obsForm = base.obs || '';
+      const obsFinal = [obsTpl, obsForm].filter(Boolean).join(' · ');
       await window._fbPushPrev({
         ...base,
+        obs:       obsFinal,
         tarefa,
         criadoPor: state.user || '—',
-        criadoTs: nowStr(),
+        criadoTs:  nowStr(),
       });
     }
     toast(tarefas.length + ' preventiva' + (tarefas.length===1?'':'s') + ' cadastrada' + (tarefas.length===1?'':'s'), 'ok');
@@ -6748,32 +6819,131 @@ function abrirModalMaquina(key) {
     _populateMaqResponsavelSelect(m.responsavel || '');
     const prevs = Array.isArray(m.prevs) ? m.prevs : (m.prevs ? m.prevs.split('\n').filter(Boolean) : []);
     document.getElementById('maq-prevs').value  = prevs.join('\n');
+    // v3.54.0 — carrega templates por frequência (com migração do prevs antigo)
+    _maqLoadTemplates(m, prevs);
   } else {
     titulo.textContent = 'Nova Máquina';
     ['maq-nome','maq-tag','maq-ano','maq-modelo','maq-prevs','maq-localizacao'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('maq-setor').value = 'mecanica';
     document.getElementById('maq-status').value = 'ativa';
     _populateMaqResponsavelSelect('');
+    _maqLoadTemplates(null, []);
   }
   document.getElementById('modal-maquina').classList.add('open');
 }
 
+// v3.54.0 — State + helpers dos templates de preventiva por freq
+let _maqTplState = null; // { diaria:[], semanal:[], ..., anual:[] }
+let _maqTplFreqAtiva = 'semanal';
+const _MAQ_FREQS = [
+  { k:'diaria',     l:'Diária',     dot:'diaria' },
+  { k:'semanal',    l:'Semanal',    dot:'semanal' },
+  { k:'quinzenal',  l:'Quinzenal',  dot:'quinzenal' },
+  { k:'mensal',     l:'Mensal',     dot:'mensal' },
+  { k:'trimestral', l:'Trimestral', dot:'trimestral' },
+  { k:'semestral',  l:'Semestral',  dot:'semestral' },
+  { k:'anual',      l:'Anual',      dot:'anual' },
+];
+function _maqLoadTemplates(m, prevsLegacy) {
+  // Schema novo: m.prevsTemplate = { diaria:[], semanal:[{tarefa,obs}], ... }
+  // Migração: se não tem prevsTemplate mas tem prevs (string/array antigos), entra em "semanal" como default
+  const tpl = (m && m.prevsTemplate) ? Object.assign({}, m.prevsTemplate) : null;
+  _maqTplState = {};
+  _MAQ_FREQS.forEach(f => { _maqTplState[f.k] = []; });
+  if (tpl) {
+    _MAQ_FREQS.forEach(f => {
+      _maqTplState[f.k] = Array.isArray(tpl[f.k]) ? tpl[f.k].map(it => ({
+        tarefa: typeof it === 'string' ? it : (it.tarefa || ''),
+        obs:    typeof it === 'string' ? '' : (it.obs || ''),
+      })) : [];
+    });
+  } else if (prevsLegacy && prevsLegacy.length) {
+    // Migração: joga tudo em "semanal" (admin recategoriza depois)
+    _maqTplState.semanal = prevsLegacy.map(t => ({ tarefa: String(t).trim(), obs: '' })).filter(it => it.tarefa);
+  }
+  _maqTplFreqAtiva = 'semanal';
+  _maqRenderTabs();
+  _maqRenderTasks();
+}
+function _maqRenderTabs() {
+  const host = document.getElementById('maq-tpl-tabs');
+  if (!host) return;
+  host.innerHTML = _MAQ_FREQS.map(f => {
+    const cnt = (_maqTplState[f.k] || []).length;
+    const cntBadge = cnt > 0 ? '<span class="freq-cnt">' + cnt + '</span>' : '<span class="freq-cnt">0</span>';
+    return '<button type="button" class="freq-tab' + (_maqTplFreqAtiva === f.k ? ' active' : '') + '" onclick="_maqSetTplFreq(\'' + f.k + '\')">' +
+      '<span class="freq-dot ' + f.dot + '"></span>' + f.l + cntBadge +
+    '</button>';
+  }).join('');
+}
+function _maqRenderTasks() {
+  const host = document.getElementById('maq-tpl-tasks');
+  if (!host) return;
+  const lista = _maqTplState[_maqTplFreqAtiva] || [];
+  const freqLbl = (_MAQ_FREQS.find(f => f.k === _maqTplFreqAtiva) || {}).l || '';
+  if (!lista.length) {
+    host.innerHTML = '<div class="tasks-empty">Nenhuma tarefa ' + freqLbl.toLowerCase() + ' cadastrada</div>' +
+      '<div class="task-add" onclick="_maqAddTask()">＋ Adicionar tarefa ' + freqLbl.toLowerCase() + '</div>';
+    return;
+  }
+  const escA = s => String(s||'').replace(/"/g,'&quot;');
+  host.innerHTML = lista.map((it, idx) =>
+    '<div class="task-row">' +
+      '<input value="' + escA(it.tarefa) + '" placeholder="Nome da tarefa" oninput="_maqEditTask(' + idx + ',\'tarefa\',this.value)">' +
+      '<input class="obs-ipt" value="' + escA(it.obs) + '" placeholder="Observação (opcional)" oninput="_maqEditTask(' + idx + ',\'obs\',this.value)">' +
+      '<button class="task-rm" onclick="_maqRmTask(' + idx + ')" title="Remover">🗑</button>' +
+    '</div>'
+  ).join('') +
+  '<div class="task-add" onclick="_maqAddTask()">＋ Adicionar tarefa ' + freqLbl.toLowerCase() + '</div>';
+}
+window._maqSetTplFreq = function(k) { _maqTplFreqAtiva = k; _maqRenderTabs(); _maqRenderTasks(); };
+window._maqAddTask = function() {
+  if (!_maqTplState[_maqTplFreqAtiva]) _maqTplState[_maqTplFreqAtiva] = [];
+  _maqTplState[_maqTplFreqAtiva].push({ tarefa: '', obs: '' });
+  _maqRenderTabs(); _maqRenderTasks();
+  // Foca no input novo
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#maq-tpl-tasks .task-row input');
+    if (inputs.length) inputs[inputs.length - 2].focus();
+  }, 50);
+};
+window._maqEditTask = function(idx, campo, valor) {
+  if (!_maqTplState[_maqTplFreqAtiva] || !_maqTplState[_maqTplFreqAtiva][idx]) return;
+  _maqTplState[_maqTplFreqAtiva][idx][campo] = valor;
+  // Não re-renderiza (preserva foco). Atualiza só o contador:
+  _maqRenderTabs();
+};
+window._maqRmTask = function(idx) {
+  if (!_maqTplState[_maqTplFreqAtiva]) return;
+  _maqTplState[_maqTplFreqAtiva].splice(idx, 1);
+  _maqRenderTabs(); _maqRenderTasks();
+};
+
 function salvarMaquina() {
   const nome = document.getElementById('maq-nome').value.trim();
   if (!nome) return;
-  const prevsText = document.getElementById('maq-prevs').value;
-  const prevs = prevsText.split('\n').map(s => s.trim()).filter(Boolean);
+  // v3.54.0 — limpa templates: remove tarefas vazias
+  const prevsTemplate = {};
+  _MAQ_FREQS.forEach(f => {
+    const limpas = (_maqTplState[f.k] || []).map(it => ({
+      tarefa: String(it.tarefa || '').trim(),
+      obs:    String(it.obs || '').trim(),
+    })).filter(it => it.tarefa);
+    if (limpas.length) prevsTemplate[f.k] = limpas;
+  });
+  // Mantém prevs (legacy) sincronizado com a soma de todos os templates
+  const prevsLegacy = [].concat(...Object.values(prevsTemplate)).map(it => it.tarefa);
   const m = {
     nome,
     tag:    document.getElementById('maq-tag').value.trim(),
     setor:  document.getElementById('maq-setor').value,
     ano:    document.getElementById('maq-ano').value,
     modelo: document.getElementById('maq-modelo').value.trim(),
-    // v3.34.0 — Ajuste 1: campos novos
     status:       document.getElementById('maq-status').value,
     responsavel:  document.getElementById('maq-responsavel').value,
     localizacao:  document.getElementById('maq-localizacao').value.trim(),
-    prevs,
+    prevs:         prevsLegacy,
+    prevsTemplate, // v3.54.0
   };
   if (editandoMaqKey) {
     window._fbUpdateMaquina(editandoMaqKey, m);
