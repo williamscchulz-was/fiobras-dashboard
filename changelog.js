@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.50.1', d:'23 abr 2026', current:true,
+    v:'3.50.2', d:'23 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Manutenção · Kanban: toggle de avatar pra admin/gerente filtrar por técnico.',
+        desc:'Mockup aprovado em mockup-toggle-por-tecnico.html (Opção 2 — Avatar row).\n\n• Barra de toggle aparece SÓ pra admin/gerente, acima das colunas do Kanban.\n• Botões: ★ Meus · <Avatar de cada técnico> · ⊕ Time inteiro\n• Default ao logar: "Meus" (foco nas próprias tarefas)\n• Click num técnico → filtra cards desse user\n• Click em "Time" → vê tudo (comportamento da v3.50.0 antiga)\n• Estado salvo em localStorage["fio_kb_view_<userKey>"] — Joacir abre sempre na visão que deixou\n• Lista de técnicos puxada DINAMICAMENTE do Firebase (users-config + users-profile)\n  - Filtro: active !== false E (role admin/gerente OU modulesAllowedOverride.includes("manutencao"))\n  - Mesmo helper já usado em _popUserSelect (form +Demanda) e abrirModalReatribuir\n  - Cadastrar técnico novo no HUB (com módulo Manutenção) → aparece no toggle SEM deploy\n• Badge vermelho com contagem de cards abertos por user\n• Foto se cadastrada (users-profile/foto), senão iniciais com cor por hash determinística\n• Técnico (producao) NÃO vê o toggle — segue regra v3.50.1 (sempre só os dele)'}
+    ]
+  },
+  {
+    v:'3.50.1', d:'23 abr 2026',
     items:[
       {type:'fix', title:'Manutenção · Kanban: filtro de visibilidade por user + campo "última execução" no modal.',
         desc:'2 ajustes solicitados pelo William:\n\n1) DESCRIÇÃO AUTOMÁTICA NO CARD DE PREVENTIVA REMOVIDA\n   • Antes: ao gerar card, desc ficava "Vencida em 23/04/2026. Responsável: Vorlei."\n   • Agora: desc vai vazia (técnico preenche com observações ao executar)\n   • Card grava `ultimaExec` separadamente (metadado readonly)\n   • Modal Editar Solicitação ganhou campo "Última execução desta preventiva" READONLY (só visível em cards de preventiva). Mostra "DD/MM/YYYY por <Tecnico>" ou "Nunca executada".\n\n2) FILTRO DE VISIBILIDADE POR USUÁRIO\n   • Antes: TODOS viam TODOS os cards do Kanban\n   • Agora: usuário comum (não admin/gerente) só vê cards onde:\n     - é responsável (resp/respKey) OU\n     - é autor (autor/autorKey)\n   • Admin/gerente continuam vendo tudo\n   • Comparação prefere chave canônica (sobrevive a rename), com fallback pro nome literal pra cards antigos sem *Key.'}
