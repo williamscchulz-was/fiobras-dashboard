@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.50.2', d:'23 abr 2026', current:true,
+    v:'3.50.3', d:'23 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Gerenciar Usuários · ordenação hierárquica (admin → gerente → usuário, alfabético).',
+        desc:'Antes: lista vinha desordenada do Object.entries(getAllUsers()) — sem garantia de ordem.\n\nAgora: admin no topo, depois gerentes, depois usuários comuns. Dentro de cada grupo, ordenação alfabética por nome.\n\nUsa getEffectiveRole() pra pegar o role atual considerando overrides. Comparação caseinsensitive.'}
+    ]
+  },
+  {
+    v:'3.50.2', d:'23 abr 2026',
     items:[
       {type:'feat', title:'Manutenção · Kanban: toggle de avatar pra admin/gerente filtrar por técnico.',
         desc:'Mockup aprovado em mockup-toggle-por-tecnico.html (Opção 2 — Avatar row).\n\n• Barra de toggle aparece SÓ pra admin/gerente, acima das colunas do Kanban.\n• Botões: ★ Meus · <Avatar de cada técnico> · ⊕ Time inteiro\n• Default ao logar: "Meus" (foco nas próprias tarefas)\n• Click num técnico → filtra cards desse user\n• Click em "Time" → vê tudo (comportamento da v3.50.0 antiga)\n• Estado salvo em localStorage["fio_kb_view_<userKey>"] — Joacir abre sempre na visão que deixou\n• Lista de técnicos puxada DINAMICAMENTE do Firebase (users-config + users-profile)\n  - Filtro: active !== false E (role admin/gerente OU modulesAllowedOverride.includes("manutencao"))\n  - Mesmo helper já usado em _popUserSelect (form +Demanda) e abrirModalReatribuir\n  - Cadastrar técnico novo no HUB (com módulo Manutenção) → aparece no toggle SEM deploy\n• Badge vermelho com contagem de cards abertos por user\n• Foto se cadastrada (users-profile/foto), senão iniciais com cor por hash determinística\n• Técnico (producao) NÃO vê o toggle — segue regra v3.50.1 (sempre só os dele)'}
