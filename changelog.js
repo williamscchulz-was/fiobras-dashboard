@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.3.0', d:'24 abr 2026', current:true,
+    v:'4.4.0', d:'24 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Stats Cor · full-width + gx-h (CSS .sc-* já no padrão).',
+        desc:'v4.0.0 entrega #5 · O CSS .sc-fibras/sc-months/sc-detail/sc-donut/sc-hist já era moderno. Mudanças mínimas:\n\n• HTML: 3 .sh+h2+sh-line trocados por gx-h DM Mono\n• HTML: subtítulo "mix de tingimento por fibra/categoria" inline no gx-h principal\n• HTML: botão "Lançar mês" reposicionado pro canto direito do gx-h (era em toolbar separada)\n\nCSS escopado em #panel-statscor:\n• Full-width (max-width:none, padding 24/28/80)\n• Estilo do botão "Lançar mês" inline (verde Fiobras pill)\n• Esconde .sh legacy\n\nLógica intacta: scSetFibra, abrirScLancamento, renderStatsCor, donut SVG, plurianual, 6 categorias (Branco/Clara/Média/Escura/Intensa/Preta), por fibra (Total/CO/PAC/PES/CV).'}
+    ]
+  },
+  {
+    v:'4.3.0', d:'24 abr 2026',
     items:[
       {type:'feat', title:'Produção · padrão Gerencial v3 escopado em #panel-producao.',
         desc:'v4.0.0 entrega #4 · Aplica o mesmo polish do Gerencial v3.56.x na aba Produção.\n\nHTML:\n• 3 .sh+h2+sh-line trocados por gx-h DM Mono uppercase\n• Subtítulo "mensal por métrica" inline no gx-h dos Prêmios\n• Removido subtítulo redundante "Prêmio mensal por métrica..."\n\nCSS escopado em #panel-producao:\n• Full-width (max-width:none, padding 24/28/80)\n• KPIs: padding 18/20/16, border 14, border-top 4 colorido, valor Outfit 800 1.85rem, hover translateY -2px\n• Months grid: 12 colunas, padding 11/8/9, mc-name 600\n• Mdet: padding 24/26, border 16, barra verde gradient (008835→3ECF6E→008835), border-bottom no header\n• Premio block: bg transparent (sem card-em-card)\n\nLógica intacta: renderProducao, renderProdKPI (com YoY vs 2025/2024 nos KPIs), renderProdMeses, renderProdDetalhe (5 grupos: IPAC, Tinturaria, Repasse, Dias, Reprocesso), renderProdPremio, calcIpac, getNivelIpac, salvarMesProd, abrirRelatorioProd.\n\nReusa CSS já existente do .kpi/.mc/.mdet (definido em css/hub.css base).'}

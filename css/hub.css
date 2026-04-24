@@ -2364,6 +2364,16 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   v4.4.0 — Stats Cor polish · full-width + gx-h
+   ════════════════════════════════════════════════════════════════════════ */
+#panel-statscor .wrap{max-width:none !important;padding:24px 28px 80px !important}
+@media(max-width:768px){#panel-statscor .wrap{padding:18px 16px 60px !important}}
+#panel-statscor .gx-h .sc-new-btn{font-family:'Poppins',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:7px 14px;border-radius:999px;background:var(--green);color:#fff;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;height:32px}
+#panel-statscor .gx-h .sc-new-btn:hover{background:var(--green2)}
+[data-theme="dark"] #panel-statscor .gx-h .sc-new-btn{color:#000}
+#panel-statscor .sh{display:none !important}
+
+/* ════════════════════════════════════════════════════════════════════════
    v4.3.0 — Produção polish · padrão Gerencial v3 escopado em #panel-producao
    (KPIs maiores YoY + months grid + Mdet hero + Prêmios refinados)
    ════════════════════════════════════════════════════════════════════════ */
