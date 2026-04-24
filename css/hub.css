@@ -1579,7 +1579,8 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   #prodDet .prod-group-title{font-size:11px !important;letter-spacing:1px;margin-bottom:12px;}
   #prodDet .prod-group-title span{font-size:9px !important;}
   #prodDet .prod-split{grid-template-columns:1fr !important;gap:14px;}
-  #prodDet .prod-fields{grid-template-columns:1fr 1fr !important;gap:8px;}
+  /* v4.6.2 — 1 coluna em todo mobile (era 2 cols) — números grandes (109.787,96) estouravam o card */
+  #prodDet .prod-fields{grid-template-columns:1fr !important;gap:8px;}
   #prodDet .prod-fields .mf label{
     font-family:'Poppins',sans-serif !important;
     font-size:10px !important;

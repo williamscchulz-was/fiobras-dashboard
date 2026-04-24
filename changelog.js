@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.6.1', d:'24 abr 2026', current:true,
+    v:'4.6.2', d:'24 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Mobile · Produção mdet com inputs em 1 coluna (era 2, números grandes estouravam).',
+        desc:'BUG (reportado por screenshot): no mobile da aba Produção, dentro do card "IPAC", os 4 inputs de fibra (CV/CO/PES/PAC) renderizavam em grid 2x2. Como os números podem ser grandes (ex: CO=109.787,96 = 10 chars), os valores estouravam visualmente o card direito.\n\nCAUSA: regra `#prodDet .prod-fields{grid-template-columns:1fr 1fr !important}` em @media(max-width:480px) — forçava 2 colunas no iPhone (393px) deixando cada input com ~150px disponíveis; suficiente pra rótulo mas não pra valores grandes.\n\nFIX: trocada pra `1fr` (1 coluna) em todo mobile ≤480px. Cada input agora ocupa toda largura disponível (~340px), comporta números até 12 chars sem estourar. Aplica a TODOS os 5 prod-groups (IPAC, Tinturaria, Repasse, Dias, Reprocesso).\n\nDesktop intacto — `auto-fit, minmax(120px,1fr)` continua, então em telas grandes mostra 4 inline.\n\n1 linha trocada em css/hub.css (1582). Patch dentro da major v4.0.0.'}
+    ]
+  },
+  {
+    v:'4.6.1', d:'24 abr 2026',
     items:[
       {type:'fix', title:'Cabeçalhos · regra .gx-h virou GLOBAL (era escopada só pro Gerencial).',
         desc:'BUG: o estilo `.gx-h` (cabeçalho minimal DM Mono uppercase) estava escopado em `#panel-metas, #panel-historico` no css/hub.css. Como Produção/Cor/Apontamento/Stats Cor/Timeline também usam a classe `.gx-h` (introduzida nas entregas v4.1-4.6), os cabeçalhos dessas abas caíam no default e renderizavam como texto Poppins branco normal.\n\nSintomas (reportados por screenshots):\n• Produção: "Acumulado 2026", "Meses · clique...", "Prêmios Produção" em texto branco grande\n• Cor: "Cores" em texto branco grande\n• Stats Cor: idem topo\n\nFIX: removido o escopo `#panel-metas, #panel-historico` das 3 regras (.gx-h base, :first-child, ::after). Como `.gx-h` só é usada nos panels redesenhados, zero risco de vazar pra outros componentes.\n\nLinhas tocadas: css/hub.css 2882-2891 (-3 seletores escopados, +1 regra global). Patch dentro da major v4.0.0.'}
