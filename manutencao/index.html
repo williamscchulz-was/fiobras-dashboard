@@ -425,6 +425,8 @@ white-space: nowrap;
 .pv-task-status.late { background: rgba(220,38,38,.15); color: #F87171; }
 .pv-task-status.due { background: rgba(245,158,11,.15); color: #FCD34D; }
 .pv-task-status.ok { background: rgba(16,185,129,.15); color: #6EE7B7; }
+.pv-task-status.rotina { background: rgba(99,102,241,.13); color: #A5B4FC; } /* v3.40.6 · diária = roxo neutro (sem cobrança de prazo) */
+.pv-task-status.sem { background: rgba(255,255,255,.06); color: #9CA295; }
 .pv-task-actions { display: inline-flex; gap: 4px; }
 .pv-task-ab { width: 26px; height: 26px; border-radius: 6px; border: 0; background: rgba(255,255,255,.05); color: var(--muted, #9CA295); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; transition: .15s; }
 .pv-task-ab svg { width: 12px; height: 12px; }
@@ -5728,6 +5730,12 @@ function _pvFreqBucket(freqDays) {
   return _pvFreqBuckets.find(b => f >= b.min && f <= b.max) || _pvFreqBuckets[6];
 }
 function _pvStatusFor(p) {
+  // v3.40.6 (HUB v4.9.6) · DIÁRIAS (freq=1) nunca viram card no kanban (regra v3.32.1)
+  // — então `ultima` nunca atualiza pelo fluxo do app → ficavam permanentemente "ATRASADA".
+  // Status novo "rotina" (executada no turno · sem cobrança de prazo).
+  if (p.freq && parseInt(p.freq) === 1) {
+    return { key: 'rotina', lbl: 'Rotina diária', dr: null, prox: null };
+  }
   if (!p.ultima || !p.freq) return { key: 'sem', lbl: 'Sem data', dr: null };
   const prox = addDays(parseDt(p.ultima), parseInt(p.freq));
   const dr = diffDays(today(), prox);
@@ -5810,7 +5818,7 @@ function renderPreventiva() {
       const st = _pvStatusFor(p);
       if (st.key === 'late') late++;
       else if (st.key === 'due') due++;
-      else if (st.key === 'ok') ok++;
+      else if (st.key === 'ok' || st.key === 'rotina') ok++; // v3.40.6 · rotina diária = sem cobrança
       else sem++;
       if (st.prox && (!proxMaisCedo || st.prox < proxMaisCedo)) proxMaisCedo = st.prox;
     });
@@ -5899,9 +5907,10 @@ function renderPreventiva() {
           const respHtml = p.resp
             ? '<div class="pv-task-resp">' + avatar(p.resp, 'xs') + '<span class="pv-task-resp-nome">' + p.resp + '</span></div>'
             : '<span style="font-size:.6rem;color:var(--muted);font-style:italic">—</span>';
-          const dataTxt = p.ultima
-            ? fmtDt(p.ultima) + ' → ' + fmtBR(st.prox)
-            : '—';
+          // v3.40.6 · diárias mostram "Todo dia" (não tem prazo cobrado)
+          const dataTxt = (st.key === 'rotina')
+            ? 'Todo dia · executada no turno'
+            : (p.ultima ? fmtDt(p.ultima) + ' → ' + fmtBR(st.prox) : '—');
           return '<div class="pv-task" onclick="event.stopPropagation()">' +
             '<div class="pv-task-tarefa" title="' + (p.tarefa || '').replace(/"/g,'&quot;') + '">' + (p.tarefa || '—') + '</div>' +
             respHtml +
