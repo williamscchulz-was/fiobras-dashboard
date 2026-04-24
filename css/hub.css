@@ -2364,6 +2364,13 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   v4.2.0 — Apontamento polish · full-width + gx-h
+   ════════════════════════════════════════════════════════════════════════ */
+#panel-apontamento .wrap{max-width:none !important;padding:24px 28px 80px !important}
+@media(max-width:768px){#panel-apontamento .wrap{padding:18px 16px 60px !important}}
+#panel-apontamento .gx-h .apt-badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:.55rem;padding:3px 9px;border-radius:999px;background:var(--surface);color:var(--green);letter-spacing:.5px;border:1px solid var(--green-border,rgba(62,207,110,.22));text-transform:none;font-weight:600}
+
+/* ════════════════════════════════════════════════════════════════════════
    v4.1.0 — REDESIGN aba Desenv. Cor · escopado em #panel-cores
    - Tabela densa (substitui cards verticais)
    - Cor por fibra (CO=azul, PAC=amarelo, CV=verde, PES=roxo, Outra=cinza)
