@@ -2362,3 +2362,191 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   .sc-lanc-row-input-wrap input{font-size:16px !important;}
   .sc-lanc-actions{padding:12px 18px 18px;}
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v3.56.0 — REDESIGN MINIMAL · módulo Gerencial (panel-metas + panel-historico)
+   Mockup aprovado: mockup-gerencial-v3.html
+   - Sem branco/preto puro · usa largura total
+   - Cabeçalhos: <h2 + .sh-line> → DM Mono uppercase com line discreta (.gx-h)
+   - KPIs: border-top colorido · YoY já existente preservada
+   - Progresso meta: mantido (já é bom), só polish de tipografia
+   - Months grid: chips minimal com bullet de nível
+   - Mdet: 4 colunas paralelas (preservadas) · inputs limpos
+   - Prêmios: cards com border-top colorido por nível
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Cabeçalho minimal (substitui .sh + h2 + .sh-line) */
+#panel-metas .gx-h,
+#panel-historico .gx-h{
+  font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:2.2px;
+  color:var(--muted);text-transform:uppercase;margin:24px 0 12px;
+  display:flex;align-items:center;gap:10px;font-weight:500;
+}
+#panel-metas .gx-h:first-child,
+#panel-historico .gx-h:first-child{margin-top:4px}
+#panel-metas .gx-h::after,
+#panel-historico .gx-h::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Esconder os .sh antigos do panel-metas/historico (legacy) */
+#panel-metas > .wrap > .sh,
+#panel-historico > .wrap > .sh{display:none !important}
+
+/* KPIs · border-top colorido + spacing tighter */
+#panel-metas .kpi-strip{gap:10px;margin-bottom:24px}
+#panel-metas .kpi{
+  padding:14px 16px 12px;border:1px solid var(--border);border-radius:10px;
+  border-top:3px solid var(--kc,var(--green));box-shadow:none;background:var(--surface);
+}
+#panel-metas .kpi-lbl{font-size:.55rem;letter-spacing:2px;font-weight:400;margin-bottom:6px;color:var(--muted)}
+#panel-metas .kpi-dot{width:6px;height:6px}
+#panel-metas .kpi-val{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.55rem;letter-spacing:-.012em;line-height:1.1}
+#panel-metas .kpi-yoy{margin-top:7px;align-items:baseline;gap:8px}
+#panel-metas .kpi-yoy-base{font-size:.66rem}
+#panel-metas .kpi-yoy-d{font-size:.72rem;font-weight:600}
+#panel-metas .kpi-vs-label{font-size:.58rem;letter-spacing:.5px;margin-top:4px}
+
+/* Progresso por nível de meta · polish */
+#panel-metas .anual-block{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:20px 22px;margin-bottom:22px;box-shadow:none;
+}
+#panel-metas .anual-grid{gap:24px}
+#panel-metas .anual-lbl{font-size:.6rem;letter-spacing:1.8px;font-weight:600;color:var(--text)}
+#panel-metas .anual-row{margin-bottom:6px;gap:10px}
+#panel-metas .anual-rlbl{font-size:.7rem}
+#panel-metas .anual-prog{height:6px;background:var(--surface3);border-radius:999px}
+#panel-metas .anual-prog-fill{border-radius:999px}
+#panel-metas .anual-pct{font-size:.72rem;font-weight:500}
+#panel-metas .anual-atual{font-size:.74rem}
+#panel-metas .anual-tgt{font-size:.62rem}
+
+/* Months grid · chips minimal */
+#panel-metas .months-grid{gap:5px;margin-bottom:22px}
+#panel-metas .mc{
+  padding:10px 6px 8px;border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);box-shadow:none;
+}
+#panel-metas .mc:hover{border-color:var(--green)}
+#panel-metas .mc.filled{border-color:rgba(62,207,110,.3);background:rgba(62,207,110,.06)}
+[data-theme="dark"] #panel-metas .mc.filled{background:rgba(62,207,110,.06)}
+[data-theme="light"] #panel-metas .mc.filled,
+:root:not([data-theme="dark"]) #panel-metas .mc.filled{background:rgba(0,136,53,.06)}
+#panel-metas .mc.sel{border-color:var(--green);background:rgba(62,207,110,.1)}
+[data-theme="light"] #panel-metas .mc.sel,
+:root:not([data-theme="dark"]) #panel-metas .mc.sel{background:rgba(0,136,53,.08)}
+#panel-metas .mc.future{opacity:.5;cursor:default}
+#panel-metas .mc-name{font-size:.58rem;letter-spacing:1.5px;margin-bottom:2px;font-weight:500}
+#panel-metas .mc.filled .mc-name,
+#panel-metas .mc.sel .mc-name{color:var(--green)}
+#panel-metas .mc-dot{display:none}
+#panel-metas .mc-mini{font-size:.62rem;margin-top:2px}
+#panel-metas .mc.filled .mc-mini{color:var(--green)}
+#panel-metas .mc-lvl{top:5px;right:6px;width:5px;height:5px}
+
+/* Mdet (4 colunas) · hero card style com barra verde no topo */
+#panel-metas .mdet{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:22px 24px;margin-bottom:22px;box-shadow:none;position:relative;overflow:hidden;
+}
+#panel-metas .mdet::before{
+  content:'';position:absolute;left:0;top:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--green),#3ECF6E);
+}
+#panel-metas .mdet-hdr{margin-bottom:18px}
+#panel-metas .mdet-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem}
+#panel-metas .mdet-grid{gap:16px}
+
+/* Mdet field · 4 colunas paralelas (Receita/LL/IPAC/Clientes) */
+#panel-metas .mf > label{
+  font-family:'DM Mono',monospace;font-size:.54rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:7px;font-weight:400;
+}
+#panel-metas .mf-wrap{
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  height:40px;overflow:hidden;
+}
+#panel-metas .mf-wrap:focus-within{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,136,53,.08)}
+[data-theme="dark"] #panel-metas .mf-wrap:focus-within{box-shadow:0 0 0 3px rgba(62,207,110,.12)}
+#panel-metas .mf-pfx{
+  background:transparent;border-right:1px solid var(--border);
+  padding:0 12px;color:var(--muted);font-size:.7rem;letter-spacing:.3px;
+  display:flex;align-items:center;height:100%;
+}
+#panel-metas .mf-wrap input{
+  font-family:'Outfit',sans-serif;font-weight:500;font-size:.92rem;
+  color:var(--text);padding:0 12px;
+}
+
+/* Mdet histórico de anos · linhas dashed */
+#panel-metas .mf-vs{margin-top:10px;font-size:.68rem;line-height:1.5}
+#panel-metas .mf-vs-row{
+  padding:5px 0;border-bottom:1px dashed var(--border);justify-content:space-between;
+}
+#panel-metas .mf-vs-row:last-child{border-bottom:none}
+#panel-metas .mf-vs-yr{font-size:.62rem;font-weight:500;color:var(--muted);width:34px}
+#panel-metas .mf-vs-val{font-size:.7rem;flex:1;text-align:right}
+#panel-metas .mf-vs-d{font-size:.66rem;margin-left:8px;min-width:48px;text-align:right;font-weight:500}
+
+/* Mdet níveis · footer mini chips M/P/S */
+#panel-metas .mf-lvls{
+  margin-top:10px;padding-top:8px;border-top:1px solid var(--border);
+  gap:6px;
+}
+#panel-metas .mf-lvl{
+  font-size:.58rem;padding:2px 7px;border-radius:4px;
+  letter-spacing:.5px;font-weight:500;
+}
+
+/* Prêmios · cards com border-top colorido */
+#panel-metas .premio-block{
+  background:transparent;border:none;padding:0;box-shadow:none;
+}
+#panel-metas .premio-grid{gap:10px;margin-top:10px}
+#panel-metas .pc{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:16px 18px;border-top:3px solid var(--pc-c,var(--green));box-shadow:none;
+}
+#panel-metas .pc-lvl{
+  font-size:.58rem;letter-spacing:2px;font-weight:600;
+  margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+#panel-metas .pc-sec-lbl{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+#panel-metas .pc-row{padding:4px 0}
+#panel-metas .pc-lbl{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted);letter-spacing:.3px}
+#panel-metas .pc-val{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:600}
+#panel-metas .pc-mes-tag{font-size:.62rem;padding:2px 8px;border-radius:999px;font-weight:500}
+#panel-metas .pc-total{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+#panel-metas .pc-tlbl{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+#panel-metas .pc-tval{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:-.012em}
+
+/* Botões save/zerar dentro do mdet */
+#panel-metas .mdet-actions .save-btn{
+  font-family:'Poppins',sans-serif;font-size:.66rem;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;padding:9px 18px;
+  border-radius:999px;box-shadow:none !important;
+}
+
+/* Off-black/off-white tokens · sutilmente menos puros */
+[data-theme="dark"] #panel-metas{--bg-mn:#0F0F11;--surf-mn:#17171A}
+:root:not([data-theme="dark"]) #panel-metas,
+[data-theme="light"] #panel-metas{--bg-mn:#EDF1EA;--surf-mn:#F6F8F2}
+
+/* Histórico · polish similar */
+#panel-historico .chart-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px;margin-bottom:14px;box-shadow:none;
+}
+#panel-historico .chart-lbl{
+  font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:12px;
+}
+
+@media(max-width:900px){
+  #panel-metas .anual-grid{grid-template-columns:1fr;gap:18px}
+  #panel-metas .mdet-grid{grid-template-columns:repeat(2,1fr)}
+  #panel-metas .premio-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  #panel-metas .mdet-grid{grid-template-columns:1fr}
+  #panel-metas .kpi-strip{grid-template-columns:repeat(2,1fr)}
+}

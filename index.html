@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#008835"><!-- v3.48.1: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
-<link rel="stylesheet" href="css/hub.css?v=3.49.0">
+<link rel="stylesheet" href="css/hub.css?v=3.56.0">
 
 <!-- v3.32.6: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.55.2</div>
+    <div class="login-foot">Sistema interno · v3.56.0</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.55.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.56.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -332,32 +332,39 @@
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
-  <div class="sh"><h2>Acumulado 2026</h2><div class="sh-line"></div></div>
+  <!-- v3.56.0 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
+  <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="kpiStrip"></div>
-  <div class="sh"><h2>Progresso por nível de meta</h2><div class="sh-line"></div></div>
+
+  <div class="gx-h">Progresso por nível de meta</div>
   <div class="anual-block"><div class="anual-grid" id="anualGrid"></div></div>
-  <div class="sh"><h2>Meses · clique para lançar resultado</h2><div class="sh-line"></div></div>
+
+  <div class="gx-h">Meses · clique para lançar resultado</div>
   <div class="months-grid" id="monthsGrid"></div>
+
   <div class="mdet" id="mdet">
     <div class="mdet-hdr">
       <div class="mdet-title">Resultado de <span id="mdet-nome">—</span></div>
-      <div class="mdet-actions"><div id="mdet-lvl-badge"></div><button class="save-btn" style="background:var(--red);box-shadow:0 2px 12px rgba(224,82,82,.25)" onclick="zerarMes()">Zerar</button><button class="save-btn" onclick="salvarMes()">Salvar</button></div>
+      <div class="mdet-actions"><div id="mdet-lvl-badge"></div><button class="save-btn" style="background:var(--red)" onclick="zerarMes()">Zerar</button><button class="save-btn" onclick="salvarMes()">Salvar</button></div>
     </div>
     <div class="mdet-grid" id="mdet-fields"></div>
   </div>
-  <div class="sh" style="margin-top:4px"><h2>Prêmios</h2><div class="sh-line"></div></div>
+
+  <div class="gx-h">Prêmios</div>
   <div class="premio-block">
-    <div style="font-size:.74rem;color:var(--muted)">Prêmio mensal acumulado + projeção anual · separado por Receita Bruta e Lucro Ajustado.</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:.72rem;color:var(--muted);margin-bottom:4px">Prêmio mensal acumulado + projeção anual · separado por Receita Bruta e Lucro Ajustado.</div>
     <div class="premio-grid" id="premioGrid"></div>
   </div>
 </div>
 </div>
 <div class="panel" id="panel-historico">
 <div class="wrap">
-  <div class="sh"><h2>Métrica</h2><div class="sh-line"></div></div>
+  <div class="gx-h">Métrica</div>
   <div class="metric-tabs" id="metricTabs"></div>
-  <div class="sh"><h2>Comparativo anual · 2020 — 2026</h2><div class="sh-line"></div></div>
+
+  <div class="gx-h">Comparativo anual · 2020 — 2026</div>
   <div class="years-strip" id="yearsStrip"></div>
+
   <div class="chart-card"><div class="chart-lbl" id="chartLbl">Evolução histórica</div><canvas id="histChart" height="200"></canvas></div>
   <div class="chart-card"><div class="chart-lbl">2026 vs 2025 — mês a mês</div><canvas id="compChart" height="200"></canvas></div>
 </div>
@@ -2856,7 +2863,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.55.2';
+const CURRENT_VERSION = '3.56.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
