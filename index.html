@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#008835"><!-- v3.48.1: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
-<link rel="stylesheet" href="css/hub.css?v=4.9.2">
+<link rel="stylesheet" href="css/hub.css?v=4.9.3">
 
 <!-- v3.32.6: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v4.9.2</div>
+    <div class="login-foot">Sistema interno · v4.9.3</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.9.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.9.3</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -2915,7 +2915,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '4.9.2';
+const CURRENT_VERSION = '4.9.3';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.

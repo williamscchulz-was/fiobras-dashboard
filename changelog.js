@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.9.2', d:'24 abr 2026', current:true,
+    v:'4.9.3', d:'24 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Apontamento · tabs MINIMAIS + nome do turno realmente legível (override regras antigas).',
+        desc:'Tentei corrigir contraste na v4.9.2 mas o nome continuou sumindo. CAUSA REAL identificada por screenshot do William:\n\nLinhas 1886-1889 do hub.css (legacy v2.x quando tab tinha bg verde sólido):\n• `.apt-turno-tab.active .apt-turno-tab-name{color:#fff}` ← branco no active\n• `[data-theme="dark"] .apt-turno-tab.active .apt-turno-tab-name{color:#0d1510}` ← QUASE PRETO no dark active\n\nFaziam sentido quando o tab active tinha bg verde sólido (branco em verde / preto em verde claro). Mas v4.9.0 mudou o tab active pra fundo TRANSPARENTE com border-bottom verde — então: branco em fundo claro = invisível no light, quase-preto em fundo escuro = invisível no dark.\n\n=== FIX v4.9.3 ===\n• Override no escopo `#panel-apontamento` com `!important` pra blindar contra regras globais\n• Active: nome em var(--green) em ambos os modos\n• Inativo: var(--text) com opacity .5 (visível mas baixo contraste pra mostrar inatividade)\n• Hover: opacity .85\n\n=== TABS MINIMAIS (request do William) ===\n• Removido bullet/dot redundante (border-bottom verde já indica active, não precisa de 2 sinais)\n• Removido linha "responsável" (ex: "turno 1º" / "Edilson") — ruído visual sem ação\n• Mantido só: NOME (Outfit 700) · TIME (DM Mono uppercase) · KG TOTAL (DM Mono se filled)\n• Padding reduzido (12/14 vs 14/0)\n• Background/border/shadow legacy zerados via !important\n\nLógica intacta · só visual.'}
+    ]
+  },
+  {
+    v:'4.9.2', d:'24 abr 2026',
     items:[
       {type:'fix', title:'Apontamento · ordem dos turnos 1º→2º→3º + nome do turno legível em ambos os modos.',
         desc:'2 bugs reportados pelo William na v4.9.0:\n\n=== BUG 1: ORDEM DOS TURNOS ===\nAntes: APT_TURNOS = [3,1,2] (cronológica do dia — 3º turno começa 00:00)\nAgora: APT_TURNOS = [1,2,3] (visual/numérica)\n\nAfeta tanto a UI das tabs quanto a lógica de subtotais (que itera APT_TURNOS).\n\n=== BUG 2: NOME DO TURNO SUMINDO ===\nAntes: tab usava `color:var(--muted)` no parent — texto cinza fraco, no dark mode parecia preto sumindo, no light mode branco quase invisível.\n\nAgora:\n• Tab parent: color:var(--text) + opacity:.55 (estado inativo)\n• Hover: opacity:.85\n• Active: opacity:1 + color:var(--green) (contraste forte)\n• Filled (com dados, não-active): opacity:.85 (mostra que tem dado sem competir com active)\n• Total kg do turno: weight 700, color:text (era .72rem 600)\n• Time/Resp: var(--muted) (era var(--muted2), muito apagado)\n\nResultado: nome do turno LEGÍVEL em qualquer combinação de modo (dark/light) × estado (inativo/filled/active).\n\nLógica intacta, só CSS + ordem do array.'}

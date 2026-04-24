@@ -3335,41 +3335,57 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 #panel-apontamento .apt-turnos-tabs{
   display:flex;gap:0;padding:0 26px;background:var(--surface);border-bottom:1px solid var(--border);
 }
-/* v4.9.2 · contraste forte do nome do turno (era var(--muted), sumindo no dark e light) */
+/* v4.9.3 · tabs MINIMAIS · zera cards antigas (.apt-turno-tab background/border legacy)
+   + sobrescreve regras pretas/brancas globais que sumiam no dark/light */
 #panel-apontamento .apt-turno-tab{
-  flex:1;padding:14px 0;background:transparent;border:0;border-bottom:2px solid transparent;
-  color:var(--text);font-family:'Outfit',sans-serif;font-weight:700;font-size:.86rem;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;text-align:center;
-  transition:color .15s, border-color .15s, opacity .15s;opacity:.55;
+  flex:1;padding:12px 0 14px;background:transparent !important;border:0 !important;
+  border-bottom:2px solid transparent !important;border-radius:0 !important;
+  box-shadow:none !important;transform:none !important;
+  color:var(--text);font-family:'Outfit',sans-serif;font-weight:700;font-size:.84rem;
+  cursor:pointer;text-align:center;position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  transition:color .15s, border-color .15s, opacity .15s;opacity:.5;
 }
-#panel-apontamento .apt-turno-tab:hover{opacity:.85}
-#panel-apontamento .apt-turno-tab .apt-turno-tab-name{display:flex;align-items:center;gap:6px;justify-content:center}
-#panel-apontamento .apt-turno-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background .15s}
-#panel-apontamento .apt-turno-tab.filled .apt-turno-tab-dot{background:var(--green)}
+#panel-apontamento .apt-turno-tab:hover{opacity:.85;transform:none}
+#panel-apontamento .apt-turno-tab .apt-turno-tab-name{
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:.84rem;
+  color:inherit !important;letter-spacing:0;
+  display:flex;align-items:center;gap:6px;justify-content:center;
+}
+#panel-apontamento .apt-turno-tab-dot{display:none !important} /* minimal · sem dot redundante */
 #panel-apontamento .apt-turno-tab-time{
-  font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.3px;color:var(--muted);
-  text-transform:uppercase;font-weight:500;
+  font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.4px;
+  color:var(--muted) !important;text-transform:uppercase;font-weight:500;margin-bottom:0;
 }
-#panel-apontamento .apt-turno-tab-resp{
-  font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);margin-top:1px;
-  font-weight:500;letter-spacing:.4px;text-transform:none;line-height:1.2;
-}
+#panel-apontamento .apt-turno-tab-resp{display:none !important} /* minimal · resp some (info já no hero) */
 #panel-apontamento .apt-turno-tab-kg{
-  font-family:'DM Mono',monospace;font-size:.72rem;color:var(--text);font-weight:700;margin-top:5px;
+  font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text);font-weight:600;margin-top:2px;
+  opacity:.7;
 }
-/* ACTIVE · 100% opacidade + verde no nome (contraste forte) */
+
+/* ACTIVE · 100% opacidade + verde forte (override regras antigas globais) */
 #panel-apontamento .apt-turno-tab.active{
-  color:var(--green);border-bottom-color:var(--green);opacity:1;
+  color:var(--green) !important;border-bottom-color:var(--green) !important;opacity:1;
+  background:transparent !important;
+}
+#panel-apontamento .apt-turno-tab.active .apt-turno-tab-name,
+[data-theme="dark"] #panel-apontamento .apt-turno-tab.active .apt-turno-tab-name{
+  color:var(--green) !important;
 }
 #panel-apontamento .apt-turno-tab.active .apt-turno-tab-time,
-#panel-apontamento .apt-turno-tab.active .apt-turno-tab-resp{color:var(--green);opacity:.85}
-#panel-apontamento .apt-turno-tab.active .apt-turno-tab-kg{color:var(--green)}
-#panel-apontamento .apt-turno-tab.active .apt-turno-tab-dot{background:var(--green)}
-/* FILLED não-active · opacidade boa pra mostrar que tem dados sem competir com active */
-#panel-apontamento .apt-turno-tab.filled:not(.active){opacity:.85}
-#panel-apontamento .apt-turno-tab-lock{
-  position:absolute;top:8px;right:10px;color:var(--muted);
+[data-theme="dark"] #panel-apontamento .apt-turno-tab.active .apt-turno-tab-time{
+  color:var(--green) !important;opacity:.7;
 }
+#panel-apontamento .apt-turno-tab.active .apt-turno-tab-kg{color:var(--green) !important;opacity:1}
+
+/* FILLED não-active · opacidade boa pra mostrar que tem dado */
+#panel-apontamento .apt-turno-tab.filled:not(.active){opacity:.85}
+#panel-apontamento .apt-turno-tab.filled:not(.active) .apt-turno-tab-kg{opacity:1}
+
+#panel-apontamento .apt-turno-tab-lock{
+  position:absolute;top:6px;right:8px;color:var(--muted);
+}
+[data-theme="dark"] #panel-apontamento .apt-turno-tab.active .apt-turno-tab-lock{color:var(--green)}
 
 /* Readonly banner */
 #panel-apontamento .apt-readonly-banner{display:none;margin:0 26px;margin-top:14px;
