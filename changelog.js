@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.0.0', d:'24 abr 2026', current:true,
+    v:'4.0.1', d:'24 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Feriados · Indaial corrigido pra 21/03 (emancipação Decreto 526/1934).',
+        desc:'William confirmou: o aniversário oficial de Indaial-SC é em 21 de março — data da emancipação política do município (Decreto nº 526 de 1934).\n\nA colonização começou entre 1859-1860 com imigrantes alemães, mas a emancipação (separação de Blumenau) foi em 1934. A cidade celebra o aniversário no dia 21/03.\n\nAntes (3.x): hardcoded 29/06 (origem desconhecida)\nv4.0.0: troquei pra 25/06 (data da fundação da colônia)\nv4.0.1: corrigido pra 21/03 (emancipação política)\n\nAtualizado em ambos os arquivos: index.html (IIFE generator) e data/feriados-2026-2050.js (módulo standalone).'}
+    ]
+  },
+  {
+    v:'4.0.0', d:'24 abr 2026',
     items:[
       {type:'feat', title:'v4.0.0 · MAJOR · Redesign do módulo Produção · feriados 2026-2050.',
         desc:'Início da major v4.0.0 — redesign completo do módulo Produção (5 abas + mobile) com padrão visual aprovado pelo William.\n\n=== ENTREGA #1 desta major: Feriados 2026-2050 ===\n\nANTES: array hardcoded só de 2026 (16 datas) — depois disso, diasUteis() não excluiria feriados.\n\nAGORA: gerador automático cobrindo 2026-2050 via algoritmo Anonymous Gregorian (calcula domingo de Páscoa pra cada ano) + offsets:\n• Carnaval segunda = Páscoa − 48\n• Carnaval terça = Páscoa − 47\n• Quarta de Cinzas = Páscoa − 46\n• Sexta-feira Santa = Páscoa − 2\n• Corpus Christi = Páscoa + 60\n\nFERIADOS COBERTOS (16/ano · 25 anos = 400 datas):\n• 8 nacionais fixos: Confraternização (1/1), Tiradentes (21/4), Trabalho (1/5), Independência (7/9), Aparecida (12/10), Finados (2/11), República (15/11), Natal (25/12)\n• Móveis: Carnaval seg+ter, Quarta Cinzas, Sexta Santa, Corpus Christi\n• Consciência Negra (20/11) — nacional desde 2024\n• SC Data Magna (11/08)\n• Indaial 25/06 (fundação 1860 — antes era 29/06, aguardando confirmação)\n\nIMPLEMENTAÇÃO: IIFE no boot popula window._FERIADOS_FIOBRAS, FERIADOS_SET cobre tudo. diasUteis() existente (que já usa FERIADOS_SET) ganha 24 anos extras de cobertura sem alteração.\n\nNo arquivo data/feriados-2026-2050.js fica a versão ES module standalone pra reuso.\n\nPRÓXIMOS COMMITS DA v4.0.0 (em ordem):\n• Cor (Opção E prioridade + cor por fibra)\n• Apontamento\n• Produção (5 grupos)\n• Stats Cor\n• Timeline B\n• Mobile pra todas as abas'}

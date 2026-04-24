@@ -56,10 +56,10 @@ function feriadosDoAno(year) {
     shiftISO(pascoa, -46),            // Quarta-feira de Cinzas
     shiftISO(pascoa, -2),             // Sexta-feira Santa
     shiftISO(pascoa, 0),              // Páscoa (domingo · não é feriado oficial mas listamos)
+    `${year}-03-21`,                  // Aniversário de Indaial · emancipação Decreto 526/1934
     `${year}-04-21`,                  // Tiradentes
     `${year}-05-01`,                  // Dia do Trabalho
     shiftISO(pascoa, 60),             // Corpus Christi
-    `${year}-06-25`,                  // Aniversário de Indaial · fundação 1860
     `${year}-08-11`,                  // Data Magna SC
     `${year}-09-07`,                  // Independência do Brasil
     `${year}-10-12`,                  // Nossa Senhora Aparecida

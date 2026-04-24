@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v4.0.0</div>
+    <div class="login-foot">Sistema interno · v4.0.1</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.0.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.0.1</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -332,7 +332,7 @@
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
-  <!-- v4.0.0 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
+  <!-- v4.0.1 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="kpiStrip"></div>
 
@@ -347,7 +347,7 @@
     <div class="mdet-grid" id="mdet-fields"></div>
   </div>
 
-  <!-- v4.0.0: Progresso & Prêmios movido pra baixo · consequência dos dados,
+  <!-- v4.0.1: Progresso & Prêmios movido pra baixo · consequência dos dados,
        vê depois de lançar/visualizar os meses -->
   <div class="gx-h">Progresso & Prêmios 2026</div>
   <div class="pp-grid" id="progressoPremiosGrid"></div>
@@ -2862,7 +2862,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '4.0.0';
+const CURRENT_VERSION = '4.0.1';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -3778,12 +3778,12 @@ const acumClin = () => Object.values(resultados).filter(hasData).reduce((a,r) =>
 
 function render() {
   renderKPI();
-  renderProgressoPremios(); // v4.0.0 — substitui renderAnual + renderPremio (unificados)
+  renderProgressoPremios(); // v4.0.1 — substitui renderAnual + renderPremio (unificados)
   renderMeses();
   if (mesSel !== null) renderDetalhe(mesSel);
 }
 
-// v4.0.0 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
+// v4.0.1 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
 function renderProgressoPremios() {
   const fat = acumFat(), ll = acumLL(), fatTotal = fat, llTotal = ll;
   const meses = Object.keys(resultados).sort();
@@ -4927,7 +4927,7 @@ function syncIpacToFinanceiro(mesIdx, ipacKg) {
 // DESENVOLVIMENTO DE COR — Constantes, Estado, Render
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ── Feriados 2026 → 2050 (v4.0.0) ───────────────────────────────────────
+// ── Feriados 2026 → 2050 (v4.0.1) ───────────────────────────────────────
 // Calculado via algoritmo Anonymous Gregorian (Páscoa) + offsets.
 // Fonte: data/feriados-2026-2050.js (mantida em sync — copiar daqui se editar)
 //
@@ -4966,10 +4966,10 @@ function syncIpacToFinanceiro(mesIdx, ipacKg) {
       _shift(p, -47),          // Carnaval (terça)
       _shift(p, -46),          // Quarta de Cinzas
       _shift(p, -2),           // Sexta-feira Santa
+      `${y}-03-21`,           // Aniversário de Indaial (emancipação política · Decreto 526 de 1934)
       `${y}-04-21`,           // Tiradentes
       `${y}-05-01`,           // Dia do Trabalho
       _shift(p, 60),           // Corpus Christi
-      `${y}-06-25`,           // Aniversário de Indaial (fundação 1860)
       `${y}-08-11`,           // Data Magna SC
       `${y}-09-07`,           // Independência do Brasil
       `${y}-10-12`,           // Nossa Senhora Aparecida
