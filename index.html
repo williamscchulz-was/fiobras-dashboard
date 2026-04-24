@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v4.4.0</div>
+    <div class="login-foot">Sistema interno · v4.5.0</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.4.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.5.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -332,7 +332,7 @@
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
-  <!-- v4.4.0 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
+  <!-- v4.5.0 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="kpiStrip"></div>
 
@@ -347,7 +347,7 @@
     <div class="mdet-grid" id="mdet-fields"></div>
   </div>
 
-  <!-- v4.4.0: Progresso & Prêmios movido pra baixo · consequência dos dados,
+  <!-- v4.5.0: Progresso & Prêmios movido pra baixo · consequência dos dados,
        vê depois de lançar/visualizar os meses -->
   <div class="gx-h">Progresso & Prêmios 2026</div>
   <div class="pp-grid" id="progressoPremiosGrid"></div>
@@ -371,7 +371,7 @@
 <!-- ── Aba Produção ── -->
 <div class="panel" id="panel-producao">
 <div class="wrap">
-  <!-- v4.4.0 — Polish padrão Gerencial v3 (KPIs maiores YoY · Mdet hero · Prêmios após Mdet) -->
+  <!-- v4.5.0 — Polish padrão Gerencial v3 (KPIs maiores YoY · Mdet hero · Prêmios após Mdet) -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="prodKpiStrip"></div>
   <div class="gx-h">Meses · clique para lançar resultado</div>
@@ -412,7 +412,7 @@
 </div>
 <div class="panel" id="panel-cores">
 <div class="wrap">
-  <!-- v4.4.0 — Redesign aprovado pelo William (mockup-cor-tabela-fluxo-v2 + cor por fibra + Opção E prioridade) -->
+  <!-- v4.5.0 — Redesign aprovado pelo William (mockup-cor-tabela-fluxo-v2 + cor por fibra + Opção E prioridade) -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="coresKpiStrip"></div>
   <div class="gx-h">Prazo mensal · cores aprovadas, dias úteis ativos</div>
@@ -535,7 +535,7 @@
 <!-- ── Aba Apontamento (tintoria) · v2.4.0 ── -->
 <div class="panel" id="panel-apontamento">
 <div class="wrap">
-  <!-- v4.4.0 — full-width + gx-h minimal (CSS .apt-* já no padrão) -->
+  <!-- v4.5.0 — full-width + gx-h minimal (CSS .apt-* já no padrão) -->
   <div class="gx-h">Apontamento Tintoria <span class="apt-badge" id="apt-badge-dias">0 DIAS</span></div>
   <div class="apt-cal">
     <div class="apt-cal-nav">
@@ -598,7 +598,7 @@
 <!-- ── Aba Stats Cor · v2.6.0 ── -->
 <div class="panel" id="panel-statscor">
 <div class="wrap">
-  <!-- v4.4.0 — Stats Cor polish · gx-h + full-width -->
+  <!-- v4.5.0 — Stats Cor polish · gx-h + full-width -->
   <div class="gx-h">Stats Cor · mix de tingimento por fibra/categoria<button class="sc-new-btn" id="scNewBtn" onclick="abrirScLancamento()" style="display:none;margin-left:auto"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lançar mês</button></div>
   <div class="sc-toolbar" style="display:none"></div>
 
@@ -2867,7 +2867,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '4.4.0';
+const CURRENT_VERSION = '4.5.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -3783,12 +3783,12 @@ const acumClin = () => Object.values(resultados).filter(hasData).reduce((a,r) =>
 
 function render() {
   renderKPI();
-  renderProgressoPremios(); // v4.4.0 — substitui renderAnual + renderPremio (unificados)
+  renderProgressoPremios(); // v4.5.0 — substitui renderAnual + renderPremio (unificados)
   renderMeses();
   if (mesSel !== null) renderDetalhe(mesSel);
 }
 
-// v4.4.0 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
+// v4.5.0 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
 function renderProgressoPremios() {
   const fat = acumFat(), ll = acumLL(), fatTotal = fat, llTotal = ll;
   const meses = Object.keys(resultados).sort();
@@ -4932,7 +4932,7 @@ function syncIpacToFinanceiro(mesIdx, ipacKg) {
 // DESENVOLVIMENTO DE COR — Constantes, Estado, Render
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ── Feriados 2026 → 2050 (v4.4.0) ───────────────────────────────────────
+// ── Feriados 2026 → 2050 (v4.5.0) ───────────────────────────────────────
 // Calculado via algoritmo Anonymous Gregorian (Páscoa) + offsets.
 // Fonte: data/feriados-2026-2050.js (mantida em sync — copiar daqui se editar)
 //
@@ -5233,7 +5233,7 @@ function renderCoresLista() {
     return;
   }
 
-  // v4.4.0 · Tabela densa com quick buttons textuais contextuais
+  // v4.5.0 · Tabela densa com quick buttons textuais contextuais
   // (substitui cards anteriores · mantém calcDiasAtivos, corTemOp30, acoesPossiveis,
   // togglePrioridadeCor, corAcao, abrirCorDetalhe — toda lógica backend preservada)
   const fibClass = (f) => {
@@ -6573,20 +6573,16 @@ function tlRenderFilterBar(){
 /** Renderiza o feed da timeline */
 function renderTimeline() {
   const feed = document.getElementById('tlFeed');
-  // v3.3.0: barra de filtros + contador no título
   tlRenderFilterBar();
   const allEntries = Object.entries(tlDados).sort((a, b) => {
     return new Date(b[1].criadoEm) - new Date(a[1].criadoEm);
   });
   const entries = tlFilterTag ? allEntries.filter(([id, evt]) => evt.tag === tlFilterTag) : allEntries;
-  // Atualiza contador
   const countEl = document.getElementById('tlCountBadge');
   if(countEl){
-    if(tlFilterTag){
-      countEl.textContent = entries.length + ' de ' + allEntries.length;
-    } else {
-      countEl.textContent = allEntries.length + (allEntries.length === 1 ? ' registro' : ' registros');
-    }
+    countEl.textContent = tlFilterTag
+      ? entries.length + ' de ' + allEntries.length
+      : allEntries.length + (allEntries.length === 1 ? ' registro' : ' registros');
   }
 
   if (entries.length === 0) {
@@ -6600,54 +6596,96 @@ function renderTimeline() {
     return;
   }
 
-  feed.className = 'tl-feed';
+  // v4.5.0 · Layout Journal aprovado (mockup-cor-timeline-opcoes B)
+  // Agrupa entries por DIA (YYYY-MM-DD) e renderiza data grande à esquerda + cards à direita
+  feed.className = 'tl-journal';
+
+  const MES_PT = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const DOW_PT = ['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+
+  // Agrupar
+  const groups = {};
+  entries.forEach(([id, evt]) => {
+    const d = new Date(evt.criadoEm);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (!groups[key]) groups[key] = { date: d, items: [] };
+    groups[key].items.push([id, evt]);
+  });
+  const groupKeys = Object.keys(groups).sort((a,b) => b.localeCompare(a)); // desc
+
+  // Tag → variant (info/danger/warning/info)
+  const TAG_VARIANT = {
+    'desenvolvimento':'info', 'desenv':'info', 'teste':'info',
+    'problema':'danger', 'problemas':'danger', 'erro':'danger', 'falha':'danger',
+    'melhoria':'warning', 'melhorias':'warning', 'otimizacao':'warning',
+  };
 
   let html = '';
-  let lastDate = '';
+  groupKeys.forEach(key => {
+    const g = groups[key];
+    const d = g.date;
+    const dia = String(d.getDate()).padStart(2,'0');
+    const mes = MES_PT[d.getMonth()];
+    const ano = String(d.getFullYear()).slice(2);
+    const dow = DOW_PT[d.getDay()];
+    const ct = g.items.length;
 
-  entries.forEach(([id, evt]) => {
-    const dateLabel = tlFormatDate(evt.criadoEm);
-    if (dateLabel !== lastDate) {
-      lastDate = dateLabel;
-      html += '<div class="tl-date-sep"><div class="tl-dot"></div><span class="tl-date-lbl">' + dateLabel + '</span></div>';
-    }
+    html += '<div class="tl-day-group">' +
+      '<div class="tl-day-label">' +
+        '<div class="tl-day-num">'+dia+'</div>' +
+        '<div class="tl-day-mes">'+mes+' · '+ano+'</div>' +
+        '<div class="tl-day-dow">'+dow+'</div>' +
+        '<div class="tl-day-count">'+ct+' reg'+(ct>1?'s':'')+'</div>' +
+      '</div>' +
+      '<div class="tl-day-entries">';
 
-    // Fallback: registros antigos têm `desc` no lugar de `objetivo`
-    const titulo = evt.objetivo || evt.desc || '(sem título)';
+    g.items.forEach(([id, evt]) => {
+      const titulo = evt.objetivo || evt.desc || '(sem título)';
+      const tagKey = (evt.tag||'').toLowerCase();
+      const variant = TAG_VARIANT[tagKey] || 'info';
 
-    const firstChip = evt.cor ? '<span class="tl-chip">' + evt.cor + '</span>'
-      : evt.cliente ? '<span class="tl-chip cli">' + evt.cliente + '</span>'
-      : evt.op ? '<span class="tl-chip op">' + evt.op + '</span>' : '';
-    const tagChip = evt.tag ? tlRenderTagChip(evt.tag) : '';
-    const chipsHtml = (firstChip || tagChip)
-      ? '<div class="tl-evt-chips">' + firstChip + tagChip + '</div>'
-      : '';
+      const sub = [evt.cor, evt.cliente, evt.op].filter(Boolean).join(' · ').toUpperCase();
+      const subHtml = sub ? '<div class="tl-entry-sub">'+sub+'</div>' : '';
 
-    // v2.7.0: 1ª foto como thumb + badge +N se tiver mais
-    const fotosArr = (Array.isArray(evt.fotos) && evt.fotos.length)
-      ? evt.fotos
-      : (evt.foto ? [{ data: evt.foto }] : []);
-    const fotoThumb = fotosArr.length
-      ? '<div class="tl-evt-foto-wrap">' +
-          '<img class="tl-evt-foto" src="' + fotosArr[0].data + '" alt="" style="width:40px;height:40px;border-radius:6px;" loading="lazy" decoding="async">' +
-          (fotosArr.length > 1 ? '<span class="tl-evt-foto-badge">+' + (fotosArr.length - 1) + '</span>' : '') +
-        '</div>'
-      : '';
+      const tagChip = evt.tag ? tlRenderTagChip(evt.tag) : '';
 
-    html += '<div class="tl-evt" onclick="tlAbrirDetalhe(\'' + id + '\')" style="cursor:pointer;">' +
-      '<div class="tl-evt-dot"></div>' +
-      '<div class="tl-evt-top">' +
-        fotoThumb +
-        '<div class="tl-evt-body">' +
-          '<div class="tl-evt-desc">' + titulo + '</div>' +
-          chipsHtml +
+      // Fotos · grid responsivo conforme quantidade
+      const fotosArr = (Array.isArray(evt.fotos) && evt.fotos.length)
+        ? evt.fotos
+        : (evt.foto ? [{ data: evt.foto }] : []);
+      let fotosHtml = '';
+      if (fotosArr.length) {
+        const cls = fotosArr.length === 1 ? 'p1' : (fotosArr.length === 2 ? 'p2' : 'p4');
+        const max = fotosArr.length > 4 ? 4 : fotosArr.length;
+        let inner = '';
+        for (let i = 0; i < max; i++) {
+          if (i === 3 && fotosArr.length > 4) {
+            inner += '<div class="tl-entry-photo more">+'+(fotosArr.length-3)+'</div>';
+          } else {
+            inner += '<img class="tl-entry-photo" src="'+fotosArr[i].data+'" alt="" loading="lazy" decoding="async">';
+          }
+        }
+        fotosHtml = '<div class="tl-entry-photos '+cls+'">'+inner+'</div>';
+      }
+
+      const autorChip = evt.criadoPor ? userChip(evt.criadoPor, {size:18}) : '';
+      const autorHtml = evt.criadoPor
+        ? '<div class="tl-entry-author">'+autorChip+'<span>por <b>'+evt.criadoPor+'</b></span></div>'
+        : '';
+
+      html += '<div class="tl-entry '+variant+'" onclick="tlAbrirDetalhe(\''+id+'\')">' +
+        '<div class="tl-entry-head">' +
+          '<span class="tl-entry-time">'+tlFormatTime(evt.criadoEm)+'</span>' +
+          tagChip +
         '</div>' +
-      '</div>' +
-      '<div class="tl-evt-meta">' +
-        '<span class="tl-evt-time">' + tlFormatTime(evt.criadoEm) + '</span>' +
-        (evt.criadoPor ? userChip(evt.criadoPor, {size:22, cls:'tl-evt-user-chip'}) : '<span class="tl-evt-user"></span>') +
-      '</div>' +
-    '</div>';
+        '<div class="tl-entry-title">'+titulo+'</div>' +
+        subHtml +
+        fotosHtml +
+        autorHtml +
+      '</div>';
+    });
+
+    html += '</div></div>';
   });
 
   feed.innerHTML = html;

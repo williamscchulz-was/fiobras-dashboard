@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.4.0', d:'24 abr 2026', current:true,
+    v:'4.5.0', d:'24 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Timeline · Layout Journal (agrupado por dia · Opção B aprovada).',
+        desc:'v4.0.0 entrega #6 · Mockup mockup-cor-timeline-opcoes (Opção B) aprovado pelo William.\n\nLAYOUT JOURNAL:\n• Entradas agrupadas por DIA (cronológico desc)\n• Coluna esquerda 140px · sticky · data grande Outfit ExtraBold (verde Fiobras 2.2rem)\n  ↳ "17 / ABR · 26 / QUI / 1 reg"\n• Coluna direita · entradas conectadas por linha vertical (border-left 2px) com bolinhas coloridas (info=azul / danger=vermelho / warning=amarelo)\n• Cards: time + tag + título + sub + fotos + autor\n\nLÓGICA TAGS → VARIANT (cor da bolinha + border hover):\n• desenvolvimento/desenv/teste → info (azul)\n• problema/erro/falha → danger (vermelho)\n• melhoria/otimizacao → warning (amarelo)\n\nFOTOS:\n• 1 foto → grid 1 col (16:10)\n• 2 fotos → grid 2 col\n• 3-4 fotos → grid 4 col (square)\n• 5+ fotos → 3 fotos + tile "+N more"\n\nMOBILE (≤768px):\n• Data label vira inline horizontal (não mais sticky lateral)\n• Linha vertical removida (cards stacked diretamente)\n• Padding reduzido\n\nLÓGICA INTACTA:\n• tlDados (entries do Firebase)\n• tlFilterTag (filtro por tag)\n• tlRenderFilterBar (chips de tags com contadores)\n• tlAbrirDetalhe (modal completo · click no card)\n• tlFormatTime (HH:MM)\n• userChip (avatar do criador)\n• tlRenderTagChip (chip da tag custom)\n\nCSS escopado em #panel-timeline (~70 linhas). Esconde .tl-feed:not(.tl-journal) e .tl-date-sep antigos.'}
+    ]
+  },
+  {
+    v:'4.4.0', d:'24 abr 2026',
     items:[
       {type:'feat', title:'Stats Cor · full-width + gx-h (CSS .sc-* já no padrão).',
         desc:'v4.0.0 entrega #5 · O CSS .sc-fibras/sc-months/sc-detail/sc-donut/sc-hist já era moderno. Mudanças mínimas:\n\n• HTML: 3 .sh+h2+sh-line trocados por gx-h DM Mono\n• HTML: subtítulo "mix de tingimento por fibra/categoria" inline no gx-h principal\n• HTML: botão "Lançar mês" reposicionado pro canto direito do gx-h (era em toolbar separada)\n\nCSS escopado em #panel-statscor:\n• Full-width (max-width:none, padding 24/28/80)\n• Estilo do botão "Lançar mês" inline (verde Fiobras pill)\n• Esconde .sh legacy\n\nLógica intacta: scSetFibra, abrirScLancamento, renderStatsCor, donut SVG, plurianual, 6 categorias (Branco/Clara/Média/Escura/Intensa/Preta), por fibra (Total/CO/PAC/PES/CV).'}
