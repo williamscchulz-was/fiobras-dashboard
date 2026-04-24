@@ -2878,17 +2878,14 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
    - Prêmios: cards com border-top colorido por nível
    ════════════════════════════════════════════════════════════════════════ */
 
-/* Cabeçalho minimal (substitui .sh + h2 + .sh-line) */
-#panel-metas .gx-h,
-#panel-historico .gx-h{
+/* Cabeçalho minimal (substitui .sh + h2 + .sh-line) — GLOBAL desde v4.6.1 */
+.gx-h{
   font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:2.2px;
   color:var(--muted);text-transform:uppercase;margin:24px 0 12px;
   display:flex;align-items:center;gap:10px;font-weight:500;
 }
-#panel-metas .gx-h:first-child,
-#panel-historico .gx-h:first-child{margin-top:4px}
-#panel-metas .gx-h::after,
-#panel-historico .gx-h::after{content:'';flex:1;height:1px;background:var(--border)}
+.gx-h:first-child{margin-top:4px}
+.gx-h::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* Esconder os .sh antigos do panel-metas/historico (legacy) */
 #panel-metas > .wrap > .sh,

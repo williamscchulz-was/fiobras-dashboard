@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.6.0', d:'24 abr 2026', current:true,
+    v:'4.6.1', d:'24 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Cabeçalhos · regra .gx-h virou GLOBAL (era escopada só pro Gerencial).',
+        desc:'BUG: o estilo `.gx-h` (cabeçalho minimal DM Mono uppercase) estava escopado em `#panel-metas, #panel-historico` no css/hub.css. Como Produção/Cor/Apontamento/Stats Cor/Timeline também usam a classe `.gx-h` (introduzida nas entregas v4.1-4.6), os cabeçalhos dessas abas caíam no default e renderizavam como texto Poppins branco normal.\n\nSintomas (reportados por screenshots):\n• Produção: "Acumulado 2026", "Meses · clique...", "Prêmios Produção" em texto branco grande\n• Cor: "Cores" em texto branco grande\n• Stats Cor: idem topo\n\nFIX: removido o escopo `#panel-metas, #panel-historico` das 3 regras (.gx-h base, :first-child, ::after). Como `.gx-h` só é usada nos panels redesenhados, zero risco de vazar pra outros componentes.\n\nLinhas tocadas: css/hub.css 2882-2891 (-3 seletores escopados, +1 regra global). Patch dentro da major v4.0.0.'}
+    ]
+  },
+  {
+    v:'4.6.0', d:'24 abr 2026',
     items:[
       {type:'feat', title:'Mobile · ajustes pras 5 abas redesenhadas (último commit da v4.x).',
         desc:'v4.0.0 entrega #7 (final) · Padrão mobile aprovado em mockup-mobile-todas-abas (iPhone + Android).\n\nMEDIA QUERIES @media(max-width:640px) escopadas por #panel-*:\n\nCOR (Tabela densa colapsa):\n• Header da tabela some\n• Cada row vira card vertical (auto + 1fr + auto / 4 rows):\n  ↳ row1: prio btn · ref · fibra chip\n  ↳ row2: nome (full width)\n  ↳ row3: status · dias\n  ↳ row4: actions full-width (qbtns flex 1)\n• Cliente oculto (vai pra detalhe ao tocar)\n• Border-left mantida pra prio (Opção E)\n\nPRODUÇÃO:\n• Mdet padding reduzido (18/16)\n• Header empilhado (título cima, ações embaixo)\n• KPI val Outfit 1.5rem (era 1.85)\n\nAPONTAMENTO:\n• Calendário compacto (padding 14/12)\n• Day panel padding 18/14\n\nSTATS COR:\n• Fibras tabs scroll horizontal (Total/CO/PAC/PES/CV)\n• Cada chip flex-shrink:0\n\nTIMELINE B:\n• Data label horizontal (era sticky lateral)\n• Vira pill compacta no topo de cada grupo\n• Linha vertical removida (cards stacked)\n• Photos grids responsivos full-width\n\nGERAL:\n• Wrap padding: 14px lateral (era 28)\n• Botões cor-toolbar font menor\n\nFIM da major v4.0.0 (7 entregas):\n#1 v4.0.0 feriados 2026-2050 · #2 v4.1.0 Cor · #3 v4.2.0 Apontamento\n#4 v4.3.0 Produção · #5 v4.4.0 Stats Cor · #6 v4.5.0 Timeline B\n#7 v4.6.0 Mobile (este)'}
