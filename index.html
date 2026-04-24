@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.56.3</div>
+    <div class="login-foot">Sistema interno · v4.0.0</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.56.3</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.0.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -332,7 +332,7 @@
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
-  <!-- v3.56.3 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
+  <!-- v4.0.0 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="kpiStrip"></div>
 
@@ -347,7 +347,7 @@
     <div class="mdet-grid" id="mdet-fields"></div>
   </div>
 
-  <!-- v3.56.3: Progresso & Prêmios movido pra baixo · consequência dos dados,
+  <!-- v4.0.0: Progresso & Prêmios movido pra baixo · consequência dos dados,
        vê depois de lançar/visualizar os meses -->
   <div class="gx-h">Progresso & Prêmios 2026</div>
   <div class="pp-grid" id="progressoPremiosGrid"></div>
@@ -2862,7 +2862,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.56.3';
+const CURRENT_VERSION = '4.0.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -3778,12 +3778,12 @@ const acumClin = () => Object.values(resultados).filter(hasData).reduce((a,r) =>
 
 function render() {
   renderKPI();
-  renderProgressoPremios(); // v3.56.3 — substitui renderAnual + renderPremio (unificados)
+  renderProgressoPremios(); // v4.0.0 — substitui renderAnual + renderPremio (unificados)
   renderMeses();
   if (mesSel !== null) renderDetalhe(mesSel);
 }
 
-// v3.56.3 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
+// v4.0.0 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
 function renderProgressoPremios() {
   const fat = acumFat(), ll = acumLL(), fatTotal = fat, llTotal = ll;
   const meses = Object.keys(resultados).sort();
@@ -4927,29 +4927,62 @@ function syncIpacToFinanceiro(mesIdx, ipacKg) {
 // DESENVOLVIMENTO DE COR — Constantes, Estado, Render
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ── Feriados 2026 — Nacionais + SC + Indaial ─────────────────────────────
-const FERIADOS_2026 = [
-  // Nacionais
-  '2026-01-01', // Confraternização Universal
-  '2026-02-16', // Carnaval (segunda)
-  '2026-02-17', // Carnaval (terça)
-  '2026-02-18', // Quarta de Cinzas
-  '2026-04-03', // Sexta-feira Santa
-  '2026-04-21', // Tiradentes
-  '2026-05-01', // Dia do Trabalho
-  '2026-06-04', // Corpus Christi
-  '2026-09-07', // Independência
-  '2026-10-12', // Aparecida
-  '2026-11-02', // Finados
-  '2026-11-15', // Proclamação da República
-  '2026-12-25', // Natal
-  // SC Estadual
-  '2026-08-11', // Data Magna SC
-  // Indaial Municipal
-  '2026-06-29', // Aniversário de Indaial
-].map(d => d); // Strings ISO
+// ── Feriados 2026 → 2050 (v4.0.0) ───────────────────────────────────────
+// Calculado via algoritmo Anonymous Gregorian (Páscoa) + offsets.
+// Fonte: data/feriados-2026-2050.js (mantida em sync — copiar daqui se editar)
+//
+// Inclui:
+//  · 8 Nacionais fixos (Confraternização, Tiradentes, Trabalho, Independência,
+//    Aparecida, Finados, República, Natal, Consciência Negra)
+//  · Móveis (Carnaval seg+ter, Quarta Cinzas, Sexta Santa, Corpus Christi)
+//  · SC Data Magna (11/08)
+//  · Indaial 25/06 (fundação 1860 — confirmar com William)
 
-const FERIADOS_SET = new Set(FERIADOS_2026);
+(function _gerarFeriadosFiobras(){
+  // Algoritmo Anonymous Gregorian para domingo de Páscoa
+  function _pascoa(y) {
+    const a = y % 19, b = Math.floor(y / 100), c = y % 100;
+    const d = Math.floor(b / 4), e = b % 4;
+    const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4;
+    const L = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * L) / 451);
+    const month = Math.floor((h + L - 7 * m + 114) / 31);
+    const day = ((h + L - 7 * m + 114) % 31) + 1;
+    return new Date(Date.UTC(y, month - 1, day));
+  }
+  function _shift(date, dd) {
+    const d = new Date(date);
+    d.setUTCDate(d.getUTCDate() + dd);
+    return d.toISOString().slice(0, 10);
+  }
+  const all = [];
+  for (let y = 2026; y <= 2050; y++) {
+    const p = _pascoa(y);
+    all.push(
+      `${y}-01-01`,           // Confraternização Universal
+      _shift(p, -48),          // Carnaval (segunda)
+      _shift(p, -47),          // Carnaval (terça)
+      _shift(p, -46),          // Quarta de Cinzas
+      _shift(p, -2),           // Sexta-feira Santa
+      `${y}-04-21`,           // Tiradentes
+      `${y}-05-01`,           // Dia do Trabalho
+      _shift(p, 60),           // Corpus Christi
+      `${y}-06-25`,           // Aniversário de Indaial (fundação 1860)
+      `${y}-08-11`,           // Data Magna SC
+      `${y}-09-07`,           // Independência do Brasil
+      `${y}-10-12`,           // Nossa Senhora Aparecida
+      `${y}-11-02`,           // Finados
+      `${y}-11-15`,           // Proclamação da República
+      `${y}-11-20`,           // Consciência Negra (nacional desde 2024)
+      `${y}-12-25`,           // Natal
+    );
+  }
+  window._FERIADOS_FIOBRAS = all;
+})();
+
+const FERIADOS_SET = new Set(window._FERIADOS_FIOBRAS);
 
 /** Calcula dias úteis entre duas datas (exclui fds + feriados) */
 function diasUteis(dataIni, dataFim) {
