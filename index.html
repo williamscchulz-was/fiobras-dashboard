@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#008835"><!-- v3.48.1: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
-<link rel="stylesheet" href="css/hub.css?v=4.6.2">
+<link rel="stylesheet" href="css/hub.css?v=4.7.0">
 
 <!-- v3.32.6: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v4.6.2</div>
+    <div class="login-foot">Sistema interno · v4.7.0</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.6.2</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.7.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -415,10 +415,13 @@
   <!-- v4.6.0 — Redesign aprovado pelo William (mockup-cor-tabela-fluxo-v2 + cor por fibra + Opção E prioridade) -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="coresKpiStrip"></div>
-  <div class="gx-h">Prazo mensal · cores aprovadas, dias úteis ativos</div>
-  <div id="coresMesesPrazo" class="cor-prazo-meses"></div>
+  <!-- v4.7.0 — Prazo mensal compactado em row inline com chips horizontais -->
+  <div class="cor-prazo-row">
+    <span class="cor-prazo-lbl">Prazo mensal · cores aprovadas (dias úteis ativos)</span>
+    <div id="coresMesesPrazo" class="cor-prazo-chips"></div>
+  </div>
   <div class="cor-toolbar">
-    <select class="cor-filter-select" id="filtroStatus" onchange="renderCoresLista()">
+    <select class="cor-filter-select" id="filtroStatus" onchange="corPageReset();renderCoresLista()">
       <option value="">Todos status</option>
       <option value="entrada">Entrada</option>
       <option value="desenvolvida">Desenvolvida</option>
@@ -427,14 +430,14 @@
       <option value="aprovada">Aprovada</option>
       <option value="cancelada">Cancelada</option>
     </select>
-    <select class="cor-filter-select" id="filtroMes" onchange="renderCoresLista()">
+    <select class="cor-filter-select" id="filtroMes" onchange="corPageReset();renderCoresLista()">
       <option value="">Todos meses</option>
       <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
       <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
       <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
       <option value="9">Out</option><option value="10">Nov</option><option value="11">Dez</option>
     </select>
-    <select class="cor-filter-select" id="filtroFibra" onchange="renderCoresLista()">
+    <select class="cor-filter-select" id="filtroFibra" onchange="corPageReset();renderCoresLista()">
       <option value="">Todas fibras</option>
       <option value="CO">CO</option>
       <option value="CV">CV</option>
@@ -442,7 +445,7 @@
       <option value="PAC">PAC</option>
       <option value="Outra">Outra</option>
     </select>
-    <div class="cor-search"><input id="filtroCliente" oninput="renderCoresLista()" placeholder="Buscar cor, ref, cliente..."></div>
+    <div class="cor-search"><input id="filtroCliente" oninput="corPageReset();renderCoresLista()" placeholder="Buscar cor, ref, cliente..."></div>
     <button class="cor-btn primary" onclick="novaCor()">+ Nova Cor</button>
     <button class="cor-btn outline" onclick="abrirRelatorio()">Relatório</button>
   </div>
@@ -2867,7 +2870,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '4.6.2';
+const CURRENT_VERSION = '4.7.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -5123,13 +5126,13 @@ function renderCores() {
   renderCoresLista();
 }
 
-/** Calcula e renderiza prazo médio por mês (cores aprovadas pela data de aprovação) */
+/** v4.7.0 · Calcula e renderiza prazo médio por mês como CHIPS INLINE (compactado).
+ *  Antes era cards 90px de altura (cor-prazo-meses); agora vira row horizontal scroll. */
 function renderCoresMesesPrazo() {
   const el = document.getElementById('coresMesesPrazo');
   if (!el) return;
 
-  // Agrupa cores aprovadas por mês de aprovação
-  const porMes = {}; // { 0: [dias1, dias2], 1: [...], ... }
+  const porMes = {};
   Object.values(coresData).forEach(c => {
     if (c.status !== 'aprovada') return;
     const aprovEvt = (c.historico || []).filter(h => h.acao === 'aprovada').pop();
@@ -5140,31 +5143,45 @@ function renderCoresMesesPrazo() {
     porMes[mesAprov].push(dias);
   });
 
-  // Renderiza os 12 meses (só os que têm dados)
   const mesesComDados = Object.keys(porMes).map(Number).sort((a,b) => a - b);
   if (mesesComDados.length === 0) {
-    el.innerHTML = '<span style="font-size:.72rem;color:var(--muted2)">Nenhuma cor aprovada ainda</span>';
+    el.innerHTML = '<span class="cor-prazo-empty">Nenhuma cor aprovada ainda</span>';
     return;
   }
 
+  const mesAtual = new Date().getMonth();
   el.innerHTML = mesesComDados.map(m => {
     const arr = porMes[m];
     const media = arr.reduce((a,b) => a + b, 0) / arr.length;
-    const ok = media <= META_DIAS_DEV;
     const temOp30 = Object.values(coresData).some(c => {
       if (c.status !== 'aprovada') return false;
       const aprov = (c.historico || []).filter(h => h.acao === 'aprovada').pop();
       if (!aprov) return false;
       return new Date(aprov.data + 'T00:00:00').getMonth() === m && corTemOp30(c);
     });
-
-    return '<div class="prazo-mes '+(ok && !temOp30 ? 'ok' : 'fail')+'">' +
-      '<span class="prazo-mes-lbl">' + MONTHS[m] + '</span>' +
-      '<span class="prazo-mes-val" style="color:'+(ok && !temOp30 ? '#3ecf6e' : 'var(--red)')+'">'+fmtBR(media, 1)+' d</span>' +
-      '<span class="prazo-mes-n">' + arr.length + ' cor'+(arr.length>1?'es':'')+'</span>' +
-      (temOp30 ? '<span style="font-size:.48rem;color:var(--red);margin-top:2px">OP>30d</span>' : '') +
+    const ok = media <= META_DIAS_DEV && !temOp30;
+    const isCurr = m === mesAtual;
+    return '<div class="cor-prazo-chip'+(ok?'':' fail')+(isCurr?' curr':'')+'">' +
+      '<span class="cor-prazo-chip-mes">'+MONTHS[m]+'</span>' +
+      '<span class="cor-prazo-chip-val">'+fmtBR(media, 1)+' d</span>' +
+      '<span class="cor-prazo-chip-cnt">'+arr.length+'</span>' +
     '</div>';
   }).join('');
+}
+
+// v4.7.0 · Estado de paginação (20 por padrão, persistido em localStorage)
+window.corPage = 1;
+window.corPerPage = (function(){
+  const saved = parseInt(localStorage.getItem('fiobras-cor-perpage'));
+  return (saved === 20 || saved === 50 || saved === 100) ? saved : 20;
+})();
+function corPageReset(){ window.corPage = 1; }
+function corPageGo(p){ window.corPage = Math.max(1, p|0); renderCoresLista(); }
+function corPagePerSet(p){
+  window.corPerPage = (p === 20 || p === 50 || p === 100) ? p : 20;
+  localStorage.setItem('fiobras-cor-perpage', String(window.corPerPage));
+  window.corPage = 1;
+  renderCoresLista();
 }
 
 function renderCoresKPI() {
@@ -5233,6 +5250,15 @@ function renderCoresLista() {
     return;
   }
 
+  // v4.7.0 · Paginação · slice da lista
+  const per = window.corPerPage || 20;
+  const totalPg = Math.max(1, Math.ceil(lista.length / per));
+  if (window.corPage > totalPg) window.corPage = totalPg;
+  const page = Math.max(1, window.corPage);
+  const ini = (page - 1) * per;
+  const fim = ini + per;
+  const listaPg = lista.slice(ini, fim);
+
   // v4.6.0 · Tabela densa com quick buttons textuais contextuais
   // (substitui cards anteriores · mantém calcDiasAtivos, corTemOp30, acoesPossiveis,
   // togglePrioridadeCor, corAcao, abrirCorDetalhe — toda lógica backend preservada)
@@ -5256,7 +5282,7 @@ function renderCoresLista() {
       '<div>AÇÕES</div>' +
     '</div>';
 
-  const rows = lista.map(c => {
+  const rows = listaPg.map(c => {
     const sc = STATUS_CONFIG[c.status] || STATUS_CONFIG.entrada;
     const dias = calcDiasAtivos(c);
     const op30 = corTemOp30(c);
@@ -5318,7 +5344,44 @@ function renderCoresLista() {
     '</div>';
   }).join('');
 
-  document.getElementById('coresLista').innerHTML = '<div class="cort">' + headRow + rows + '</div>';
+  // v4.7.0 · Paginação · construir nav controls
+  const buildPgnav = () => {
+    if (totalPg <= 1) {
+      return '<div class="cor-pgnav"><div class="cor-pgnav-info">Mostrando <b>'+lista.length+'</b> de <b>'+lista.length+'</b> cores'+
+        ' <span class="cor-pgnav-perpage">Por página '+
+          '<select onchange="corPagePerSet(parseInt(this.value))">'+
+            ['20','50','100'].map(n => '<option value="'+n+'"'+(parseInt(n)===per?' selected':'')+'>'+n+'</option>').join('')+
+          '</select>'+
+        '</span></div></div>';
+    }
+    // Páginas a mostrar: 1, current-1, current, current+1, totalPg + ellipsis
+    const pages = new Set([1, totalPg, page - 1, page, page + 1]);
+    const sorted = [...pages].filter(p => p >= 1 && p <= totalPg).sort((a,b) => a - b);
+    let btnsHtml = '';
+    let prev = 0;
+    sorted.forEach(p => {
+      if (p - prev > 1) btnsHtml += '<span class="cor-pgnav-ellipsis">···</span>';
+      btnsHtml += '<button class="cor-pgnav-btn'+(p===page?' curr':'')+'" onclick="corPageGo('+p+')">'+p+'</button>';
+      prev = p;
+    });
+    return '<div class="cor-pgnav">' +
+      '<div class="cor-pgnav-info">' +
+        'Mostrando <b>'+(ini+1)+'–'+Math.min(fim, lista.length)+'</b> de <b>'+lista.length+'</b> cores' +
+        ' <span class="cor-pgnav-perpage">Por página '+
+          '<select onchange="corPagePerSet(parseInt(this.value))">'+
+            ['20','50','100'].map(n => '<option value="'+n+'"'+(parseInt(n)===per?' selected':'')+'>'+n+'</option>').join('')+
+          '</select>'+
+        '</span>' +
+      '</div>' +
+      '<div class="cor-pgnav-ctrl">' +
+        '<button class="cor-pgnav-btn" onclick="corPageGo('+(page-1)+')"'+(page===1?' disabled':'')+'>‹</button>' +
+        btnsHtml +
+        '<button class="cor-pgnav-btn" onclick="corPageGo('+(page+1)+')"'+(page===totalPg?' disabled':'')+'>›</button>' +
+      '</div>' +
+    '</div>';
+  };
+
+  document.getElementById('coresLista').innerHTML = '<div class="cort">' + headRow + rows + '</div>' + buildPgnav();
 }
 
 // v3.20.3: backfill — cores antigas sem criadoPor → geovani (registrante real)

@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.6.2', d:'24 abr 2026', current:true,
+    v:'4.7.0', d:'24 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Desenv. Cor · compactação + paginação 20/pág.',
+        desc:'Mockup mockup-cor-compacto-paginacao aprovado pelo William.\n\n=== COMPACTAÇÃO ===\n• KPIs: font-size 1.85→1.65rem, padding menor (14/16/12)\n• "Prazo mensal" cards verticais 90px → CHIPS HORIZONTAIS inline\n  (~36px de altura, scroll H em mobile, ocupam 1/3 do espaço anterior)\n• Tabela: padding row 13/14 → 10/12 (~10% menor)\n• Gap entre seções 30px → 8-14px\n\n=== PAGINAÇÃO (NOVO) ===\n• Default: 20 cores/página\n• Seletor de itens/pág: 20 / 50 / 100 (persistido em localStorage `fiobras-cor-perpage`)\n• Controles: ‹ 1 2 3 ... N › com ellipsis quando passa de 5 páginas\n• Página atual destacada em verde Fiobras\n• Footer: "Mostrando 1–20 de 312 cores"\n• Reset automático pra página 1 quando filtros mudam\n• Total mantém contagem real (independente da paginação)\n\nFunções novas:\n• window.corPage / window.corPerPage (state global)\n• corPageReset() — chamado pelos onchange dos filtros\n• corPageGo(p) — navega pra página\n• corPagePerSet(p) — muda items/pág + persiste\n\nRegra: 1 página? Mostra só info+seletor (sem botões). Página atual > totalPg após filtro? Auto-clamp pra última página válida.\n\nLógica backend INTACTA: filtros, ordenação (prioritárias→abertas→aprovadas→data desc), KPIs, calcDiasAtivos, todos os quick buttons textuais, Opção E prioridade.\n\nPróximo: v4.8.0 Timeline desktop dual-col, v4.9.0 Apontamento redesign.'}
+    ]
+  },
+  {
+    v:'4.6.2', d:'24 abr 2026',
     items:[
       {type:'fix', title:'Mobile · Produção mdet com inputs em 1 coluna (era 2, números grandes estouravam).',
         desc:'BUG (reportado por screenshot): no mobile da aba Produção, dentro do card "IPAC", os 4 inputs de fibra (CV/CO/PES/PAC) renderizavam em grid 2x2. Como os números podem ser grandes (ex: CO=109.787,96 = 10 chars), os valores estouravam visualmente o card direito.\n\nCAUSA: regra `#prodDet .prod-fields{grid-template-columns:1fr 1fr !important}` em @media(max-width:480px) — forçava 2 colunas no iPhone (393px) deixando cada input com ~150px disponíveis; suficiente pra rótulo mas não pra valores grandes.\n\nFIX: trocada pra `1fr` (1 coluna) em todo mobile ≤480px. Cada input agora ocupa toda largura disponível (~340px), comporta números até 12 chars sem estourar. Aplica a TODOS os 5 prod-groups (IPAC, Tinturaria, Repasse, Dias, Reprocesso).\n\nDesktop intacto — `auto-fit, minmax(120px,1fr)` continua, então em telas grandes mostra 4 inline.\n\n1 linha trocada em css/hub.css (1582). Patch dentro da major v4.0.0.'}
