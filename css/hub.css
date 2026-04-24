@@ -3202,3 +3202,276 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
   #panel-cores .cor-pgnav-ctrl{margin:0 auto}
   #panel-cores .cor-pgnav-btn{min-width:30px;height:30px;font-size:.72rem}
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v4.9.0 — Apontamento Tintoria · REDESIGN COMPLETO
+   Mockup mockup-apontamento-redesign aprovado
+   • Desktop: 2 cols (rail calendário 340px / day-panel dominante)
+   • Hero do dia (Outfit Black 900 huge)
+   • Turnos como tabs com bullet + time + responsável + total kg
+   • 4 fibras como cards coloridos por tipo (CO=azul / PAC=amarelo / CV=verde / PES=roxo)
+   • Mobile: chips horizontais de dias + cards 2x2
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Wrap full-width igual outras abas */
+#panel-apontamento .wrap{max-width:none !important;padding:24px 28px 80px !important}
+@media(max-width:768px){#panel-apontamento .wrap{padding:18px 16px 60px !important}}
+
+/* Esconde estilos antigos do .apt-cal · .apt-day · .apt-day-title · .apt-foot-totals etc */
+#panel-apontamento .apt-cal{display:none !important}
+#panel-apontamento .apt-day-title,
+#panel-apontamento .apt-foot,
+#panel-apontamento .apt-foot-totals,
+#panel-apontamento .apt-tp-card{display:none !important}
+
+/* Shell · grid 2 cols */
+#panel-apontamento .apt-shell{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;margin-top:8px}
+@media(max-width:1024px){#panel-apontamento .apt-shell{grid-template-columns:300px 1fr;gap:18px}}
+@media(max-width:768px){#panel-apontamento .apt-shell{grid-template-columns:1fr;gap:16px}}
+
+/* RAIL · calendário compacto */
+#panel-apontamento .apt-month-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;
+}
+#panel-apontamento .apt-monthhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+#panel-apontamento .apt-mono{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:-.5px;line-height:1}
+#panel-apontamento .apt-mono small{
+  font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);
+  font-weight:500;text-transform:uppercase;letter-spacing:1.4px;display:block;margin-top:3px;
+}
+#panel-apontamento .apt-month-nav{display:flex;gap:4px}
+#panel-apontamento .apt-month-nav button{
+  width:28px;height:28px;border-radius:7px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+#panel-apontamento .apt-month-nav button:hover{color:var(--green);border-color:var(--green)}
+
+/* Calendário · grid 7 cols compacto */
+#panel-apontamento .apt-cal-dows{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;
+}
+#panel-apontamento .apt-cal-dows div{
+  font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:1.2px;color:var(--muted2);
+  text-transform:uppercase;text-align:center;padding:4px 0;font-weight:500;
+}
+#panel-apontamento .apt-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px}
+#panel-apontamento .apt-day-cell{
+  aspect-ratio:1;border-radius:7px;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:.78rem;color:var(--text);position:relative;
+  border:1px solid transparent;transition:all .12s;
+}
+#panel-apontamento .apt-day-cell:hover{border-color:var(--border2)}
+#panel-apontamento .apt-day-cell.muted{background:transparent;color:var(--muted2);cursor:default;opacity:.4}
+#panel-apontamento .apt-day-cell.weekend{color:var(--muted2);background:transparent;cursor:default}
+#panel-apontamento .apt-day-cell.filled{background:rgba(62,207,110,.1);color:var(--green);font-weight:600}
+#panel-apontamento .apt-day-cell.filled::before{
+  content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
+  width:14px;height:2px;background:var(--green);border-radius:1px;
+}
+#panel-apontamento .apt-day-cell.today{box-shadow:inset 0 0 0 1.5px #FFCB00}
+#panel-apontamento .apt-day-cell.selected{
+  background:var(--green);color:#000;font-weight:700;border-color:var(--green);
+}
+#panel-apontamento .apt-day-cell.selected::before{display:none}
+
+/* Legenda */
+#panel-apontamento .apt-cal-legend{
+  display:flex;gap:14px;margin-top:0;padding-top:14px;border-top:1px solid var(--border);
+  font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:1.2px;color:var(--muted);
+  text-transform:uppercase;flex-wrap:wrap;
+}
+#panel-apontamento .apt-cal-legend span{display:inline-flex;align-items:center;gap:5px}
+#panel-apontamento .apt-cal-legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+#panel-apontamento .leg-filled{background:var(--green)}
+#panel-apontamento .leg-today{background:transparent;border:1.5px solid #FFCB00}
+#panel-apontamento .leg-holiday{background:rgba(255,69,58,.5)}
+
+/* KPIs do mês */
+#panel-apontamento .apt-month-kpi{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#panel-apontamento .apt-mkpi{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+#panel-apontamento .apt-mkpi-lbl{
+  font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:1.3px;color:var(--muted);
+  text-transform:uppercase;margin-bottom:3px;
+}
+#panel-apontamento .apt-mkpi-val{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.05rem;line-height:1.1}
+#panel-apontamento .apt-mkpi-sub{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);margin-top:1px}
+
+/* DAY PANEL · direita */
+#panel-apontamento .apt-day-panel{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+}
+
+/* Hero do dia */
+#panel-apontamento .apt-day-hero{
+  display:flex;align-items:center;justify-content:space-between;padding:22px 26px;
+  background:linear-gradient(180deg,var(--surface2),var(--surface));border-bottom:1px solid var(--border);gap:16px;
+}
+#panel-apontamento .apt-hero-l{display:flex;align-items:baseline;gap:14px;min-width:0}
+#panel-apontamento .apt-hero-num{
+  font-family:'Outfit',sans-serif;font-weight:900;font-size:3.4rem;color:var(--text);
+  line-height:1;letter-spacing:-2px;
+}
+#panel-apontamento .apt-hero-meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+#panel-apontamento .apt-hero-mo{
+  font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:1.5px;color:var(--green);
+  text-transform:uppercase;font-weight:500;
+}
+#panel-apontamento .apt-hero-dow{font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:600;color:var(--text)}
+#panel-apontamento .apt-hero-rel{
+  font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);text-transform:uppercase;
+  letter-spacing:1px;margin-top:2px;
+}
+#panel-apontamento .apt-hero-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+#panel-apontamento .apt-hero-total{
+  font-family:'Outfit',sans-serif;font-weight:800;font-size:2rem;color:var(--green);line-height:1;
+}
+#panel-apontamento .apt-hero-total-lbl{
+  font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;
+}
+
+/* Turnos · tabs segmentadas */
+#panel-apontamento .apt-turnos-tabs{
+  display:flex;gap:0;padding:0 26px;background:var(--surface);border-bottom:1px solid var(--border);
+}
+#panel-apontamento .apt-turno-tab{
+  flex:1;padding:14px 0;background:transparent;border:0;border-bottom:2px solid transparent;
+  color:var(--muted);font-family:'Outfit',sans-serif;font-weight:600;font-size:.84rem;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;text-align:center;
+  transition:color .15s, border-color .15s;
+}
+#panel-apontamento .apt-turno-tab .apt-turno-tab-name{display:flex;align-items:center;gap:6px;justify-content:center}
+#panel-apontamento .apt-turno-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--muted2);transition:background .15s}
+#panel-apontamento .apt-turno-tab.filled .apt-turno-tab-dot{background:var(--green)}
+#panel-apontamento .apt-turno-tab-time{
+  font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.3px;color:var(--muted2);
+  text-transform:uppercase;font-weight:500;
+}
+#panel-apontamento .apt-turno-tab-resp{
+  font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted2);margin-top:1px;
+  font-weight:400;letter-spacing:.4px;text-transform:none;line-height:1.2;
+}
+#panel-apontamento .apt-turno-tab-kg{
+  font-family:'DM Mono',monospace;font-size:.72rem;color:var(--text);font-weight:600;margin-top:5px;
+}
+#panel-apontamento .apt-turno-tab.active{color:var(--green);border-bottom-color:var(--green)}
+#panel-apontamento .apt-turno-tab.active .apt-turno-tab-time,
+#panel-apontamento .apt-turno-tab.active .apt-turno-tab-resp{color:var(--green);opacity:.85}
+#panel-apontamento .apt-turno-tab.active .apt-turno-tab-dot{background:var(--green)}
+#panel-apontamento .apt-turno-tab-lock{
+  position:absolute;top:8px;right:10px;color:var(--muted2);
+}
+
+/* Readonly banner */
+#panel-apontamento .apt-readonly-banner{display:none;margin:0 26px;margin-top:14px;
+  padding:8px 12px;background:rgba(255,159,10,.08);border:1px solid rgba(255,159,10,.25);
+  border-radius:8px;color:#FF9F0A;font-size:.74rem;align-items:center;gap:8px;
+}
+#panel-apontamento .apt-readonly-banner.show{display:flex}
+#panel-apontamento .apt-readonly-icon{flex-shrink:0;display:flex}
+#panel-apontamento .apt-readonly-text{display:flex;flex-direction:column;line-height:1.3}
+#panel-apontamento .apt-readonly-title{font-weight:600;font-size:.72rem}
+#panel-apontamento .apt-readonly-sub{font-size:.62rem;opacity:.85}
+
+/* Body do dia · horas + fibras grid */
+#panel-apontamento .apt-day-body{padding:24px 26px}
+#panel-apontamento .apt-hours-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:14px 16px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:18px;
+}
+#panel-apontamento .apt-hours-lbl{display:flex;flex-direction:column;gap:2px;min-width:0}
+#panel-apontamento .apt-hours-title{font-family:'Outfit',sans-serif;font-size:.84rem;font-weight:600;color:var(--text)}
+#panel-apontamento .apt-hours-sub{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.5px}
+#panel-apontamento .apt-hours-input{display:flex;align-items:baseline;gap:6px}
+#panel-apontamento .apt-hours-input input{
+  background:transparent;border:0;color:var(--text);
+  font-family:'Outfit',sans-serif;font-weight:800;font-size:1.65rem;width:100px;
+  outline:none;padding:0;text-align:right;line-height:1;
+}
+#panel-apontamento .apt-hours-input input.readonly{color:var(--muted)}
+#panel-apontamento .apt-hours-unit{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:1px}
+
+/* Fibras · 4 cards coloridos */
+#panel-apontamento .apt-fibras-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1100px){#panel-apontamento .apt-fibras-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){#panel-apontamento .apt-fibras-grid{grid-template-columns:1fr 1fr;gap:10px}}
+#panel-apontamento .apt-fibra-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;border-top:3px solid var(--green);position:relative;
+  transition:border-color .15s;
+}
+#panel-apontamento .apt-fibra-card[data-fibra=co]{border-top-color:#0A84FF}
+#panel-apontamento .apt-fibra-card[data-fibra=pac]{border-top-color:#FFCB00}
+#panel-apontamento .apt-fibra-card[data-fibra=cv]{border-top-color:var(--green)}
+#panel-apontamento .apt-fibra-card[data-fibra=pes]{border-top-color:#BF5AF2}
+#panel-apontamento .apt-fibra-card:focus-within{border-color:var(--border2)}
+#panel-apontamento .apt-fibra-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#panel-apontamento .apt-fibra-tag{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;
+  font-family:'DM Mono',monospace;font-size:.58rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+}
+#panel-apontamento .apt-fibra-card[data-fibra=co] .apt-fibra-tag{background:rgba(10,132,255,.15);color:#0A84FF}
+#panel-apontamento .apt-fibra-card[data-fibra=pac] .apt-fibra-tag{background:rgba(255,203,0,.15);color:#FFCB00}
+[data-theme="light"] #panel-apontamento .apt-fibra-card[data-fibra=pac] .apt-fibra-tag{color:#A07A00}
+#panel-apontamento .apt-fibra-card[data-fibra=cv] .apt-fibra-tag{background:rgba(62,207,110,.15);color:var(--green)}
+#panel-apontamento .apt-fibra-card[data-fibra=pes] .apt-fibra-tag{background:rgba(191,90,242,.15);color:#BF5AF2}
+#panel-apontamento .apt-fibra-name{font-family:'Outfit',sans-serif;font-size:.7rem;color:var(--muted);font-weight:500}
+#panel-apontamento .apt-fibra-input{display:flex;align-items:baseline;gap:6px}
+#panel-apontamento .apt-fibra-input input{
+  background:transparent;border:0;color:var(--text);
+  font-family:'Outfit',sans-serif;font-weight:800;font-size:1.55rem;width:100%;
+  outline:none;padding:0;text-align:left;line-height:1;
+}
+#panel-apontamento .apt-fibra-input input::placeholder{color:var(--muted2);font-weight:600}
+#panel-apontamento .apt-fibra-input input.readonly{color:var(--muted)}
+#panel-apontamento .apt-fibra-unit{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:1px;flex-shrink:0}
+
+/* Footer do dia · subtotal + horas + botão salvar */
+#panel-apontamento .apt-day-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 26px;background:var(--surface2);border-top:1px solid var(--border);gap:12px;
+}
+#panel-apontamento .apt-foot-l{display:flex;align-items:baseline;gap:24px;flex-wrap:wrap}
+#panel-apontamento .apt-foot-item{display:flex;flex-direction:column;gap:1px}
+#panel-apontamento .apt-foot-item-lbl{
+  font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;
+}
+#panel-apontamento .apt-foot-item-val{font-family:'Outfit',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text)}
+#panel-apontamento .apt-foot-r{display:flex;gap:8px;flex-shrink:0}
+#panel-apontamento .apt-btn-save{
+  padding:10px 18px;border-radius:8px;border:0;background:var(--green);color:#000;
+  font-family:'Poppins',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;transition:all .15s;
+}
+#panel-apontamento .apt-btn-save:hover:not(.disabled){background:#34c062;transform:translateY(-1px)}
+#panel-apontamento .apt-btn-save.disabled{background:var(--surface);color:var(--muted2);cursor:not-allowed}
+
+/* === MOBILE (≤768px) · calendário stacked + tabs scroll H + fibras 2x2 === */
+@media(max-width:768px){
+  /* Hero · número menor + total apertado */
+  #panel-apontamento .apt-day-hero{padding:16px 18px;gap:12px}
+  #panel-apontamento .apt-hero-num{font-size:2.4rem;letter-spacing:-1px}
+  #panel-apontamento .apt-hero-total{font-size:1.4rem}
+  #panel-apontamento .apt-hero-total-lbl{font-size:.5rem}
+  #panel-apontamento .apt-hero-dow{font-size:.9rem}
+  /* Tabs · scroll horizontal */
+  #panel-apontamento .apt-turnos-tabs{padding:0 10px;overflow-x:auto;scrollbar-width:none}
+  #panel-apontamento .apt-turnos-tabs::-webkit-scrollbar{display:none}
+  #panel-apontamento .apt-turno-tab{flex:0 0 auto;min-width:108px;padding:12px 12px;font-size:.78rem}
+  /* Body */
+  #panel-apontamento .apt-day-body{padding:14px 14px}
+  #panel-apontamento .apt-hours-row{padding:12px 14px;margin-bottom:14px}
+  #panel-apontamento .apt-hours-input input{font-size:1.4rem;width:80px}
+  #panel-apontamento .apt-fibra-card{padding:12px}
+  #panel-apontamento .apt-fibra-input input{font-size:1.3rem}
+  /* Footer · empilhado */
+  #panel-apontamento .apt-day-foot{flex-direction:column;align-items:stretch;padding:14px 16px;gap:10px}
+  #panel-apontamento .apt-foot-l{justify-content:space-between;gap:14px}
+  #panel-apontamento .apt-foot-r{width:100%}
+  #panel-apontamento .apt-btn-save{width:100%;justify-content:center;padding:13px}
+  /* Card mês · padding menor */
+  #panel-apontamento .apt-month-card{padding:14px}
+  #panel-apontamento .apt-mono{font-size:1.2rem}
+}

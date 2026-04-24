@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#008835"><!-- v3.48.1: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
-<link rel="stylesheet" href="css/hub.css?v=4.8.0">
+<link rel="stylesheet" href="css/hub.css?v=4.9.0">
 
 <!-- v3.32.6: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v4.8.0</div>
+    <div class="login-foot">Sistema interno · v4.9.0</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.8.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.9.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -538,37 +538,82 @@
 <!-- ── Aba Apontamento (tintoria) · v2.4.0 ── -->
 <div class="panel" id="panel-apontamento">
 <div class="wrap">
-  <!-- v4.6.0 — full-width + gx-h minimal (CSS .apt-* já no padrão) -->
+  <!-- v4.9.0 — Apontamento redesign · 2 colunas desktop · mockup-apontamento-redesign aprovado -->
   <div class="gx-h">Apontamento Tintoria <span class="apt-badge" id="apt-badge-dias">0 DIAS</span></div>
-  <div class="apt-cal">
-    <div class="apt-cal-nav">
-      <button class="apt-cal-navbtn" onclick="aptMesNav(-1)" aria-label="Mês anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <div class="apt-cal-month" id="apt-cal-month">—</div>
-      <button class="apt-cal-navbtn" onclick="aptMesNav(1)" aria-label="Próximo mês"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
-    </div>
-    <div class="apt-cal-dows"><div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div></div>
-    <div class="apt-cal-grid" id="apt-cal-grid"></div>
-  </div>
-  <div class="apt-day" id="apt-day">
-    <div class="apt-day-title">
-      <div class="apt-day-lbl">Lançar produção</div>
-      <div class="apt-day-date" id="apt-day-date">—</div>
-    </div>
-    <div class="apt-turno-tabs" id="apt-turno-tabs"></div>
-    <div class="apt-readonly-banner" id="apt-readonly-banner">
-      <div class="apt-readonly-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-      <div class="apt-readonly-text"><span class="apt-readonly-title">Somente leitura</span><span class="apt-readonly-sub" id="apt-readonly-sub">—</span></div>
-    </div>
-    <div class="apt-panel" id="apt-turno-panel"></div>
-    <div class="apt-foot">
-      <div class="apt-foot-totals">
-        <div class="apt-foot-tot"><span class="apt-foot-tot-lbl">Horas Dia</span><span class="apt-foot-tot-val" id="apt-foot-horas">0.0 h</span></div>
-        <div class="apt-foot-tot"><span class="apt-foot-tot-lbl">Total Kg</span><span class="apt-foot-tot-val green" id="apt-foot-kg">0,00</span></div>
+
+  <div class="apt-shell">
+    <!-- LEFT · rail (calendário compacto + KPIs do mês) -->
+    <div class="apt-rail">
+      <div class="apt-month-card">
+        <div class="apt-monthhead">
+          <div class="apt-mono">
+            <span id="apt-cal-month-name">—</span>
+            <small id="apt-cal-month-sub">—</small>
+          </div>
+          <div class="apt-month-nav">
+            <button onclick="aptMesNav(-1)" aria-label="Mês anterior"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <button onclick="aptMesNav(1)" aria-label="Próximo mês"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
+        </div>
+        <!-- compat: input invisible apt-cal-month (mantido pro código antigo escrever) -->
+        <div id="apt-cal-month" style="display:none">—</div>
+        <div class="apt-cal-dows"><div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div></div>
+        <div class="apt-cal-grid" id="apt-cal-grid"></div>
+        <div class="apt-cal-legend">
+          <span><i class="leg-filled"></i>Lançado</span>
+          <span><i class="leg-today"></i>Hoje</span>
+          <span><i class="leg-holiday"></i>Feriado</span>
+        </div>
+        <div class="apt-month-kpi">
+          <div class="apt-mkpi"><div class="apt-mkpi-lbl">Total mês</div><div class="apt-mkpi-val" id="apt-month-total">—</div><div class="apt-mkpi-sub" id="apt-month-total-sub">—</div></div>
+          <div class="apt-mkpi"><div class="apt-mkpi-lbl">Média / dia</div><div class="apt-mkpi-val" id="apt-month-media">—</div><div class="apt-mkpi-sub" id="apt-month-media-sub">—</div></div>
+        </div>
       </div>
-      <button class="apt-btn-save" id="apt-btn-save" onclick="salvarApontamento()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        <span id="apt-btn-save-lbl">Salvar Apontamento</span>
-      </button>
+    </div>
+
+    <!-- RIGHT · day panel dominante -->
+    <div class="apt-day-panel" id="apt-day">
+      <!-- Hero do dia · número grande + meta + total -->
+      <div class="apt-day-hero">
+        <div class="apt-hero-l">
+          <div class="apt-hero-num" id="apt-hero-num">—</div>
+          <div class="apt-hero-meta">
+            <div class="apt-hero-mo" id="apt-hero-mo">—</div>
+            <div class="apt-hero-dow" id="apt-hero-dow">—</div>
+            <div class="apt-hero-rel" id="apt-hero-rel"></div>
+          </div>
+        </div>
+        <div class="apt-hero-r">
+          <div class="apt-hero-total" id="apt-foot-kg">0,00</div>
+          <div class="apt-hero-total-lbl" id="apt-hero-total-lbl">Total do dia · 3 turnos</div>
+        </div>
+        <!-- compat: id="apt-day-date" mantido pra retrocompat (escondido) -->
+        <div id="apt-day-date" style="display:none">—</div>
+      </div>
+
+      <div class="apt-turnos-tabs" id="apt-turno-tabs"></div>
+
+      <div class="apt-readonly-banner" id="apt-readonly-banner">
+        <div class="apt-readonly-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <div class="apt-readonly-text"><span class="apt-readonly-title">Somente leitura</span><span class="apt-readonly-sub" id="apt-readonly-sub">—</span></div>
+      </div>
+
+      <div class="apt-day-body">
+        <div class="apt-panel" id="apt-turno-panel"></div>
+      </div>
+
+      <div class="apt-day-foot">
+        <div class="apt-foot-l">
+          <div class="apt-foot-item"><div class="apt-foot-item-lbl">Turno · subtotal</div><div class="apt-foot-item-val" id="apt-total-turno">0,00 kg</div></div>
+          <div class="apt-foot-item"><div class="apt-foot-item-lbl">Horas trabalhadas</div><div class="apt-foot-item-val" id="apt-foot-horas">0.0 h</div></div>
+        </div>
+        <div class="apt-foot-r">
+          <button class="apt-btn-save" id="apt-btn-save" onclick="salvarApontamento()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span id="apt-btn-save-lbl">Salvar turno</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2870,7 +2915,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '4.8.0';
+const CURRENT_VERSION = '4.9.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -6270,6 +6315,13 @@ function aptFmtKg(v) {
   if (v == null || isNaN(v)) return '0,00';
   return Number(v).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
 }
+// v4.9.0 · Curto · 142800 → "142,8 t" / 8420 → "8,4 t" / 420 → "420 kg"
+function aptFmtKgShort(v) {
+  if (v == null || isNaN(v) || v === 0) return '—';
+  const n = Number(v);
+  if (n >= 1000) return (n/1000).toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:1 }) + ' t';
+  return Math.round(n).toLocaleString('pt-BR') + ' kg';
+}
 function aptFmtMesKey(date) {
   return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
 }
@@ -6312,13 +6364,47 @@ function aptRenderCalendario() {
   const mesDados = window._aptDados[mesKey] || {};
 
   const meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const mesesFull = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   document.getElementById('apt-cal-month').textContent = meses[m] + ' · ' + y;
+
+  // v4.9.0 · Header novo (Outfit Big · sub muted)
+  const elName = document.getElementById('apt-cal-month-name');
+  const elSub = document.getElementById('apt-cal-month-sub');
+  if (elName) elName.textContent = mesesFull[m];
+  if (elSub) {
+    const hoje = new Date();
+    const isCurrent = (hoje.getFullYear() === y && hoje.getMonth() === m);
+    elSub.textContent = y + (isCurrent ? ' · em curso' : '');
+  }
 
   const diasComDados = Object.keys(mesDados).filter(d => {
     const dd = mesDados[d];
     return dd && (dd[1] || dd[2] || dd[3]);
   }).length;
   document.getElementById('apt-badge-dias').textContent = diasComDados + (diasComDados === 1 ? ' DIA' : ' DIAS');
+
+  // v4.9.0 · KPIs do mês · Total + Média/dia
+  let totalMesKg = 0;
+  Object.values(mesDados).forEach(dd => {
+    [1,2,3].forEach(t => {
+      const td = (dd && dd[t]) || {};
+      totalMesKg += aptParseNum(td.co) + aptParseNum(td.pac) + aptParseNum(td.pes) + aptParseNum(td.cv);
+    });
+  });
+  const ultimoDiaKpi = new Date(y, m+1, 0).getDate();
+  let diasUteisMes = 0;
+  for (let dk = 1; dk <= ultimoDiaKpi; dk++) {
+    const dow = new Date(y, m, dk).getDay();
+    if (dow !== 0 && dow !== 6) diasUteisMes++;
+  }
+  const elTot = document.getElementById('apt-month-total');
+  const elTotSub = document.getElementById('apt-month-total-sub');
+  const elMed = document.getElementById('apt-month-media');
+  const elMedSub = document.getElementById('apt-month-media-sub');
+  if (elTot) elTot.textContent = totalMesKg > 0 ? aptFmtKgShort(totalMesKg) : '—';
+  if (elTotSub) elTotSub.textContent = diasComDados + '/' + diasUteisMes + ' dias úteis';
+  if (elMed) elMed.textContent = diasComDados > 0 ? aptFmtKgShort(totalMesKg / diasComDados) : '—';
+  if (elMedSub) elMedSub.textContent = diasComDados > 0 ? 'kg/dia lançado' : '—';
 
   const grid = document.getElementById('apt-cal-grid');
   grid.innerHTML = '';
@@ -6380,9 +6466,24 @@ function aptRenderDia() {
   const y = parts[0], m = parts[1], d = parts[2];
   const dateObj = new Date(y, m-1, d);
   const dows = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const diaLbl = dows[dateObj.getDay()] + ' · ';
   const dataLbl = String(d).padStart(2,'0') + '/' + String(m).padStart(2,'0');
   document.getElementById('apt-day-date').innerHTML = diaLbl + '<span class="apt-day-date-val">'+dataLbl+'</span>';
+
+  // v4.9.0 · Hero do dia (número grande Outfit Black + meta + total)
+  const heroNum = document.getElementById('apt-hero-num');
+  const heroMo = document.getElementById('apt-hero-mo');
+  const heroDow = document.getElementById('apt-hero-dow');
+  const heroRel = document.getElementById('apt-hero-rel');
+  if (heroNum) heroNum.textContent = String(d).padStart(2,'0');
+  if (heroMo) heroMo.textContent = meses[m-1] + ' · ' + y;
+  if (heroDow) heroDow.textContent = dows[dateObj.getDay()] + '-feira'.replace('Domingo-feira','Domingo').replace('Sábado-feira','Sábado');
+  if (heroRel) {
+    const hojeStr = aptFmtDiaKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+    const semana = Math.ceil(((dateObj - new Date(y,0,1))/86400000 + new Date(y,0,1).getDay()+1)/7);
+    heroRel.textContent = (aptDiaSel === hojeStr ? 'Hoje · ' : '') + 'Semana ' + semana;
+  }
 
   if (!aptTurnoAtivo) {
     aptTurnoAtivo = window._currentUserTurno || 1;
@@ -6394,19 +6495,31 @@ function aptRenderDia() {
 
   const tabsEl = document.getElementById('apt-turno-tabs');
   tabsEl.innerHTML = '';
+  // v4.9.0 · Tab nova com responsável + total kg
   APT_TURNOS.forEach(t => {
     const tab = document.createElement('div');
     const temDados = !!diaDados[t.num];
     const podeEditar = aptPodeEditar(t.num);
+    const td = diaDados[t.num] || {};
+    const turnoKg = aptParseNum(td.co) + aptParseNum(td.pac) + aptParseNum(td.pes) + aptParseNum(td.cv);
+    // Responsável: nome do "by" se existe, senão tenta achar no USERS por turno hardcoded
+    let resp = (td.by || '').toString();
+    if (!resp && window.USERS) {
+      const u = Object.values(window.USERS || {}).find(u => u.turno === t.num);
+      if (u && u.nome) resp = u.nome;
+    }
+    if (!resp) resp = 'turno ' + t.num + 'º';
+    const isMine = window._currentUserTurno === t.num;
     tab.className = 'apt-turno-tab';
     if (t.num === aptTurnoAtivo) tab.classList.add('active');
     if (temDados) tab.classList.add('filled');
     if (!podeEditar) tab.classList.add('locked');
     tab.innerHTML =
       (podeEditar ? '' : '<div class="apt-turno-tab-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>') +
-      '<div class="apt-turno-tab-dot"></div>' +
+      '<div class="apt-turno-tab-name"><span class="apt-turno-tab-dot"></span>'+t.nome+'</div>' +
       '<div class="apt-turno-tab-time">'+t.time+'</div>' +
-      '<div class="apt-turno-tab-name">'+t.nome+'</div>';
+      '<div class="apt-turno-tab-resp">'+resp+(isMine?' · você':'')+'</div>' +
+      '<div class="apt-turno-tab-kg">'+(turnoKg > 0 ? aptFmtKgShort(turnoKg) : '—')+'</div>';
     tab.onclick = () => {
       aptCapturarRascunho();
       aptTurnoAtivo = t.num;
@@ -6414,6 +6527,20 @@ function aptRenderDia() {
     };
     tabsEl.appendChild(tab);
   });
+
+  // v4.9.0 · Hero total = SOMA dos 3 turnos do dia
+  let heroTotalKg = 0;
+  APT_TURNOS.forEach(t => {
+    const td = diaDados[t.num] || {};
+    heroTotalKg += aptParseNum(td.co) + aptParseNum(td.pac) + aptParseNum(td.pes) + aptParseNum(td.cv);
+  });
+  const elHeroTot = document.getElementById('apt-foot-kg');
+  if (elHeroTot) elHeroTot.textContent = heroTotalKg > 0 ? aptFmtKgShort(heroTotalKg) : '—';
+  const elHeroTotLbl = document.getElementById('apt-hero-total-lbl');
+  const turnosCom = APT_TURNOS.filter(t => !!diaDados[t.num]).length;
+  if (elHeroTotLbl) elHeroTotLbl.textContent = turnosCom > 0
+    ? ('Total do dia · ' + turnosCom + ' turno' + (turnosCom>1?'s':'') + ' lançado'+(turnosCom>1?'s':''))
+    : 'Nenhum turno lançado';
 
   const turnoDef = APT_TURNOS.find(t => t.num === aptTurnoAtivo);
   const turnoDados = diaDados[aptTurnoAtivo] || {};
@@ -6431,16 +6558,21 @@ function aptRenderDia() {
     ? ('padrão ' + turnoDef.horasPadrao.toFixed(1) + ' h')
     : ('lançado por ' + (turnoDados.by || '—').toLowerCase());
 
+  // v4.9.0 · Fibra card com cor por tipo (CO=azul, PAC=amarelo, CV=verde, PES=roxo)
   const mkFibra = (f, val) => {
     const roCls = podeEditar ? '' : 'readonly';
     const inputAttrs = podeEditar
       ? 'oninput="aptCapturarRascunho(); aptAtualizarTotais()" inputmode="decimal"'
       : 'readonly disabled';
-    return '<div class="apt-tp-fibra-row">' +
-      '<div class="apt-tp-fibra-lbl"><div class="apt-tp-fibra-code">'+f.code+'</div><div class="apt-tp-fibra-name">'+f.nome+'</div></div>' +
-      '<div class="apt-tp-fibra-wrap '+roCls+'">' +
-        '<input type="text" class="apt-tp-fibra-input '+roCls+'" id="apt-in-'+f.code.toLowerCase()+'" value="'+(val===''?'':val)+'" placeholder="0,00" '+inputAttrs+'>' +
-        '<span class="apt-tp-fibra-unit">kg</span>' +
+    const fc = f.code.toLowerCase();
+    return '<div class="apt-fibra-card" data-fibra="'+fc+'">' +
+      '<div class="apt-fibra-h">' +
+        '<span class="apt-fibra-tag">'+f.code+'</span>' +
+        '<span class="apt-fibra-name">'+f.nome+'</span>' +
+      '</div>' +
+      '<div class="apt-fibra-input">' +
+        '<input type="text" class="apt-tp-fibra-input '+roCls+'" id="apt-in-'+fc+'" value="'+(val===''?'':val)+'" placeholder="0,00" '+inputAttrs+'>' +
+        '<span class="apt-fibra-unit">kg</span>' +
       '</div>' +
     '</div>';
   };
@@ -6449,25 +6581,24 @@ function aptRenderDia() {
     ? 'oninput="aptCapturarRascunho(); aptAtualizarTotais()"'
     : 'readonly disabled';
 
+  // v4.9.0 · Panel novo: horas inline compacto + grid 4 cards de fibra coloridos
+  // Subtotal do turno vai pro footer global (apt-total-turno) pra evitar redundância
   panel.innerHTML =
-    '<div class="apt-tp-card">' +
-      '<div class="apt-tp-hours-row">' +
-        '<div class="apt-tp-hours-label">' +
-          '<div class="apt-tp-hours-title">Horas trabalhadas</div>' +
-          '<div class="apt-tp-hours-sub">'+subLbl+'</div>' +
-        '</div>' +
+    '<div class="apt-hours-row">' +
+      '<div class="apt-hours-lbl">' +
+        '<div class="apt-hours-title">Horas trabalhadas</div>' +
+        '<div class="apt-hours-sub">'+subLbl+'</div>' +
+      '</div>' +
+      '<div class="apt-hours-input">' +
         '<input type="text" class="apt-tp-hours-big '+(podeEditar?'':'readonly')+'" id="apt-in-horas" value="'+(valH===''?'':valH)+'" placeholder="'+turnoDef.horasPadrao.toFixed(1)+'" inputmode="decimal" '+hoursInputAttrs+'>' +
+        '<span class="apt-hours-unit">h</span>' +
       '</div>' +
-      '<div class="apt-tp-fibras">' +
-        APT_FIBRAS.map(f => {
-          const val = f.code==='CO'?valCO:f.code==='PAC'?valPAC:f.code==='PES'?valPES:valCV;
-          return mkFibra(f, val);
-        }).join('') +
-      '</div>' +
-      '<div class="apt-tp-total">' +
-        '<div class="apt-tp-total-lbl">Total do Turno</div>' +
-        '<div class="apt-tp-total-val '+(podeEditar?'':'muted')+'" id="apt-total-turno">0,00 kg</div>' +
-      '</div>' +
+    '</div>' +
+    '<div class="apt-fibras-grid">' +
+      APT_FIBRAS.map(f => {
+        const val = f.code==='CO'?valCO:f.code==='PAC'?valPAC:f.code==='PES'?valPES:valCV;
+        return mkFibra(f, val);
+      }).join('') +
     '</div>';
 
   const banner = document.getElementById('apt-readonly-banner');
@@ -6491,7 +6622,7 @@ function aptRenderDia() {
   } else {
     btn.classList.remove('disabled');
     btn.disabled = false;
-    lbl.textContent = 'Salvar Apontamento';
+    lbl.textContent = 'Salvar turno ' + aptTurnoAtivo + 'º';
   }
 
   aptAtualizarTotais();
@@ -6539,7 +6670,8 @@ window.aptAtualizarTotais = function() {
   const elH = document.getElementById('apt-foot-horas');
   const elKg = document.getElementById('apt-foot-kg');
   if (elH) elH.textContent = horasDia.toFixed(1) + ' h';
-  if (elKg) elKg.textContent = aptFmtKg(kgDia);
+  // v4.9.0 · apt-foot-kg agora é o hero total (formato curto)
+  if (elKg) elKg.textContent = kgDia > 0 ? aptFmtKgShort(kgDia) : '—';
 };
 
 window.salvarApontamento = function() {
