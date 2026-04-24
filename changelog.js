@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.9.1', d:'24 abr 2026', current:true,
+    v:'4.9.2', d:'24 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Apontamento · ordem dos turnos 1º→2º→3º + nome do turno legível em ambos os modos.',
+        desc:'2 bugs reportados pelo William na v4.9.0:\n\n=== BUG 1: ORDEM DOS TURNOS ===\nAntes: APT_TURNOS = [3,1,2] (cronológica do dia — 3º turno começa 00:00)\nAgora: APT_TURNOS = [1,2,3] (visual/numérica)\n\nAfeta tanto a UI das tabs quanto a lógica de subtotais (que itera APT_TURNOS).\n\n=== BUG 2: NOME DO TURNO SUMINDO ===\nAntes: tab usava `color:var(--muted)` no parent — texto cinza fraco, no dark mode parecia preto sumindo, no light mode branco quase invisível.\n\nAgora:\n• Tab parent: color:var(--text) + opacity:.55 (estado inativo)\n• Hover: opacity:.85\n• Active: opacity:1 + color:var(--green) (contraste forte)\n• Filled (com dados, não-active): opacity:.85 (mostra que tem dado sem competir com active)\n• Total kg do turno: weight 700, color:text (era .72rem 600)\n• Time/Resp: var(--muted) (era var(--muted2), muito apagado)\n\nResultado: nome do turno LEGÍVEL em qualquer combinação de modo (dark/light) × estado (inativo/filled/active).\n\nLógica intacta, só CSS + ordem do array.'}
+    ]
+  },
+  {
+    v:'4.9.1', d:'24 abr 2026',
     items:[
       {type:'fix', title:'Timeline · feed vazio (ReferenceError no esc dentro do renderTimeline).',
         desc:'BUG CRÍTICO da v4.8.0 (reportado por screenshot do William): aba Timeline mostrava "Nenhum registro" mesmo com 8 registros existindo no backend (badge "8 registros" e chips "Todas · 8" / "Melhorias · 8" estavam visíveis).\n\nCAUSA: na v4.8.0 adicionei `esc(evt.descricao)` e `esc(evt.resultado)` dentro do forEach do renderTimeline pra escapar HTML. Mas a função `esc()` é declarada LOCALMENTE dentro de outras funções (tlAbrirDetalhe, abrirCorDetalhe, etc) — nunca foi global. O ReferenceError era silencioso (try/catch implícito do innerHTML não pega) mas zerava o html do feed.\n\nFIX: declarado `const esc` local dentro do renderTimeline (mesma definição usada nas outras funções: replace de < e >). 1 linha adicionada (logo abaixo das constantes MES_PT/DOW_PT).\n\nEstrutura dual-col da v4.8.0 mantida intacta — só faltava o helper.\n\nTesta: abrir Timeline → 8 registros visíveis · cards com Descrição + Resultado na coluna direita.'}

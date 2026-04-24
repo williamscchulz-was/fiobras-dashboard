@@ -3335,32 +3335,40 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 #panel-apontamento .apt-turnos-tabs{
   display:flex;gap:0;padding:0 26px;background:var(--surface);border-bottom:1px solid var(--border);
 }
+/* v4.9.2 · contraste forte do nome do turno (era var(--muted), sumindo no dark e light) */
 #panel-apontamento .apt-turno-tab{
   flex:1;padding:14px 0;background:transparent;border:0;border-bottom:2px solid transparent;
-  color:var(--muted);font-family:'Outfit',sans-serif;font-weight:600;font-size:.84rem;cursor:pointer;
+  color:var(--text);font-family:'Outfit',sans-serif;font-weight:700;font-size:.86rem;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;text-align:center;
-  transition:color .15s, border-color .15s;
+  transition:color .15s, border-color .15s, opacity .15s;opacity:.55;
 }
+#panel-apontamento .apt-turno-tab:hover{opacity:.85}
 #panel-apontamento .apt-turno-tab .apt-turno-tab-name{display:flex;align-items:center;gap:6px;justify-content:center}
-#panel-apontamento .apt-turno-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--muted2);transition:background .15s}
+#panel-apontamento .apt-turno-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background .15s}
 #panel-apontamento .apt-turno-tab.filled .apt-turno-tab-dot{background:var(--green)}
 #panel-apontamento .apt-turno-tab-time{
-  font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.3px;color:var(--muted2);
+  font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.3px;color:var(--muted);
   text-transform:uppercase;font-weight:500;
 }
 #panel-apontamento .apt-turno-tab-resp{
-  font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted2);margin-top:1px;
-  font-weight:400;letter-spacing:.4px;text-transform:none;line-height:1.2;
+  font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);margin-top:1px;
+  font-weight:500;letter-spacing:.4px;text-transform:none;line-height:1.2;
 }
 #panel-apontamento .apt-turno-tab-kg{
-  font-family:'DM Mono',monospace;font-size:.72rem;color:var(--text);font-weight:600;margin-top:5px;
+  font-family:'DM Mono',monospace;font-size:.72rem;color:var(--text);font-weight:700;margin-top:5px;
 }
-#panel-apontamento .apt-turno-tab.active{color:var(--green);border-bottom-color:var(--green)}
+/* ACTIVE · 100% opacidade + verde no nome (contraste forte) */
+#panel-apontamento .apt-turno-tab.active{
+  color:var(--green);border-bottom-color:var(--green);opacity:1;
+}
 #panel-apontamento .apt-turno-tab.active .apt-turno-tab-time,
 #panel-apontamento .apt-turno-tab.active .apt-turno-tab-resp{color:var(--green);opacity:.85}
+#panel-apontamento .apt-turno-tab.active .apt-turno-tab-kg{color:var(--green)}
 #panel-apontamento .apt-turno-tab.active .apt-turno-tab-dot{background:var(--green)}
+/* FILLED não-active · opacidade boa pra mostrar que tem dados sem competir com active */
+#panel-apontamento .apt-turno-tab.filled:not(.active){opacity:.85}
 #panel-apontamento .apt-turno-tab-lock{
-  position:absolute;top:8px;right:10px;color:var(--muted2);
+  position:absolute;top:8px;right:10px;color:var(--muted);
 }
 
 /* Readonly banner */
