@@ -2513,6 +2513,48 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 #panel-timeline .tl-entry-author b{color:var(--text);font-weight:600}
 
 /* ════════════════════════════════════════════════════════════════════════
+   v4.8.0 — Timeline DUAL-COL no desktop · descrição + resultado side-by-side
+   Mockup mockup-timeline-desktop-dual aprovado
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Card vira grid 2 col (esq: meta+title+sub+fotos+autor / dir: desc + result) */
+#panel-timeline .tl-entry{
+  display:grid;grid-template-columns:minmax(0,1.1fr) 1px minmax(0,1fr);
+  gap:20px;padding:18px 20px;
+}
+#panel-timeline .tl-entry-l{display:flex;flex-direction:column;min-width:0}
+#panel-timeline .tl-entry-divider{background:var(--border);width:1px;height:100%}
+#panel-timeline .tl-entry-r{display:flex;flex-direction:column;gap:14px;min-width:0;justify-content:flex-start}
+
+#panel-timeline .tl-block{display:flex;flex-direction:column;gap:6px}
+#panel-timeline .tl-block-h{
+  font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.8px;
+  color:var(--muted);text-transform:uppercase;font-weight:500;
+  display:flex;align-items:center;gap:6px;
+}
+#panel-timeline .tl-block-h .dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+#panel-timeline .tl-block-h.result .dot{background:#0A84FF}
+#panel-timeline .tl-block-body{
+  font-size:.82rem;line-height:1.55;color:var(--text);
+  white-space:pre-line;
+  /* line-clamp pra não estourar — abre detalhe no click pra ver completo */
+  display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;
+  overflow:hidden;text-overflow:ellipsis;
+}
+#panel-timeline .tl-block-empty{
+  font-size:.72rem;color:var(--muted2);font-style:italic;
+}
+
+/* Mobile (≤768px) · stacked novamente, esconde col direita (lê-se no detalhe) */
+@media(max-width:768px){
+  #panel-timeline .tl-entry{
+    display:block;grid-template-columns:none;gap:0;padding:12px 14px;
+  }
+  #panel-timeline .tl-entry-divider{display:none}
+  #panel-timeline .tl-entry-r{display:none}
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    v4.4.0 — Stats Cor polish · full-width + gx-h
    ════════════════════════════════════════════════════════════════════════ */
 #panel-statscor .wrap{max-width:none !important;padding:24px 28px 80px !important}
