@@ -4794,6 +4794,15 @@ window._toggleChecklistItem = function(cardKey) {
   if (!card) return;
   // Toggle local (UI imediato)
   card.checklistDone = !card.checklistDone;
+  // v3.40.4 (HUB v4.9.4) · PERSISTIR no Firebase pra não perder se fechar/reabrir o modal
+  // (também sincroniza o sourceObj que veio de state.kanban e mantém referência)
+  if (window._fbUpdateCard) {
+    window._fbUpdateCard(cardKey, { checklistDone: card.checklistDone });
+  }
+  // Espelha no state local (state.kanban[cardKey].checklistDone) pra UI permanecer ao reabrir
+  if (state.kanban && state.kanban[cardKey]) {
+    state.kanban[cardKey].checklistDone = card.checklistDone;
+  }
   // Re-render lista
   _renderChecklistGrupo();
   // AUTO MOVER: se todos checados → move grupo pra done (sem modal)
@@ -4810,8 +4819,12 @@ window._toggleChecklistItem = function(cardKey) {
 
 window._concluirTodasGrupo = function() {
   if (!_grupoAtual) return;
-  // Marca todos
-  _grupoAtual.cards.forEach(c => { c.checklistDone = true; });
+  // Marca todos (UI + Firebase)
+  _grupoAtual.cards.forEach(c => {
+    c.checklistDone = true;
+    if (window._fbUpdateCard) window._fbUpdateCard(c._key, { checklistDone: true });
+    if (state.kanban && state.kanban[c._key]) state.kanban[c._key].checklistDone = true;
+  });
   _renderChecklistGrupo();
   // Move pra done
   setTimeout(() => {
