@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'3.56.2', d:'24 abr 2026', current:true,
+    v:'3.56.3', d:'24 abr 2026', current:true,
+    items:[
+      {type:'fix', title:'Gerencial · "Progresso & Prêmios" movido pro final da página.',
+        desc:'William: o quadro de Progresso & Prêmios é consequência dos dados — faz mais sentido vir DEPOIS de visualizar/lançar os meses, não antes.\n\nNova ordem da aba 2026:\n1. Acumulado 2026 (KPIs com YoY)\n2. Meses · clique para lançar\n3. Resultado de [mês] (mdet · aparece quando seleciona)\n4. Progresso & Prêmios 2026 (Achievement Ladder · final)\n\nAntes: Progresso vinha entre KPIs e Meses. Agora KPIs → ação (lançar) → consequência (Progresso/Prêmios).'}
+    ]
+  },
+  {
+    v:'3.56.2', d:'24 abr 2026',
     items:[
       {type:'feat', title:'Gerencial · "Progresso por nível de meta" + "Prêmios" UNIFICADOS num único bloco (Achievement Ladder).',
         desc:'Conceito A do mockup-progresso-premios-unificado.html aprovado pelo William.\n\nANTES (2 blocos separados):\n• Progresso por nível de meta: 6 barras (2 métricas × 3 níveis)\n• Prêmios: 3 cards (Meta/Plus/Super) com Receita+Lucro+Bônus em cada\n\nDEPOIS (1 bloco unificado "Progresso & Prêmios 2026"):\n• 3 cards lado a lado (Meta → Plus → Super)\n• Cada card tem header com nome + sublabel ("Nível base"/"+5%"/"+10%") + TOTAL ACUMULADO grande à direita\n• Dentro: 2 mini-painéis (Receita Bruta · LL Ajustado)\n• Cada mini-painel: nome + %atingido grande + barra de progresso + R$ realizado/meta + chips de meses batidos + linha de bônus (mensal + anual + total da métrica)\n\nMUDANÇAS CÓDIGO:\n• Nova função renderProgressoPremios() substitui renderAnual + renderPremio (math intacto)\n• Função antiga renderAnual + renderPremio mantidas no código mas não chamadas (compat)\n• #progressoPremiosGrid no HTML substitui #anualGrid + #premioGrid (mantidos hidden pra não quebrar)\n• CSS escopado #panel-metas .pp-* (170 linhas)\n\nVALORES PREMIOS confirmados (já existentes no código):\n• Meta: R$ 500/mês por métrica · Bônus anual R$ 2.500\n• Meta Plus: R$ 1.000/mês por métrica · Bônus anual R$ 8.000\n• Super Meta: R$ 1.621/mês por métrica · Bônus anual R$ 15.000 (Receita) / R$ 20.000 (LL)\n\nGANHO: ~280px de altura recuperados (eram 2 seções com h2+border, agora 1 sem repetição)'}
