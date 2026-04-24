@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.2.0', d:'24 abr 2026', current:true,
+    v:'4.3.0', d:'24 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Produção · padrão Gerencial v3 escopado em #panel-producao.',
+        desc:'v4.0.0 entrega #4 · Aplica o mesmo polish do Gerencial v3.56.x na aba Produção.\n\nHTML:\n• 3 .sh+h2+sh-line trocados por gx-h DM Mono uppercase\n• Subtítulo "mensal por métrica" inline no gx-h dos Prêmios\n• Removido subtítulo redundante "Prêmio mensal por métrica..."\n\nCSS escopado em #panel-producao:\n• Full-width (max-width:none, padding 24/28/80)\n• KPIs: padding 18/20/16, border 14, border-top 4 colorido, valor Outfit 800 1.85rem, hover translateY -2px\n• Months grid: 12 colunas, padding 11/8/9, mc-name 600\n• Mdet: padding 24/26, border 16, barra verde gradient (008835→3ECF6E→008835), border-bottom no header\n• Premio block: bg transparent (sem card-em-card)\n\nLógica intacta: renderProducao, renderProdKPI (com YoY vs 2025/2024 nos KPIs), renderProdMeses, renderProdDetalhe (5 grupos: IPAC, Tinturaria, Repasse, Dias, Reprocesso), renderProdPremio, calcIpac, getNivelIpac, salvarMesProd, abrirRelatorioProd.\n\nReusa CSS já existente do .kpi/.mc/.mdet (definido em css/hub.css base).'}
+    ]
+  },
+  {
+    v:'4.2.0', d:'24 abr 2026',
     items:[
       {type:'feat', title:'Apontamento Tintoria · full-width + gx-h minimal (CSS já estava no padrão).',
         desc:'v4.0.0 entrega #3 · O CSS .apt-* (calendário, day panel, turnos, totais) já estava no padrão visual aprovado (Outfit/DM Mono, verde Fiobras, sem branco/preto puro). Mudanças mínimas:\n\n• HTML: substituí h2 "Apontamento · Tintoria" + .sh-line por gx-h DM Mono uppercase (mesmo padrão do Gerencial v3 · 4.x)\n• HTML: badge "X DIAS" reposicionado pro canto direito do gx-h\n• CSS: full-width #panel-apontamento .wrap (max-width:none, padding 24/28/80)\n\nLógica preservada 100%: aptMesNav, salvarApontamento, calendário com dias filled/selected/today, 3 turnos, 4 fibras (CV/CO/PES/PAC), totais (horas/kg), readonly banner pra restrição de role/turno.\n\nNenhum elemento novo · CSS só ~5 linhas.'}

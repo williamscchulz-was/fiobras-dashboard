@@ -2364,6 +2364,61 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   v4.3.0 — Produção polish · padrão Gerencial v3 escopado em #panel-producao
+   (KPIs maiores YoY + months grid + Mdet hero + Prêmios refinados)
+   ════════════════════════════════════════════════════════════════════════ */
+#panel-producao .wrap{max-width:none !important;padding:24px 28px 80px !important}
+@media(max-width:768px){#panel-producao .wrap{padding:18px 16px 60px !important}}
+
+/* KPIs · estilo Gerencial v3.56.1 */
+#panel-producao .kpi-strip{gap:14px;margin-bottom:32px;display:grid;grid-template-columns:repeat(4,1fr)}
+@media(max-width:1100px){#panel-producao .kpi-strip{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){#panel-producao .kpi-strip{grid-template-columns:1fr}}
+#panel-producao .kpi{
+  padding:18px 20px 16px !important;border:1px solid var(--border);border-radius:14px;
+  border-top:4px solid var(--kc,var(--green));box-shadow:none;background:var(--surface);
+  transition:transform .15s,border-color .15s;
+}
+#panel-producao .kpi:hover{transform:translateY(-2px);border-color:var(--border2)}
+#panel-producao .kpi-lbl{font-size:.55rem !important;letter-spacing:2px;font-weight:500;margin-bottom:10px;color:var(--muted);text-transform:uppercase}
+#panel-producao .kpi-dot{width:6px;height:6px}
+#panel-producao .kpi-val{
+  font-family:'Outfit',sans-serif !important;font-weight:800 !important;
+  font-size:1.85rem !important;letter-spacing:-.02em !important;line-height:1 !important;
+}
+
+/* Months grid · padrão Gerencial */
+#panel-producao .months-grid{gap:6px;margin-bottom:24px;display:grid;grid-template-columns:repeat(12,1fr)}
+@media(max-width:900px){#panel-producao .months-grid{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:520px){#panel-producao .months-grid{grid-template-columns:repeat(4,1fr)}}
+#panel-producao .mc{
+  padding:11px 8px 9px !important;border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);box-shadow:none;
+}
+#panel-producao .mc-name{font-size:.58rem;letter-spacing:1.5px;margin-bottom:4px;font-weight:600}
+#panel-producao .mc-mini{font-size:.66rem;font-weight:500}
+
+/* Mdet hero · barra verde gradient + spacing */
+#panel-producao .mdet{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:24px 26px;margin-bottom:30px;box-shadow:none;position:relative;overflow:hidden;
+}
+#panel-producao .mdet::before{
+  content:'';position:absolute;left:0;top:0;right:0;height:3px;
+  background:linear-gradient(90deg,#008835 0%,#3ECF6E 50%,#008835 100%);
+}
+#panel-producao .mdet-hdr{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+#panel-producao .mdet-title{font-family:'Outfit',sans-serif !important;font-weight:800 !important;font-size:1.1rem !important;letter-spacing:-.012em}
+#panel-producao .mdet-title span{color:var(--green) !important;text-transform:capitalize}
+
+/* Premio block */
+#panel-producao .premio-block{background:transparent;padding:0;border:none;margin-bottom:0}
+#panel-producao .premio-block #prodPremioGrid{margin-top:0}
+
+/* Esconde sh antigo */
+#panel-producao .sh{display:none !important}
+
+/* ════════════════════════════════════════════════════════════════════════
    v4.2.0 — Apontamento polish · full-width + gx-h
    ════════════════════════════════════════════════════════════════════════ */
 #panel-apontamento .wrap{max-width:none !important;padding:24px 28px 80px !important}
