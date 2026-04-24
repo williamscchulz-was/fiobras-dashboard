@@ -3967,6 +3967,28 @@ function gerarCardsPreventivas() {
   // Preventivas SEM `ultima` viram card (vencidas desde sempre — fix v3.50.0).
 
   const hoje = today();
+
+  // v3.40.5 (HUB v4.9.5) · LIMPEZA DE FANTASMAS · roda toda vez (não one-shot)
+  // Bug reportado: ao concluir grupo de preventivas, o onValue do kanban dispara
+  // ANTES do onValue de preventivas (race), aí gerarCardsPreventivas roda com
+  // state.preventivas.ultima antiga → cria card duplicado. Quando preventivas
+  // atualiza, jaExiste=true impede remoção. Fix: ANTES de criar novos, remove
+  // cards "todo" cuja preventiva NÃO está mais vencida (proxima > hoje).
+  if (window._fbRemoveCard) {
+    state.cards.forEach(c => {
+      if (c.tipo !== 'preventiva' || !c.prevId) return;
+      if (c.col !== 'todo') return; // só limpa A Fazer (em andamento e done são tocados a mão)
+      const pv = state.preventivas.find(p => (p._key || p.id) === c.prevId);
+      if (!pv || !pv.freq) return;
+      // Sem `ultima` ainda é vencida-desde-sempre (mantém o card)
+      if (!pv.ultima) return;
+      const proxima = addDays(parseDt(pv.ultima), parseInt(pv.freq));
+      if (proxima > hoje) {
+        // Não venceu mais (ex: foi concluída agora) → fantasma → remove
+        window._fbRemoveCard(c._key);
+      }
+    });
+  }
   // Mapa: maqKey → { maxFreq, vencidas:[{p, proxima}] }
   const porMaq = {};
   state.preventivas.forEach(p => {
