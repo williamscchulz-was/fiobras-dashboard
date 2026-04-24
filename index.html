@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#008835"><!-- v3.48.1: fix calendário supressão -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..900&family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css?v=3.30.0">
-<link rel="stylesheet" href="css/hub.css?v=3.56.1">
+<link rel="stylesheet" href="css/hub.css?v=3.56.2">
 
 <!-- v3.32.6: prefetch passivo dos sub-apps + preconnect Firebase
      Browser baixa em background quando idle (sem ativar Firebase nem
@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v3.56.1</div>
+    <div class="login-foot">Sistema interno · v3.56.2</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.56.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v3.56.2</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -332,12 +332,17 @@
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
-  <!-- v3.56.1 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
+  <!-- v3.56.2 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="kpiStrip"></div>
 
-  <div class="gx-h">Progresso por nível de meta</div>
-  <div class="anual-block"><div class="anual-grid" id="anualGrid"></div></div>
+  <!-- v3.56.2: Progresso por nível de meta + Prêmios UNIFICADOS num único bloco
+       (Achievement Ladder · Conceito A aprovado pelo William) -->
+  <div class="gx-h">Progresso & Prêmios 2026</div>
+  <div class="pp-grid" id="progressoPremiosGrid"></div>
+  <!-- Stubs hidden pra manter renderAnual/renderPremio funcionando se forem chamados em outros lugares -->
+  <div id="anualGrid" hidden></div>
+  <div id="premioGrid" hidden></div>
 
   <div class="gx-h">Meses · clique para lançar resultado</div>
   <div class="months-grid" id="monthsGrid"></div>
@@ -348,12 +353,6 @@
       <div class="mdet-actions"><div id="mdet-lvl-badge"></div><button class="save-btn" style="background:var(--red)" onclick="zerarMes()">Zerar</button><button class="save-btn" onclick="salvarMes()">Salvar</button></div>
     </div>
     <div class="mdet-grid" id="mdet-fields"></div>
-  </div>
-
-  <div class="gx-h">Prêmios</div>
-  <div class="premio-block">
-    <div style="font-family:'Poppins',sans-serif;font-size:.72rem;color:var(--muted);margin-bottom:4px">Prêmio mensal acumulado + projeção anual · separado por Receita Bruta e Lucro Ajustado.</div>
-    <div class="premio-grid" id="premioGrid"></div>
   </div>
 </div>
 </div>
@@ -2863,7 +2862,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '3.56.1';
+const CURRENT_VERSION = '3.56.2';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -3779,10 +3778,104 @@ const acumClin = () => Object.values(resultados).filter(hasData).reduce((a,r) =>
 
 function render() {
   renderKPI();
-  renderAnual();
+  renderProgressoPremios(); // v3.56.2 — substitui renderAnual + renderPremio (unificados)
   renderMeses();
-  renderPremio();
   if (mesSel !== null) renderDetalhe(mesSel);
+}
+
+// v3.56.2 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
+function renderProgressoPremios() {
+  const fat = acumFat(), ll = acumLL(), fatTotal = fat, llTotal = ll;
+  const meses = Object.keys(resultados).sort();
+
+  // Coletar meses batidos por nível e métrica
+  const mesesPorNivel = { fat:{ meta:[], plus:[], super:[] }, ll:{ meta:[], plus:[], super:[] } };
+  meses.forEach(k => {
+    const i = parseInt(k.split('-')[1]) - 1, r = resultados[k];
+    const lvF = getNivelFat(+r.fat||0, i), lvL = getNivelLL(+r.ll||0, i), nm = MONTHS[i];
+    if (lvF !== 'none') mesesPorNivel.fat[lvF].push(nm);
+    if (lvL !== 'none') mesesPorNivel.ll[lvL].push(nm);
+  });
+
+  function temBonusAnual(tipo, level) {
+    const acum = tipo === 'fat' ? fatTotal : llTotal;
+    const metaAnual = tipo === 'fat' ? METAS_FAT.anual[level] : METAS_LL.anual[level];
+    return acum >= metaAnual;
+  }
+
+  const NIVEIS = [
+    { k:'meta',  lb:'Meta',       sub:'Nível base',     c:'#3ecf6e' },
+    { k:'plus',  lb:'Meta Plus',  sub:'+5% sobre meta', c:'#4db3ff' },
+    { k:'super', lb:'Super Meta', sub:'+10% sobre meta',c:'#FFCB00' }
+  ];
+
+  // Render dos 3 cards
+  document.getElementById('progressoPremiosGrid').innerHTML = NIVEIS.map(lv => {
+    // Receita Bruta · neste nível
+    const pctF = calcPct(fat, METAS_FAT.anual[lv.k]);
+    const mesesF = mesesPorNivel.fat[lv.k];
+    const mesalF = mesesF.length * PREMIOS.fat[lv.k].m;
+    const bonusF = temBonusAnual('fat', lv.k) ? PREMIOS.fat[lv.k].a : 0;
+    const totalF = mesalF + bonusF;
+    const mesesFhtml = mesesF.length
+      ? mesesF.map(m => '<span class="pp-mes" style="color:'+lv.c+';border-color:'+lv.c+'66">'+m+'</span>').join('')
+      : '<span class="pp-empty">— nenhum batido</span>';
+
+    // LL Ajustado · neste nível
+    const pctL = calcPct(ll, METAS_LL.anual[lv.k]);
+    const mesesL = mesesPorNivel.ll[lv.k];
+    const mesalL = mesesL.length * PREMIOS.ll[lv.k].m;
+    const bonusL = temBonusAnual('ll', lv.k) ? PREMIOS.ll[lv.k].a : 0;
+    const totalL = mesalL + bonusL;
+    const mesesLhtml = mesesL.length
+      ? mesesL.map(m => '<span class="pp-mes" style="color:'+lv.c+';border-color:'+lv.c+'66">'+m+'</span>').join('')
+      : '<span class="pp-empty">— nenhum batido</span>';
+
+    const totalCard = totalF + totalL;
+
+    return '<div class="pp-card pp-'+lv.k+'" style="--pp-c:'+lv.c+'">' +
+      '<div class="pp-h">' +
+        '<div class="pp-h-l">' +
+          '<div class="pp-lvl">'+lv.lb+'</div>' +
+          '<div class="pp-sub">'+lv.sub+'</div>' +
+        '</div>' +
+        '<div class="pp-h-r">' +
+          '<div class="pp-tot-lbl">Total acumulado</div>' +
+          '<div class="pp-tot-val">R$ '+fmtBR(totalCard,0)+'</div>' +
+        '</div>' +
+      '</div>' +
+
+      // Receita Bruta
+      '<div class="pp-mp">' +
+        '<div class="pp-mp-h">' +
+          '<span class="pp-mp-name">Receita Bruta</span>' +
+          '<span class="pp-mp-pct" style="color:'+lv.c+'">'+fmtBR(pctF,1)+'%</span>' +
+        '</div>' +
+        '<div class="pp-mp-bar"><div class="fill" style="width:'+Math.min(pctF,100)+'%;background:'+lv.c+'"></div></div>' +
+        '<div class="pp-mp-vals"><span><b>'+fmtMoeda(fat)+'</b> / '+fmtMoeda(METAS_FAT.anual[lv.k])+'</span></div>' +
+        '<div class="pp-mp-meses"><span class="pp-mp-meses-lbl">Meses</span>'+mesesFhtml+'</div>' +
+        '<div class="pp-mp-bonus">' +
+          '<span>Mensal R$ '+fmtBR(mesalF,0)+' + Bônus R$ '+fmtBR(bonusF,0)+'</span>' +
+          '<b>R$ '+fmtBR(totalF,0)+'</b>' +
+        '</div>' +
+      '</div>' +
+
+      // LL Ajustado
+      '<div class="pp-mp">' +
+        '<div class="pp-mp-h">' +
+          '<span class="pp-mp-name">LL Ajustado</span>' +
+          '<span class="pp-mp-pct" style="color:'+lv.c+'">'+fmtBR(pctL,1)+'%</span>' +
+        '</div>' +
+        '<div class="pp-mp-bar"><div class="fill" style="width:'+Math.min(pctL,100)+'%;background:'+lv.c+'"></div></div>' +
+        '<div class="pp-mp-vals"><span><b>'+fmtMoeda(ll)+'</b> / '+fmtMoeda(METAS_LL.anual[lv.k])+'</span></div>' +
+        '<div class="pp-mp-meses"><span class="pp-mp-meses-lbl">Meses</span>'+mesesLhtml+'</div>' +
+        '<div class="pp-mp-bonus">' +
+          '<span>Mensal R$ '+fmtBR(mesalL,0)+' + Bônus R$ '+fmtBR(bonusL,0)+'</span>' +
+          '<b>R$ '+fmtBR(totalL,0)+'</b>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 // ── KPI Strip (4 cards no topo) ──────────────────────────────────────────

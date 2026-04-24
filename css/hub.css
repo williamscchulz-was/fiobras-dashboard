@@ -2364,6 +2364,96 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   v3.56.2 — UNIFICADO · Progresso por nível de meta + Prêmios
+   Conceito A "Achievement Ladder" aprovado pelo William
+   3 cards (Meta → Plus → Super), cada um com 2 mini-painéis (Receita+LL)
+   ════════════════════════════════════════════════════════════════════════ */
+#panel-metas .pp-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:30px;
+}
+@media(max-width:1100px){#panel-metas .pp-grid{grid-template-columns:1fr}}
+
+#panel-metas .pp-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;position:relative;
+}
+#panel-metas .pp-card::before{
+  content:'';position:absolute;left:0;top:0;right:0;height:4px;background:var(--pp-c,var(--green));
+}
+#panel-metas .pp-h{
+  padding:18px 22px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+#panel-metas .pp-h-l .pp-lvl{
+  font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:2.2px;
+  text-transform:uppercase;font-weight:600;color:var(--pp-c,var(--green));margin-bottom:4px;
+}
+#panel-metas .pp-h-l .pp-sub{
+  font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);
+  letter-spacing:.5px;text-transform:uppercase;
+}
+#panel-metas .pp-h-r{text-align:right;flex-shrink:0}
+#panel-metas .pp-h-r .pp-tot-lbl{
+  font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:3px;
+}
+#panel-metas .pp-h-r .pp-tot-val{
+  font-family:'Outfit',sans-serif;font-weight:800;font-size:1.55rem;
+  letter-spacing:-.018em;line-height:1;color:var(--pp-c,var(--green));
+}
+
+/* Mini-painel (Receita Bruta · LL Ajustado) */
+#panel-metas .pp-mp{padding:14px 22px;border-bottom:1px solid var(--border)}
+#panel-metas .pp-mp:last-child{border-bottom:none}
+#panel-metas .pp-mp-h{
+  display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;
+}
+#panel-metas .pp-mp-name{
+  font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1.8px;
+  text-transform:uppercase;color:var(--muted);font-weight:500;
+}
+#panel-metas .pp-mp-pct{
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:-.012em;
+}
+#panel-metas .pp-mp-bar{
+  height:6px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:8px;
+}
+#panel-metas .pp-mp-bar .fill{
+  height:100%;border-radius:999px;transition:width 1s cubic-bezier(.4,0,.2,1);
+}
+#panel-metas .pp-mp-vals{
+  display:flex;justify-content:space-between;
+  font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:9px;
+}
+#panel-metas .pp-mp-vals b{color:var(--text);font-weight:600}
+#panel-metas .pp-mp-meses{
+  display:flex;gap:5px;flex-wrap:wrap;align-items:center;min-height:22px;
+}
+#panel-metas .pp-mp-meses-lbl{
+  font-family:'DM Mono',monospace;font-size:.5rem;color:var(--muted);
+  letter-spacing:.5px;text-transform:uppercase;margin-right:4px;
+}
+#panel-metas .pp-mp-meses .pp-mes{
+  font-family:'DM Mono',monospace;font-size:.55rem;font-weight:600;
+  padding:2px 8px;border-radius:999px;border:1px solid currentColor;letter-spacing:.5px;
+}
+#panel-metas .pp-empty{
+  color:var(--muted2);font-style:italic;font-size:.62rem;font-family:'Poppins',sans-serif;
+}
+#panel-metas .pp-mp-bonus{
+  margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);
+}
+#panel-metas .pp-mp-bonus b{color:var(--text);font-weight:700;font-size:.74rem}
+
+@media(max-width:520px){
+  #panel-metas .pp-h{padding:14px 18px 12px}
+  #panel-metas .pp-mp{padding:12px 18px}
+  #panel-metas .pp-h-r .pp-tot-val{font-size:1.3rem}
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    v3.56.1 — POLISH MAIS AGRESSIVO · usa toda a largura, KPIs maiores
    ════════════════════════════════════════════════════════════════════════ */
 /* Full-width: panel-metas e panel-historico saem do max-width 1160px */
