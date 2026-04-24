@@ -2,7 +2,14 @@
    Carregado sob demanda quando o user clica na pílula de versão. */
 window.CHANGELOG = [
   {
-    v:'4.5.0', d:'24 abr 2026', current:true,
+    v:'4.6.0', d:'24 abr 2026', current:true,
+    items:[
+      {type:'feat', title:'Mobile · ajustes pras 5 abas redesenhadas (último commit da v4.x).',
+        desc:'v4.0.0 entrega #7 (final) · Padrão mobile aprovado em mockup-mobile-todas-abas (iPhone + Android).\n\nMEDIA QUERIES @media(max-width:640px) escopadas por #panel-*:\n\nCOR (Tabela densa colapsa):\n• Header da tabela some\n• Cada row vira card vertical (auto + 1fr + auto / 4 rows):\n  ↳ row1: prio btn · ref · fibra chip\n  ↳ row2: nome (full width)\n  ↳ row3: status · dias\n  ↳ row4: actions full-width (qbtns flex 1)\n• Cliente oculto (vai pra detalhe ao tocar)\n• Border-left mantida pra prio (Opção E)\n\nPRODUÇÃO:\n• Mdet padding reduzido (18/16)\n• Header empilhado (título cima, ações embaixo)\n• KPI val Outfit 1.5rem (era 1.85)\n\nAPONTAMENTO:\n• Calendário compacto (padding 14/12)\n• Day panel padding 18/14\n\nSTATS COR:\n• Fibras tabs scroll horizontal (Total/CO/PAC/PES/CV)\n• Cada chip flex-shrink:0\n\nTIMELINE B:\n• Data label horizontal (era sticky lateral)\n• Vira pill compacta no topo de cada grupo\n• Linha vertical removida (cards stacked)\n• Photos grids responsivos full-width\n\nGERAL:\n• Wrap padding: 14px lateral (era 28)\n• Botões cor-toolbar font menor\n\nFIM da major v4.0.0 (7 entregas):\n#1 v4.0.0 feriados 2026-2050 · #2 v4.1.0 Cor · #3 v4.2.0 Apontamento\n#4 v4.3.0 Produção · #5 v4.4.0 Stats Cor · #6 v4.5.0 Timeline B\n#7 v4.6.0 Mobile (este)'}
+    ]
+  },
+  {
+    v:'4.5.0', d:'24 abr 2026',
     items:[
       {type:'feat', title:'Timeline · Layout Journal (agrupado por dia · Opção B aprovada).',
         desc:'v4.0.0 entrega #6 · Mockup mockup-cor-timeline-opcoes (Opção B) aprovado pelo William.\n\nLAYOUT JOURNAL:\n• Entradas agrupadas por DIA (cronológico desc)\n• Coluna esquerda 140px · sticky · data grande Outfit ExtraBold (verde Fiobras 2.2rem)\n  ↳ "17 / ABR · 26 / QUI / 1 reg"\n• Coluna direita · entradas conectadas por linha vertical (border-left 2px) com bolinhas coloridas (info=azul / danger=vermelho / warning=amarelo)\n• Cards: time + tag + título + sub + fotos + autor\n\nLÓGICA TAGS → VARIANT (cor da bolinha + border hover):\n• desenvolvimento/desenv/teste → info (azul)\n• problema/erro/falha → danger (vermelho)\n• melhoria/otimizacao → warning (amarelo)\n\nFOTOS:\n• 1 foto → grid 1 col (16:10)\n• 2 fotos → grid 2 col\n• 3-4 fotos → grid 4 col (square)\n• 5+ fotos → 3 fotos + tile "+N more"\n\nMOBILE (≤768px):\n• Data label vira inline horizontal (não mais sticky lateral)\n• Linha vertical removida (cards stacked diretamente)\n• Padding reduzido\n\nLÓGICA INTACTA:\n• tlDados (entries do Firebase)\n• tlFilterTag (filtro por tag)\n• tlRenderFilterBar (chips de tags com contadores)\n• tlAbrirDetalhe (modal completo · click no card)\n• tlFormatTime (HH:MM)\n• userChip (avatar do criador)\n• tlRenderTagChip (chip da tag custom)\n\nCSS escopado em #panel-timeline (~70 linhas). Esconde .tl-feed:not(.tl-journal) e .tl-date-sep antigos.'}

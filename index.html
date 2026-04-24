@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v4.5.0</div>
+    <div class="login-foot">Sistema interno · v4.6.0</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.5.0</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.6.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -332,7 +332,7 @@
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
-  <!-- v4.5.0 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
+  <!-- v4.6.0 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="kpiStrip"></div>
 
@@ -347,7 +347,7 @@
     <div class="mdet-grid" id="mdet-fields"></div>
   </div>
 
-  <!-- v4.5.0: Progresso & Prêmios movido pra baixo · consequência dos dados,
+  <!-- v4.6.0: Progresso & Prêmios movido pra baixo · consequência dos dados,
        vê depois de lançar/visualizar os meses -->
   <div class="gx-h">Progresso & Prêmios 2026</div>
   <div class="pp-grid" id="progressoPremiosGrid"></div>
@@ -371,7 +371,7 @@
 <!-- ── Aba Produção ── -->
 <div class="panel" id="panel-producao">
 <div class="wrap">
-  <!-- v4.5.0 — Polish padrão Gerencial v3 (KPIs maiores YoY · Mdet hero · Prêmios após Mdet) -->
+  <!-- v4.6.0 — Polish padrão Gerencial v3 (KPIs maiores YoY · Mdet hero · Prêmios após Mdet) -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="prodKpiStrip"></div>
   <div class="gx-h">Meses · clique para lançar resultado</div>
@@ -412,7 +412,7 @@
 </div>
 <div class="panel" id="panel-cores">
 <div class="wrap">
-  <!-- v4.5.0 — Redesign aprovado pelo William (mockup-cor-tabela-fluxo-v2 + cor por fibra + Opção E prioridade) -->
+  <!-- v4.6.0 — Redesign aprovado pelo William (mockup-cor-tabela-fluxo-v2 + cor por fibra + Opção E prioridade) -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="coresKpiStrip"></div>
   <div class="gx-h">Prazo mensal · cores aprovadas, dias úteis ativos</div>
@@ -535,7 +535,7 @@
 <!-- ── Aba Apontamento (tintoria) · v2.4.0 ── -->
 <div class="panel" id="panel-apontamento">
 <div class="wrap">
-  <!-- v4.5.0 — full-width + gx-h minimal (CSS .apt-* já no padrão) -->
+  <!-- v4.6.0 — full-width + gx-h minimal (CSS .apt-* já no padrão) -->
   <div class="gx-h">Apontamento Tintoria <span class="apt-badge" id="apt-badge-dias">0 DIAS</span></div>
   <div class="apt-cal">
     <div class="apt-cal-nav">
@@ -598,7 +598,7 @@
 <!-- ── Aba Stats Cor · v2.6.0 ── -->
 <div class="panel" id="panel-statscor">
 <div class="wrap">
-  <!-- v4.5.0 — Stats Cor polish · gx-h + full-width -->
+  <!-- v4.6.0 — Stats Cor polish · gx-h + full-width -->
   <div class="gx-h">Stats Cor · mix de tingimento por fibra/categoria<button class="sc-new-btn" id="scNewBtn" onclick="abrirScLancamento()" style="display:none;margin-left:auto"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lançar mês</button></div>
   <div class="sc-toolbar" style="display:none"></div>
 
@@ -2867,7 +2867,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '4.5.0';
+const CURRENT_VERSION = '4.6.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -3783,12 +3783,12 @@ const acumClin = () => Object.values(resultados).filter(hasData).reduce((a,r) =>
 
 function render() {
   renderKPI();
-  renderProgressoPremios(); // v4.5.0 — substitui renderAnual + renderPremio (unificados)
+  renderProgressoPremios(); // v4.6.0 — substitui renderAnual + renderPremio (unificados)
   renderMeses();
   if (mesSel !== null) renderDetalhe(mesSel);
 }
 
-// v4.5.0 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
+// v4.6.0 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
 function renderProgressoPremios() {
   const fat = acumFat(), ll = acumLL(), fatTotal = fat, llTotal = ll;
   const meses = Object.keys(resultados).sort();
@@ -4932,7 +4932,7 @@ function syncIpacToFinanceiro(mesIdx, ipacKg) {
 // DESENVOLVIMENTO DE COR — Constantes, Estado, Render
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ── Feriados 2026 → 2050 (v4.5.0) ───────────────────────────────────────
+// ── Feriados 2026 → 2050 (v4.6.0) ───────────────────────────────────────
 // Calculado via algoritmo Anonymous Gregorian (Páscoa) + offsets.
 // Fonte: data/feriados-2026-2050.js (mantida em sync — copiar daqui se editar)
 //
@@ -5233,7 +5233,7 @@ function renderCoresLista() {
     return;
   }
 
-  // v4.5.0 · Tabela densa com quick buttons textuais contextuais
+  // v4.6.0 · Tabela densa com quick buttons textuais contextuais
   // (substitui cards anteriores · mantém calcDiasAtivos, corTemOp30, acoesPossiveis,
   // togglePrioridadeCor, corAcao, abrirCorDetalhe — toda lógica backend preservada)
   const fibClass = (f) => {
@@ -6596,7 +6596,7 @@ function renderTimeline() {
     return;
   }
 
-  // v4.5.0 · Layout Journal aprovado (mockup-cor-timeline-opcoes B)
+  // v4.6.0 · Layout Journal aprovado (mockup-cor-timeline-opcoes B)
   // Agrupa entries por DIA (YYYY-MM-DD) e renderiza data grande à esquerda + cards à direita
   feed.className = 'tl-journal';
 

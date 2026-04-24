@@ -2364,6 +2364,75 @@ button,a,select,input[type="checkbox"],input[type="radio"],[role="button"],.mc,.
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   v4.6.0 — MOBILE · ajustes pras 5 abas redesenhadas em 4.x
+   Padrão aprovado em mockup-mobile-todas-abas (iPhone 390/Android 380)
+   ════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* ─── Cor (Tabela densa colapsa em cards verticais) ─── */
+  #panel-cores .cor-toolbar{gap:6px}
+  #panel-cores .cor-filter-select{flex:1;min-width:120px}
+  #panel-cores .cor-search{flex:1 1 100%;order:99}
+  #panel-cores .cor-btn{flex:1;justify-content:center}
+
+  #panel-cores .cort-row.head{display:none}
+  #panel-cores .cort-row{
+    grid-template-columns:auto 1fr auto;
+    grid-template-rows:auto auto auto;
+    gap:6px 10px;padding:14px;
+  }
+  #panel-cores .cort-row > div:nth-child(1){grid-column:1;grid-row:1}      /* prio btn */
+  #panel-cores .cort-row > div:nth-child(2){grid-column:2;grid-row:1;align-self:center;font-size:.65rem}      /* ref */
+  #panel-cores .cort-row > div:nth-child(5){grid-column:3;grid-row:1;justify-self:end} /* fibra chip */
+  #panel-cores .cort-row > div:nth-child(3){grid-column:1/-1;grid-row:2;font-size:.95rem}      /* nome (full row) */
+  #panel-cores .cort-row > div:nth-child(4){display:none}      /* cliente (oculto, vai pra meta) */
+  #panel-cores .cort-row > div:nth-child(6){grid-column:1/2;grid-row:3}      /* status */
+  #panel-cores .cort-row > div:nth-child(7){grid-column:2/4;grid-row:3;justify-self:end} /* dias */
+  #panel-cores .cort-row > div:nth-child(8){grid-column:1/-1;grid-row:4;display:flex;flex-wrap:wrap;gap:6px}      /* actions full row */
+  #panel-cores .cort-actions .cort-qbtn{flex:1;justify-content:center}
+  #panel-cores .cort-row.is-prio{padding-left:14px}
+
+  /* ─── Produção (mdet hero menos padding) ─── */
+  #panel-producao .mdet{padding:18px 16px}
+  #panel-producao .mdet-hdr{flex-direction:column;align-items:flex-start;gap:14px}
+  #panel-producao .mdet-actions{width:100%;justify-content:flex-end}
+  #panel-producao .kpi-val{font-size:1.5rem !important}
+
+  /* ─── Apontamento ─── */
+  #panel-apontamento .apt-cal{padding:14px 12px}
+  #panel-apontamento .apt-day{padding:18px 14px}
+
+  /* ─── Stats Cor ─── */
+  #panel-statscor .sc-fibras{gap:5px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  #panel-statscor .sc-fibras::-webkit-scrollbar{display:none}
+  #panel-statscor .sc-fib{flex-shrink:0;padding:7px 12px;font-size:.65rem}
+
+  /* ─── Timeline (Journal vertical) ─── */
+  #panel-timeline .tl-day-label{
+    flex-direction:row;align-items:baseline;gap:8px;
+    padding:8px 10px;background:var(--surface);border:1px solid var(--border);
+    border-radius:8px;margin-bottom:6px;
+  }
+  #panel-timeline .tl-day-num{font-size:1.4rem;color:var(--green)}
+  #panel-timeline .tl-day-mes,
+  #panel-timeline .tl-day-dow{margin-top:0;font-size:.55rem}
+  #panel-timeline .tl-day-count{margin-left:auto;margin-top:0;font-size:.5rem}
+  #panel-timeline .tl-entry-photos.p1,
+  #panel-timeline .tl-entry-photos.p2,
+  #panel-timeline .tl-entry-photos.p4{max-width:100%}
+
+  /* ─── Wraps gerais · padding lateral menor ─── */
+  #panel-cores .wrap,
+  #panel-producao .wrap,
+  #panel-apontamento .wrap,
+  #panel-statscor .wrap,
+  #panel-timeline .wrap{padding:14px 12px 60px !important}
+
+  /* ─── Botões cor-btn em mobile ─── */
+  #panel-cores .cor-toolbar .cor-btn{font-size:.6rem;padding:6px 12px}
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    v4.5.0 — Timeline (Layout B · Journal) · agrupado por dia
    Mockup mockup-cor-timeline-opcoes (Opção B) aprovado
    ════════════════════════════════════════════════════════════════════════ */
