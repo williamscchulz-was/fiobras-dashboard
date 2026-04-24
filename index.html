@@ -117,7 +117,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-foot">Sistema interno · v4.0.1</div>
+    <div class="login-foot">Sistema interno · v4.1.0</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
     </button>
   </div>
   <div class="hdr-right">
-    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.0.1</div>
+    <div class="hdr-pill" onclick="openChangelog()" title="Ver histórico de versões">v4.1.0</div>
     <div class="hdr-divider"></div>
     <!-- v3.24.0: botão "Instalar app" — escondido por default, JS revela quando PWA é instalável -->
     <button class="hdr-install-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" aria-label="Instalar app no dispositivo" title="Instalar app" style="display:none;">
@@ -332,7 +332,7 @@
 </div>
 <div class="panel active" id="panel-metas">
 <div class="wrap">
-  <!-- v4.0.1 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
+  <!-- v4.1.0 minimal: sh+h2+sh-line → gx-h DM Mono uppercase com line discreta -->
   <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="kpiStrip"></div>
 
@@ -347,7 +347,7 @@
     <div class="mdet-grid" id="mdet-fields"></div>
   </div>
 
-  <!-- v4.0.1: Progresso & Prêmios movido pra baixo · consequência dos dados,
+  <!-- v4.1.0: Progresso & Prêmios movido pra baixo · consequência dos dados,
        vê depois de lançar/visualizar os meses -->
   <div class="gx-h">Progresso & Prêmios 2026</div>
   <div class="pp-grid" id="progressoPremiosGrid"></div>
@@ -412,13 +412,13 @@
 </div>
 <div class="panel" id="panel-cores">
 <div class="wrap">
-  <div class="sh"><h2>Desenvolvimento de Cor 2026</h2><div class="sh-line"></div></div>
+  <!-- v4.1.0 — Redesign aprovado pelo William (mockup-cor-tabela-fluxo-v2 + cor por fibra + Opção E prioridade) -->
+  <div class="gx-h">Acumulado 2026</div>
   <div class="kpi-strip" id="coresKpiStrip"></div>
-  <div class="sh"><h2>Prazo mensal</h2><div class="sh-line"></div></div>
-  <div id="coresMesesPrazo" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px"></div>
-  <div class="sh"><h2>Filtros</h2><div class="sh-line"></div></div>
-  <div class="cor-filtros" id="corFiltros">
-    <select class="login-select" id="filtroStatus" onchange="renderCoresLista()" style="width:auto;min-width:140px;padding:9px 36px 9px 12px;font-size:.72rem">
+  <div class="gx-h">Prazo mensal · cores aprovadas, dias úteis ativos</div>
+  <div id="coresMesesPrazo" class="cor-prazo-meses"></div>
+  <div class="cor-toolbar">
+    <select class="cor-filter-select" id="filtroStatus" onchange="renderCoresLista()">
       <option value="">Todos status</option>
       <option value="entrada">Entrada</option>
       <option value="desenvolvida">Desenvolvida</option>
@@ -427,14 +427,14 @@
       <option value="aprovada">Aprovada</option>
       <option value="cancelada">Cancelada</option>
     </select>
-    <select class="login-select" id="filtroMes" onchange="renderCoresLista()" style="width:auto;min-width:120px;padding:9px 36px 9px 12px;font-size:.72rem">
+    <select class="cor-filter-select" id="filtroMes" onchange="renderCoresLista()">
       <option value="">Todos meses</option>
       <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
       <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
       <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
       <option value="9">Out</option><option value="10">Nov</option><option value="11">Dez</option>
     </select>
-    <select class="login-select" id="filtroFibra" onchange="renderCoresLista()" style="width:auto;min-width:100px;padding:9px 36px 9px 12px;font-size:.72rem">
+    <select class="cor-filter-select" id="filtroFibra" onchange="renderCoresLista()">
       <option value="">Todas fibras</option>
       <option value="CO">CO</option>
       <option value="CV">CV</option>
@@ -442,11 +442,14 @@
       <option value="PAC">PAC</option>
       <option value="Outra">Outra</option>
     </select>
-    <input class="login-input" id="filtroCliente" oninput="renderCoresLista()" placeholder="Buscar cor, cliente..." style="width:auto;min-width:160px;padding:9px 12px;font-size:.72rem">
-    <button class="save-btn" onclick="novaCor()">Nova Cor</button>
-    <button class="save-btn" style="background:var(--blue);box-shadow:0 2px 12px rgba(0,118,190,.25)" onclick="abrirRelatorio()">Relatório</button>
+    <div class="cor-search"><input id="filtroCliente" oninput="renderCoresLista()" placeholder="Buscar cor, ref, cliente..."></div>
+    <button class="cor-btn primary" onclick="novaCor()">+ Nova Cor</button>
+    <button class="cor-btn outline" onclick="abrirRelatorio()">Relatório</button>
   </div>
-  <div class="sh" style="margin-top:16px"><h2>Cores</h2><div class="sh-line"></div><span id="coresCount" style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted)"></span></div>
+  <div class="cor-count-row">
+    <div class="gx-h" style="margin:0">Cores</div>
+    <div class="cor-count" id="coresCount"></div>
+  </div>
   <div id="coresLista"></div>
   <!-- Modal Nova/Editar Cor -->
   <div class="modal-bg" id="corModal">
@@ -2862,7 +2865,7 @@ function toggleTheme(){
 }
 
 // ── Central de Atualizações (v2.2.0+) ────────────────────────────────────
-const CURRENT_VERSION = '4.0.1';
+const CURRENT_VERSION = '4.1.0';
 window.CURRENT_VERSION = CURRENT_VERSION; // exposto pro SW register
 // CHANGELOG agora vive em /changelog.js (carregado sob demanda em openChangelog).
 // v3.32.6: removeu ~95KB de texto do bundle inicial.
@@ -3778,12 +3781,12 @@ const acumClin = () => Object.values(resultados).filter(hasData).reduce((a,r) =>
 
 function render() {
   renderKPI();
-  renderProgressoPremios(); // v4.0.1 — substitui renderAnual + renderPremio (unificados)
+  renderProgressoPremios(); // v4.1.0 — substitui renderAnual + renderPremio (unificados)
   renderMeses();
   if (mesSel !== null) renderDetalhe(mesSel);
 }
 
-// v4.0.1 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
+// v4.1.0 — Bloco unificado "Progresso & Prêmios" (Achievement Ladder)
 function renderProgressoPremios() {
   const fat = acumFat(), ll = acumLL(), fatTotal = fat, llTotal = ll;
   const meses = Object.keys(resultados).sort();
@@ -4927,7 +4930,7 @@ function syncIpacToFinanceiro(mesIdx, ipacKg) {
 // DESENVOLVIMENTO DE COR — Constantes, Estado, Render
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ── Feriados 2026 → 2050 (v4.0.1) ───────────────────────────────────────
+// ── Feriados 2026 → 2050 (v4.1.0) ───────────────────────────────────────
 // Calculado via algoritmo Anonymous Gregorian (Páscoa) + offsets.
 // Fonte: data/feriados-2026-2050.js (mantida em sync — copiar daqui se editar)
 //
@@ -5228,54 +5231,92 @@ function renderCoresLista() {
     return;
   }
 
-  // Cards minimalistas — só resumo. Detalhe abre em modal via tap.
-  document.getElementById('coresLista').innerHTML = lista.map(c => {
+  // v4.1.0 · Tabela densa com quick buttons textuais contextuais
+  // (substitui cards anteriores · mantém calcDiasAtivos, corTemOp30, acoesPossiveis,
+  // togglePrioridadeCor, corAcao, abrirCorDetalhe — toda lógica backend preservada)
+  const fibClass = (f) => {
+    const k = (f||'').toLowerCase();
+    if (k === 'co')  return 'co';
+    if (k === 'pac') return 'pac';
+    if (k === 'cv')  return 'cv';
+    if (k === 'pes') return 'pes';
+    return 'outra';
+  };
+  const headRow =
+    '<div class="cort-row head">' +
+      '<div></div>' +              // priorizar (Opção E · botão circular alert)
+      '<div>REF</div>' +
+      '<div>NOME</div>' +
+      '<div>CLIENTE</div>' +
+      '<div>FIBRA</div>' +
+      '<div>STATUS</div>' +
+      '<div style="text-align:right">DIAS ÚTEIS</div>' +
+      '<div>AÇÕES</div>' +
+    '</div>';
+
+  const rows = lista.map(c => {
     const sc = STATUS_CONFIG[c.status] || STATUS_CONFIG.entrada;
     const dias = calcDiasAtivos(c);
     const op30 = corTemOp30(c);
     const pausado = c.status === 'enviada';
     const warn = !pausado && c.status !== 'cancelada' && c.status !== 'aprovada' && dias > 10;
-
-    const pauseSVG = pausado
-      ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
-      : '';
-
-    const diasCls = pausado ? 'pausado' : (warn ? 'warn' : '');
-    // v2.6.5: nome editado substitui o código no card; senão usa código original
+    const isFinal = c.status === 'aprovada' || c.status === 'cancelada';
+    const isPrio = !!c.prioridade && !isFinal;
     const tituloPrincipal = (c.nome && c.nome.trim()) ? c.nome.trim() : c.codigo;
     const clienteLinha = c.cliente || '—';
+    const fib = c.fibra || 'Outra';
 
-    // v3.19.0: criador (do registro ou do primeiro evento de entrada do histórico)
-    const _criador = c.criadoPor || (c.historico||[]).find(h => h.acao==='entrada')?.by;
-    const _criadorChip = _criador ? userChip(_criador, {size:22}) : '';
-    // v3.18.0: estrela de prioridade (toggle inline)
-    const isPrio = !!c.prioridade && c.status !== 'aprovada' && c.status !== 'cancelada';
-    const prioIc = '<button class="cor-card-prio'+(isPrio?' on':'')+'" onclick="event.stopPropagation();togglePrioridadeCor(\''+c.id+'\')" title="'+(isPrio?'Remover prioridade':'Marcar como prioritária')+'" aria-label="Prioridade"><svg viewBox="0 0 24 24" fill="'+(isPrio?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>';
-    return '<div class="cor-card'+(isPrio?' cor-card-prio-on':'')+'" style="--cor-status:'+sc.cor+'" onclick="abrirCorDetalhe(\''+c.id+'\')">' +
-      '<div class="cor-card-row">' +
-        '<div class="cor-card-left">' +
-          '<div class="cor-card-codigo">'+prioIc+tituloPrincipal+(c.fibra?'<span class="cor-card-fibra">'+c.fibra+'</span>':'')+'</div>' +
-          '<div class="cor-card-sub">'+clienteLinha+'</div>' +
-        '</div>' +
-        '<div class="cor-card-right">' +
-          _criadorChip +
-          '<span class="tag tag--sm tag--'+sc.variant+'"><svg><use href="#'+sc.icon+'"/></svg>'+sc.lb+'</span>' +
-          '<span class="cor-card-dias '+diasCls+'">'+pauseSVG+dias+' dia'+(dias!==1?'s':'')+'</span>' +
-          (op30 ? '<span class="cor-card-op30">OP>30d</span>' : '') +
-        '</div>' +
-      '</div>' +
-      (function(){
-        // v2.6.1: ações inline no card (rollback do tap-to-detail só pra Desenv. Cor)
-        const acs = acoesPossiveis(c.status);
-        if(!acs.length) return '';
-        const btns = acs.map(a => {
-          const cls = a.cls === 'primary' ? 'primary' : (a.cls === 'danger' ? 'danger' : '');
-          return '<button class="cor-act-btn '+cls+'" onclick="event.stopPropagation();corAcao(\''+c.id+'\',\''+a.acao+'\')">'+a.lb+'</button>';
-        }).join('');
-        return '<div class="cor-actions" onclick="event.stopPropagation()">'+btns+'</div>';
-      })() +
+    // Opção E · botão circular alert vermelho · destaque na linha quando ativo
+    const prioBtn = '<button class="cort-prio'+(isPrio?'':' off')+'" '+
+      (isFinal ? 'disabled' : 'onclick="event.stopPropagation();togglePrioridadeCor(\''+c.id+'\')"') +
+      ' title="'+(isPrio?'Remover prioridade':'Marcar como prioritária')+'" aria-label="Prioridade">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">'+
+        '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'+
+        '<line x1="12" y1="9" x2="12" y2="13" stroke-linecap="round"/>'+
+        '<line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round"/>'+
+      '</svg>' +
+    '</button>';
+
+    // Status chip com ícone original do STATUS_CONFIG
+    const pauseChip = pausado ? '<svg style="width:.8em;height:.8em;margin-left:3px" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>' : '';
+    const statusChip = '<span class="tag tag--sm tag--'+sc.variant+'"><svg><use href="#'+sc.icon+'"/></svg>'+sc.lb+pauseChip+'</span>';
+
+    // Dias úteis · com pause icon ao lado se enviada · OP30 badge embaixo
+    const diasCls = isFinal ? (c.status==='aprovada'?'aprovada':'final') : (pausado ? 'pausado' : (warn ? 'late' : ''));
+    const pauseInline = pausado ? '<svg style="width:.95em;height:.95em" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>' : '';
+    const op30Badge = op30 ? '<span class="cort-op30">OP&gt;30D</span>' : '';
+    const diasCol =
+      '<div class="cort-dias">' +
+        '<span class="cort-dias-v '+diasCls+'">'+pauseInline+dias+'<span class="cort-dias-lbl">d</span></span>' +
+        op30Badge +
+      '</div>';
+
+    // Quick buttons textuais via acoesPossiveis · mais ações secundárias (foto/edit/hist)
+    const acs = acoesPossiveis(c.status);
+    const actBtns = acs.map(a => {
+      const cls = a.cls === 'primary' ? 'primary' : (a.cls === 'danger' ? 'danger' : 'neutral');
+      return '<button class="cort-qbtn '+cls+'" onclick="event.stopPropagation();corAcao(\''+c.id+'\',\''+a.acao+'\')">'+a.lb+'</button>';
+    }).join('');
+    const secActions =
+      '<button class="cort-iconbtn" onclick="event.stopPropagation();abrirCorDetalhe(\''+c.id+'\')" title="Ver detalhes / fotos">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/></svg>' +
+      '</button>';
+    const actionsCol = '<div class="cort-actions" onclick="event.stopPropagation()">'+actBtns+secActions+'</div>';
+
+    const rowCls = 'cort-row' + (isPrio?' is-prio':'') + (isFinal?' is-final':'');
+    return '<div class="'+rowCls+'" onclick="abrirCorDetalhe(\''+c.id+'\')">' +
+      '<div class="cort-prio-cell">'+prioBtn+'</div>' +
+      '<div class="cort-ref">'+(c.codigo||'—')+'</div>' +
+      '<div class="cort-name">'+tituloPrincipal+'</div>' +
+      '<div class="cort-cliente">'+clienteLinha+'</div>' +
+      '<div><span class="cort-fibra '+fibClass(fib)+'">'+fib+'</span></div>' +
+      '<div>'+statusChip+'</div>' +
+      diasCol +
+      actionsCol +
     '</div>';
   }).join('');
+
+  document.getElementById('coresLista').innerHTML = '<div class="cort">' + headRow + rows + '</div>';
 }
 
 // v3.20.3: backfill — cores antigas sem criadoPor → geovani (registrante real)
